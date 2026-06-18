@@ -1,73 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel | Fox Games</title>
-  <link rel="stylesheet" href="/css/style.css"/>
-  <style>
-    body{padding:100px 5% 40px}.admin-wrap{display:grid;gap:22px}.admin-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.panel{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.grid input,.grid select,textarea{width:100%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;padding:12px;border-radius:14px;outline:none}textarea{min-height:88px;grid-column:1/-1}.btn{border:0;border-radius:999px;padding:12px 18px;color:white;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#ff2e8a,#7b2cff)}.danger{background:#e63946}.ok{background:#25d366}.table{width:100%;border-collapse:collapse;margin-top:14px}.table th,.table td{border-bottom:1px solid rgba(255,255,255,.1);padding:12px;text-align:left;color:#fff}.table small{color:#b8abc8}.hidden{display:none}.status{color:#ffd166}
-  </style>
-</head>
-<body>
-  <header class="navbar"><a class="brand" href="/"><img src="/assets/logo-wolf.svg"><span>Fox Admin</span></a><nav><a href="/">Store</a><a href="/login.html">Login</a></nav><button class="cartBtn" onclick="logout()">Logout</button></header>
-  <main class="admin-wrap">
-    <div class="admin-top"><div><span class="eyebrow">Dashboard</span><h1>Admin Panel</h1><p class="status" id="status">Checking admin...</p></div></div>
-
-    <section id="adminContent" class="hidden">
-      <div class="panel">
-        <h2>Add / Edit Product</h2>
-        <div class="grid">
-          <input id="productId" placeholder="Product ID for edit only" readonly>
-          <input id="name" placeholder="Product name">
-          <input id="category" placeholder="Category">
-          <input id="game" placeholder="Game Name">
-          <input id="amount" type="number" placeholder="Amount / UC / Diamonds">
-          <input id="price" type="number" placeholder="Price EGP">
-          <input type="file" id="imageFile" accept="image/*">
-          <select id="active"><option value="true">Active</option><option value="false">Hidden</option></select>
-          <textarea id="description" placeholder="Description"></textarea>
-        </div>
-        <button class="btn" onclick="saveProduct()">Save Product</button>
-        <button class="btn danger" onclick="clearForm()">Clear</button>
-      </div> 
-      
-    <div class="panel">
-  <h2>Product Codes</h2>
-
-  <input id="codeProductId" placeholder="Product ID">
-
-  <textarea id="codes"
-  placeholder="One code per line"></textarea>
-
-  <button class="btn" onclick="saveCodes()">
-    Save Codes
-  </button>
-</div>
-
-
-      <div class="panel">
-        
-        <h2>Products</h2>
-        <table class="table"><thead><tr><th>Name</th><th>Game</th><th>Price</th><th>Active</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table>
-      </div>
-
-      <div class="panel">
-        <h2>Orders</h2>
-        <table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table>
-      </div>
-
-      <div class="panel">
-        <h2>Transactions</h2>
-        <table class="table"><thead><tr><th>Merchant Order</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="transactionsTable"></tbody></table>
-      </div>
-    </section>
-  </main>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fox Games Admin</title>
+  <link rel="stylesheet" href="/css/admin.css" />
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js"></script>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <h2>Fox Store</h2>
+    <button onclick="showPage('dashboard')">الرئيسية</button>
+    <button onclick="showPage('products')">المنتجات</button>
+    <button onclick="showPage('categories')">التصنيفات</button>
+    <button onclick="showPage('codes')">أكواد المنتجات</button>
+    <button onclick="showPage('orders')">الطلبات</button>
+    <button onclick="showPage('coupons')">كوبونات الخصم</button>
+    <button onclick="showPage('customers')">العملاء</button>
+    <button onclick="logout()">تسجيل خروج</button>
+  </aside>
+
+  <main class="main">
+    <section id="dashboard" class="page active">
+      <h1>لوحة التحكم</h1>
+      <div class="stats">
+        <div><span>المنتجات</span><b id="productsCount">0</b></div>
+        <div><span>الطلبات</span><b id="ordersCount">0</b></div>
+        <div><span>المبيعات</span><b id="salesTotal">0 EGP</b></div>
+        <div><span>الأكواد المتاحة</span><b id="codesCount">0</b></div>
+      </div>
+    </section>
+
+    <section id="products" class="page">
+      <h1>إدارة المنتجات</h1>
+
+      <div class="panel">
+        <input id="productId" type="hidden" />
+
+        <input id="name" placeholder="اسم المنتج" />
+        <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
+        <input id="game" placeholder="اسم اللعبة" />
+        <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
+        <input id="price" type="number" placeholder="السعر" />
+
+        <input id="image" placeholder="رابط الصورة المباشر" />
+        <textarea id="description" placeholder="وصف المنتج"></textarea>
+
+        <label class="check">
+          <input id="active" type="checkbox" checked />
+          المنتج مفعل
+        </label>
+
+        <button onclick="saveProduct()">حفظ المنتج</button>
+        <button onclick="clearProductForm()" class="ghost">تفريغ</button>
+      </div>
+
+      <div id="productsList" class="cards"></div>
+    </section>
+
+    <section id="categories" class="page">
+      <h1>التصنيفات</h1>
+
+      <div class="panel">
+        <input id="catName" placeholder="اسم التصنيف" />
+        <input id="catImage" placeholder="رابط صورة التصنيف" />
+        <button onclick="saveCategory()">حفظ التصنيف</button>
+      </div>
+
+      <div id="categoriesList" class="cards"></div>
+    </section>
+
+    <section id="codes" class="page">
+      <h1>أكواد المنتجات</h1>
+
+      <div class="panel">
+        <select id="codeProductId"></select>
+
+        <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
+
+        <button onclick="saveCodes()">حفظ الأكواد</button>
+      </div>
+
+      <div id="codesList" class="cards"></div>
+    </section>
+
+    <section id="orders" class="page">
+      <h1>الطلبات</h1>
+      <div id="ordersList" class="table"></div>
+    </section>
+
+    <section id="coupons" class="page">
+      <h1>كوبونات الخصم</h1>
+
+      <div class="panel">
+        <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
+        <input id="couponValue" type="number" placeholder="نسبة الخصم" />
+        <button onclick="saveCoupon()">حفظ الكوبون</button>
+      </div>
+
+      <div id="couponsList" class="cards"></div>
+    </section>
+
+    <section id="customers" class="page">
+      <h1>العملاء</h1>
+      <div id="customersList" class="table"></div>
+    </section>
+  </main>
+
   <script src="/js/admin.js"></script>
 </body>
 </html>
