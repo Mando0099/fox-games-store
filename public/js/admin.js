@@ -4,11 +4,21 @@ let currentUser = null;
 const $ = (id) => document.getElementById(id);
 
 function showPage(id, btn){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  $(id).classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    $(id).classList.add('active');
 
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+}
+
+function logout(){
+    firebase.auth().signOut().then(()=>{
+        window.location.href = '/login.html';
+    });
+}
+
+function val(id){
+    return ($(id)?.value || '').trim();
 }
 
 function val(id){
