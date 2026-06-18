@@ -14,7 +14,8 @@ firebase.auth().onAuthStateChanged(async user => {
 });
 
 function val(id){ return document.getElementById(id).value.trim(); }
-function clearForm(){ ['productId','name','game','amount','price','image','description'].forEach(id=>document.getElementById(id).value=''); document.getElementById('active').value='true'; }
+function clearForm(){
+ ['productId','name','category','game','amount','price','image','description'].forEach(id=>document.getElementById(id).value=''); document.getElementById('active').value='true'; }
 
 async function saveProduct(){
   const data = {
