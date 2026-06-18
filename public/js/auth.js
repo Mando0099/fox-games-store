@@ -1,3 +1,7 @@
+if (!firebase.apps.length) {
+  firebase.initializeApp(window.firebaseConfig);
+}
+
 const msg = document.getElementById('msg');
 const db = firebase.apps.length ? firebase.firestore() : null;
 function show(x){ msg.textContent = x; }
