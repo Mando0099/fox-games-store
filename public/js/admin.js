@@ -169,16 +169,30 @@ async function saveCategory(){
   const name = val('catName');
   const file = document.getElementById('categoryImageFile').files[0];
 
-let image = '';
+  let image = '';
 
-if(file){
+  if(file){
     image = await uploadImage(file);
-}
+  }
 
   if(!name){
     alert('اسم التصنيف مطلوب');
     return;
   }
+
+  await db.collection('categories').add({
+    name,
+    image,
+    active:true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  $('catName').value = '';
+  document.getElementById('categoryImageFile').value = '';
+
+  await loadCategories();
+  alert('تم حفظ التصنيف');
+}
 
   await db.collection('categories').add({
     name,
