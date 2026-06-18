@@ -172,13 +172,8 @@ async function deleteProduct(id){
 
 async function saveCategory(){
   const name = val('catName');
-  const file = document.getElementById('categoryImageFile').files[0];
-
-  let image = '';
-
-  if(file){
-    image = await uploadImage(file);
-  }
+  const file = document.getElementById('categoryImageFile')?.files?.[0];
+  const image = file ? await uploadImage(file, 'categories') : '';
 
   if(!name){
     alert('اسم التصنيف مطلوب');
@@ -191,13 +186,6 @@ async function saveCategory(){
     active:true,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-
-  $('catName').value = '';
-  document.getElementById('categoryImageFile').value = '';
-
-  await loadCategories();
-  alert('تم حفظ التصنيف');
-}
 
   await db.collection('categories').add({
     name,
