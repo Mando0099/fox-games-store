@@ -167,7 +167,13 @@ async function deleteProduct(id){
 
 async function saveCategory(){
   const name = val('catName');
-  const image = val('catImage');
+  const file = document.getElementById('categoryImageFile').files[0];
+
+let image = '';
+
+if(file){
+    image = await uploadImage(file);
+}
 
   if(!name){
     alert('اسم التصنيف مطلوب');
@@ -182,7 +188,8 @@ async function saveCategory(){
   });
 
   $('catName').value = '';
-  $('catImage').value = '';
+
+document.getElementById('categoryImageFile').value = '';
 
   await loadCategories();
   alert('تم حفظ التصنيف');
