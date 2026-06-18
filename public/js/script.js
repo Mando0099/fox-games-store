@@ -1,4 +1,4 @@
-const products=[
+let products=[
 {name:'PUBG Mobile UC 660',category:'PUBG',desc:'Fast PUBG Mobile UC top-up.',price:420,bg:'/assets/bg-pubg.svg',img:'/assets/item-uc.svg',popular:10},
 {name:'PUBG Mobile UC 1800',category:'PUBG',desc:'High value UC recharge pack.',price:1050,bg:'/assets/bg-pubg.svg',img:'/assets/item-uc.svg',popular:9},
 {name:'Fortnite V-Bucks 1000',category:'Fortnite',desc:'V-Bucks digital wallet code.',price:520,bg:'/assets/bg-fortnite.svg',img:'/assets/item-vbucks.svg',popular:10},
