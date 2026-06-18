@@ -61,23 +61,18 @@ async function loadAll(){
 }
 
 function clearProductForm(){
-  ['productId','name','category','game','amount','price','image','description']
-    .forEach(id => $(id).value = '');
-  $('active').checked = true;
+  ['productId','name','category','game','amount','price','description']
+    .forEach(id => {
+      const el = $(id);
+      if(el) el.value = '';
+    });
+
+  const imageFile = $('imageFile');
+  if(imageFile) imageFile.value = '';
+
+  const active = $('active');
+  if(active) active.checked = true;
 }
-async function uploadImage(file) {
-  const formData = new FormData();
-
-  formData.append('file', file);
-  formData.append('upload_preset', 'FOX-GAMES');
-
-  const res = await fetch(
-    'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
-    {
-      method: 'POST',
-      body: formData
-    }
-  );
 
   const data = await res.json();
 
