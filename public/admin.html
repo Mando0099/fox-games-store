@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fox Games Admin</title>
+  <title>Fox Store Admin</title>
+
   <link rel="stylesheet" href="/css/admin.css" />
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -15,41 +16,160 @@
 
 <body>
   <aside class="sidebar">
-    <h2>Fox Store</h2>
-    <button onclick="showPage('dashboard')">الرئيسية</button>
-    <button onclick="showPage('products')">المنتجات</button>
-    <button onclick="showPage('categories')">التصنيفات</button>
-    <button onclick="showPage('codes')">أكواد المنتجات</button>
-    <button onclick="showPage('orders')">الطلبات</button>
-    <button onclick="showPage('coupons')">كوبونات الخصم</button>
-    <button onclick="showPage('customers')">العملاء</button>
-    <button onclick="logout()">تسجيل خروج</button>
+    <div class="brand">
+      <div class="logo">🦊</div>
+      <div>
+        <h1>FOX STORE</h1>
+        <span>ADMIN</span>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard', this)">🏠 الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products', this)">📦 المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories', this)">📁 التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes', this)">🎟️ أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders', this)">🛒 الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons', this)">٪ أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers', this)">👥 العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports', this)">📊 التقارير</button>
+    </nav>
+
+    <div class="admin-box">
+      <div class="avatar">👤</div>
+      <div>
+        <strong>مدير المتجر</strong>
+        <small id="adminEmail">admin@foxstore.com</small>
+      </div>
+    </div>
+
+    <button class="logout" onclick="logout()">تسجيل الخروج</button>
   </aside>
 
   <main class="main">
+    <header class="topbar">
+      <button class="menu-btn">☰</button>
+
+      <div class="top-actions">
+        <button class="icon-btn">🔔 <span>5</span></button>
+        <button class="lang-btn">🌐 العربية</button>
+        <div class="welcome">
+          <small>مرحباً بك</small>
+          <strong>مدير المتجر</strong>
+        </div>
+      </div>
+    </header>
+
     <section id="dashboard" class="page active">
-      <h1>لوحة التحكم</h1>
-    <div class="stats">
-  <div><span>المنتجات</span><b id="productsCount">0</b></div>
-  <div><span>الطلبات</span><b id="ordersCount">0</b></div>
-  <div><span>المبيعات</span><b id="salesTotal">0 EGP</b></div>
-  <div><span>الأكواد المتاحة</span><b id="codesCount">0</b></div>
-</div>
+      <div class="page-head">
+        <h2>لوحة التحكم</h2>
+        <p>مرحباً بك في لوحة إدارة المتجر</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon">💰</div>
+          <div>
+            <span>إجمالي المبيعات</span>
+            <strong id="salesTotal">0 EGP</strong>
+            <small>+12.5% عن الشهر الماضي</small>
+          </div>
+        </div>
+
+        <div class="stat-card blue">
+          <div class="stat-icon">📦</div>
+          <div>
+            <span>إجمالي المنتجات</span>
+            <strong id="productsCount">0</strong>
+            <small>منتجات مضافة</small>
+          </div>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-icon">🛒</div>
+          <div>
+            <span>إجمالي الطلبات</span>
+            <strong id="ordersCount">0</strong>
+            <small>طلب جديد</small>
+          </div>
+        </div>
+
+        <div class="stat-card orange">
+          <div class="stat-icon">🎟️</div>
+          <div>
+            <span>الأكواد المتاحة</span>
+            <strong id="codesCount">0</strong>
+            <small>كود متاح</small>
+          </div>
+        </div>
+
+        <div class="stat-card pink">
+          <div class="stat-icon">👥</div>
+          <div>
+            <span>إجمالي العملاء</span>
+            <strong id="customersCount">0</strong>
+            <small>عميل مسجل</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="panel big">
+          <div class="panel-head">
+            <h3>آخر الطلبات</h3>
+            <button>عرض الكل</button>
+          </div>
+          <div id="latestOrders" class="table-box"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>المبيعات آخر 7 أيام</h3>
+            <button>7 أيام</button>
+          </div>
+          <div class="chart-placeholder">
+            <div class="line"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>أفضل المنتجات</h3>
+          </div>
+          <div id="topProducts" class="mini-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>تنبيهات</h3>
+          </div>
+          <div class="alerts">
+            <div class="alert warning">⚠️ نفاد بعض الأكواد قريباً</div>
+            <div class="alert success">✅ طلب جديد تم استلامه</div>
+            <div class="alert danger">٪ كوبون منتهي</div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="products" class="page">
-      <h1>إدارة المنتجات</h1>
+      <div class="page-head">
+        <h2>إدارة المنتجات</h2>
+        <p>إضافة وتعديل المنتجات الرقمية</p>
+      </div>
 
-      <div class="panel">
+      <div class="panel form-panel">
         <input id="productId" type="hidden" />
 
-        <input id="name" placeholder="اسم المنتج" />
-        <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
-        <input id="game" placeholder="اسم اللعبة" />
-        <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
-        <input id="price" type="number" placeholder="السعر" />
+        <div class="form-grid">
+          <input id="name" placeholder="اسم المنتج" />
+          <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
+          <input id="game" placeholder="اسم اللعبة" />
+          <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
+          <input id="price" type="number" placeholder="السعر EGP" />
+          <input id="image" placeholder="رابط الصورة المباشر" />
+        </div>
 
-        <input id="image" placeholder="رابط الصورة المباشر" />
         <textarea id="description" placeholder="وصف المنتج"></textarea>
 
         <label class="check">
@@ -57,59 +177,95 @@
           المنتج مفعل
         </label>
 
-        <button onclick="saveProduct()">حفظ المنتج</button>
-        <button onclick="clearProductForm()" class="ghost">تفريغ</button>
+        <div class="actions">
+          <button onclick="saveProduct()">حفظ المنتج</button>
+          <button class="ghost" onclick="clearProductForm()">تفريغ</button>
+        </div>
       </div>
 
-      <div id="productsList" class="cards"></div>
+      <div id="productsList" class="cards-grid"></div>
     </section>
 
     <section id="categories" class="page">
-      <h1>التصنيفات</h1>
+      <div class="page-head">
+        <h2>التصنيفات</h2>
+        <p>إدارة تصنيفات المنتجات</p>
+      </div>
 
-      <div class="panel">
-        <input id="catName" placeholder="اسم التصنيف" />
-        <input id="catImage" placeholder="رابط صورة التصنيف" />
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="catName" placeholder="اسم التصنيف" />
+          <input id="catImage" placeholder="رابط صورة التصنيف" />
+        </div>
         <button onclick="saveCategory()">حفظ التصنيف</button>
       </div>
 
-      <div id="categoriesList" class="cards"></div>
+      <div id="categoriesList" class="cards-grid"></div>
     </section>
 
     <section id="codes" class="page">
-      <h1>أكواد المنتجات</h1>
+      <div class="page-head">
+        <h2>أكواد المنتجات</h2>
+        <p>ربط مجموعة أكواد بكل منتج</p>
+      </div>
 
-      <div class="panel">
-        <select id="codeProductId"></select>
+      <div class="panel form-panel">
+        <select id="codeProductId">
+          <option value="">اختر المنتج</option>
+        </select>
 
         <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
 
         <button onclick="saveCodes()">حفظ الأكواد</button>
       </div>
 
-      <div id="codesList" class="cards"></div>
+      <div id="codesList" class="cards-grid"></div>
     </section>
 
     <section id="orders" class="page">
-      <h1>الطلبات</h1>
-      <div id="ordersList" class="table"></div>
+      <div class="page-head">
+        <h2>الطلبات</h2>
+        <p>متابعة الطلبات وتسليم الأكواد</p>
+      </div>
+
+      <div id="ordersList" class="panel table-box"></div>
     </section>
 
     <section id="coupons" class="page">
-      <h1>كوبونات الخصم</h1>
+      <div class="page-head">
+        <h2>أكواد الخصم</h2>
+        <p>إنشاء وإدارة كوبونات الخصم</p>
+      </div>
 
-      <div class="panel">
-        <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
-        <input id="couponValue" type="number" placeholder="نسبة الخصم" />
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
+          <input id="couponValue" type="number" placeholder="نسبة الخصم" />
+        </div>
         <button onclick="saveCoupon()">حفظ الكوبون</button>
       </div>
 
-      <div id="couponsList" class="cards"></div>
+      <div id="couponsList" class="cards-grid"></div>
     </section>
 
     <section id="customers" class="page">
-      <h1>العملاء</h1>
-      <div id="customersList" class="table"></div>
+      <div class="page-head">
+        <h2>العملاء</h2>
+        <p>بيانات العملاء المسجلين</p>
+      </div>
+
+      <div id="customersList" class="panel table-box"></div>
+    </section>
+
+    <section id="reports" class="page">
+      <div class="page-head">
+        <h2>التقارير</h2>
+        <p>إحصائيات المبيعات والمنتجات</p>
+      </div>
+
+      <div class="panel">
+        <h3>قريباً: تقارير تفصيلية ورسوم بيانية</h3>
+      </div>
     </section>
   </main>
 
