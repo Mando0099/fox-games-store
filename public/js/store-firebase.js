@@ -22,12 +22,26 @@
       };
     });
 
-    categories = [...new Set(products.map(p => p.category || 'Gaming'))]
-      .map(c => ({
-        name: c,
-        desc: c,
-        bg: '/assets/bg-pubg.svg'
-      }));
+    const catSnap = await db.collection('categories').get();
+
+if (!catSnap.empty) {
+  categories = catSnap.docs.map(d => {
+    const c = d.data();
+
+    return {
+      name: c.name || 'Category',
+      desc: c.description || c.desc || '',
+      bg: c.image || c.bg || '/assets/bg-pubg.svg'
+    };
+  });
+} else {
+  categories = [...new Set(products.map(p => p.category || 'Gaming'))]
+    .map(c => ({
+      name: c,
+      desc: c,
+      bg: '/assets/bg-pubg.svg'
+    }));
+}
 
     renderCategories();
     renderFilters();
