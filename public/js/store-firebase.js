@@ -7,19 +7,19 @@
     const snap = await db.collection('products').get();
 
     products = snap.docs.map(d => {
-      const p = d.data();
+  const p = d.data();
 
-      return {
-        id: d.id,
-        name: p.name  p.title  'Product',
-        category: p.category  p.game  'Gaming',
-        desc: p.description || ${p.amount || ''} digital top-up,
-        price: Number(p.price || 0),
-        bg: p p.image e || p.img || '/assets/bg-pubg.svg',
-        img: p.im p.img g || '/assets/item-uc.svg',
-        popular: 10
-      };
-    });
+  return {
+    id: d.id,
+    name: p.name || p.title || 'Product',
+    category: p.category || p.game || 'Gaming',
+    desc: p.description || `${p.amount || ''} digital top-up`,
+    price: Number(p.price || 0),
+    bg: p.bg || p.image || p.img || '/assets/bg-pubg.svg',
+    img: p.image || p.img || '/assets/item-uc.svg',
+    popular: 10
+  };
+});
 
     const catSnap = await db.collection('categories').get();
 
