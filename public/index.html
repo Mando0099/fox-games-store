@@ -16,13 +16,13 @@
       </a>
 
       <nav id="navMenu" class="dockNav">
-        <a href="#home" title="Home">⌂<span>Home</span></a>
-        <a href="#trending" title="Trending">◇<span>Trending</span></a>
-        <a href="#products" title="Store">▦<span>Store</span></a>
-        <a href="#checkout" title="Checkout">◉<span>Checkout</span></a>
-        <a href="#support" title="Support">✦<span>Support</span></a>
-        <a href="/login.html" title="Login">●<span>Login</span></a>
-        <a href="/admin.html" class="adminLink" title="Admin">⚙<span>Admin</span></a>
+        <a href="#home" title="Home"><i>⌂</i><span>Home</span></a>
+        <a href="#trending" title="Top-Up"><i>💎</i><span>Top-Up</span></a>
+        <a href="#products" title="Game Cards"><i>🎮</i><span>Game Cards</span></a>
+        <a href="#checkout" title="Payment"><i>💳</i><span>Payment</span></a>
+        <a href="#support" title="Support"><i>🎧</i><span>Support</span></a>
+        <a href="/login.html" title="Account"><i>👤</i><span>Account</span></a>
+        <a href="/admin.html" class="adminLink" title="Admin"><i>⚙</i><span>Admin</span></a>
       </nav>
 
       <div class="dockBottom">
@@ -53,12 +53,12 @@
       <section class="hero">
         <div class="heroLeft reveal">
           <div class="eyebrow">Premium gaming marketplace</div>
-          <h1>Digital Game Top-Ups, Cards & Wallets</h1>
-          <p>Buy PUBG UC, Valorant points, Steam wallet, PlayStation cards, Xbox passes and digital subscriptions with a smooth premium checkout experience.</p>
+          <h1>Fast & Secure Gaming Top-Up</h1>
+          <p>Buy PUBG UC, Valorant Points, PlayStation Cards, Xbox Codes and more with instant delivery and easy checkout.</p>
 
           <div class="heroCtas">
-            <button onclick="scrollToId('products')" class="primary">Shop Products</button>
-            <button onclick="scrollToId('trending')" class="secondary">Browse Categories</button>
+            <button onclick="scrollToId('products')" class="primary">Shop Now</button>
+            <button onclick="scrollToId('trending')" class="secondary">Quick Recharge</button>
           </div>
 
           <div class="heroStats">
@@ -69,20 +69,55 @@
         </div>
 
         <div class="heroPanel reveal">
-          <div class="heroScreen">
+          <div class="quickRechargeCard">
             <div class="screenTop">
               <span></span><span></span><span></span>
-              <div class="screenTag">FOX GAMES</div>
+              <div class="screenTag">FAST ORDER</div>
             </div>
 
-            <div class="featuredGame">
-              <img src="/assets/game-feature.svg" alt="Featured game">
-              <div>
-                <small>Now available</small>
-                <h3>Top-Up Deals</h3>
-                <p>Cards, wallet codes and game credits with clean checkout.</p>
-                <button onclick="scrollToId('products')">Buy Now</button>
-              </div>
+            <div class="quickHeader">
+              <small>Instant Checkout</small>
+              <h2>Quick Recharge</h2>
+              <p>Choose the game, enter player ID, select package and send the order directly.</p>
+            </div>
+
+            <div class="quickForm">
+              <label>
+                <span>Game</span>
+                <select id="quickGame" onchange="updateQuickPackages()">
+                  <option value="PUBG">PUBG Mobile</option>
+                  <option value="Valorant">Valorant</option>
+                  <option value="Fortnite">Fortnite</option>
+                  <option value="PlayStation">PlayStation</option>
+                  <option value="Steam">Steam</option>
+                  <option value="Xbox">Xbox</option>
+                </select>
+              </label>
+              <label>
+                <span>Player ID / Email</span>
+                <input id="quickPlayer" placeholder="Enter player ID or account email">
+              </label>
+              <label>
+                <span>Package</span>
+                <select id="quickPackage"></select>
+              </label>
+              <label>
+                <span>Payment</span>
+                <select id="quickPayment">
+                  <option>Vodafone Cash</option>
+                  <option>Fawry</option>
+                  <option>Visa / MasterCard</option>
+                  <option>InstaPay</option>
+                  <option>Bank Transfer</option>
+                </select>
+              </label>
+              <button class="primary full" onclick="quickBuy()">Continue Order</button>
+            </div>
+
+            <div class="quickBadges">
+              <div><b>⚡ Instant</b><span>Fast delivery</span></div>
+              <div><b>🛡 Secure</b><span>Safe payment</span></div>
+              <div><b>🎧 24/7</b><span>WhatsApp help</span></div>
             </div>
 
             <div class="miniSlider" id="miniSlider"></div>
@@ -94,7 +129,7 @@
         <div class="sectionHead reveal">
           <div>
             <span>Trending</span>
-            <h2>Browse Categories</h2>
+            <h2>Browse Top Categories</h2>
           </div>
           <button onclick="scrollToId('products')">View Store</button>
         </div>
