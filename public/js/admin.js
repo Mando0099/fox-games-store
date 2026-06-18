@@ -74,10 +74,7 @@ function clearProductForm(){
   if(active) active.checked = true;
 }
 
-  const data = await res.json();
 
-  return data.secure_url;
-}
 async function saveProduct(){
 const file = document.getElementById('imageFile').files[0];
  console.log("FILE =", file);
