@@ -39,7 +39,7 @@
       <div class="avatar">👤</div>
       <div>
         <strong>مدير المتجر</strong>
-        <small id="adminEmail">admin@foxstore.com</small>
+        <small id="adminEmail">namy9585@gmail.com</small>
       </div>
     </div>
 
@@ -167,7 +167,9 @@
           <input id="game" placeholder="اسم اللعبة" />
           <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
           <input id="price" type="number" placeholder="السعر EGP" />
-          <input type="file" id="categoryImageFile" accept="image/*">
+          <input type="file" id="imageFile" accept="image/*">
+          <img id="imagePreview"
+          style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
         </div>
 
         <textarea id="description" placeholder="وصف المنتج"></textarea>
@@ -195,7 +197,9 @@
       <div class="panel form-panel">
         <div class="form-grid">
           <input id="catName" placeholder="اسم التصنيف" />
-          <input id="catImage" placeholder="رابط صورة التصنيف" />
+          <input type="file" id="categoryImageFile" accept="image/*" />
+          <img id="categoryImagePreview"
+           style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
         </div>
         <button onclick="saveCategory()">حفظ التصنيف</button>
       </div>
