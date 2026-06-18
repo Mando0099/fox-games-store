@@ -1,227 +1,306 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fox Games Market</title>
-  <link rel="stylesheet" href="/css/style.css"/>
-</head>
-<body>
-  <canvas id="stars"></canvas>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fox Store Admin</title>
 
-  <div class="appShell">
-    <aside class="sideDock">
-      <a class="dockBrand" href="#home" aria-label="Fox Games">
-        <img src="/assets/logo-wolf.svg" alt="Fox Games"/>
-      </a>
-
-      <nav id="navMenu" class="dockNav">
-        <a href="#home" title="Home">⌂<span>Home</span></a>
-        <a href="#trending" title="Trending">◇<span>Trending</span></a>
-        <a href="#products" title="Store">▦<span>Store</span></a>
-        <a href="#checkout" title="Checkout">◉<span>Checkout</span></a>
-        <a href="#support" title="Support">✦<span>Support</span></a>
-        <a href="/login.html" title="Login">●<span>Login</span></a>
-        <a href="/admin.html" class="adminLink" title="Admin">⚙<span>Admin</span></a>
-      </nav>
-
-      <div class="dockBottom">
-        <button onclick="focusSearch()" title="Search">⌕</button>
-        <button onclick="toggleCart()" title="Cart">🛒<b id="cartCount">0</b></button>
-      </div>
-    </aside>
-
-    <header class="topbar">
-      <a class="brand" href="/">
-        <img src="/assets/logo-wolf.svg" alt="Logo">
-        <span>Fox Games</span>
-      </a>
-
-      <div class="topSearch">
-        <span>⌕</span>
-        <input placeholder="Search products..." onfocus="focusSearch()">
-      </div>
-
-      <div class="navActions">
-        <button onclick="openAuth()" title="Account">👤</button>
-        <button onclick="toggleCart()" title="Cart">🛒 <b id="cartCountTop">0</b></button>
-        <button class="menuBtn" onclick="toggleMenu()">☰</button>
-      </div>
-    </header>
-
-    <main id="home" class="content">
-      <section class="hero">
-        <div class="heroLeft reveal">
-          <div class="eyebrow">Premium gaming marketplace</div>
-          <h1>Digital Game Top-Ups, Cards & Wallets</h1>
-          <p>Buy PUBG UC, Valorant points, Steam wallet, PlayStation cards, Xbox passes and digital subscriptions with a smooth premium checkout experience.</p>
-
-          <div class="heroCtas">
-            <button onclick="scrollToId('products')" class="primary">Shop Products</button>
-            <button onclick="scrollToId('trending')" class="secondary">Browse Categories</button>
-          </div>
-
-          <div class="heroStats">
-            <div><strong>Instant</strong><span>Digital delivery</span></div>
-            <div><strong>24/7</strong><span>Support team</span></div>
-            <div><strong>Secure</strong><span>Kashier payments</span></div>
-          </div>
-        </div>
-
-        <div class="heroPanel reveal">
-          <div class="heroScreen">
-            <div class="screenTop">
-              <span></span><span></span><span></span>
-              <div class="screenTag">FOX GAMES</div>
-            </div>
-
-            <div class="featuredGame">
-              <img src="/assets/game-feature.svg" alt="Featured game">
-              <div>
-                <small>Now available</small>
-                <h3>Top-Up Deals</h3>
-                <p>Cards, wallet codes and game credits with clean checkout.</p>
-                <button onclick="scrollToId('products')">Buy Now</button>
-              </div>
-            </div>
-
-            <div class="miniSlider" id="miniSlider"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="trending">
-        <div class="sectionHead reveal">
-          <div>
-            <span>Trending</span>
-            <h2>Browse Categories</h2>
-          </div>
-          <button onclick="scrollToId('products')">View Store</button>
-        </div>
-        <div class="trendGrid" id="categoryGrid"></div>
-      </section>
-
-      <section class="section" id="products">
-        <div class="sectionHead reveal">
-          <div>
-            <span>Store</span>
-            <h2>Products & Top-Ups</h2>
-          </div>
-          <div class="filters">
-            <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam...">
-            <select id="categoryFilter" onchange="renderProducts()"></select>
-            <select id="sortFilter" onchange="renderProducts()">
-              <option value="popular">Most Popular</option>
-              <option value="low">Price Low</option>
-              <option value="high">Price High</option>
-            </select>
-          </div>
-        </div>
-        <div class="productGrid" id="productGrid"></div>
-      </section>
-
-      <section class="section" id="checkout">
-        <div class="checkoutShowcase reveal">
-          <div>
-            <span>Payment Gateway</span>
-            <h2>Fast Secure Checkout</h2>
-            <p>Customer enters payment details, then the backend creates a signed checkout URL and redirects directly to the payment page.</p>
-          </div>
-          <div class="paymentMethods">
-            <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span><span>Bank</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="support">
-        <div class="supportBox reveal">
-          <div>
-            <span>Support</span>
-            <h2>Need Help With Your Order?</h2>
-            <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
-          </div>
-          <div class="supportActions">
-            <a href="https://wa.me/201010502795" target="_blank">WhatsApp</a>
-            <button onclick="toggleChat()">Live Chat</button>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <aside class="cartDrawer" id="cartDrawer">
-    <div class="cartHead">
-      <h3>Your Cart</h3>
-      <button onclick="toggleCart()">×</button>
-    </div>
-    <div id="cartItems"></div>
-    <div class="coupon">
-      <input id="couponInput" placeholder="Coupon: FOX10">
-      <button onclick="applyCoupon()">Apply</button>
-    </div>
-    <div class="summary">
-      <p><span>Subtotal</span><b id="subtotal">0 EGP</b></p>
-      <p><span>Discount</span><b id="discount">0 EGP</b></p>
-      <p class="grand"><span>Total</span><b id="total">0 EGP</b></p>
-    </div>
-    <div class="checkoutForm">
-      <input id="customerName" placeholder="Full Name">
-      <input id="customerPhone" placeholder="Phone Number">
-      <select id="paymentMethod">
-        <option>Visa / MasterCard</option>
-        <option>Wallet</option>
-        <option>Vodafone Cash</option>
-        <option>Fawry</option>
-        <option>Bank Transfer</option>
-      </select>
-      <button class="primary full" onclick="checkout()">Pay Now</button>
-      <button class="whatsapp full" onclick="sendWhatsappOrder()">WhatsApp Order</button>
-      <small>Secure checkout connected through the backend.</small>
-    </div>
-  </aside>
-
-  <div class="authModal" id="authModal">
-    <div class="authBox">
-      <button class="close" onclick="closeAuth()">×</button>
-      <h2>Login</h2>
-      <input placeholder="Email">
-      <input type="password" placeholder="Password">
-      <button onclick="closeAuth()">Continue</button>
-      <p>Demo login UI. You can connect Firebase/Auth later.</p>
-    </div>
-  </div>
-
-  <div class="chat" id="chat">
-    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
-    <div class="chatBody">
-      <p>Hey gamer 👋 How can we help?</p>
-      <small>This is a demo chat widget.</small>
-    </div>
-    <div class="chatInput">
-      <input placeholder="Write message...">
-      <button>Send</button>
-    </div>
-  </div>
-  <button class="chatBubble" onclick="toggleChat()">💬</button>
-
-  <footer>
-    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
-    <p>© 2026 Fox Games Market</p>
-  </footer>
+  <link rel="stylesheet" href="/css/admin.css" />
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js"></script>
-  <script src="/js/script.js"></script>
-  <script src="/js/store-firebase.js"></script>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🦊</div>
+      <div>
+        <h1>FOX STORE</h1>
+        <span>ADMIN</span>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard', this)">🏠 الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products', this)">📦 المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories', this)">📁 التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes', this)">🎟️ أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders', this)">🛒 الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons', this)">٪ أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers', this)">👥 العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports', this)">📊 التقارير</button>
+    </nav>
+
+    <div class="admin-box">
+      <div class="avatar">👤</div>
+      <div>
+        <strong>مدير المتجر</strong>
+        <small id="adminEmail">namy9585@gmail.com</small>
+      </div>
+    </div>
+
+    <button class="logout" onclick="logout()">تسجيل الخروج</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-btn">☰</button>
+
+      <div class="top-actions">
+        <button class="icon-btn">🔔 <span>5</span></button>
+        <button class="lang-btn">🌐 العربية</button>
+        <div class="welcome">
+          <small>مرحباً بك</small>
+          <strong>مدير المتجر</strong>
+        </div>
+      </div>
+    </header>
+
+    <section id="dashboard" class="page active">
+      <div class="page-head">
+        <h2>لوحة التحكم</h2>
+        <p>مرحباً بك في لوحة إدارة المتجر</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon">💰</div>
+          <div>
+            <span>إجمالي المبيعات</span>
+            <strong id="salesTotal">0 EGP</strong>
+            <small>+12.5% عن الشهر الماضي</small>
+          </div>
+        </div>
+
+        <div class="stat-card blue">
+          <div class="stat-icon">📦</div>
+          <div>
+            <span>إجمالي المنتجات</span>
+            <strong id="productsCount">0</strong>
+            <small>منتجات مضافة</small>
+          </div>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-icon">🛒</div>
+          <div>
+            <span>إجمالي الطلبات</span>
+            <strong id="ordersCount">0</strong>
+            <small>طلب جديد</small>
+          </div>
+        </div>
+
+        <div class="stat-card orange">
+          <div class="stat-icon">🎟️</div>
+          <div>
+            <span>الأكواد المتاحة</span>
+            <strong id="codesCount">0</strong>
+            <small>كود متاح</small>
+          </div>
+        </div>
+
+        <div class="stat-card pink">
+          <div class="stat-icon">👥</div>
+          <div>
+            <span>إجمالي العملاء</span>
+            <strong id="customersCount">0</strong>
+            <small>عميل مسجل</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="panel big">
+          <div class="panel-head">
+            <h3>آخر الطلبات</h3>
+            <button>عرض الكل</button>
+          </div>
+          <div id="latestOrders" class="table-box"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>المبيعات آخر 7 أيام</h3>
+            <button>7 أيام</button>
+          </div>
+          <div class="chart-placeholder">
+            <div class="line"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>أفضل المنتجات</h3>
+          </div>
+          <div id="topProducts" class="mini-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>تنبيهات</h3>
+          </div>
+          <div class="alerts">
+            <div class="alert warning">⚠️ نفاد بعض الأكواد قريباً</div>
+            <div class="alert success">✅ طلب جديد تم استلامه</div>
+            <div class="alert danger">٪ كوبون منتهي</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="page">
+      <div class="page-head">
+        <h2>إدارة المنتجات</h2>
+        <p>إضافة وتعديل المنتجات الرقمية</p>
+      </div>
+
+      <div class="panel form-panel">
+        <input id="productId" type="hidden" />
+
+        <div class="form-grid">
+          <input id="name" placeholder="اسم المنتج" />
+          <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
+          <input id="game" placeholder="اسم اللعبة" />
+          <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
+          <input id="price" type="number" placeholder="السعر EGP" />
+          <input type="file" id="imageFile" accept="image/*">
+          <img id="imagePreview"
+          style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
+        </div>
+
+        <textarea id="description" placeholder="وصف المنتج"></textarea>
+
+        <label class="check">
+          <input id="active" type="checkbox" checked />
+          المنتج مفعل
+        </label>
+
+        <div class="actions">
+          <button onclick="saveProduct()">حفظ المنتج</button>
+          <button class="ghost" onclick="clearProductForm()">تفريغ</button>
+        </div>
+      </div>
+
+      <div id="productsList" class="cards-grid"></div>
+    </section>
+
+    <section id="categories" class="page">
+      <div class="page-head">
+        <h2>التصنيفات</h2>
+        <p>إدارة تصنيفات المنتجات</p>
+      </div>
+
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="catName" placeholder="اسم التصنيف" />
+          <input type="file" id="categoryImageFile" accept="image/*" />
+          <img id="categoryImagePreview"
+           style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
+        </div>
+        <button onclick="saveCategory()">حفظ التصنيف</button>
+      </div>
+
+      <div id="categoriesList" class="cards-grid"></div>
+    </section>
+
+    <section id="codes" class="page">
+      <div class="page-head">
+        <h2>أكواد المنتجات</h2>
+        <p>ربط مجموعة أكواد بكل منتج</p>
+      </div>
+
+      <div class="panel form-panel">
+        <select id="codeProductId">
+          <option value="">اختر المنتج</option>
+        </select>
+
+        <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
+
+        <button onclick="saveCodes()">حفظ الأكواد</button>
+      </div>
+
+      <div id="codesList" class="cards-grid"></div>
+    </section>
+
+    <section id="orders" class="page">
+      <div class="page-head">
+        <h2>الطلبات</h2>
+        <p>متابعة الطلبات وتسليم الأكواد</p>
+      </div>
+
+      <div id="ordersList" class="panel table-box"></div>
+    </section>
+
+    <section id="coupons" class="page">
+      <div class="page-head">
+        <h2>أكواد الخصم</h2>
+        <p>إنشاء وإدارة كوبونات الخصم</p>
+      </div>
+
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
+          <input id="couponValue" type="number" placeholder="نسبة الخصم" />
+        </div>
+        <button onclick="saveCoupon()">حفظ الكوبون</button>
+      </div>
+
+      <div id="couponsList" class="cards-grid"></div>
+    </section>
+
+    <section id="customers" class="page">
+      <div class="page-head">
+        <h2>العملاء</h2>
+        <p>بيانات العملاء المسجلين</p>
+      </div>
+
+      <div id="customersList" class="panel table-box"></div>
+    </section>
+
+    <section id="reports" class="page">
+      <div class="page-head">
+        <h2>التقارير</h2>
+        <p>إحصائيات المبيعات والمنتجات</p>
+      </div>
+
+      <div class="panel">
+        <h3>قريباً: تقارير تفصيلية ورسوم بيانية</h3>
+      </div>
+    </section>
+  </main>
+  
   <script>
-    const syncCartBadges = () => {
-      const main = document.getElementById('cartCount');
-      const top = document.getElementById('cartCountTop');
-      if(main && top) top.textContent = main.textContent;
-    };
-    setInterval(syncCartBadges, 500);
-  </script>
+window.showPage = function(id, btn){
+  document.querySelectorAll('.page').forEach(function(p){
+    p.classList.remove('active');
+  });
+
+  var page = document.getElementById(id);
+  if(page){
+    page.classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+
+  if(btn){
+    btn.classList.add('active');
+  }
+};
+
+window.logout = function(){
+  firebase.auth().signOut().then(function(){
+    location.href = '/login.html';
+  });
+};
+</script>
+
+<script src="/js/admin.js?v=200"></script>
+</body>
 </body>
 </html>
