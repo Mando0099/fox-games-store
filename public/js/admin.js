@@ -56,16 +56,21 @@ function clearProductForm(){
   $('active').checked = true;
 }
 
-async function uploadImage(file){
-  const storageRef = firebase.storage().ref();
-  const fileRef = storageRef.child(
-    `products/${Date.now()}_${file.name}`
-  );
+async function saveProduct(){
+  const file = document.getElementById('imageFile')?.files?.[0];
+  const imageUrl = file ? await uploadImage(file, 'products') : '';
 
-  await fileRef.put(file);
-
-  return await fileRef.getDownloadURL();
-}
+  const data = {
+    name: val('name'),
+    category: val('category'),
+    game: val('game'),
+    amount: Number(val('amount') || 0),
+    price: Number(val('price') || 0),
+    image: imageUrl,
+    description: val('description'),
+    active: $('active').checked,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
 
 async function saveProduct(){
 const file = document.getElementById('imageFile').files[0];
