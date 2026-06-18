@@ -85,11 +85,13 @@ async function uploadImage(file) {
 }
 async function saveProduct(){
 const file = document.getElementById('imageFile').files[0];
+ console.log("FILE =", file);
 
 let imageUrl = '';
 
 if(file){
   imageUrl = await uploadImage(file);
+    console.log("IMAGE URL =", imageurl);
 }
 
 const data = {
