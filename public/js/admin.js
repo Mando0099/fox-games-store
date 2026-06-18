@@ -18,7 +18,7 @@ function clearForm(){ ['productId','name','game','amount','price','image','descr
 
 async function saveProduct(){
   const data = {
-    name: val('name'), game: val('game'), amount: Number(val('amount')||0), price: Number(val('price')||0), image: val('image'), description: val('description'), active: val('active')==='true', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    name: val('name'), category: val('category'), game: val('game'), amount: Number(val('amount')||0), price: Number(val('price')||0), image: val('image'), description: val('description'), active: val('active')==='true', updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   if(!data.name || !data.price) return alert('Name and price required');
   const id = val('productId');
@@ -46,4 +46,28 @@ async function loadTransactions(){
   const snap = await db.collection('transactions').limit(50).get(); transactionsTable.innerHTML='';
   snap.forEach(doc=>{ const t=doc.data(); transactionsTable.innerHTML += `<tr><td>${t.merchantOrderId||''}</td><td>${t.amount||0} ${t.currency||'EGP'}</td><td>${t.paymentStatus||t.kashierStatus||''}</td><td>${t.createdAt?.toDate ? t.createdAt.toDate().toLocaleString() : ''}</td></tr>`; });
 }
-function logout(){ firebase.auth().signOut().then(()=>location.href='/login.html'); }
+async function saveCodes(){
+  const productId = val('codeProductId');
+  const raw = val('codes');
+
+  if(!productId || !raw) {
+    return alert('Product ID and codes required');
+  }
+
+  const codes = raw.split('\n').map(c=>c.trim()).filter(Boolean);
+
+  for(const code of codes){
+    await db.collection('productCodes').add({
+      productId,
+      code,
+      status:'available',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  alert('Codes saved');
+}
+
+function logout(){
+  firebase.auth().signOut().then(()=>location.href='/login.html');
+}
