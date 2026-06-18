@@ -12,7 +12,7 @@ let products=[
 {name:'Gminoid Subscription',category:'Subscriptions',desc:'Gaming premium subscription.',price:350,bg:'/assets/bg-sub.svg',img:'/assets/item-sub.svg',popular:5},
 {name:'Aquatic Gaming Pass',category:'Subscriptions',desc:'Premium aquatic gaming access.',price:299,bg:'/assets/bg-aqua.svg',img:'/assets/item-aqua.svg',popular:5}
 ];
-const categories=[{name:'PUBG',desc:'UC recharge',bg:'/assets/bg-pubg.svg'},{name:'Fortnite',desc:'V-Bucks & Crew',bg:'/assets/bg-fortnite.svg'},{name:'Steam',desc:'Wallet cards',bg:'/assets/bg-steam.svg'},{name:'PlayStation',desc:'PSN cards',bg:'/assets/bg-psn.svg'},{name:'Xbox',desc:'Game Pass',bg:'/assets/bg-xbox.svg'},{name:'GameFi',desc:'Digital packs',bg:'/assets/bg-gamefi.svg'}];
+let categories=[{name:'PUBG',desc:'UC recharge',bg:'/assets/bg-pubg.svg'},{name:'Fortnite',desc:'V-Bucks & Crew',bg:'/assets/bg-fortnite.svg'},{name:'Steam',desc:'Wallet cards',bg:'/assets/bg-steam.svg'},{name:'PlayStation',desc:'PSN cards',bg:'/assets/bg-psn.svg'},{name:'Xbox',desc:'Game Pass',bg:'/assets/bg-xbox.svg'},{name:'GameFi',desc:'Digital packs',bg:'/assets/bg-gamefi.svg'}];
 let cart=JSON.parse(localStorage.getItem('foxgames_cart'))||[];let coupon=Number(localStorage.getItem('foxgames_coupon'))||0;const $=id=>document.getElementById(id);
 window.addEventListener('load',()=>{renderCategories();renderFilters();renderProducts();renderMiniSlider();updateCart();reveal();stars()});window.addEventListener('scroll',reveal);
 function renderMiniSlider(){$('miniSlider').innerHTML=products.slice(0,4).map(p=>`<div class="miniCard" style="background-image:url('${p.bg}')"><span>${p.name}</span></div>`).join('')}
