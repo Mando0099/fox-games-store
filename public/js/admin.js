@@ -65,7 +65,24 @@ function clearProductForm(){
     .forEach(id => $(id).value = '');
   $('active').checked = true;
 }
+async function uploadImage(file) {
+  const formData = new FormData();
 
+  formData.append('file', file);
+  formData.append('upload_preset', 'FOX-GAMES');
+
+  const res = await fetch(
+    'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
+    {
+      method: 'POST',
+      body: formData
+    }
+  );
+
+  const data = await res.json();
+
+  return data.secure_url;
+}
 async function saveProduct(){
 const file = document.getElementById('imageFile').files[0];
 
@@ -166,6 +183,25 @@ async function deleteProduct(id){
   await db.collection('products').doc(id).delete();
   await loadProducts();
   await loadStats();
+}
+
+async function uploadImage(file) {
+  const formData = new FormData();
+
+  formData.append('file', file);
+  formData.append('upload_preset', 'FOX-GAMES');
+
+  const res = await fetch(
+    'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
+    {
+      method: 'POST',
+      body: formData
+    }
+  );
+
+  const data = await res.json();
+  console.log(data);
+  return data.secure_url;
 }
 
 async function saveCategory(){
