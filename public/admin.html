@@ -272,7 +272,35 @@
       </div>
     </section>
   </main>
+  
+  <script>
+window.showPage = function(id, btn){
+  document.querySelectorAll('.page').forEach(function(p){
+    p.classList.remove('active');
+  });
 
-  <script src="/js/admin.js"></script>
+  var page = document.getElementById(id);
+  if(page){
+    page.classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+
+  if(btn){
+    btn.classList.add('active');
+  }
+};
+
+window.logout = function(){
+  firebase.auth().signOut().then(function(){
+    location.href = '/login.html';
+  });
+};
+</script>
+
+<script src="/js/admin.js?v=200"></script>
+</body>
 </body>
 </html>
