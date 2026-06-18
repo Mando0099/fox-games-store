@@ -1,0 +1,2 @@
+Replace SVG placeholders with licensed real images here.
+Then update public/js/script.js paths, e.g. bg:'/assets/real-images/pubg.jpg'
