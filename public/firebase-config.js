@@ -1,6 +1,6 @@
 // Firebase Config for Fox Games
 // Replace these values with your Firebase Web App config from Firebase Console.
-const firebaseConfig = {
+window. firebaseConfig = {
   apiKey: "AIzaSyAslaKipcL_4qDS8_i1UYsWEgxzPfHRDQc",
   authDomain: "fox-games-store.firebaseapp.com",
   projectId: "fox-games-store",
@@ -14,9 +14,9 @@ const firebaseConfig = {
 window.FOX_ADMIN_EMAIL = "namy9585@gmail.com";
 
 try {
-  if (!firebase.apps.length && !window.firebaseConfig.apiKey.includes('PASTE_')) {
-    firebase.initializeApp(window.firebaseConfig);
-  }
+    if (!firebase.apps.length) {
+        firebase.initializeApp(window.firebaseConfig);
+    }
 } catch (e) {
-  console.warn('Firebase not initialized:', e.message);
+    console.warn('Firebase not initialized:', e.message);
 }
