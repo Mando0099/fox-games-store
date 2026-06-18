@@ -91,7 +91,7 @@ let imageUrl = '';
 
 if(file){
   imageUrl = await uploadImage(file);
-    console.log("IMAGE URL =", imageurl);
+    console.log("IMAGE URL =", imageUrl);
 }
 
 const data = {
