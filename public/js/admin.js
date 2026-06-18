@@ -3,9 +3,12 @@ let currentUser = null;
 
 const $ = (id) => document.getElementById(id);
 
-function showPage(id){
+function showPage(id, btn){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   $(id).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
 }
 
 function val(id){
@@ -20,10 +23,11 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
   currentUser = user;
   db = firebase.firestore();
+  $('adminEmail').textContent = user.email;
 
   const adminCheck = await db.collection('admins')
-    .where('email', '==', user.email)
-    .where('active', '==', true)
+    .where('email','==',user.email)
+    .where('active','==',true)
     .limit(1)
     .get();
 
@@ -73,7 +77,7 @@ async function saveProduct(){
   const id = val('productId');
 
   if(id){
-    await db.collection('products').doc(id).set(data, { merge:true });
+    await db.collection('products').doc(id).set(data, {merge:true});
   }else{
     await db.collection('products').add({
       ...data,
@@ -83,14 +87,12 @@ async function saveProduct(){
 
   clearProductForm();
   await loadProducts();
-  await loadCategories();
   await loadStats();
   alert('تم حفظ المنتج');
 }
 
 async function loadProducts(){
   const snap = await db.collection('products').get();
-
   const list = $('productsList');
   const select = $('codeProductId');
 
@@ -100,23 +102,20 @@ async function loadProducts(){
   snap.forEach(doc => {
     const p = doc.data();
 
-    select.innerHTML += `
-      <option value="${doc.id}">
-        ${p.name || 'منتج بدون اسم'}
-      </option>
-    `;
+    select.innerHTML += `<option value="${doc.id}">${p.name || 'منتج بدون اسم'}</option>`;
 
     list.innerHTML += `
-      <div class="card">
-        ${p.image ? `<img src="${p.image}">` : ''}
-        <h3>${p.name || ''}</h3>
-        <p>التصنيف: ${p.category || p.game || '-'}</p>
+      <div class="panel">
+        ${p.image ? `<img src="${p.image}" style="width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px">` : ''}
+        <h3>${p.name || '-'}</h3>
+        <p>التصنيف: ${p.category || '-'}</p>
         <p>اللعبة: ${p.game || '-'}</p>
         <p>السعر: ${p.price || 0} EGP</p>
         <p>الحالة: ${p.active ? 'نشط' : 'مخفي'}</p>
-
-        <button onclick="editProduct('${doc.id}')">تعديل</button>
-        <button onclick="deleteProduct('${doc.id}')">حذف</button>
+        <div class="actions">
+          <button onclick="editProduct('${doc.id}')">تعديل</button>
+          <button class="ghost" onclick="deleteProduct('${doc.id}')">حذف</button>
+        </div>
       </div>
     `;
   });
@@ -128,7 +127,7 @@ async function editProduct(id){
 
   $('productId').value = id;
   $('name').value = p.name || '';
-  $('category').value = p.category || p.game || '';
+  $('category').value = p.category || '';
   $('game').value = p.game || '';
   $('amount').value = p.amount || '';
   $('price').value = p.price || '';
@@ -136,8 +135,8 @@ async function editProduct(id){
   $('description').value = p.description || '';
   $('active').checked = p.active !== false;
 
-  showPage('products');
-  window.scrollTo({top:0, behavior:'smooth'});
+  showPage('products', document.querySelector('[onclick*="products"]'));
+  scrollTo({top:0, behavior:'smooth'});
 }
 
 async function deleteProduct(id){
@@ -179,9 +178,9 @@ async function loadCategories(){
     const c = doc.data();
 
     list.innerHTML += `
-      <div class="card">
-        ${c.image ? `<img src="${c.image}">` : ''}
-        <h3>${c.name || ''}</h3>
+      <div class="panel">
+        ${c.image ? `<img src="${c.image}" style="width:100%;height:140px;object-fit:cover;border-radius:14px;margin-bottom:12px">` : ''}
+        <h3>${c.name || '-'}</h3>
         <button onclick="deleteCategory('${doc.id}')">حذف</button>
       </div>
     `;
@@ -230,10 +229,10 @@ async function loadCodes(){
     const c = doc.data();
 
     list.innerHTML += `
-      <div class="card">
-        <h3>${c.code || ''}</h3>
-        <p>Product ID: ${c.productId || ''}</p>
-        <p>الحالة: ${c.status || ''}</p>
+      <div class="panel">
+        <h3>${c.code || '-'}</h3>
+        <p>Product ID: ${c.productId || '-'}</p>
+        <p>الحالة: ${c.status || '-'}</p>
       </div>
     `;
   });
@@ -272,7 +271,7 @@ async function loadCoupons(){
     const c = doc.data();
 
     list.innerHTML += `
-      <div class="card">
+      <div class="panel">
         <h3>${c.code}</h3>
         <p>خصم: ${c.value}%</p>
         <p>${c.active ? 'مفعل' : 'مغلق'}</p>
@@ -283,42 +282,41 @@ async function loadCoupons(){
 
 async function loadOrders(){
   const snap = await db.collection('orders').limit(50).get();
-  const list = $('ordersList');
 
-  list.innerHTML = `
+  const table = `
     <table>
       <tr>
+        <th>رقم الطلب</th>
         <th>العميل</th>
         <th>المنتج</th>
         <th>الإجمالي</th>
         <th>الحالة</th>
         <th>الكود</th>
       </tr>
+      ${snap.docs.map(doc => {
+        const o = doc.data();
+        return `
+          <tr>
+            <td>${o.orderId || doc.id}</td>
+            <td>${o.customerName || o.email || '-'}</td>
+            <td>${o.productName || '-'}</td>
+            <td>${o.total || o.price || 0}</td>
+            <td>${o.status || o.paymentStatus || '-'}</td>
+            <td>${o.assignedCode || '-'}</td>
+          </tr>
+        `;
+      }).join('')}
     </table>
   `;
 
-  const table = list.querySelector('table');
-
-  snap.forEach(doc => {
-    const o = doc.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${o.customerName || o.email || '-'}</td>
-        <td>${o.productName || '-'}</td>
-        <td>${o.total || o.price || 0}</td>
-        <td>${o.status || o.paymentStatus || '-'}</td>
-        <td>${o.assignedCode || '-'}</td>
-      </tr>
-    `;
-  });
+  $('ordersList').innerHTML = table;
+  $('latestOrders').innerHTML = table;
 }
 
 async function loadCustomers(){
   const snap = await db.collection('users').limit(100).get();
-  const list = $('customersList');
 
-  list.innerHTML = `
+  $('customersList').innerHTML = `
     <table>
       <tr>
         <th>الاسم</th>
@@ -326,31 +324,26 @@ async function loadCustomers(){
         <th>الهاتف</th>
         <th>الدور</th>
       </tr>
+      ${snap.docs.map(doc => {
+        const u = doc.data();
+        return `
+          <tr>
+            <td>${u.name || '-'}</td>
+            <td>${u.email || '-'}</td>
+            <td>${u.phone || '-'}</td>
+            <td>${u.role || 'user'}</td>
+          </tr>
+        `;
+      }).join('')}
     </table>
   `;
-
-  const table = list.querySelector('table');
-
-  snap.forEach(doc => {
-    const u = doc.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${u.name || '-'}</td>
-        <td>${u.email || '-'}</td>
-        <td>${u.phone || '-'}</td>
-        <td>${u.role || 'user'}</td>
-      </tr>
-    `;
-  });
 }
 
 async function loadStats(){
   const products = await db.collection('products').get();
   const orders = await db.collection('orders').get();
-  const codes = await db.collection('productCodes')
-    .where('status','==','available')
-    .get();
+  const users = await db.collection('users').get();
+  const codes = await db.collection('productCodes').where('status','==','available').get();
 
   let total = 0;
   orders.forEach(doc => {
@@ -361,15 +354,19 @@ async function loadStats(){
   $('productsCount').textContent = products.size;
   $('ordersCount').textContent = orders.size;
   $('codesCount').textContent = codes.size;
+  $('customersCount').textContent = users.size;
   $('salesTotal').textContent = total + ' EGP';
+
+  $('topProducts').innerHTML = products.docs.slice(0,3).map((doc, i) => {
+    const p = doc.data();
+    return `
+      <div class="alert success">
+        ${i+1}. ${p.name || 'منتج'} — ${p.price || 0} EGP
+      </div>
+    `;
+  }).join('');
 }
 
 function logout(){
-  firebase.auth().signOut().then(() => location.href = '/login.html');
-}
-  alert('Codes saved');
-}
-
-function logout(){
-  firebase.auth().signOut().then(()=>location.href='/login.html');
+  firebase.auth().signOut().then(() => location.href='/login.html');
 }
