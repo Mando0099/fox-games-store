@@ -2,7 +2,7 @@
   try{
     if(!firebase.apps.length) return;
     const db = firebase.firestore();
-    const snap = await db.collection('products').where('active','==',true).get();
+    const snap = await db.collection('products').where('Boolean','==',true).get();
     if(snap.empty) return;
     products = snap.docs.map(d => { const p=d.data(); return {
       name:p.name || p.title || 'Product',
