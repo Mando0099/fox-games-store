@@ -20,18 +20,34 @@
         <div class="grid">
           <input id="productId" placeholder="Product ID for edit only" readonly>
           <input id="name" placeholder="Product name">
-          <input id="game" placeholder="Game / Category">
+          <input id="category" placeholder="Category">
+          <input id="game" placeholder="Game Name">
           <input id="amount" type="number" placeholder="Amount / UC / Diamonds">
           <input id="price" type="number" placeholder="Price EGP">
-          <input id="image" placeholder="Direct image URL .jpg/.png/.webp">
+          <input type="file" id="imageFile" accept="image/*">
           <select id="active"><option value="true">Active</option><option value="false">Hidden</option></select>
           <textarea id="description" placeholder="Description"></textarea>
         </div>
         <button class="btn" onclick="saveProduct()">Save Product</button>
         <button class="btn danger" onclick="clearForm()">Clear</button>
-      </div>
+      </div> 
+      
+    <div class="panel">
+  <h2>Product Codes</h2>
+
+  <input id="codeProductId" placeholder="Product ID">
+
+  <textarea id="codes"
+  placeholder="One code per line"></textarea>
+
+  <button class="btn" onclick="saveCodes()">
+    Save Codes
+  </button>
+</div>
+
 
       <div class="panel">
+        
         <h2>Products</h2>
         <table class="table"><thead><tr><th>Name</th><th>Game</th><th>Price</th><th>Active</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table>
       </div>
