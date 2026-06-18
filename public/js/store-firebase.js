@@ -17,7 +17,7 @@
         desc: p.description || `${p.amount || ''} digital top-up`,
         price: Number(p.price || 0),
         bg: p.bg || '/assets/bg-pubg.svg',
-        img: p.image || '/assets/item-uc.svg',
+        img: p.image || p.img || '/assets/item-uc.svg',
         popular: 10
       };
     });
