@@ -115,12 +115,16 @@ async function loadProducts(){
   const select = $('codeProductId');
 
   list.innerHTML = '';
+ if(select){
   select.innerHTML = '<option value="">اختر المنتج</option>';
+}
 
   snap.forEach(doc => {
     const p = doc.data();
 
-    select.innerHTML += `<option value="${doc.id}">${p.name || 'منتج بدون اسم'}</option>`;
+    if(select){
+  select.innerHTML += `<option value="${doc.id}">${p.name || 'منتج بدون اسم'}</option>`;
+}
 
     list.innerHTML += `
       <div class="panel">
