@@ -24,7 +24,7 @@
 
     const catSnap = await db.collection('categories').get();
 
-if (!catSnap.empty) {
+//if (!catSnap.empty) {
   categories = catSnap.docs.map(d => {
     const c = d.data();
 
