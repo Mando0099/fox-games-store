@@ -10,7 +10,58 @@ if (typeof coupon === 'undefined') {
   var coupon = Number(localStorage.getItem('foxgames_coupon')) || 0;
 }
 
+// مصفوفة الترجمة الحقيقية المتوافقة مع أوسمة الـ HTML الجديدة
+const translations = {
+  en: {
+    nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
+    search_placeholder: "Search for products...", btn_login: "Login", btn_cart: "Cart",
+    hero_title: "Game Cards & Top-Ups", hero_subtitle: "Instant delivery. Secure payments. Best prices.",
+    btn_shop_now: "Shop Now", btn_browse_cat: "Browse Categories",
+    feat_delivery: "Instant Delivery", feat_secure: "Secure Payments", feat_support: "24/7 Support",
+    title_popular: "Popular Products", sort_popular: "Most Popular", sort_low: "Price Low", sort_high: "Price High",
+    title_categories: "Shop by Categories", btn_view_all: "View All",
+    b_feat1_title: "Instant Delivery", b_feat1_desc: "Get your products instantly after payment",
+    b_feat2_title: "Secure Payments", b_feat2_desc: "100% secure payment methods",
+    b_feat3_title: "24/7 Support", b_feat3_desc: "We are here to help you anytime",
+    b_feat4_title: "Best Prices", b_feat4_desc: "Competitive prices on all products",
+    check_title: "Secure Payment Methods", check_desc: "Choose your product, add it to cart, and complete the order using your preferred payment method.",
+    sup_title: "Need Help With Your Order?", sup_desc: "Payment failed, code delayed, top-up issue, account problem — contact support instantly.",
+    btn_live_chat: "Live Chat", cart_title: "Your Cart", btn_apply: "Apply",
+    cart_subtotal: "Subtotal", cart_discount: "Discount", cart_total: "Total",
+    holder_name: "Full Name", holder_phone: "Phone Number", opt_visa: "Visa / MasterCard",
+    opt_wallet: "Wallet", opt_vodafone: "Vodafone Cash", opt_fawry: "Fawry", opt_bank: "Bank Transfer",
+    btn_pay_now: "Pay Now", btn_wa_order: "WhatsApp Order", secure_checkout_notice: "Secure checkout connected through the backend.",
+    lang_btn: "العربية"
+  },
+  ar: {
+    nav_home: "الرئيسية", nav_store: "المتجر", nav_categories: "الأقسام", nav_support: "الدعم الفني",
+    search_placeholder: "ابحث عن الألعاب والمنتجات...", btn_login: "تسجيل الدخول", btn_cart: "السلة",
+    hero_title: "بطاقات الألعاب وشحن الرصيد", hero_subtitle: "تسليم فوري. دفع آمن. أفضل الأسعار التنافسية.",
+    btn_shop_now: "تسوق الآن", btn_browse_cat: "تصفح الأقسام",
+    feat_delivery: "تسليم فوري", feat_secure: "طرق دفع آمنة", feat_support: "دعم 24/7",
+    title_popular: "المنتجات الشائعة", sort_popular: "الأكثر شعبية", sort_low: "السعر من الأقل", sort_high: "السعر من الأعلى",
+    title_categories: "تسوق حسب الأقسام", btn_view_all: "عرض الكل",
+    b_feat1_title: "تسليم فوري وسريع", b_feat1_desc: "احصل على منتجك مباشرة كود رقمي فور الدفع",
+    b_feat2_title: "دفع آمن 100%", b_feat2_desc: "نوفر لك خيارات دفع محلية وعالمية مشفرة",
+    b_feat3_title: "دعم فني متواصل", b_feat3_desc: "فريق الدعم الفني معك دائماً لحل أي استفسار",
+    b_feat4_title: "أفضل الأسعار", b_feat4_desc: "عروض حصرية وأسعار لا تقبل المنافسة",
+    check_title: "طرق دفع آمنة وموثوقة", check_desc: "اختر منتجك المفضّل، أضفه إلى سلة المشتريات، وأكمل الدفع بالطريقة التي تناسبك.",
+    sup_title: "هل تحتاج مساعدة في طلبك؟", sup_desc: "تأخر الكود، مشكلة في الشحن، فشل عملية الدفع — تواصل مع الدعم فوراً.",
+    btn_live_chat: "المحادثة المباشرة", cart_title: "سلة المشتريات", btn_apply: "تطبيق",
+    cart_subtotal: "المجموع الفرعي", cart_discount: "الخصم", cart_total: "الإجمالي الكلي",
+    holder_name: "الاسم بالكامل", holder_phone: "رقم الهاتف المحمول", opt_visa: "فيزا / ماستركارد",
+    opt_wallet: "المحافظ الإلكترونية", opt_vodafone: "فودافون كاش", opt_fawry: "فوري", opt_bank: "تحويل بنكي",
+    btn_pay_now: "ادفع الآن بأمان", btn_wa_order: "طلب عبر الواتساب", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
+    lang_btn: "English"
+  }
+};
+
+let currentLang = localStorage.getItem('foxgames_lang') || 'en';
+
 window.addEventListener('load', () => {
+  // تطبيق اللغة المحفوظة فور تحميل المتجر
+  applyLanguage(currentLang);
+
   // تشغيل الفانكشنز الأساسية المرتبطة بالفايربيز والـ Auth في مشروعك
   if (typeof checkAuthState === 'function') checkAuthState();
   
@@ -29,7 +80,7 @@ window.addEventListener('scroll', reveal);
 
 function renderMiniSlider() {}
 
-// عرض التصنيفات الحقيقية - تم التعديل لمنع تمط أو انضغاط الصور
+// عرض التصنيفات الحقيقية
 function renderCategories() {
   if (!$('categoryGrid')) return;
   if (typeof categories === 'undefined' || !categories.length) return;
@@ -53,7 +104,7 @@ function renderFilters() {
   $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
 
-// عرض المنتجات - تم التعديل هنا لضبط مقاس الصورة داخل الـ Cover
+// عرض المنتجات
 function renderProducts() {
   if (!$('productGrid')) return;
   if (typeof products === 'undefined' || !products.length) {
@@ -76,7 +127,6 @@ function renderProducts() {
 
   $('productGrid').innerHTML = list.map(p => {
     const i = products.indexOf(p);
-    // دعم قراءة رابط الصورة من البانل بأي مسمى
     const imgUrl = p.img || p.image || '';
     
     return `<article class="productCard reveal">
@@ -100,6 +150,14 @@ function renderProducts() {
 function selectCategory(c) {
   const f = $('categoryFilter');
   if (f) f.value = c; 
+  renderProducts();
+  scrollToId('products');
+}
+
+// دالة إعادة تعيين الفلتر عند الضغط على View All
+function resetCategoryFilter() {
+  const f = $('categoryFilter');
+  if (f) f.value = 'All';
   renderProducts();
   scrollToId('products');
 }
@@ -143,33 +201,74 @@ function updateCart() {
   if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
 }
 
-// بقية أكواد الـ الكوبون والواتساب والـ Auth بدون أي تعديل للحفاظ على استقرارها
+// نظام تبديل اللغة الاحترافي والآمن
+function toggleLanguage() {
+  currentLang = currentLang === 'en' ? 'ar' : 'en';
+  localStorage.setItem('foxgames_lang', currentLang);
+  applyLanguage(currentLang);
+}
+
+function applyLanguage(lang) {
+  // 1. تحديث اتجاه لغة الصفحة بالكامل
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+
+  // 2. ترجمة النصوص العادية التي تحتوي على وسم data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) {
+      // لو العنصر جواه أيقونة Font Awesome نحتفظ بها ونغير النص فقط
+      const icon = el.querySelector('i');
+      if (icon) {
+        el.innerHTML = '';
+        el.appendChild(icon);
+        el.appendChild(document.createTextNode(' ' + translations[lang][key]));
+      } else {
+        el.textContent = translations[lang][key];
+      }
+    }
+  });
+
+  // 3. ترجمة نصوص الـ Placeholders (خانات البحث والبيانات)
+  document.querySelectorAll('[data-i18n-holder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-holder');
+    if (translations[lang][key]) {
+      el.placeholder = translations[lang][key];
+    }
+  });
+
+  // 4. تحديث نص زرار التبديل نفسه
+  if ($('langToggleBtn')) {
+    $('langToggleBtn').textContent = translations[lang]['lang_btn'];
+  }
+}
+
 function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
   if (code === 'FOX10') {
     coupon = 10;
     save();
     updateCart();
-    alert('Coupon FOX10 applied successfully! 🎉');
+    alert(currentLang === 'ar' ? 'تم تطبيق كود الخصم بنجاح! 🎉' : 'Coupon FOX10 applied successfully! 🎉');
   } else {
-    alert('Invalid coupon. Try: FOX10');
+    alert(currentLang === 'ar' ? 'كود غير صحيح. جرب: FOX10' : 'Invalid coupon. Try: FOX10');
   }
 }
 
 async function checkout() {
-  if (!cart.length) return alert('Your cart is empty.');
-  alert('Checkout system is ready. Connecting with backend payment gateway...');
+  if (!cart.length) return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
+  alert(currentLang === 'ar' ? 'بوابة الدفع جاهزة. يتم الاتصال الآن بالسيرفر...' : 'Checkout system is ready. Connecting with backend payment gateway...');
 }
 
 function sendWhatsappOrder() {
-  if (!cart.length) return alert('Your cart is empty.');
+  if (!cart.length) return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
 
   const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
   const payment = $('paymentMethod')?.value || 'Not Specified';
   
   if (!name || !phone) {
-    return alert('Please enter your Name and Phone Number to complete the order.');
+    return alert(currentLang === 'ar' ? 'برجاء إدخال الاسم ورقم الهاتف لإكمال الطلب.' : 'Please enter your Name and Phone Number to complete the order.');
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
