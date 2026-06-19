@@ -1,53 +1,56 @@
+// ================= FOX GAMES ACCOUNT COMPATIBILITY =================
 if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
 
 const accountDb = firebase.firestore();
 
 function showStoreUser(data, user){
-  const nav = document.querySelector('.navActions');
-  if(!nav) return;
+  // جلب عناصر البروفايل الجديد المعتمد في الـ index.html
+  const mainLoginBtn = document.getElementById('mainLoginBtn');
+  const userProfileWrapper = document.getElementById('userProfileWrapper');
+  const topNavUserName = document.getElementById('topNavUserName');
+  const dropdownUserName = document.getElementById('dropdownUserName');
+  const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+  const profileUserAvatar = document.getElementById('profileUserAvatar');
 
-  const name = data.name || user.displayName || 'User';
-  const email = data.email || user.email || '';
+  // استخراج البيانات القادمة من الفايربيز
+  const name = data.name || user.displayName || 'Gamer';
+  const email = data.email || user.email || 'No Email';
   const phone = data.fullPhone || data.phone || '';
+  const photoURL = user.photoURL || "https://via.placeholder.com/150";
 
-  let box = document.getElementById('userProfileMenu');
-  if(!box){
-    box = document.createElement('div');
-    box.id = 'userProfileMenu';
-    box.innerHTML = `
-      <button id="profileToggle" class="profileBtn">👤 ${name.split(' ')[0]}</button>
-      <div id="profileDrop" class="profileDrop">
-        <b>${name}</b>
-        <small>${email}</small>
-        ${phone ? `<small>${phone}</small>` : ''}
-        <button id="logoutBtn">Logout</button>
-      </div>
-    `;
+  // إخفاء زر تسجيل الدخول وإظهار كارت البروفايل الجديد فوراً
+  if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
+  if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
 
-    const style = document.createElement('style');
-    style.textContent = `
-      #userProfileMenu{position:relative;display:inline-block}
-      .profileBtn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:white;border-radius:16px;padding:12px 14px;font-weight:900;cursor:pointer}
-      .profileDrop{display:none;position:absolute;right:0;top:54px;width:250px;background:#0f172a;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);z-index:5000}
-      .profileDrop.open{display:block}.profileDrop b,.profileDrop small{display:block;color:white;margin-bottom:6px}.profileDrop small{color:#b8abc8}
-      .profileDrop button{width:100%;border:0;border-radius:12px;padding:10px;background:#a3ff12;color:#07100b;font-weight:900;cursor:pointer;margin-top:8px}
-    `;
-    document.head.appendChild(style);
-    nav.prepend(box);
-  }
+  // ربط الداتا الحقيقية بالتصميم الجديد
+  if (topNavUserName) topNavUserName.innerText = name.split(' ')[0]; 
+  if (dropdownUserName) dropdownUserName.innerText = name;
+  if (dropdownUserEmail) dropdownUserEmail.innerText = email;
+  if (profileUserAvatar) profileUserAvatar.src = photoURL;
 
-  document.getElementById('profileToggle').onclick = () => document.getElementById('profileDrop').classList.toggle('open');
-  document.getElementById('logoutBtn').onclick = async () => { await firebase.auth().signOut(); location.reload(); };
-
+  // ملء بيانات العميل تلقائياً في خانات الشراء والسلة إذا كانت فارغة
   const customerName = document.getElementById('customerName');
   const customerPhone = document.getElementById('customerPhone');
   if(customerName && !customerName.value) customerName.value = name;
   if(customerPhone && !customerPhone.value) customerPhone.value = phone;
 }
 
+// الاستماع المستمر لحالة تسجيل الدخول وجلب البيانات من الفايربيز ستور
 firebase.auth().onAuthStateChanged(async user => {
-  if(!user) return;
+  const mainLoginBtn = document.getElementById('mainLoginBtn');
+  const userProfileWrapper = document.getElementById('userProfileWrapper');
+
+  if(!user) {
+    // في حال عدم وجود مستخدم، نضمن بقاء زر اللوجن ظاهراً والبروفايل الجديد مخفياً
+    if (mainLoginBtn) mainLoginBtn.classList.remove('foxHidden');
+    if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
+    return;
+  }
+
+  // جلب بيانات الحساب الإضافية (مثل رقم الهاتف الموثق) من الفايربيز
   const doc = await accountDb.collection('users').doc(user.uid).get();
   const data = doc.exists ? doc.data() : {};
+  
+  // تشغيل الدالة لتغذية التصميم الجديد بالبيانات الصحيحة
   showStoreUser(data, user);
 });
