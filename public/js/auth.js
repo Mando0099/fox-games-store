@@ -32,6 +32,7 @@ async function saveUser(user, extra = {}){
   }, {merge:true});
 }
 
+// تعديل جوهري: التوجيه للرئيسية '/' ليتولى الكود الجديد في index.html إظهار البروفايل
 async function goAfterLogin(user){
   await saveUser(user);
   const adminSnap = await db.collection('admins')
@@ -40,6 +41,7 @@ async function goAfterLogin(user){
     .limit(1)
     .get();
 
+  // إذا كان أدمن يذهب لصفحة الأدمن، غير ذلك يذهب للرئيسية ليتفعل نظام البروفايل
   location.href = adminSnap.empty ? '/' : '/admin.html';
 }
 
@@ -49,9 +51,7 @@ async function loginEmail(){
     const password = valueOf('password');
 
     if(!email || !password) return show('Please enter email and password.');
-
-    // email/password login. If user typed phone here, show clear message.
-    if(!email.includes('@')) return show('Phone login uses SMS OTP. Use email here or enable phone OTP form.');
+    if(!email.includes('@')) return show('Phone login uses SMS OTP. Use email here.');
 
     const r = await firebase.auth().signInWithEmailAndPassword(email, password);
     await goAfterLogin(r.user);
@@ -85,7 +85,7 @@ async function createAccount(){
     await saveUser(r.user, {name,email,countryCode,phone});
     await r.user.sendEmailVerification();
 
-    show('Account created. Verification email sent. You can login now.');
+    show('Account created. Verification email sent.');
     setTimeout(() => location.href = '/login.html', 1200);
   }catch(e){ show(e.message); }
 }
