@@ -1,3 +1,22 @@
+// ================= DATA (البيانات) =================
+// تأكد من تعديل الروابط والأسماء هنا لتطابق منتجاتك الحقيقية
+const categories = [
+  { name: "PUBG Mobile", desc: "UC & Packs", bg: "/assets/pubg-bg.jpg" },
+  { name: "Free Fire", desc: "Diamonds", bg: "/assets/ff-bg.jpg" },
+  { name: "Valorant", desc: "Points", bg: "/assets/val-bg.jpg" },
+  { name: "Steam", desc: "Gift Cards", bg: "/assets/steam-bg.jpg" },
+  { name: "PlayStation", desc: "Cards & Plus", bg: "/assets/ps-bg.jpg" }
+];
+
+const products = [
+  { name: "PUBG Mobile 60 UC", category: "PUBG Mobile", desc: "Instant recharge via ID", price: 60, img: "/assets/uc60.jpg", bg: "/assets/pubg-bg.jpg", popular: 90 },
+  { name: "PUBG Mobile 325 UC", category: "PUBG Mobile", desc: "Instant recharge via ID", price: 300, img: "/assets/uc325.jpg", bg: "/assets/pubg-bg.jpg", popular: 95 },
+  { name: "Valorant 1000 VP", category: "Valorant", desc: "Riot Games prepaid card", price: 450, img: "/assets/vp1000.jpg", bg: "/assets/val-bg.jpg", popular: 85 },
+  { name: "Free Fire 100 Diamonds", category: "Free Fire", desc: "Instant recharge via ID", price: 80, img: "/assets/ff100.jpg", bg: "/assets/ff-bg.jpg", popular: 80 },
+  { name: "Steam $10 Gift Card", category: "Steam", desc: "Global Wallet Code", price: 550, img: "/assets/steam10.jpg", bg: "/assets/steam-bg.jpg", popular: 88 }
+];
+
+// ================= APP LOGIC (الكود الأساسي) =================
 let cart = JSON.parse(localStorage.getItem('foxgames_cart')) || [];
 let coupon = Number(localStorage.getItem('foxgames_coupon')) || 0;
 const $ = id => document.getElementById(id);
@@ -16,7 +35,6 @@ function renderMiniSlider() {}
 // عرض التصنيفات بشكل صحيح
 function renderCategories() {
   if (!$('categoryGrid')) return;
-  if (typeof categories === 'undefined') return; // حماية في حال لم يتم تحميل مصفوفة البيانات بعد
   $('categoryGrid').innerHTML = categories.map(cat => `
     <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="background-image:url('${cat.bg}')">
       <div><h3>${cat.name}</h3><p>${cat.desc}</p></div>
@@ -26,7 +44,6 @@ function renderCategories() {
 // إنشاء قائمة الفلاتر تلقائياً بناءً على المنتجات المتاحة
 function renderFilters() {
   if (!$('categoryFilter')) return;
-  if (typeof products === 'undefined') return;
   const list = ['All', ...new Set(products.map(p => p.category))];
   $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
@@ -34,7 +51,6 @@ function renderFilters() {
 // عرض المنتجات بناءً على البحث والفلترة والترتيب
 function renderProducts() {
   if (!$('productGrid')) return;
-  if (typeof products === 'undefined') return;
 
   const search = ($('searchInput')?.value || '').toLowerCase();
   const filter = $('categoryFilter')?.value || 'All';
@@ -58,7 +74,7 @@ function renderProducts() {
         <p>${p.desc}</p>
         <div class="priceRow">
           <div class="price">${p.price}.00 EGP</div>
-          <span class="rating"><i class="fas fa-star"></i> 4.9</span>
+          <span class="rating">★ 4.9</span>
         </div>
         <button class="add" onclick="addToCart(${i})">Buy Now</button>
       </div>
@@ -67,11 +83,11 @@ function renderProducts() {
   reveal();
 }
 
-// إصلاح البج: الآن عند اختيار تصنيف يتم فلترة المنتجات بناءً عليه مباشرة
+// عند اختيار تصنيف يتم فلترة المنتجات بناءً عليه مباشرة
 function selectCategory(c) {
   const f = $('categoryFilter');
   if (f) {
-    f.value = c; // تعديل لجعل الفلتر يختار التصنيف المضغطوط عليه بدلاً من 'All'
+    f.value = c; 
   }
   renderProducts();
   scrollToId('products');
@@ -79,7 +95,6 @@ function selectCategory(c) {
 
 // إضافة منتج للسلة
 function addToCart(i) {
-  if (typeof products === 'undefined') return;
   cart.push({ ...products[i], id: Date.now() + Math.random() });
   save();
   updateCart();
@@ -106,7 +121,7 @@ function updateCart() {
             <div><b>${item.name}</b><br><small>${item.category}</small></div>
             <b class="green-text">${item.price} EGP</b>
           </div>
-          <button onclick="removeItem(${item.id})"><i class="fas fa-trash-alt"></i> Remove</button>
+          <button onclick="removeItem(${item.id})">Remove</button>
         </div>`).join('')
       : `<p style="color:#94a3b8; text-align:center; padding:20px;">Your cart is empty.</p>`;
   }
@@ -138,11 +153,10 @@ async function checkout() {
   alert('Checkout system is ready. Connecting with backend payment gateway...');
 }
 
-// تطوير كود الواتساب ليسحب بيانات العميل والطلب بالكامل بشكل احترافي
+// تطوير كود الواتساب ليسحب بيانات العميل والطلب بالكامل
 function sendWhatsappOrder() {
   if (!cart.length) return alert('Your cart is empty.');
 
-  // سحب بيانات الفورم الجديدة
   const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
   const payment = $('paymentMethod')?.value || 'Not Specified';
@@ -155,7 +169,6 @@ function sendWhatsappOrder() {
   const discountValue = Math.round(subtotal * coupon / 100);
   const finalTotal = subtotal - discountValue;
 
-  // بناء الرسالة المنسقة لتصلك على الواتساب جاهزة
   let msg = `🎮 *New Order from Fox Games* 🎮%0A%0A`;
   msg += `👤 *Customer Name:* ${encodeURIComponent(name)}%0A`;
   msg += `📞 *Phone Number:* ${encodeURIComponent(phone)}%0A`;
@@ -168,7 +181,6 @@ function sendWhatsappOrder() {
 
   msg += `%0A💰 *Total Amount:* ${finalTotal} EGP`;
   
-  // فتح الواتساب مباشرة برقمك المحدد
   window.open(`https://wa.me/201010502795?text=${msg}`, '_blank');
 }
 
