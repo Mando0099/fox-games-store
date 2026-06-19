@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -17,21 +17,22 @@
     </a>
 
     <nav class="mainNav">
-      <a class="active" href="#home">Home</a>
-      <a href="#products">Store</a>
-      <a href="#trending">Categories</a>
-      <a href="#support">Support</a>
+      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
     </nav>
 
     <div class="topSearch">
-      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()">
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()" data-i18n-holder="search_placeholder">
       <span class="search-icon-btn"><i class="fas fa-search"></i></span>
     </div>
 
     <div class="navActions">
-      <button onclick="openAuth()" title="Account" class="loginBtn">Login</button>
+      <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
+      <button onclick="openAuth()" title="Account" class="loginBtn" data-i18n="btn_login">Login</button>
       <button onclick="toggleCart()" title="Cart" class="cartBtn">
-        <i class="fas fa-shopping-cart"></i> <span>Cart</span> 
+        <i class="fas fa-shopping-cart"></i> <span data-i18n="btn_cart">Cart</span> 
         <b id="cartCountTop" class="cart-badge">0</b>
       </button>
     </div>
@@ -42,22 +43,22 @@
     <section class="hero-banner-section">
       <div class="hero-banner-card">
         <div class="hero-content">
-          <h1 class="hero-title">Game Cards & Top-Ups</h1>
-          <p class="hero-subtitle">Instant delivery. Secure payments. Best prices.</p>
+          <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
           
           <div class="hero-cta-buttons">
             <button onclick="scrollToId('products')" class="shop-now-btn">
-              <i class="fas fa-shopping-bag"></i> Shop Now
+              <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
             </button>
             <button onclick="scrollToId('trending')" class="browse-cat-btn">
-              <i class="fas fa-th-large"></i> Browse Categories
+              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
             </button>
           </div>
 
           <div class="hero-features">
-            <span class="feature-item"><i class="fas fa-bolt green-text"></i> Instant Delivery</span>
-            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> Secure Payments</span>
-            <span class="feature-item"><i class="fas fa-headset green-text"></i> 24/7 Support</span>
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
           </div>
         </div>
 
@@ -74,15 +75,15 @@
     <section class="section" id="products">
       <div class="sectionHead reveal">
         <div>
-          <h2>Popular Products</h2>
+          <h2 data-i18n="title_popular">Popular Products</h2>
         </div>
         <div class="filters">
-          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam...">
+          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam..." data-i18n-holder="search_placeholder">
           <select id="categoryFilter" onchange="renderProducts()"></select>
           <select id="sortFilter" onchange="renderProducts()">
-            <option value="popular">Most Popular</option>
-            <option value="low">Price Low</option>
-            <option value="high">Price High</option>
+            <option value="popular" data-i18n="sort_popular">Most Popular</option>
+            <option value="low" data-i18n="sort_low">Price Low</option>
+            <option value="high" data-i18n="sort_high">Price High</option>
           </select>
         </div>
       </div>
@@ -92,42 +93,47 @@
     <section class="section" id="trending">
       <div class="sectionHead reveal">
         <div>
-          <h2>Shop by Categories</h2>
+          <h2 data-i18n="title_categories">Shop by Categories</h2>
         </div>
-        <button class="view-all-btn" onclick="scrollToId('products')">View All <i class="fas fa-arrow-right"></i></button>
+        <button class="view-all-btn" onclick="resetCategoryFilter()" data-i18n="btn_view_all">View All <i class="fas fa-arrow-right"></i></button>
       </div>
       <div class="trendGrid" id="categoryGrid"></div>
     </section>
 
     <section class="benefits">
-      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b>Instant Delivery</b><span>Get your products instantly after payment</span></div></div>
-      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b>Secure Payments</b><span>100% secure payment methods</span></div></div>
-      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b>24/7 Support</b><span>We are here to help you anytime</span></div></div>
-      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b>Best Prices</b><span>Competitive prices on all products</span></div></div>
+      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
     </section>
 
     <section class="section" id="checkout">
       <div class="checkoutShowcase reveal">
         <div>
-          <h2>Secure Payment Methods</h2>
-          <p>Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
+          <h2 data-i18n="check_title">Secure Payment Methods</h2>
+          <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
         </div>
         
         <div class="paymentMethods">
           <div class="method-card" title="Visa">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <span>Visa</span>
           </div>
           <div class="method-card" title="MasterCard">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="MasterCard">
+            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 28px;"></i>
+            <span>MasterCard</span>
           </div>
           <div class="method-card" title="Vodafone Cash">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Vodafone_2017_logo.svg" alt="Vodafone Cash">
+            <i class="fas fa-wallet" style="color: #e60000; font-size: 22px;"></i>
+            <span>Vodafone Cash</span>
           </div>
           <div class="method-card" title="Fawry">
-            <img src="https://fawry.com/wp-content/uploads/2023/04/fawry-logo-english.png" alt="Fawry" style="filter: brightness(1.2);">
+            <i class="fas fa-money-bill-wave" style="color: #ffcc00; font-size: 22px;"></i>
+            <span>Fawry</span>
           </div>
           <div class="method-card" title="InstaPay">
-            <img src="https://www.instapay.eg/wp-content/themes/instapay/assets/images/logo.svg" alt="InstaPay">
+            <i class="fas fa-university" style="color: #00bfa5; font-size: 22px;"></i>
+            <span>InstaPay</span>
           </div>
         </div>
 
@@ -137,12 +143,12 @@
     <section class="section" id="support">
       <div class="supportBox reveal">
         <div>
-          <h2>Need Help With Your Order?</h2>
-          <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
+          <h2 data-i18n="sup_title">Need Help With Your Order?</h2>
+          <p data-i18n="sup_desc">Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
         </div>
         <div class="supportActions">
           <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-          <button onclick="toggleChat()">Live Chat</button>
+          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
         </div>
       </div>
     </section>
@@ -150,32 +156,32 @@
 
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead">
-      <h3>Your Cart</h3>
+      <h3 data-i18n="cart_title">Your Cart</h3>
       <button onclick="toggleCart()">×</button>
     </div>
     <div id="cartItems"></div>
     <div class="coupon">
       <input id="couponInput" placeholder="Coupon: FOX10">
-      <button onclick="applyCoupon()">Apply</button>
+      <button onclick="applyCoupon()" data-i18n="btn_apply">Apply</button>
     </div>
     <div class="summary">
-      <p><span>Subtotal</span><b id="subtotal">0 EGP</b></p>
-      <p><span>Discount</span><b id="discount">0 EGP</b></p>
-      <p class="grand"><span>Total</span><b id="total">0 EGP</b></p>
+      <p><span data-i18n="cart_subtotal">Subtotal</span><b id="subtotal">0 EGP</b></p>
+      <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
+      <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
     </div>
     <div class="checkoutForm">
-      <input id="customerName" placeholder="Full Name">
-      <input id="customerPhone" placeholder="Phone Number">
+      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name">
+      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone">
       <select id="paymentMethod">
-        <option>Visa / MasterCard</option>
-        <option>Wallet</option>
-        <option>Vodafone Cash</option>
-        <option>Fawry</option>
-        <option>Bank Transfer</option>
+        <option data-i18n="opt_visa">Visa / MasterCard</option>
+        <option data-i18n="opt_wallet">Wallet</option>
+        <option data-i18n="opt_vodafone">Vodafone Cash</option>
+        <option data-i18n="opt_fawry">Fawry</option>
+        <option data-i18n="opt_bank">Bank Transfer</option>
       </select>
-      <button class="primary full" onclick="checkout()">Pay Now</button>
-      <button class="whatsapp full" onclick="sendWhatsappOrder()">WhatsApp Order</button>
-      <small>Secure checkout connected through the backend.</small>
+      <button class="primary full" onclick="checkout()" data-i18n="btn_pay_now">Pay Now</button>
+      <button class="whatsapp full" onclick="sendWhatsappOrder()" data-i18n="btn_wa_order">WhatsApp Order</button>
+      <small data-i18n="secure_checkout_notice">Secure checkout connected through the backend.</small>
     </div>
   </aside>
 
