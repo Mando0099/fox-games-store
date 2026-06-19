@@ -12,43 +12,42 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/FOX-LOGO.png" alt="Fox Games">
-      <span>Fox Games</span>
+      <span>FOX <b>GAMES</b></span>
     </a>
 
     <nav class="mainNav">
-      <a href="#home">Home</a>
+      <a class="active" href="#home">Home</a>
       <a href="#products">Store</a>
       <a href="#trending">Categories</a>
       <a href="#support">Support</a>
     </nav>
 
     <div class="topSearch">
+      <input placeholder="Search for products..." onfocus="focusSearch()">
       <span>⌕</span>
-      <input placeholder="Search products..." onfocus="focusSearch()">
     </div>
 
     <div class="navActions">
-      <button onclick="openAuth()" title="Account">👤</button>
-      <button onclick="toggleCart()" title="Cart">🛒 <b id="cartCountTop">0</b></button>
+      <button onclick="openAuth()" title="Account" class="loginBtn">Login</button>
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">🛒 <span>Cart</span> <b id="cartCountTop">0</b></button>
     </div>
   </header>
 
   <main id="home" class="content">
     <section class="hero">
       <div class="heroLeft reveal">
-        <div class="eyebrow">Premium gaming marketplace</div>
         <h1>Game Cards & Top-Ups</h1>
-        <p>Buy PUBG UC, Steam Wallet, PlayStation cards, Xbox codes, Valorant points and digital subscriptions with fast delivery and secure checkout.</p>
+        <p>Instant delivery. Secure payments. Best prices.</p>
 
         <div class="heroCtas">
-          <button onclick="scrollToId('products')" class="primary">Shop Now</button>
-          <button onclick="scrollToId('trending')" class="secondary">Browse Categories</button>
+          <button onclick="scrollToId('products')" class="primary">🛍 Shop Now</button>
+          <button onclick="scrollToId('trending')" class="secondary">▦ Browse Categories</button>
         </div>
 
         <div class="heroStats">
-          <div><strong>Instant</strong><span>Digital delivery</span></div>
-          <div><strong>Secure</strong><span>Safe payments</span></div>
-          <div><strong>24/7</strong><span>Support team</span></div>
+          <div><strong>Instant Delivery</strong></div>
+          <div><strong>Secure Payments</strong></div>
+          <div><strong>24/7 Support</strong></div>
         </div>
       </div>
     </section>
@@ -56,7 +55,6 @@
     <section class="section" id="products">
       <div class="sectionHead reveal">
         <div>
-          <span>Store</span>
           <h2>Popular Products</h2>
         </div>
         <div class="filters">
@@ -75,23 +73,28 @@
     <section class="section" id="trending">
       <div class="sectionHead reveal">
         <div>
-          <span>Categories</span>
-          <h2>Shop by Category</h2>
+          <h2>Shop by Categories</h2>
         </div>
-        <button onclick="scrollToId('products')">View Store</button>
+        <button onclick="scrollToId('products')">View All →</button>
       </div>
       <div class="trendGrid" id="categoryGrid"></div>
+    </section>
+
+    <section class="benefits">
+      <div><b>⚡ Instant Delivery</b><span>Get your products instantly after payment</span></div>
+      <div><b>🛡 Secure Payments</b><span>100% secure payment methods</span></div>
+      <div><b>🎧 24/7 Support</b><span>We are here to help you anytime</span></div>
+      <div><b>👍 Best Prices</b><span>Competitive prices on all products</span></div>
     </section>
 
     <section class="section" id="checkout">
       <div class="checkoutShowcase reveal">
         <div>
-          <span>Checkout</span>
           <h2>Secure Payment Methods</h2>
           <p>Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
         </div>
         <div class="paymentMethods">
-          <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span><span>Bank</span>
+          <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span>
         </div>
       </div>
     </section>
@@ -99,7 +102,6 @@
     <section class="section" id="support">
       <div class="supportBox reveal">
         <div>
-          <span>Support</span>
           <h2>Need Help With Your Order?</h2>
           <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
         </div>
