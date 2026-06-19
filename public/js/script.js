@@ -1,22 +1,3 @@
-let products=[
-{name:'PUBG Mobile UC 660',category:'PUBG',desc:'Fast PUBG Mobile UC top-up.',price:420,bg:'/assets/bg-pubg.svg',img:'/assets/item-uc.svg',popular:10},
-{name:'PUBG Mobile UC 1800',category:'PUBG',desc:'High value UC recharge pack.',price:1050,bg:'/assets/bg-pubg.svg',img:'/assets/item-uc.svg',popular:9},
-{name:'Fortnite V-Bucks 1000',category:'Fortnite',desc:'V-Bucks digital wallet code.',price:520,bg:'/assets/bg-fortnite.svg',img:'/assets/item-vbucks.svg',popular:10},
-{name:'Fortnite Crew 1 Month',category:'Fortnite',desc:'Fortnite Crew subscription.',price:650,bg:'/assets/bg-fortnite.svg',img:'/assets/item-vbucks.svg',popular:8},
-{name:'Steam Wallet 10 USD',category:'Steam',desc:'Steam wallet gift card.',price:520,bg:'/assets/bg-steam.svg',img:'/assets/item-steam.svg',popular:9},
-{name:'PlayStation Store Card 10 USD',category:'PlayStation',desc:'PSN wallet digital card.',price:570,bg:'/assets/bg-psn.svg',img:'/assets/item-psn.svg',popular:8},
-{name:'Xbox Game Pass 1 Month',category:'Xbox',desc:'Xbox Game Pass subscription.',price:450,bg:'/assets/bg-xbox.svg',img:'/assets/item-xbox.svg',popular:7},
-{name:'Valorant Points 475 VP',category:'Valorant',desc:'Valorant points digital code.',price:250,bg:'/assets/bg-valorant.svg',img:'/assets/item-valorant.svg',popular:7}
-];
-
-let categories=[
-{name:'PUBG',desc:'UC recharge',bg:'/assets/bg-pubg.svg'},
-{name:'Fortnite',desc:'V-Bucks & Crew',bg:'/assets/bg-fortnite.svg'},
-{name:'Steam',desc:'Wallet cards',bg:'/assets/bg-steam.svg'},
-{name:'PlayStation',desc:'PSN cards',bg:'/assets/bg-psn.svg'},
-{name:'Xbox',desc:'Game Pass',bg:'/assets/bg-xbox.svg'},
-{name:'Valorant',desc:'Points & codes',bg:'/assets/bg-valorant.svg'}
-];
 
 let cart=JSON.parse(localStorage.getItem('foxgames_cart'))||[];
 let coupon=Number(localStorage.getItem('foxgames_coupon'))||0;
