@@ -176,21 +176,31 @@ function removeItem(id) {
   updateCart();
 }
 
+// تحديث السلة بالتصميم الاحترافي الجديد (عرض الصور + أيقونة الحذف)
 function updateCart() {
   if ($('cartCount')) $('cartCount').textContent = cart.length;
   if ($('cartCountTop')) $('cartCountTop').textContent = cart.length;
   
   if ($('cartItems')) {
     $('cartItems').innerHTML = cart.length 
-      ? cart.map(item => `
-        <div class="cartItem">
-          <div class="row">
-            <div><b>${item.name}</b><br><small>${item.category || ''}</small></div>
-            <b class="green-text">${item.price} EGP</b>
-          </div>
-          <button onclick="removeItem(${item.id})">Remove</button>
-        </div>`).join('')
-      : `<p style="color:#94a3b8; text-align:center; padding:20px;">Your cart is empty.</p>`;
+      ? cart.map(item => {
+          // قراءة الصورة المرفوعة على الفايربيز وإذا لم توجد نضع صورة ديمو
+          const imgUrl = item.img || item.image || 'https://via.placeholder.com/150';
+          
+          return `
+            <div class="cartItem">
+              <img src="${imgUrl}" class="cartItem-img" alt="${item.name}">
+              <div class="cartItem-details">
+                <span class="cartItem-name">${item.name}</span>
+                <span class="cartItem-cat">${item.category || ''}</span>
+                <span class="cartItem-price">${item.price} EGP</span>
+              </div>
+              <button class="cartItem-remove-btn" onclick="removeItem(${item.id})" title="Remove">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>`;
+        }).join('')
+      : `<p style="color:#94a3b8; text-align:center; padding:30px; font-size:13px;">Your cart is empty.</p>`;
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
