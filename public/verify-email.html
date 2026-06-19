@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Email | Fox Games</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="/css/auth-ui.css"/>
+</head>
+<body class="authPage">
+  <div class="verifyCard">
+    <div class="pulseMail">✉</div>
+    <h1>Check your email</h1>
+    <p>We sent a verification link to your email. Open it, then come back and continue.</p>
+    <button class="authPrimary" onclick="checkEmailVerified()">I verified my email</button>
+    <button class="authGhost" onclick="resendVerification()">Resend email</button>
+    <a class="backStore" href="/login.html">Back to Login</a>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>
