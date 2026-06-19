@@ -83,26 +83,34 @@ body {
   color: var(--accent);
 }
 
+/* تحديث شكل التابات والـ Navbar لجعلها احترافية وعصرية */
 .mainNav {
   display: flex;
-  gap: 30px;
+  gap: 12px;
   margin-left: 40px;
 }
 
 .mainNav a {
+  position: relative;
   color: #94a3b8;
   text-decoration: none;
   font-weight: 600;
   font-size: 15px;
-  padding: 24px 0;
-  border-bottom: 3px solid transparent;
-  transition: color 0.3s;
+  padding: 8px 16px;
+  border-bottom: none !important;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mainNav a.active,
-.mainNav a:hover {
+.mainNav a.active {
+  color: #000000 !important;
+  background: var(--accent);
+  box-shadow: 0 4px 12px rgba(101, 204, 0, 0.3);
+}
+
+.mainNav a:hover:not(.active) {
   color: var(--text);
-  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .topSearch {
@@ -141,6 +149,27 @@ body {
 .navActions {
   display: flex;
   gap: 12px;
+  align-items: center;
+}
+
+/* زرار تغيير اللغة الاحترافي */
+.langBtn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  height: 42px;
+  transition: all 0.3s ease;
+}
+
+.langBtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .navActions button.loginBtn {
@@ -295,6 +324,15 @@ body {
 
 .section {
   padding: 30px 0;
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .sectionHead h2 {
@@ -568,21 +606,23 @@ body {
 .paymentMethods {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 12px;
   justify-content: center;
   align-items: center;
+  margin-top: 16px;
 }
 
-/* ستايل كروت شعارات طرق الدفع المتجاوبة مع الـ Dark Mode */
+/* ستايل كروت شعارات طرق الدفع المتجاوبة مع الـ Dark Mode الاحترافي */
 .method-card {
   background: rgba(255, 255, 255, 0.03); 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 125px;
+  gap: 10px;
+  width: 155px; /* مساحة كافية ومظبوطة جداً للأيقونة والنص معاً */
   height: 52px;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -595,11 +635,23 @@ body {
   box-shadow: 0 6px 18px rgba(101, 204, 0, 0.2);
 }
 
-.method-card img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  pointer-events: none;
+/* تنسيق النصوص داخل كروت الدفع */
+.method-card span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* ضبط الأيقونات */
+.method-card i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .supportActions {
@@ -653,7 +705,7 @@ body {
   z-index: 2200;
   padding: 24px;
   overflow: auto;
-  transition: right 0.3s ease;
+  transition: right 0.3s ease, left 0.3s ease;
 }
 
 .cartDrawer.open {
@@ -850,6 +902,39 @@ footer b {
   transform: none !important;
 }
 
+/* ================= دعم الاتجاه العربي والتمرير التلقائي (RTL Support) ================= */
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+html[dir="rtl"] .mainNav {
+  margin-left: 0;
+  margin-right: 40px;
+}
+
+html[dir="rtl"] .topSearch {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .cartDrawer {
+  right: auto;
+  left: -440px;
+  border-left: none;
+  border-right: 1px solid var(--line);
+}
+
+html[dir="rtl"] .cartDrawer.open {
+  left: 0;
+  right: auto;
+}
+
+html[dir="rtl"] .chat, 
+html[dir="rtl"] .chatBubble {
+  right: auto;
+  left: 24px;
+}
+
 /* ================= RESPONSIVE ================= */
 
 @media(max-width:1280px) {
@@ -887,6 +972,9 @@ footer b {
     order: 3;
     width: 100%;
     margin-left: 0;
+  }
+  html[dir="rtl"] .topSearch {
+    margin-right: 0;
   }
   .hero-banner-card {
     padding: 40px 24px;
