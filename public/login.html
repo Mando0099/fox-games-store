@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | Fox Games</title>
-  <link rel="stylesheet" href="./css/fox-auth.css"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Fox Games</title>
+  <link rel="stylesheet" href="./css/fox-auth.css"/>
 </head>
 <body class="foxAuthPage">
-  <main class="foxAuthStage">
-    <div class="foxPurpleSlice"></div>
-    <div class="foxMascotWrap">
-      <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
-    </div>
+  <main class="foxAuthStage">
+    <div class="foxPurpleSlice"></div>
 
-    <section class="foxCard">
-      <div class="foxLogoRow">
-        <div class="foxLogoMark"><img src="/assets/logo-wolf.svg" alt="Fox"></div>
-        <div class="foxLogoText">FOX <span>GAMES</span></div>
-      </div>
+    <section class="foxCard">
+      <div class="foxLogoRow">
+        <div class="foxLogoMark"><img src="/assets/logo-wolf.svg" alt="Fox"></div>
+        <div class="foxLogoText">FOX <span>GAMES</span></div>
+      </div>
 
-      <h1>Welcome back!</h1>
-      <p class="foxSub">Login to continue</p>
+      <h1>Welcome back!</h1>
+      <p class="foxSub">Login to continue</p>
 
-      <div class="foxField">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
-        <input id="email" placeholder="Email or Phone">
-      </div>
+      <div class="foxField">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+        <input id="email" placeholder="Email or Phone">
+      </div>
 
-      <div class="foxField">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
-        <input id="password" type="password" placeholder="Password">
-        <button class="eyeBtn" onclick="togglePass()">◉</button>
-      </div>
+      <div class="foxField">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+        <input id="password" type="password" placeholder="Password">
+        <button class="eyeBtn" onclick="togglePass()">◉</button>
+      </div>
 
-      <div class="foxActionRow">
-        <button class="foxLinkBtn" onclick="resetPassword()">Forgot password?</button>
-      </div>
+      <div class="foxActionRow">
+        <button class="foxLinkBtn" onclick="resetPassword()">Forgot password?</button>
+      </div>
 
-      <button class="foxPrimary" onclick="loginEmail()">Login</button>
+      <button class="foxPrimary" onclick="loginEmail()">Login</button>
 
-      <div class="foxDivider"><span>or continue with</span></div>
+      <div class="foxDivider"><span>or continue with</span></div>
 
-      <div class="foxSocials">
-        <button class="foxSocial" onclick="loginGoogle()"><span class="googleIcon">G</span> Google</button>
-        <button class="foxSocial" onclick="loginFacebook()"><span class="fbIcon">f</span> Facebook</button>
-      </div>
+      <div class="foxSocials">
+        <button class="foxSocial" onclick="loginGoogle()"><span class="googleIcon">G</span> Google</button>
+        <button class="foxSocial" onclick="loginFacebook()"><span class="fbIcon">f</span> Facebook</button>
+      </div>
 
-      <p class="foxBottomText">Don’t have an account? <a href="/register.html">Sign up</a></p>
-      <a class="foxSmallBack" href="/">Back to Store</a>
-      <div class="foxMsg" id="msg"></div>
+      <p class="foxBottomText">Don’t have an account? <a href="/register.html">Sign up</a></p>
+      <a class="foxSmallBack" href="/">Back to Store</a>
+      <div class="foxMsg" id="msg"></div>
+      <div id="recaptcha-container"></div>
 
-      <div id="recaptcha-container"></div>
-    </section>
-  </main>
+      <div class="foxMascotWrap">
+        <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
+      </div>
+    </section>
+  </main>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js"></script>
-  <script src="/js/auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>
