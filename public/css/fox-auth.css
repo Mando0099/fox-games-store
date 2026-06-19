@@ -2,51 +2,52 @@
 
 :root {
   --bg: #050b14;        /* اللون الغامق الأساسي للاستور */
-  --panel: #08101e;     
-  --card: #0d1722;      
-  --text: #ffffff;      
-  --muted: #94a3b8;     
+  --panel: #08101e;     /* لون البانل والـ Header */
+  --card: #0d1722;      /* لون كارت اللوجين الاحترافي */
+  --text: #ffffff;      /* نصوص بيضاء بالكامل */
+  --muted: #94a3b8;     /* لون النصوص الفرعية الرمادية */
   --accent: #65cc00;    /* النيون الأخضر اللامع لـ Fox Games */
-  --line: rgba(30, 58, 99, 0.4); 
+  --line: rgba(30, 58, 99, 0.4); /* خطوط تقسيم ناعمة مائلة للأزرق الداكن */
+  --line2: rgba(101, 204, 0, 0.4);
 }
 
-*{ box-sizing: border-box; }
+*{box-sizing:border-box}
 
 body.foxAuthPage {
   margin: 0;
   min-height: 100vh;
   font-family: Inter, Arial, sans-serif;
   color: var(--text);
-  background: var(--bg); 
+  background: var(--bg); /* خلفية داكنة متطابقة مع الاستور */
   display: grid;
   place-items: center;
   overflow-x: hidden;
-  padding: 24px 20px;
+  padding: 26px;
   position: relative;
 }
 
-/* نجوم وإضاءة الخلفية نيون ناعمة */
+/* إضافة نجوم خلفية مضيئة متناسقة */
 body.foxAuthPage::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 15% 20%, rgba(101, 204, 0, 0.05), transparent 40%),
-              radial-gradient(circle at 85% 70%, rgba(30, 58, 99, 0.15), transparent 45%);
+  background: radial-gradient(circle at 15% 20%, rgba(101, 204, 0, 0.08), transparent 35%),
+              radial-gradient(circle at 85% 70%, rgba(30, 58, 99, 0.2), transparent 40%);
   z-index: 0;
   pointer-events: none;
 }
 
 .foxAuthStage {
   width: min(1180px, 100%);
+  min-height: 720px;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(430px, 520px) 1fr;
+  grid-template-columns: minmax(430px, 540px) 1fr;
   align-items: center;
   z-index: 1;
-  gap: 60px;
 }
 
-/* الكارد في الـ PC */
+/* تعديل الكارت ليصبح غامق وتأثير نيون ناعم كبقية الاستور */
 .foxCard {
   position: relative;
   z-index: 3;
@@ -55,223 +56,446 @@ body.foxAuthPage::before {
   border-radius: 24px;
   box-shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
   padding: 46px 44px;
-  display: flex;
-  flex-direction: column;
+  animation: cardIn .65s ease both;
+  backdrop-filter: blur(18px);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px) scale(.98) }
+  to { opacity: 1; transform: none }
 }
 
 .foxLogoRow {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 30px;
+  margin-bottom: 34px;
 }
 
+/* تعديل مربع اللوجو للأخضر */
 .foxLogoMark {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
   border-radius: 12px;
   background: var(--accent);
+  color: black;
   box-shadow: 0 8px 24px rgba(101, 204, 0, 0.25);
 }
 
 .foxLogoMark img {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
+  filter: none; /* إيقاف الفلتر الأبيض ليعمل لوجو الثعلب الملون أو الأصلي */
 }
 
 .foxLogoText {
-  font-size: 26px;
+  font-size: 32px;
+  line-height: 1;
   font-weight: 900;
   letter-spacing: -0.5px;
+  color: #fff;
 }
 
-.foxLogoText span { color: var(--accent); }
+.foxLogoText span, .green-text {
+  color: var(--accent);
+}
 
 .foxCard h1 {
-  margin: 0 0 10px;
-  font-size: 32px;
+  margin: 0 0 12px;
+  font-size: 36px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
+  color: #fff;
 }
 
 .foxSub {
-  margin: 0 0 26px;
+  margin: 0 0 28px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
 }
 
-/* الخانات */
+/* تعديل حقول الإدخال لتتناسق مع الـ Dark Theme */
 .foxField {
   height: 54px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  margin-bottom: 16px;
+  margin: 16px 0;
   background: #0d192d;
   transition: .25s;
 }
 
 .foxField:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(101, 204, 0, 0.12);
+  box-shadow: 0 0 0 4px rgba(101, 204, 0, 0.15);
 }
 
-.foxField svg { width: 20px; height: 20px; color: #64748b; }
-.foxField input {
-  flex: 1; width: 100%; border: 0; outline: 0;
-  background: transparent; font-size: 15px; color: #fff; font-weight: 500;
+.foxField svg {
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  flex: 0 0 auto;
 }
+
+.foxField input, .foxField select {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 15px;
+  color: #fff;
+  font-weight: 500;
+  min-width: 0;
+}
+
 .foxField input::placeholder { color: #64748b; }
-.foxField .eyeBtn { border: 0; background: transparent; cursor: pointer; color: #64748b; font-size: 18px; }
 
-.foxActionRow { display: flex; justify-content: flex-end; margin: 4px 0 24px; }
-.foxLinkBtn { border: 0; background: transparent; color: var(--accent); font-size: 14px; font-weight: 600; cursor: pointer; }
+.foxField .eyeBtn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 18px;
+}
 
-/* الزرار الرئيسي */
+.foxActionRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 8px 0 24px;
+}
+
+/* تعديل الروابط للأخضر النيون */
+.foxLinkBtn {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.foxLinkBtn:hover {
+  color: #fff;
+}
+
+/* زر تسجيل الدخول الرئيسي باللون الأخضر النيون الاحترافي */
 .foxPrimary {
-  width: 100%; height: 52px; border: 0; border-radius: 12px;
-  color: #000; font-size: 16px; font-weight: 800; cursor: pointer;
-  background: var(--accent); box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
+  width: 100%;
+  height: 52px;
+  border: 0;
+  border-radius: 10px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--accent);
+  box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
   transition: .25s;
 }
-.foxPrimary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(101, 204, 0, 0.35); }
 
-.foxDivider { margin: 24px 0 20px; display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
-.foxDivider:before, .foxDivider:after { content: ""; height: 1px; flex: 1; background: var(--line); }
-
-/* أزرار السوشيال */
-.foxSocials { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.foxSocial {
-  height: 50px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px; transition: .25s;
+.foxPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(101, 204, 0, 0.35);
 }
-.foxSocial:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--accent); }
-.googleIcon { font-weight: 900; font-size: 18px; background: conic-gradient(#4285f4,#34a853,#fbbc05,#ea4335,#4285f4); -webkit-background-clip: text; color: transparent; }
-.fbIcon { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #1877f2; color: white; font-weight: 900; font-size: 15px; }
 
-.foxBottomText { margin: 24px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
-.foxBottomText a { color: var(--accent); font-weight: 700; text-decoration: none; margin-left: 4px; }
-.foxSmallBack { margin-top: 16px; display: block; text-align: center; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 13px; }
+.foxDivider {
+  margin: 28px 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
 
-/* الستايل الجانبي الفخم للـ PC */
+.foxDivider:before, .foxDivider:after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+
+.foxSocials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* أزرار جوجل وفيسبوك في الوضع المظلم */
+.foxSocial {
+  height: 48px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: .25s;
+}
+
+.foxSocial:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.googleIcon {
+  font-weight: 900;
+  font-size: 18px;
+  background: conic-gradient(#4285f4,#34a853,#fbbc05,#ea4335,#4285f4);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.fbIcon {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #1877f2;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.foxBottomText {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.foxBottomText a, .foxBottomText button {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.foxBottomText a:hover, .foxBottomText button:hover {
+  text-decoration: underline;
+}
+
+.foxMsg {
+  color: #f59e0b;
+  margin-top: 14px;
+  min-height: 22px;
+  line-height: 1.5;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ستايل الجزء البنفسجي الجانبي تحول إلى كحلي داكن نيون متناسق */
 .foxPurpleSlice {
-  position: absolute; right: -60px; top: -60px; bottom: -60px; width: 45%;
+  position: absolute;
+  right: -90px;
+  top: -90px;
+  bottom: -90px;
+  width: 48%;
   background: linear-gradient(160deg, #08101e, #0d1722 60%, #050b14);
-  border-left: 1px solid var(--line); transform: skewX(-10deg); z-index: 1; border-radius: 40px;
+  border-left: 1px solid var(--line);
+  transform: skewX(-14deg);
+  z-index: 1;
+  border-radius: 40px;
+  opacity: .96;
 }
 
 .foxMascotWrap {
-  position: absolute; right: 0; bottom: 0; top: 40px; width: min(42vw, 520px); z-index: 2;
-  pointer-events: none; animation: foxFloat 5s ease-in-out infinite;
+  position: absolute;
+  right: -30px;
+  bottom: -20px;
+  top: 40px;
+  width: min(46vw, 570px);
+  z-index: 2;
+  pointer-events: none;
+  animation: foxFloat 5s ease-in-out infinite;
 }
-@keyframes foxFloat { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
-.foxMascotWrap img { height: 100%; width: 100%; object-fit: contain; object-position: right bottom; filter: drop-shadow(0 20px 35px rgba(101, 204, 0, 0.15)); }
 
-.foxMsg { color: #f59e0b; margin-top: 14px; text-align: center; font-weight: 600; font-size: 13px; }
+@keyframes foxFloat {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-12px) }
+}
+
+.foxMascotWrap img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  object-position: right bottom;
+  filter: drop-shadow(0 20px 35px rgba(101, 204, 0, 0.15));
+}
+
+.foxPhoneGrid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+}
+
+.foxSmallBack {
+  margin-top: 16px;
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.foxSmallBack:hover {
+  color: #fff;
+}
+
 .foxHidden { display: none }
 
 
-/* =========================================================================
-   تعديل الموبايل الاحترافي - مطابقة كاملة للسكرين شوت (Pixel Perfect)
-   ========================================================================= */
-@media(max-width: 900px) {
+/* ================= RESPONSIVE (تعديل متناسق ومطابق لصور الموبايل والـ PC) ================= */
+@media(max-width:900px) {
   body.foxAuthPage {
-    background: #050b14; /* نفس اللون الموحد الغامق للاستور بدون تشتيت */
-    padding: 20px 16px;
-    display: block; /* إلغاء الـ Grid والاعتماد على التدفق الطبيعي */
+    overflow-y: auto;
+    background: var(--bg);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
   }
-
+  
   .foxAuthStage {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: auto;
     width: 100%;
+    margin-top: 20px;
   }
-
-  /* إخفاء السلايس الجانبية الكبيرة الخاصة بالـ PC */
+  
+  /* إخفاء الخلفية المائلة الكبيرة فقط */
   .foxPurpleSlice {
     display: none !important;
   }
-
-  /* تحويل الكارت ليكون شفاف ومندمج بالكامل مع خلفية الصفحة الشاملة للموبايل */
-  .foxCard {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 10px 0 0 0 !important; /* مساحة نظيفة مريحة للعين */
-    backdrop-filter: none !important;
-    animation: none;
-    width: 100%;
-  }
-
-  /* محاذاة اللوجو في المنتصف تماماً */
-  .foxLogoRow {
-    justify-content: center;
-    margin-bottom: 40px;
-  }
-  .foxLogoText { font-size: 28px; }
-
-  /* العناوين في المنتصف */
-  .foxCard h1 {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 8px;
-  }
   
-  .foxSub {
-    font-size: 15px;
-    text-align: center;
-    margin-bottom: 35px;
-  }
-
-  /* الحقول والأزرار مريحة ومطابقة للتصميم */
-  .foxField {
-    height: 52px;
-    background: #0b1320; /* لون خانات الإدخال الغامق المتناسق مع الصورة */
-    border-radius: 10px;
-    margin-bottom: 16px;
-  }
-
-  .foxPrimary {
-    height: 52px;
-    border-radius: 10px;
-    font-size: 16px;
-    margin-top: 8px;
-  }
-
-  /* بقاء أزرار السوشيال ميديا متجاورة في صف واحد بنسب متساوية تماماً */
-  .foxSocials {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .foxSocial {
-    height: 50px;
-    background: #0b1320;
-    border-radius: 10px;
-  }
-
-  /* ستايل وموقع صورة الثعلب في أسفل الصفحة ومطابقة الحجم */
+  /* إعادة تموضع صورة الثعلب لتظهر في الأعلى بشكل متناسق ومتحرك */
   .foxMascotWrap {
-    position: relative !important;
-    right: auto !important;
-    bottom: auto !important;
-    top: auto !important;
-    width: 100% !important;
-    max-width: 260px; /* الحجم الانسيابي في الموبايل */
-    margin: 40px auto 0 auto !important; /* توسيط الصورة في الأسفل مع مسافة مناسبة */
+    position: relative;
+    right: auto;
+    bottom: auto;
+    top: auto;
+    width: 160px; /* الحجم المثالي للثعلب أعلى الفورم في الموبايل */
+    height: 160px;
+    margin-bottom: -20px; /* تداخل خفيف يعطي عمق للتصميم */
     display: block !important;
-    height: auto !important;
+    order: 1; /* يجعل الصورة تترتب أولاً قبل الكارت */
   }
 
   .foxMascotWrap img {
     object-position: center bottom;
-    filter: drop-shadow(0 15px 25px rgba(101, 204, 0, 0.2));
   }
+  
+  /* كارت اللوجين يترتب في الموبايل تحت الصورة */
+  .foxCard {
+    order: 2;
+    padding: 35px 20px 25px 20px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    background: #0d1722;
+  }
+  
+  .foxLogoRow {
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  
+  .foxLogoText { font-size: 28px; }
+  .foxLogoMark { width: 46px; height: 46px; border-radius: 10px; }
+  .foxLogoMark img { width: 26px; height: 26px; }
+  
+  .foxCard h1 {
+    font-size: 28px;
+    text-align: center;
+    letter-spacing: -0.5px;
+  }
+  
+  .foxSub {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .foxField {
+    height: 50px;
+    border-radius: 8px;
+    padding: 0 14px;
+    margin: 14px 0;
+  }
+  
+  .foxField input, .foxField select {
+    font-size: 14px;
+  }
+  
+  .foxPrimary {
+    height: 50px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+  
+  /* أزرار السوشيال ميديا بالتوازي ومقاومة الانضغاط */
+  .foxSocials {
+    grid-template-columns: 1fr 1fr; /* الحفاظ على الزرين بجانب بعضهما كما في الصورة */
+    gap: 10px;
+  }
+  
+  .foxSocial {
+    height: 48px;
+    font-size: 14px;
+  }
+  
+  .foxPhoneGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .foxBottomText {
+    font-size: 13px;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .foxBottomText a, .foxBottomText button {
+    font-size: 13px;
+    display: inline-block;
+    margin-left: 0;
+  }
+  
+  .foxDivider {
+    font-size: 13px;
+    margin: 22px 0 16px;
+  }
+}
+
+/* الشاشات الصغيرة جداً */
+@media(max-width:360px) {
+  .foxCard h1 { font-size: 24px; }
+  .foxLogoText { font-size: 24px; }
+  .foxMascotWrap { width: 130px; height: 130px; }
 }
