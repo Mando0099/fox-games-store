@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fox Games Market</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/style.css"/>
 </head>
 <body>
@@ -12,7 +13,7 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/FOX-LOGO.png" alt="Fox Games">
-      <span>FOX <b>GAMES</b></span>
+      <span>FOX <b class="green-text">GAMES</b></span>
     </a>
 
     <nav class="mainNav">
@@ -23,31 +24,49 @@
     </nav>
 
     <div class="topSearch">
-      <input placeholder="Search for products..." onfocus="focusSearch()">
-      <span>⌕</span>
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()">
+      <span class="search-icon-btn"><i class="fas fa-search"></i></span>
     </div>
 
     <div class="navActions">
       <button onclick="openAuth()" title="Account" class="loginBtn">Login</button>
-      <button onclick="toggleCart()" title="Cart" class="cartBtn">🛒 <span>Cart</span> <b id="cartCountTop">0</b></button>
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">
+        <i class="fas fa-shopping-cart"></i> <span>Cart</span> 
+        <b id="cartCountTop" class="cart-badge">0</b>
+      </button>
     </div>
   </header>
 
   <main id="home" class="content">
-    <section class="hero">
-      <div class="heroLeft reveal">
-        <h1>Game Cards & Top-Ups</h1>
-        <p>Instant delivery. Secure payments. Best prices.</p>
+    
+    <section class="hero-banner-section">
+      <div class="hero-banner-card">
+        <div class="hero-content">
+          <h1 class="hero-title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle">Instant delivery. Secure payments. Best prices.</p>
+          
+          <div class="hero-cta-buttons">
+            <button onclick="scrollToId('products')" class="shop-now-btn">
+              <i class="fas fa-shopping-bag"></i> Shop Now
+            </button>
+            <button onclick="scrollToId('trending')" class="browse-cat-btn">
+              <i class="fas fa-th-large"></i> Browse Categories
+            </button>
+          </div>
 
-        <div class="heroCtas">
-          <button onclick="scrollToId('products')" class="primary">🛍 Shop Now</button>
-          <button onclick="scrollToId('trending')" class="secondary">▦ Browse Categories</button>
+          <div class="hero-features">
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> Instant Delivery</span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> Secure Payments</span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> 24/7 Support</span>
+          </div>
         </div>
 
-        <div class="heroStats">
-          <div><strong>Instant Delivery</strong></div>
-          <div><strong>Secure Payments</strong></div>
-          <div><strong>24/7 Support</strong></div>
+        <div class="banner-game-logos">
+          <span class="game-logo-item">PUBG MOBILE</span>
+          <span class="game-logo-item">VALORANT</span>
+          <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
+          <span class="game-logo-item"><i class="fab fa-playstation"></i> PlayStation</span>
+          <span class="game-logo-item"><i class="fab fa-xbox"></i> XBOX</span>
         </div>
       </div>
     </section>
@@ -75,99 +94,20 @@
         <div>
           <h2>Shop by Categories</h2>
         </div>
-        <button onclick="scrollToId('products')">View All →</button>
+        <button class="view-all-btn" onclick="scrollToId('products')">View All <i class="fas fa-arrow-right"></i></button>
       </div>
       <div class="trendGrid" id="categoryGrid"></div>
     </section>
 
     <section class="benefits">
-      <div><b>⚡ Instant Delivery</b><span>Get your products instantly after payment</span></div>
-      <div><b>🛡 Secure Payments</b><span>100% secure payment methods</span></div>
-      <div><b>🎧 24/7 Support</b><span>We are here to help you anytime</span></div>
-      <div><b>👍 Best Prices</b><span>Competitive prices on all products</span></div>
+      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b>Instant Delivery</b><span>Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b>Secure Payments</b><span>100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b>24/7 Support</b><span>We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b>Best Prices</b><span>Competitive prices on all products</span></div></div>
     </section>
 
     <section class="section" id="checkout">
       <div class="checkoutShowcase reveal">
         <div>
           <h2>Secure Payment Methods</h2>
-          <p>Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
-        </div>
-        <div class="paymentMethods">
-          <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="support">
-      <div class="supportBox reveal">
-        <div>
-          <h2>Need Help With Your Order?</h2>
-          <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
-        </div>
-        <div class="supportActions">
-          <a href="https://wa.me/201010502795" target="_blank">WhatsApp</a>
-          <button onclick="toggleChat()">Live Chat</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <aside class="cartDrawer" id="cartDrawer">
-    <div class="cartHead">
-      <h3>Your Cart</h3>
-      <button onclick="toggleCart()">×</button>
-    </div>
-    <div id="cartItems"></div>
-    <div class="coupon">
-      <input id="couponInput" placeholder="Coupon: FOX10">
-      <button onclick="applyCoupon()">Apply</button>
-    </div>
-    <div class="summary">
-      <p><span>Subtotal</span><b id="subtotal">0 EGP</b></p>
-      <p><span>Discount</span><b id="discount">0 EGP</b></p>
-      <p class="grand"><span>Total</span><b id="total">0 EGP</b></p>
-    </div>
-    <div class="checkoutForm">
-      <input id="customerName" placeholder="Full Name">
-      <input id="customerPhone" placeholder="Phone Number">
-      <select id="paymentMethod">
-        <option>Visa / MasterCard</option>
-        <option>Wallet</option>
-        <option>Vodafone Cash</option>
-        <option>Fawry</option>
-        <option>Bank Transfer</option>
-      </select>
-      <button class="primary full" onclick="checkout()">Pay Now</button>
-      <button class="whatsapp full" onclick="sendWhatsappOrder()">WhatsApp Order</button>
-      <small>Secure checkout connected through the backend.</small>
-    </div>
-  </aside>
-
-  <div class="chat" id="chat">
-    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
-    <div class="chatBody">
-      <p>Hey gamer 👋 How can we help?</p>
-      <small>This is a demo chat widget.</small>
-    </div>
-    <div class="chatInput">
-      <input placeholder="Write message...">
-      <button>Send</button>
-    </div>
-  </div>
-  <button class="chatBubble" onclick="toggleChat()">💬</button>
-
-  <footer>
-    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
-    <p>© 2026 Fox Games Market</p>
-  </footer>
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js"></script>
-  <script src="/js/script.js"></script>
-  <script src="/js/store-firebase.js"></script>
-  <script src="/js/store-account.js"></script>
-</body>
-</html>
+          <p>Choose your product, add it to cart, and complete the order
