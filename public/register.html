@@ -1,52 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up | Fox Games</title>
-  <link rel="stylesheet" href="/css/fox-auth.css"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | Fox Games</title>
+  <link rel="stylesheet" href="./css/fox-auth.css"/>
 </head>
 <body class="foxAuthPage">
-  <main class="foxAuthStage">
-    <div class="foxPurpleSlice"></div>
-    <div class="foxMascotWrap">
-      <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
-    </div>
+  <main class="foxAuthStage">
+    <div class="foxPurpleSlice"></div>
 
-    <section class="foxCard">
-      <div class="foxLogoRow">
-        <div class="foxLogoMark"><img src="/assets/logo-wolf.svg" alt="Fox"></div>
-        <div class="foxLogoText">FOX <span>GAMES</span></div>
-      </div>
+    <section class="foxCard">
+      <div class="foxLogoRow">
+        <div class="foxLogoMark"><img src="/assets/logo-wolf.svg" alt="Fox"></div>
+        <div class="foxLogoText">FOX <span>GAMES</span></div>
+      </div>
 
-      <h1>Create account</h1>
-      <p class="foxSub">Join Fox Games and save your details.</p>
+      <h1>Create account</h1>
+      <p class="foxSub">Join Fox Games and save your details.</p>
 
-      <div class="foxField"><input id="fullName" placeholder="Full Name"></div>
-      <div class="foxField"><input id="email" placeholder="Email"></div>
-      <div class="foxField"><input id="password" type="password" placeholder="Password"></div>
-      <div class="foxField"><input id="confirmPassword" type="password" placeholder="Confirm Password"></div>
+      <div class="foxMascotWrap">
+        <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
+      </div>
 
-      <div class="foxPhoneGrid">
-        <div class="foxField"><select id="countryCode">
-          <option value="">Country</option><option value="+20">Egypt +20</option><option value="+966">Saudi +966</option>
-          <option value="+971">UAE +971</option><option value="+965">Kuwait +965</option><option value="+1">USA +1</option>
-        </select></div>
-        <div class="foxField"><input id="phone" placeholder="Phone optional"></div>
-      </div>
+      <div class="foxField"><input id="fullName" placeholder="Full Name"></div>
+      <div class="foxField"><input id="email" placeholder="Email"></div>
+      <div class="foxField"><input id="password" type="password" placeholder="Password"></div>
+      <div class="foxField"><input id="confirmPassword" type="password" placeholder="Confirm Password"></div>
 
-      <button class="foxPrimary" onclick="createAccount()">Sign up</button>
+      <div class="foxPhoneGrid">
+        <div class="foxField">
+          <select id="countryCode">
+            <option value="">Country</option>
+            <option value="+20">Egypt +20</option>
+            <option value="+966">Saudi +966</option>
+            <option value="+971">UAE +971</option>
+            <option value="+965">Kuwait +965</option>
+            <option value="+1">USA +1</option>
+          </select>
+        </div>
+        <div class="foxField"><input id="phone" placeholder="Phone optional"></div>
+      </div>
 
-      <p class="foxBottomText">Already have an account? <a href="/login.html">Login</a></p>
-      <a class="foxSmallBack" href="/">Back to Store</a>
-      <div class="foxMsg" id="msg"></div>
-    </section>
-  </main>
+      <button class="foxPrimary" onclick="createAccount()">Sign up</button>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js"></script>
-  <script src="/js/auth.js"></script>
+      <p class="foxBottomText">Already have an account? <a href="/login.html">Login</a></p>
+      <a class="foxSmallBack" href="/">Back to Store</a>
+      <div class="foxMsg" id="msg"></div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>
