@@ -362,15 +362,25 @@ body {
   box-shadow: 0 10px 25px rgba(101, 204, 0, 0.15); /* توهج نيون خفيف عند الـ Hover */
 }
 
+/* تعديل الغلاف ليكون متناسب هيدروليكياً مع الصور بدون تمطيط */
 .productCover {
-  height: 130px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   position: relative;
+  overflow: hidden;
+  background-image: none !important;
 }
 
 .productCover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productCover img {
+  transform: scale(1.04);
 }
 
 .productInfo {
@@ -440,26 +450,37 @@ body {
   gap: 16px;
 }
 
+/* تحديث الكارد ليتوافق مع الصور المجلوبة كـ تاقات داخلية */
 .trendCard {
-  height: 120px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
   border: 1px solid var(--line);
   border-radius: 14px;
-  position: relative;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.3s, transform 0.3s;
 }
 
+.trendCard img {
+  transition: transform 0.3s ease;
+}
+
+.trendCard:hover img {
+  transform: scale(1.05);
+}
+
 .trendCard:hover {
   border-color: var(--line2);
-  transform: scale(1.02);
+  transform: translateY(-2px);
 }
 
 .trendCard:before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 11, 20, 0.1), rgba(5, 11, 20, 0.9));
+  background: linear-gradient(180deg, rgba(5, 11, 20, 0.1), rgba(5, 11, 20, 0.95));
+  z-index: 1; /* التراكب فوق الصورة وتحت النص */
 }
 
 .trendCard div {
@@ -543,20 +564,48 @@ body {
   line-height: 1.6;
 }
 
-.paymentMethods,
+/* تحديث الحاوية الرئيسية لتوزيع كروت الدفع الاحترافية بصورها */
+.paymentMethods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ستايل كروت شعارات طرق الدفع المتجاوبة مع الـ Dark Mode */
+.method-card {
+  background: rgba(255, 255, 255, 0.03); 
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 125px;
+  height: 52px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.method-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(101, 204, 0, 0.2);
+}
+
+.method-card img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .supportActions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.paymentMethods span {
-  background: #0d192d;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .supportActions .whatsapp-support-btn,
@@ -846,7 +895,7 @@ footer b {
     font-size: 34px;
   }
   .banner-game-logos {
-    display: none; /* إخفاء اللوجوهات على الشاشات الصغيرة لتجنب تداخل النصوص */
+    display: none;
   }
   .productGrid,
   .trendGrid,
