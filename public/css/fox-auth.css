@@ -71,8 +71,8 @@ body.foxAuthPage{
 }
 
 .foxLogoMark img{
-  width:80px;
-  height:80px;
+  width:54px;
+  height:54px;
   object-fit:contain;
   filter:brightness(0) invert(1);
 }
