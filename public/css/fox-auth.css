@@ -363,31 +363,59 @@ body.foxAuthPage::before {
 
 .foxHidden { display: none }
 
-/* ================= RESPONSIVE (تعديل كامل وشامل للموبايل لمنع اللخبطة) ================= */
+
+/* ================= RESPONSIVE (تعديل متناسق ومطابق لصور الموبايل والـ PC) ================= */
 @media(max-width:900px) {
   body.foxAuthPage {
     overflow-y: auto;
     background: var(--bg);
-    padding: 16px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
   }
   
   .foxAuthStage {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-height: auto;
     width: 100%;
+    margin-top: 20px;
   }
   
-  /* إخفاء السلايس والمجسم في الموبايل لتوفير مساحة كاملة للكارت */
-  .foxPurpleSlice, .foxMascotWrap {
+  /* إخفاء الخلفية المائلة الكبيرة فقط */
+  .foxPurpleSlice {
     display: none !important;
   }
   
-  /* معالجة حواف كارت اللوجين وحجمه */
+  /* إعادة تموضع صورة الثعلب لتظهر في الأعلى بشكل متناسق ومتحرك */
+  .foxMascotWrap {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    top: auto;
+    width: 160px; /* الحجم المثالي للثعلب أعلى الفورم في الموبايل */
+    height: 160px;
+    margin-bottom: -20px; /* تداخل خفيف يعطي عمق للتصميم */
+    display: block !important;
+    order: 1; /* يجعل الصورة تترتب أولاً قبل الكارت */
+  }
+
+  .foxMascotWrap img {
+    object-position: center bottom;
+  }
+  
+  /* كارت اللوجين يترتب في الموبايل تحت الصورة */
   .foxCard {
-    padding: 32px 20px;
-    border-radius: 16px;
+    order: 2;
+    padding: 35px 20px 25px 20px;
+    border-radius: 20px;
     width: 100%;
+    max-width: 440px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    background: #0d1722;
   }
   
   .foxLogoRow {
@@ -400,7 +428,7 @@ body.foxAuthPage::before {
   .foxLogoMark img { width: 26px; height: 26px; }
   
   .foxCard h1 {
-    font-size: 26px;
+    font-size: 28px;
     text-align: center;
     letter-spacing: -0.5px;
   }
@@ -411,37 +439,31 @@ body.foxAuthPage::before {
     margin-bottom: 24px;
   }
   
-  /* تظبيط حجم حقول الإدخال لتكون مريحة */
   .foxField {
-    height: 48px;
+    height: 50px;
     border-radius: 8px;
     padding: 0 14px;
-    margin: 12px 0;
+    margin: 14px 0;
   }
   
   .foxField input, .foxField select {
     font-size: 14px;
   }
   
-  .foxField svg {
-    width: 18px;
-    height: 18px;
-  }
-  
   .foxPrimary {
-    height: 48px;
+    height: 50px;
     font-size: 15px;
     border-radius: 8px;
   }
   
-  /* حل انضغاط أزرار جوجل وفيسبوك ونزول الكلمات بشكل مشوه */
+  /* أزرار السوشيال ميديا بالتوازي ومقاومة الانضغاط */
   .foxSocials {
-    grid-template-columns: 1fr; /* جعل الأزرار تحت بعضها في الموبايل ليعمل بكامل المساحة */
+    grid-template-columns: 1fr 1fr; /* الحفاظ على الزرين بجانب بعضهما كما في الصورة */
     gap: 10px;
   }
   
   .foxSocial {
-    height: 46px;
+    height: 48px;
     font-size: 14px;
   }
   
@@ -450,9 +472,8 @@ body.foxAuthPage::before {
     gap: 0;
   }
   
-  /* حماية نصوص ووصلات الـ Sign Up من التداخل */
   .foxBottomText {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.5;
     display: flex;
     flex-wrap: wrap;
@@ -461,7 +482,7 @@ body.foxAuthPage::before {
   }
   
   .foxBottomText a, .foxBottomText button {
-    font-size: 14px;
+    font-size: 13px;
     display: inline-block;
     margin-left: 0;
   }
@@ -472,8 +493,9 @@ body.foxAuthPage::before {
   }
 }
 
-/* الشاشات الصغيرة جداً جداً */
+/* الشاشات الصغيرة جداً */
 @media(max-width:360px) {
-  .foxCard h1 { font-size: 22px; }
+  .foxCard h1 { font-size: 24px; }
   .foxLogoText { font-size: 24px; }
+  .foxMascotWrap { width: 130px; height: 130px; }
 }
