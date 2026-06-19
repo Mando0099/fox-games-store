@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg: #050b14;        /* تعديل درجة اللون الغامق جداً المطابقة للصورة */
+  --bg: #050b14;        /* درجة اللون الغامق جداً المطابقة للصورة */
   --panel: #08101e;     /* لون البانل والـ Header */
   --card: #0d1722;      /* لون كروت الألعاب والتصنيفات */
   --text: #ffffff;
@@ -29,7 +29,7 @@ body {
   overflow-x: hidden;
 }
 
-/* التعديل لربط الـ Canvas الخاص بالخلفية */
+/* ربط الـ Canvas الخاص بالخلفية */
 #stars {
   position: fixed;
   top: 0;
@@ -83,7 +83,7 @@ body {
   color: var(--accent);
 }
 
-/* تحديث شكل التابات والـ Navbar لجعلها احترافية وعصرية */
+/* تابات الـ Navbar لجعلها احترافية وعصرية */
 .mainNav {
   display: flex;
   gap: 12px;
@@ -216,7 +216,7 @@ body {
   font-weight: 700;
 }
 
-/* ================= HERO BANNER (MODERN MATCH) ================= */
+/* ================= HERO BANNER ================= */
 
 .hero {
   padding: 30px 0;
@@ -276,7 +276,7 @@ body {
 
 .shop-now-btn {
   background: var(--accent);
-  color: #000;
+  color: #00;
 }
 
 .browse-cat-btn {
@@ -302,7 +302,6 @@ body {
   gap: 8px;
 }
 
-/* لوجوهات الألعاب المدمجة أسفل اليمين بالبنر */
 .banner-game-logos {
   position: absolute;
   bottom: 30px;
@@ -376,7 +375,7 @@ body {
   width: 260px;
 }
 
-/* ================= PRODUCTS (GLOW CARD MATCH) ================= */
+/* ================= PRODUCTS ================= */
 
 .productGrid {
   display: grid;
@@ -397,10 +396,9 @@ body {
 .productCard:hover {
   transform: translateY(-6px);
   border-color: var(--line2);
-  box-shadow: 0 10px 25px rgba(101, 204, 0, 0.15); /* توهج نيون خفيف عند الـ Hover */
+  box-shadow: 0 10px 25px rgba(101, 204, 0, 0.15);
 }
 
-/* تعديل الغلاف ليكون متناسب هيدروليكياً مع الصور بدون تمطيط */
 .productCover {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -488,7 +486,6 @@ body {
   gap: 16px;
 }
 
-/* تحديث الكارد ليتوافق مع الصور المجلوبة كـ تاقات داخلية */
 .trendCard {
   position: relative;
   width: 100%;
@@ -518,7 +515,7 @@ body {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(5, 11, 20, 0.1), rgba(5, 11, 20, 0.95));
-  z-index: 1; /* التراكب فوق الصورة وتحت النص */
+  z-index: 1;
 }
 
 .trendCard div {
@@ -602,7 +599,6 @@ body {
   line-height: 1.6;
 }
 
-/* تحديث الحاوية الرئيسية لتوزيع كروت الدفع الاحترافية بصورها */
 .paymentMethods {
   display: flex;
   flex-wrap: wrap;
@@ -612,7 +608,6 @@ body {
   margin-top: 16px;
 }
 
-/* ستايل كروت شعارات طرق الدفع المتجاوبة مع الـ Dark Mode الاحترافي */
 .method-card {
   background: rgba(255, 255, 255, 0.03); 
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -622,7 +617,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 155px; /* مساحة كافية ومظبوطة جداً للأيقونة والنص معاً */
+  width: 155px;
   height: 52px;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -635,7 +630,6 @@ body {
   box-shadow: 0 6px 18px rgba(101, 204, 0, 0.2);
 }
 
-/* تنسيق النصوص داخل كروت الدفع */
 .method-card span {
   font-size: 13px;
   font-weight: 600;
@@ -646,7 +640,6 @@ body {
   padding: 0 !important;
 }
 
-/* ضبط الأيقونات */
 .method-card i {
   display: flex;
   align-items: center;
@@ -935,72 +928,174 @@ html[dir="rtl"] .chatBubble {
   left: 24px;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ================= RESPONSIVE (التحديث الشامل والمنظم لكل الشاشات) ================= */
 
+/* الشاشات المتوسطة وأجهزة التابلت الكبيرة */
 @media(max-width:1280px) {
+  .content {
+    padding: 0 24px;
+  }
+  .topbar {
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .mainNav {
+    margin-left: 20px;
+    gap: 8px;
+  }
+  html[dir="rtl"] .mainNav {
+    margin-right: 20px;
+  }
   .productGrid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
   }
   .trendGrid {
     grid-template-columns: repeat(3, 1fr);
   }
-  .mainNav {
-    display: none;
-  }
 }
 
-@media(max-width:900px) {
+/* أجهزة التابلت المتوسطة والصغيرة */
+@media(max-width:1024px) {
+  .mainNav {
+    display: none; /* إخفاء التابات العادية لمنع تداخل الهيدر */
+  }
+  .topSearch {
+    width: 280px;
+  }
   .productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
   .benefits {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
 
+/* شاشات الموبايل الكبيرة والمتوسطة */
 @media(max-width:760px) {
   .content {
-    padding: 0 20px;
+    padding: 0 16px;
   }
   .topbar {
     height: auto;
     flex-wrap: wrap;
-    padding: 16px 20px;
-    gap: 16px;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .brand {
+    font-size: 19px;
   }
   .topSearch {
     order: 3;
     width: 100%;
     margin-left: 0;
-  }
-  html[dir="rtl"] .topSearch {
     margin-right: 0;
   }
+  html[dir="rtl"] .topSearch {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  /* تكييف البانر للموبايل */
   .hero-banner-card {
-    padding: 40px 24px;
+    padding: 32px 20px;
+    min-height: 320px;
+    background: linear-gradient(180deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.8) 100%),
+                url('/assets/hero-gaming-banner.jpg') center center/cover no-repeat;
   }
   .hero-title {
-    font-size: 34px;
+    font-size: 28px;
+    max-width: 100%;
   }
-  .banner-game-logos {
-    display: none;
+  .hero-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
   }
-  .productGrid,
-  .trendGrid,
+  .hero-cta-buttons {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .shop-now-btn, .browse-cat-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .banner-game-logos, .hero-features {
+    display: none; /* توفير مساحة في الموبايل */
+  }
+
+  /* كروت الألعاب والأقسام - قطعتين في الصف بشكل منظم جداً */
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .productInfo {
+    padding: 12px;
+  }
+  .productInfo h3 {
+    font-size: 13px;
+    min-height: 36px;
+  }
+  .price {
+    font-size: 14px;
+  }
+  .add {
+    padding: 9px;
+    font-size: 13px;
+  }
+
+  .trendGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
   .benefits {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
-  .checkoutShowcase,
-  .supportBox {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 24px;
-  }
+
+  /* الفلاتر وصناديق الدفع والدعم الفني */
   .filters {
     width: 100%;
     flex-direction: column;
+    gap: 10px;
   }
-  .filters input {
+  .filters input, .filters select {
     width: 100%;
+  }
+  .checkoutShowcase, .supportBox {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+  .supportActions {
+    width: 100%;
+    justify-content: center;
+  }
+  .supportActions button, 
+  .supportActions .whatsapp-support-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* السلة تملأ الشاشة في الموبايل لسهولة الاستخدام */
+  .cartDrawer {
+    width: 100%;
+  }
+  
+  footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 24px 16px;
+  }
+}
+
+/* شاشات الموبايل الصغيرة جداً */
+@media(max-width:375px) {
+  .productGrid, .trendGrid {
+    grid-template-columns: 1fr; /* عرض كارت واحد بالصف لمنع انضغاط النصوص */
   }
 }
