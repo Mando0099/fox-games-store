@@ -8,32 +8,25 @@
   <style>
     body{display:grid;place-items:center;min-height:100vh;padding:24px}
     .login-card{width:420px;max-width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
-    .login-card h1{font-size:36px;margin-bottom:8px}
-    .login-card p{color:#b8abc8;margin-bottom:18px}
+    .login-card h1{font-size:36px;margin-bottom:8px}.login-card p{color:#b8abc8;margin-bottom:18px}
     .login-card input{width:100%;margin:8px 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;padding:14px;border-radius:16px;outline:none}
     .login-card button,.login-card a{width:100%;display:block;text-align:center;margin-top:10px;border:0;border-radius:999px;padding:14px;color:#fff;font-weight:900;text-decoration:none;background:linear-gradient(135deg,#ff2e8a,#7b2cff);cursor:pointer}
-    .google{background:#fff!important;color:#111!important}
-    .back{background:rgba(255,255,255,.08)!important}
-    .msg{margin-top:12px;color:#ffd166;min-height:24px}
+    .google{background:#fff!important;color:#111!important}.back{background:rgba(255,255,255,.08)!important}.msg{margin-top:12px;color:#ffd166;min-height:24px;line-height:1.5}
   </style>
 </head>
 <body>
   <div class="login-card">
     <h1>Fox Games Login</h1>
-    <p>Login with Google or email. Admins can open the dashboard.</p>
-    <input id="email" placeholder="Email"/>
-    <input id="password" type="password" placeholder="Password"/>
+    <p>Login after verifying your email.</p>
+    <input id="email" placeholder="Email"/><input id="password" type="password" placeholder="Password"/>
     <button onclick="loginEmail()">Login</button>
     <a href="/register.html">Create Account</a>
     <button class="google" onclick="loginGoogle()">Continue with Google</button>
-    <a class="back" href="/">Back to Store</a>
-    <div class="msg" id="msg"></div>
+    <a class="back" href="/">Back to Store</a><div class="msg" id="msg"></div>
   </div>
-
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js"></script>
-  <script src="/js/auth.js"></script>
+  <script src="/firebase-config.js"></script><script src="/js/auth.js"></script>
 </body>
 </html>
