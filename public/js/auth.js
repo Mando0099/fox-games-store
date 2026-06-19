@@ -104,4 +104,4 @@ async function loginFacebook(){
     const r = await firebase.auth().signInWithPopup(provider);
     await goAfterLogin(r.user);
   }catch(e){ show(e.message); }
-}  ضيفها بعد التعديل
+} 
