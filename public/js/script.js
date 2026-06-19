@@ -266,8 +266,58 @@ function applyCoupon() {
 }
 
 async function checkout() {
-  if (!cart.length) return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
-  alert(currentLang === 'ar' ? 'بوابة الدفع جاهزة. يتم الاتصال الآن بالسيرفر...' : 'Checkout system is ready. Connecting with backend payment gateway...');
+  if (!cart.length) {
+    return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
+  }
+
+  const name = ($('customerName')?.value || '').trim() || 'Fox Games Customer';
+  const phone = ($('customerPhone')?.value || '').trim();
+  const payment = $('paymentMethod')?.value || 'Visa / MasterCard';
+
+  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
+  const discountValue = Math.round(subtotal * coupon / 100);
+  const total = subtotal - discountValue;
+
+  if (total <= 0) {
+    return alert(currentLang === 'ar' ? 'قيمة الطلب غير صحيحة.' : 'Invalid order amount.');
+  }
+
+  try {
+    const res = await fetch('/api/kashier/create-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customer: {
+          name,
+          phone
+        },
+        paymentMethod: payment,
+        currency: 'EGP',
+        subtotal,
+        discount: discountValue,
+        total,
+        items: cart.map(item => ({
+          name: item.name,
+          category: item.category || '',
+          price: Number(item.price || 0)
+        }))
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.paymentUrl) {
+      throw new Error(data.message || 'Payment link was not created.');
+    }
+
+    window.location.href = data.paymentUrl;
+
+  } catch (e) {
+    console.error('Kashier checkout error:', e);
+    alert((currentLang === 'ar' ? 'خطأ في بوابة الدفع: ' : 'Kashier error: ') + e.message);
+  }
 }
 
 function sendWhatsappOrder() {
