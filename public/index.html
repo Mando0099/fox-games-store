@@ -149,6 +149,89 @@
     }
     .foxHidden { display: none !important; }
     /* ================= END USER PROFILE STYLE ================= */
+
+    /* ================= START MODERN CART STYLE ================= */
+    .cartDrawer {
+      width: 420px;
+      background: #090f17;
+      border-left: 1px solid rgba(101, 204, 0, 0.15);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+    html[dir="rtl"] .cartDrawer {
+      border-left: none;
+      border-right: 1px solid rgba(101, 204, 0, 0.15);
+    }
+    .cartItem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: 0.3s;
+    }
+    .cartItem:hover {
+      border-color: rgba(101, 204, 0, 0.3);
+      background: rgba(101, 204, 0, 0.02);
+    }
+    .cartItem-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .cartItem-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cartItem-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cartItem-cat {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .cartItem-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: #65cc00;
+    }
+    .cartItem-remove-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .cartItem-remove-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .coupon input, .checkoutForm input, .checkoutForm select {
+      background: #0d1722 !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      padding: 10px 12px !important;
+    }
+    .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus {
+      border-color: #65cc00 !important;
+    }
+    /* ================= END MODERN CART STYLE ================= */
   </style>
 </head>
 <body>
@@ -397,9 +480,7 @@
       const authMethodBadge = document.getElementById('authMethodBadge');
       const profileLogoutBtn = document.getElementById('profileLogoutBtn');
 
-      // دالة لتنظيف أي بروفايل أو نصوص قديمة يتم زرعها بشكل خاطئ من الملفات الخارجية
       function cleanOldProfiles() {
-        // إذا قام أي سكربت خارجي بتغيير قيمة نص زرار اللوجن ليكون "Profile" أو "بروفايل" مع بقائه ظاهراً
         if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
           const btnText = mainLoginBtn.innerText.trim().toLowerCase();
           if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
@@ -407,7 +488,6 @@
           }
         }
         
-        // البحث عن أي عناصر عشوائية مكررة تحمل نصوص بروفايل قديمة تم إنشاؤها عبر الـ JS الخارجي داخل الـ navActions وحذفها
         const actionsContainer = document.querySelector('.navActions');
         if (actionsContainer) {
           const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
@@ -419,7 +499,6 @@
         }
       }
 
-      // الاستماع لحالة الدخول عن طريق Firebase Auth
       if (typeof firebase !== 'undefined' && firebase.auth) {
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
@@ -452,7 +531,7 @@
           } else {
             if (mainLoginBtn) {
               mainLoginBtn.classList.remove('foxHidden');
-              mainLoginBtn.innerText = "Login"; // إجبار النص على العودة لأصله
+              mainLoginBtn.innerText = "Login";
             }
             if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
           }
@@ -460,7 +539,6 @@
         });
       }
 
-      // حماية ومراقبة حية: تمنع الملفات الأخرى من العبث بزر اللوجن وإظهاره كبروفايل قديم
       const observer = new MutationObserver(() => {
         cleanOldProfiles();
         if (firebase.auth().currentUser) {
@@ -478,7 +556,6 @@
         observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
       }
 
-      // تشغيل حركة فتح وإغلاق قائمة البروفايل عند الضغط
       if (userProfileTrigger && userProfileDropdown) {
         userProfileTrigger.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -489,7 +566,6 @@
         });
       }
 
-      // تفعيل زر تسجيل الخروج ليعمل مع Firebase بسلاسة
       if (profileLogoutBtn) {
         profileLogoutBtn.addEventListener('click', () => {
           if (typeof firebase !== 'undefined' && firebase.auth) {
