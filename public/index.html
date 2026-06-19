@@ -188,8 +188,7 @@
             <div class="profile-info">
               <span class="profile-name" id="dropdownUserName">Gamer User</span>
               <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
-              <div class="auth-method-badge" id="authMethodBadge">
-                </div>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
             </div>
           </div>
           <div class="profile-menu-links">
@@ -398,15 +397,35 @@
       const authMethodBadge = document.getElementById('authMethodBadge');
       const profileLogoutBtn = document.getElementById('profileLogoutBtn');
 
-      // الاستماع لحالة الدخول عن طريق Firebase Auth الرسمي
+      // دالة لتنظيف أي بروفايل أو نصوص قديمة يتم زرعها بشكل خاطئ من الملفات الخارجية
+      function cleanOldProfiles() {
+        // إذا قام أي سكربت خارجي بتغيير قيمة نص زرار اللوجن ليكون "Profile" أو "بروفايل" مع بقائه ظاهراً
+        if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+          const btnText = mainLoginBtn.innerText.trim().toLowerCase();
+          if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+        }
+        
+        // البحث عن أي عناصر عشوائية مكررة تحمل نصوص بروفايل قديمة تم إنشاؤها عبر الـ JS الخارجي داخل الـ navActions وحذفها
+        const actionsContainer = document.querySelector('.navActions');
+        if (actionsContainer) {
+          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
+          textButtons.forEach(btn => {
+            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
+              btn.remove();
+            }
+          });
+        }
+      }
+
+      // الاستماع لحالة الدخول عن طريق Firebase Auth
       if (typeof firebase !== 'undefined' && firebase.auth) {
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
-            // إخفاء زر Login وإظهار كارت البروفايل فوراً
             if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
             if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
 
-            // جلب البيانات المخزنة بالحساب وعرضها
             const displayName = user.displayName || "Gamer";
             const email = user.email || "No Email";
             const photoURL = user.photoURL || "https://via.placeholder.com/150";
@@ -416,7 +435,6 @@
             if (dropdownUserEmail) dropdownUserEmail.innerText = email;
             if (profileUserAvatar) profileUserAvatar.src = photoURL;
 
-            // تحديد طريقة تسجيل الدخول (جوجل، فيس بوك، إيميل)
             let providerId = "email";
             if (user.providerData && user.providerData.length > 0) {
               providerId = user.providerData[0].providerId;
@@ -432,11 +450,32 @@
               }
             }
           } else {
-            // في حالة عدم وجود مستخدم يتم إظهار زر Login وإخفاء البروفايل
-            if (mainLoginBtn) mainLoginBtn.classList.remove('foxHidden');
+            if (mainLoginBtn) {
+              mainLoginBtn.classList.remove('foxHidden');
+              mainLoginBtn.innerText = "Login"; // إجبار النص على العودة لأصله
+            }
             if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
           }
+          cleanOldProfiles();
         });
+      }
+
+      // حماية ومراقبة حية: تمنع الملفات الأخرى من العبث بزر اللوجن وإظهاره كبروفايل قديم
+      const observer = new MutationObserver(() => {
+        cleanOldProfiles();
+        if (firebase.auth().currentUser) {
+          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
+            userProfileWrapper.classList.remove('foxHidden');
+          }
+        }
+      });
+
+      const navActionsContainer = document.querySelector('.navActions');
+      if (navActionsContainer) {
+        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
       }
 
       // تشغيل حركة فتح وإغلاق قائمة البروفايل عند الضغط
