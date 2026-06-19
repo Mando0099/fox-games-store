@@ -110,4 +110,86 @@
       <div class="checkoutShowcase reveal">
         <div>
           <h2>Secure Payment Methods</h2>
-          <p>Choose your product, add it to cart, and complete the order
+          <p>Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
+        </div>
+        <div class="paymentMethods">
+          <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="support">
+      <div class="supportBox reveal">
+        <div>
+          <h2>Need Help With Your Order?</h2>
+          <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
+        </div>
+        <div class="supportActions">
+          <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <button onclick="toggleChat()">Live Chat</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="cartDrawer" id="cartDrawer">
+    <div class="cartHead">
+      <h3>Your Cart</h3>
+      <button onclick="toggleCart()">×</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="coupon">
+      <input id="couponInput" placeholder="Coupon: FOX10">
+      <button onclick="applyCoupon()">Apply</button>
+    </div>
+    <div class="summary">
+      <p><span>Subtotal</span><b id="subtotal">0 EGP</b></p>
+      <p><span>Discount</span><b id="discount">0 EGP</b></p>
+      <p class="grand"><span>Total</span><b id="total">0 EGP</b></p>
+    </div>
+    <div class="checkoutForm">
+      <input id="customerName" placeholder="Full Name">
+      <input id="customerPhone" placeholder="Phone Number">
+      <select id="paymentMethod">
+        <option>Visa / MasterCard</option>
+        <option>Wallet</option>
+        <option>Vodafone Cash</option>
+        <option>Fawry</option>
+        <option>Bank Transfer</option>
+      </select>
+      <button class="primary full" onclick="checkout()">Pay Now</button>
+      <button class="whatsapp full" onclick="sendWhatsappOrder()">WhatsApp Order</button>
+      <small>Secure checkout connected through the backend.</small>
+    </div>
+  </aside>
+
+  <div class="chat" id="chat">
+    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatBody">
+      <p>Hey gamer 👋 How can we help?</p>
+      <small>This is a demo chat widget.</small>
+    </div>
+    <div class="chatInput">
+      <input placeholder="Write message...">
+      <button>Send</button>
+    </div>
+  </div>
+  <button class="chatBubble" onclick="toggleChat()">💬</button>
+
+  <footer>
+    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Fox Games Market</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  
+  <script src="/firebase-config.js"></script>
+  
+  <script src="/js/store-firebase.js"></script>
+  <script src="/js/store-account.js"></script>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>
