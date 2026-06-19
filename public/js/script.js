@@ -29,15 +29,19 @@ window.addEventListener('scroll', reveal);
 
 function renderMiniSlider() {}
 
-// عرض التصنيفات الحقيقية القادمة من البانل
+// عرض التصنيفات الحقيقية - تم التعديل لمنع تمط أو انضغاط الصور
 function renderCategories() {
   if (!$('categoryGrid')) return;
   if (typeof categories === 'undefined' || !categories.length) return;
   
-  $('categoryGrid').innerHTML = categories.map(cat => `
-    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="background-image:url('${cat.bg || cat.image || ''}')">
-      <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
-    </div>`).join('');
+  $('categoryGrid').innerHTML = categories.map(cat => {
+    const catImg = cat.bg || cat.image || '';
+    return `
+    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="position: relative; overflow: hidden; aspect-ratio: 3 / 2;">
+      <img src="${catImg}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
+      <div style="position: relative; z-index: 2;"><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
+    </div>`;
+  }).join('');
 }
 
 // إنشاء قائمة الفلاتر تلقائياً من الألعاب المرفوعة على الفايربيز
@@ -49,7 +53,7 @@ function renderFilters() {
   $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
 
-// عرض منتجات الفايربيز والبانل الحقيقية داخل الكروت المطورة
+// عرض المنتجات - تم التعديل هنا لضبط مقاس الصورة داخل الـ Cover
 function renderProducts() {
   if (!$('productGrid')) return;
   if (typeof products === 'undefined' || !products.length) {
@@ -72,12 +76,13 @@ function renderProducts() {
 
   $('productGrid').innerHTML = list.map(p => {
     const i = products.indexOf(p);
-    // دعم قراءة رابط الصورة سواء كان المفتاح اسمه img أو image في البانل عندك
+    // دعم قراءة رابط الصورة من البانل بأي مسمى
     const imgUrl = p.img || p.image || '';
-    const bgUrl = p.bg || p.image || '';
     
     return `<article class="productCard reveal">
-      <div class="productCover" style="background-image:url('${bgUrl}')"><img src="${imgUrl}" alt="${p.name}"></div>
+      <div class="productCover" style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-image: none !important;">
+        <img src="${imgUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+      </div>
       <div class="productInfo">
         <h3>${p.name}</h3>
         <p>${p.desc || ''}</p>
@@ -138,6 +143,7 @@ function updateCart() {
   if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
 }
 
+// بقية أكواد الـ الكوبون والواتساب والـ Auth بدون أي تعديل للحفاظ على استقرارها
 function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
   if (code === 'FOX10') {
@@ -195,9 +201,7 @@ function toggleMenu() {}
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
 
-// تشغيل اللوجين والـ Auth المربوط بالفايربيز عندك
 function openAuth() { window.location.href = 'login.html'; }
-// الرجوع للمتجر الأساسي بشكل صحيح
 function closeAuth() { window.location.href = 'index.html'; }
 
 function toggleChat() { $('chat')?.classList.toggle('open'); }
