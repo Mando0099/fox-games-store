@@ -9,180 +9,107 @@
 <body>
   <canvas id="stars"></canvas>
 
-  <div class="appShell">
-    <aside class="sideDock">
-      <a class="dockBrand" href="#home" aria-label="Fox Games">
-        <img src="/assets/FOX-LOGO.png" alt="Fox Games"/>
-      </a>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
+      <span>Fox Games</span>
+    </a>
 
-      <nav id="navMenu" class="dockNav">
-        <a href="#home" title="Home"><i>⌂</i><span>Home</span></a>
-        <a href="#trending" title="Top-Up"><i>💎</i><span>Top-Up</span></a>
-        <a href="#products" title="Game Cards"><i>🎮</i><span>Game Cards</span></a>
-        <a href="#checkout" title="Payment"><i>💳</i><span>Payment</span></a>
-        <a href="#support" title="Support"><i>🎧</i><span>Support</span></a>
-        <a href="/login.html" title="Account"><i>👤</i><span>Account</span></a>
-        <a href="/admin.html" class="adminLink" title="Admin"><i>⚙</i><span>Admin</span></a>
-      </nav>
+    <nav class="mainNav">
+      <a href="#home">Home</a>
+      <a href="#products">Store</a>
+      <a href="#trending">Categories</a>
+      <a href="#support">Support</a>
+    </nav>
 
-      <div class="dockBottom">
-        <button onclick="focusSearch()" title="Search">⌕</button>
-        <button onclick="toggleCart()" title="Cart">🛒<b id="cartCount">0</b></button>
+    <div class="topSearch">
+      <span>⌕</span>
+      <input placeholder="Search products..." onfocus="focusSearch()">
+    </div>
+
+    <div class="navActions">
+      <button onclick="openAuth()" title="Account">👤</button>
+      <button onclick="toggleCart()" title="Cart">🛒 <b id="cartCountTop">0</b></button>
+    </div>
+  </header>
+
+  <main id="home" class="content">
+    <section class="hero">
+      <div class="heroLeft reveal">
+        <div class="eyebrow">Premium gaming marketplace</div>
+        <h1>Game Cards & Top-Ups</h1>
+        <p>Buy PUBG UC, Steam Wallet, PlayStation cards, Xbox codes, Valorant points and digital subscriptions with fast delivery and secure checkout.</p>
+
+        <div class="heroCtas">
+          <button onclick="scrollToId('products')" class="primary">Shop Now</button>
+          <button onclick="scrollToId('trending')" class="secondary">Browse Categories</button>
+        </div>
+
+        <div class="heroStats">
+          <div><strong>Instant</strong><span>Digital delivery</span></div>
+          <div><strong>Secure</strong><span>Safe payments</span></div>
+          <div><strong>24/7</strong><span>Support team</span></div>
+        </div>
       </div>
-    </aside>
+    </section>
 
-    <header class="topbar">
-      <a class="brand" href="/">
-        <img src="/assets/FOX-LOGO.png" alt="Logo">
-        <span>Fox Games</span>
-      </a>
-
-      <div class="topSearch">
-        <span>⌕</span>
-        <input placeholder="Search products..." onfocus="focusSearch()">
+    <section class="section" id="products">
+      <div class="sectionHead reveal">
+        <div>
+          <span>Store</span>
+          <h2>Popular Products</h2>
+        </div>
+        <div class="filters">
+          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam...">
+          <select id="categoryFilter" onchange="renderProducts()"></select>
+          <select id="sortFilter" onchange="renderProducts()">
+            <option value="popular">Most Popular</option>
+            <option value="low">Price Low</option>
+            <option value="high">Price High</option>
+          </select>
+        </div>
       </div>
+      <div class="productGrid" id="productGrid"></div>
+    </section>
 
-      <div class="navActions">
-        <button onclick="openAuth()" title="Account">👤</button>
-        <button onclick="toggleCart()" title="Cart">🛒 <b id="cartCountTop">0</b></button>
-        <button class="menuBtn" onclick="toggleMenu()">☰</button>
+    <section class="section" id="trending">
+      <div class="sectionHead reveal">
+        <div>
+          <span>Categories</span>
+          <h2>Shop by Category</h2>
+        </div>
+        <button onclick="scrollToId('products')">View Store</button>
       </div>
-    </header>
+      <div class="trendGrid" id="categoryGrid"></div>
+    </section>
 
-    <main id="home" class="content">
-      <section class="hero">
-        <div class="heroLeft reveal">
-          <div class="eyebrow">Premium gaming marketplace</div>
-          <h1>Fast & Secure Gaming Top-Up</h1>
-          <p>Buy PUBG UC, Valorant Points, PlayStation Cards, Xbox Codes and more with instant delivery and easy checkout.</p>
-
-          <div class="heroCtas">
-            <button onclick="scrollToId('products')" class="primary">Shop Now</button>
-            <button onclick="scrollToId('trending')" class="secondary">Quick Recharge</button>
-          </div>
-
-          <div class="heroStats">
-            <div><strong>Instant</strong><span>Digital delivery</span></div>
-            <div><strong>24/7</strong><span>Support team</span></div>
-            <div><strong>Secure</strong><span>Kashier payments</span></div>
-          </div>
+    <section class="section" id="checkout">
+      <div class="checkoutShowcase reveal">
+        <div>
+          <span>Checkout</span>
+          <h2>Secure Payment Methods</h2>
+          <p>Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
         </div>
-
-        <div class="heroPanel reveal">
-          <div class="quickRechargeCard">
-            <div class="screenTop">
-              <span></span><span></span><span></span>
-              <div class="screenTag">FAST ORDER</div>
-            </div>
-
-            <div class="quickHeader">
-              <small>Instant Checkout</small>
-              <h2>Quick Recharge</h2>
-              <p>Choose the game, enter player ID, select package and send the order directly.</p>
-            </div>
-
-            <div class="quickForm">
-              <label>
-                <span>Game</span>
-                <select id="quickGame" onchange="updateQuickPackages()">
-                  <option value="PUBG">PUBG Mobile</option>
-                  <option value="Valorant">Valorant</option>
-                  <option value="Fortnite">Fortnite</option>
-                  <option value="PlayStation">PlayStation</option>
-                  <option value="Steam">Steam</option>
-                  <option value="Xbox">Xbox</option>
-                </select>
-              </label>
-              <label>
-                <span>Player ID / Email</span>
-                <input id="quickPlayer" placeholder="Enter player ID or account email">
-              </label>
-              <label>
-                <span>Package</span>
-                <select id="quickPackage"></select>
-              </label>
-              <label>
-                <span>Payment</span>
-                <select id="quickPayment">
-                  <option>Vodafone Cash</option>
-                  <option>Fawry</option>
-                  <option>Visa / MasterCard</option>
-                  <option>InstaPay</option>
-                  <option>Bank Transfer</option>
-                </select>
-              </label>
-              <button class="primary full" onclick="quickBuy()">Continue Order</button>
-            </div>
-
-            <div class="quickBadges">
-              <div><b>⚡ Instant</b><span>Fast delivery</span></div>
-              <div><b>🛡 Secure</b><span>Safe payment</span></div>
-              <div><b>🎧 24/7</b><span>WhatsApp help</span></div>
-            </div>
-
-            <div class="miniSlider" id="miniSlider"></div>
-          </div>
+        <div class="paymentMethods">
+          <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span><span>Bank</span>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="section" id="trending">
-        <div class="sectionHead reveal">
-          <div>
-            <span>Trending</span>
-            <h2>Browse Top Categories</h2>
-          </div>
-          <button onclick="scrollToId('products')">View Store</button>
+    <section class="section" id="support">
+      <div class="supportBox reveal">
+        <div>
+          <span>Support</span>
+          <h2>Need Help With Your Order?</h2>
+          <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
         </div>
-        <div class="trendGrid" id="categoryGrid"></div>
-      </section>
-
-      <section class="section" id="products">
-        <div class="sectionHead reveal">
-          <div>
-            <span>Store</span>
-            <h2>Products & Top-Ups</h2>
-          </div>
-          <div class="filters">
-            <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam...">
-            <select id="categoryFilter" onchange="renderProducts()"></select>
-            <select id="sortFilter" onchange="renderProducts()">
-              <option value="popular">Most Popular</option>
-              <option value="low">Price Low</option>
-              <option value="high">Price High</option>
-            </select>
-          </div>
+        <div class="supportActions">
+          <a href="https://wa.me/201010502795" target="_blank">WhatsApp</a>
+          <button onclick="toggleChat()">Live Chat</button>
         </div>
-        <div class="productGrid" id="productGrid"></div>
-      </section>
-
-      <section class="section" id="checkout">
-        <div class="checkoutShowcase reveal">
-          <div>
-            <span>Payment Gateway</span>
-            <h2>Fast Secure Checkout</h2>
-            <p>Customer enters payment details, then the backend creates a signed checkout URL and redirects directly to the payment page.</p>
-          </div>
-          <div class="paymentMethods">
-            <span>Visa</span><span>MasterCard</span><span>Wallet</span><span>Fawry</span><span>Vodafone Cash</span><span>Bank</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="support">
-        <div class="supportBox reveal">
-          <div>
-            <span>Support</span>
-            <h2>Need Help With Your Order?</h2>
-            <p>Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
-          </div>
-          <div class="supportActions">
-            <a href="https://wa.me/201010502795" target="_blank">WhatsApp</a>
-            <button onclick="toggleChat()">Live Chat</button>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+      </div>
+    </section>
+  </main>
 
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead">
@@ -215,9 +142,6 @@
     </div>
   </aside>
 
- 
-  </div>
-
   <div class="chat" id="chat">
     <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
     <div class="chatBody">
@@ -243,13 +167,5 @@
   <script src="/js/script.js"></script>
   <script src="/js/store-firebase.js"></script>
   <script src="/js/store-account.js"></script>
-  <script>
-    const syncCartBadges = () => {
-      const main = document.getElementById('cartCount');
-      const top = document.getElementById('cartCountTop');
-      if(main && top) top.textContent = main.textContent;
-    };
-    setInterval(syncCartBadges, 500);
-  </script>
 </body>
 </html>
