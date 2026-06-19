@@ -4,11 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up | Fox Games</title>
-  <link rel="stylesheet" href="./css/fox-auth.css"/>
+  <link rel="stylesheet" href="/css/fox-auth.css"/>
 </head>
 <body class="foxAuthPage">
   <main class="foxAuthStage">
     <div class="foxPurpleSlice"></div>
+    <div class="foxMascotWrap">
+      <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
+    </div>
 
     <section class="foxCard">
       <div class="foxLogoRow">
@@ -19,26 +22,16 @@
       <h1>Create account</h1>
       <p class="foxSub">Join Fox Games and save your details.</p>
 
-      <div class="foxMascotWrap">
-        <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
-      </div>
-
       <div class="foxField"><input id="fullName" placeholder="Full Name"></div>
       <div class="foxField"><input id="email" placeholder="Email"></div>
       <div class="foxField"><input id="password" type="password" placeholder="Password"></div>
       <div class="foxField"><input id="confirmPassword" type="password" placeholder="Confirm Password"></div>
 
       <div class="foxPhoneGrid">
-        <div class="foxField">
-          <select id="countryCode">
-            <option value="">Country</option>
-            <option value="+20">Egypt +20</option>
-            <option value="+966">Saudi +966</option>
-            <option value="+971">UAE +971</option>
-            <option value="+965">Kuwait +965</option>
-            <option value="+1">USA +1</option>
-          </select>
-        </div>
+        <div class="foxField"><select id="countryCode">
+          <option value="">Country</option><option value="+20">Egypt +20</option><option value="+966">Saudi +966</option>
+          <option value="+971">UAE +971</option><option value="+965">Kuwait +965</option><option value="+1">USA +1</option>
+        </select></div>
         <div class="foxField"><input id="phone" placeholder="Phone optional"></div>
       </div>
 
