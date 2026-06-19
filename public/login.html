@@ -5,28 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Fox Games</title>
   <link rel="stylesheet" href="/css/style.css"/>
-  <style>
-    body{display:grid;place-items:center;min-height:100vh;padding:24px}
-    .login-card{width:420px;max-width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
-    .login-card h1{font-size:36px;margin-bottom:8px}.login-card p{color:#b8abc8;margin-bottom:18px}
-    .login-card input{width:100%;margin:8px 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;padding:14px;border-radius:16px;outline:none}
-    .login-card button,.login-card a{width:100%;display:block;text-align:center;margin-top:10px;border:0;border-radius:999px;padding:14px;color:#fff;font-weight:900;text-decoration:none;background:linear-gradient(135deg,#ff2e8a,#7b2cff);cursor:pointer}
-    .google{background:#fff!important;color:#111!important}.back{background:rgba(255,255,255,.08)!important}.msg{margin-top:12px;color:#ffd166;min-height:24px;line-height:1.5}
-  </style>
+  <link rel="stylesheet" href="/css/auth-ui.css"/>
 </head>
-<body>
-  <div class="login-card">
-    <h1>Fox Games Login</h1>
-    <p>Login after verifying your email.</p>
-    <input id="email" placeholder="Email"/><input id="password" type="password" placeholder="Password"/>
-    <button onclick="loginEmail()">Login</button>
-    <a href="/register.html">Create Account</a>
-    <button class="google" onclick="loginGoogle()">Continue with Google</button>
-    <a class="back" href="/">Back to Store</a><div class="msg" id="msg"></div>
+<body class="authPage">
+  <div class="authLayout">
+    <div class="authVisual">
+      <a class="authLogo" href="/"><img src="/assets/logo-wolf.svg" alt="Fox Games"><span>Fox Games</span></a>
+      <h1>Welcome back</h1>
+      <p>Login to manage your profile, checkout faster, and track your gaming orders.</p>
+      <div class="authBadges"><span>Secure Login</span><span>Fast Checkout</span><span>24/7 Support</span></div>
+    </div>
+
+    <div class="authCard">
+      <h2>Login</h2>
+      <p class="authSub">Use email, Google, Facebook, or phone OTP.</p>
+
+      <div class="socialGrid">
+        <button onclick="loginGoogle()" class="socialBtn">G Google</button>
+        <button onclick="loginFacebook()" class="socialBtn">f Facebook</button>
+      </div>
+
+      <div class="divider"><span>or</span></div>
+
+      <input id="email" placeholder="Email"/>
+      <input id="password" type="password" placeholder="Password"/>
+
+      <button class="authPrimary" onclick="loginEmail()">Login</button>
+      <button class="authGhost" onclick="location.href='/register.html'">Create Account</button>
+      <button class="authLink" onclick="resetPassword()">Forgot password?</button>
+
+      <div class="divider"><span>phone login</span></div>
+
+      <div class="phoneRow">
+        <select id="countryCode">
+          <option value="+20">🇪🇬 +20</option><option value="+966">🇸🇦 +966</option>
+          <option value="+971">🇦🇪 +971</option><option value="+965">🇰🇼 +965</option>
+          <option value="+974">🇶🇦 +974</option><option value="+1">🇺🇸 +1</option>
+        </select>
+        <input id="phone" placeholder="Phone number"/>
+      </div>
+
+      <button class="authGhost" onclick="sendPhoneCode()">Send phone code</button>
+
+      <div id="phoneCodeBox" class="hidden">
+        <input id="phoneCode" placeholder="Enter SMS code"/>
+        <button class="authPrimary" onclick="confirmPhoneCode()">Verify Code</button>
+      </div>
+
+      <div id="recaptcha-container"></div>
+      <a class="backStore" href="/">Back to Store</a>
+      <div class="msg" id="msg"></div>
+    </div>
   </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js"></script><script src="/js/auth.js"></script>
+  <script src="/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>
