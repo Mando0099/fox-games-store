@@ -1,56 +1,61 @@
-// ================= DATA (البيانات) =================
-// تأكد من تعديل الروابط والأسماء هنا لتطابق منتجاتك الحقيقية
-const categories = [
-  { name: "PUBG Mobile", desc: "UC & Packs", bg: "/assets/pubg-bg.jpg" },
-  { name: "Free Fire", desc: "Diamonds", bg: "/assets/ff-bg.jpg" },
-  { name: "Valorant", desc: "Points", bg: "/assets/val-bg.jpg" },
-  { name: "Steam", desc: "Gift Cards", bg: "/assets/steam-bg.jpg" },
-  { name: "PlayStation", desc: "Cards & Plus", bg: "/assets/ps-bg.jpg" }
-];
-
-const products = [
-  { name: "PUBG Mobile 60 UC", category: "PUBG Mobile", desc: "Instant recharge via ID", price: 60, img: "/assets/uc60.jpg", bg: "/assets/pubg-bg.jpg", popular: 90 },
-  { name: "PUBG Mobile 325 UC", category: "PUBG Mobile", desc: "Instant recharge via ID", price: 300, img: "/assets/uc325.jpg", bg: "/assets/pubg-bg.jpg", popular: 95 },
-  { name: "Valorant 1000 VP", category: "Valorant", desc: "Riot Games prepaid card", price: 450, img: "/assets/vp1000.jpg", bg: "/assets/val-bg.jpg", popular: 85 },
-  { name: "Free Fire 100 Diamonds", category: "Free Fire", desc: "Instant recharge via ID", price: 80, img: "/assets/ff100.jpg", bg: "/assets/ff-bg.jpg", popular: 80 },
-  { name: "Steam $10 Gift Card", category: "Steam", desc: "Global Wallet Code", price: 550, img: "/assets/steam10.jpg", bg: "/assets/steam-bg.jpg", popular: 88 }
-];
-
-// ================= APP LOGIC (الكود الأساسي) =================
-let cart = JSON.parse(localStorage.getItem('foxgames_cart')) || [];
-let coupon = Number(localStorage.getItem('foxgames_coupon')) || 0;
+// ================= FOX GAMES LIVE DATABASE LINK =================
+// الاعتماد بالكامل على المصفوفات القادمة من الفايربيز والبانل بدون كود تجريبي
 const $ = id => document.getElementById(id);
 
+// هنا بنضمن إن لو الفايربيز اتأخر في التحميل، المتجر ما يضربش ويفضل مستني الداتا
+if (typeof cart === 'undefined') {
+  var cart = JSON.parse(localStorage.getItem('foxgames_cart')) || [];
+}
+if (typeof coupon === 'undefined') {
+  var coupon = Number(localStorage.getItem('foxgames_coupon')) || 0;
+}
+
 window.addEventListener('load', () => {
-  renderCategories();
-  renderFilters();
-  renderProducts();
-  updateCart();
+  // تشغيل الفانكشنز الأساسية المرتبطة بالفايربيز والـ Auth في مشروعك
+  if (typeof checkAuthState === 'function') checkAuthState();
+  
+  // انتظر ثواني للتأكد من سحب الداتا بالكامل من البانل ثم اعرضها
+  setTimeout(() => {
+    renderCategories();
+    renderFilters();
+    renderProducts();
+    updateCart();
+  }, 1000); 
+  
   reveal();
 });
+
 window.addEventListener('scroll', reveal);
 
 function renderMiniSlider() {}
 
-// عرض التصنيفات بشكل صحيح
+// عرض التصنيفات الحقيقية القادمة من البانل
 function renderCategories() {
   if (!$('categoryGrid')) return;
+  if (typeof categories === 'undefined' || !categories.length) return;
+  
   $('categoryGrid').innerHTML = categories.map(cat => `
-    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="background-image:url('${cat.bg}')">
-      <div><h3>${cat.name}</h3><p>${cat.desc}</p></div>
+    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="background-image:url('${cat.bg || cat.image || ''}')">
+      <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
     </div>`).join('');
 }
 
-// إنشاء قائمة الفلاتر تلقائياً بناءً على المنتجات المتاحة
+// إنشاء قائمة الفلاتر تلقائياً من الألعاب المرفوعة على الفايربيز
 function renderFilters() {
   if (!$('categoryFilter')) return;
-  const list = ['All', ...new Set(products.map(p => p.category))];
+  if (typeof products === 'undefined' || !products.length) return;
+  
+  const list = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
   $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
 
-// عرض المنتجات بناءً على البحث والفلترة والترتيب
+// عرض منتجات الفايربيز والبانل الحقيقية داخل الكروت المطورة
 function renderProducts() {
   if (!$('productGrid')) return;
+  if (typeof products === 'undefined' || !products.length) {
+    $('productGrid').innerHTML = `<p style="color:var(--muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products from Firebase...</p>`;
+    return;
+  }
 
   const search = ($('searchInput')?.value || '').toLowerCase();
   const filter = $('categoryFilter')?.value || 'All';
@@ -63,18 +68,22 @@ function renderProducts() {
 
   if (sort === 'low') list.sort((a, b) => a.price - b.price);
   if (sort === 'high') list.sort((a, b) => b.price - a.price);
-  if (sort === 'popular') list.sort((a, b) => b.popular - a.popular);
+  if (sort === 'popular') list.sort((a, b) => (b.popular || 0) - (a.popular || 0));
 
   $('productGrid').innerHTML = list.map(p => {
     const i = products.indexOf(p);
+    // دعم قراءة رابط الصورة سواء كان المفتاح اسمه img أو image في البانل عندك
+    const imgUrl = p.img || p.image || '';
+    const bgUrl = p.bg || p.image || '';
+    
     return `<article class="productCard reveal">
-      <div class="productCover" style="background-image:url('${p.bg}')"><img src="${p.img}" alt="${p.name}"></div>
+      <div class="productCover" style="background-image:url('${bgUrl}')"><img src="${imgUrl}" alt="${p.name}"></div>
       <div class="productInfo">
         <h3>${p.name}</h3>
-        <p>${p.desc}</p>
+        <p>${p.desc || ''}</p>
         <div class="priceRow">
           <div class="price">${p.price}.00 EGP</div>
-          <span class="rating">★ 4.9</span>
+          <span class="rating">★ ${p.rating || '4.9'}</span>
         </div>
         <button class="add" onclick="addToCart(${i})">Buy Now</button>
       </div>
@@ -83,32 +92,27 @@ function renderProducts() {
   reveal();
 }
 
-// عند اختيار تصنيف يتم فلترة المنتجات بناءً عليه مباشرة
 function selectCategory(c) {
   const f = $('categoryFilter');
-  if (f) {
-    f.value = c; 
-  }
+  if (f) f.value = c; 
   renderProducts();
   scrollToId('products');
 }
 
-// إضافة منتج للسلة
 function addToCart(i) {
+  if (typeof products === 'undefined' || !products[i]) return;
   cart.push({ ...products[i], id: Date.now() + Math.random() });
   save();
   updateCart();
   $('cartDrawer')?.classList.add('open');
 }
 
-// حذف منتج من السلة
 function removeItem(id) {
   cart = cart.filter(x => x.id !== id);
   save();
   updateCart();
 }
 
-// تحديث السلة والعدادات والمجاميع لحظياً وبدون ريفريش
 function updateCart() {
   if ($('cartCount')) $('cartCount').textContent = cart.length;
   if ($('cartCountTop')) $('cartCountTop').textContent = cart.length;
@@ -118,7 +122,7 @@ function updateCart() {
       ? cart.map(item => `
         <div class="cartItem">
           <div class="row">
-            <div><b>${item.name}</b><br><small>${item.category}</small></div>
+            <div><b>${item.name}</b><br><small>${item.category || ''}</small></div>
             <b class="green-text">${item.price} EGP</b>
           </div>
           <button onclick="removeItem(${item.id})">Remove</button>
@@ -134,7 +138,6 @@ function updateCart() {
   if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
 }
 
-// تفعيل الكوبون
 function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
   if (code === 'FOX10') {
@@ -147,13 +150,11 @@ function applyCoupon() {
   }
 }
 
-// تجهيز الدفع أوتوماتيكياً
 async function checkout() {
   if (!cart.length) return alert('Your cart is empty.');
   alert('Checkout system is ready. Connecting with backend payment gateway...');
 }
 
-// تطوير كود الواتساب ليسحب بيانات العميل والطلب بالكامل
 function sendWhatsappOrder() {
   if (!cart.length) return alert('Your cart is empty.');
 
@@ -189,30 +190,16 @@ function save() {
   localStorage.setItem('foxgames_coupon', String(coupon));
 }
 
-function toggleCart() {
-  $('cartDrawer')?.classList.toggle('open');
-}
-
+function toggleCart() { $('cartDrawer')?.classList.toggle('open'); }
 function toggleMenu() {}
+function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
+function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
 
-function scrollToId(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-}
+// تشغيل اللوجين والـ Auth المربوط بالفايربيز عندك
+function openAuth() { window.location.href = 'login.html'; }
+// الرجوع للمتجر الأساسي بشكل صحيح
+function closeAuth() { window.location.href = 'index.html'; }
 
-function focusSearch() {
-  scrollToId('products');
-  setTimeout(() => $('searchInput')?.focus(), 500);
-}
-
-function openAuth() { window.location.href = '/login.html'; }
-function closeAuth() { window.location.href = '/'; }
-
-function toggleChat() {
-  $('chat')?.classList.toggle('open');
-}
-
-function reveal() {
-  document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-}
-
+function toggleChat() { $('chat')?.classList.toggle('open'); }
+function reveal() { document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')); }
 function stars() {}
