@@ -165,4 +165,419 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(255, 255, 2
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: 0.3s;
+    }
+    .cartItem:hover {
+      border-color: rgba(101, 204, 0, 0.3);
+      background: rgba(101, 204, 0, 0.02);
+    }
+    .cartItem-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .cartItem-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cartItem-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cartItem-cat {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .cartItem-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: #65cc00;
+    }
+    .cartItem-remove-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .cartItem-remove-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .coupon input, .checkoutForm input, .checkoutForm select {
+      background: #0d1722 !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      padding: 10px 12px !important;
+    }
+    .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus {
+      border-color: #65cc00 !important;
+    }
+    /* ================= END MODERN CART STYLE ================= */
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
+      <span>FOX <b class="green-text">GAMES</b></span>
+    </a>
+
+    <nav class="mainNav">
+      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
+    </nav>
+
+    <div class="topSearch">
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()" data-i18n-holder="search_placeholder">
+      <span class="search-icon-btn"><i class="fas fa-search"></i></span>
+    </div>
+
+    <div class="navActions">
+      <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
+      
+      <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
+      
+      <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
+        <button class="user-profile-btn" id="userProfileTrigger">
+          <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
+        </button>
+        
+        <div class="user-profile-dropdown" id="userProfileDropdown">
+          <div class="profile-header">
+            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
+            <div class="profile-info">
+              <span class="profile-name" id="dropdownUserName">Gamer User</span>
+              <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
+            </div>
+          </div>
+          <div class="profile-menu-links">
+            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
+          </div>
+          <button class="logout-btn-new" id="profileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+          </button>
+        </div>
+      </div>
+
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">
+        <i class="fas fa-shopping-cart"></i> <span data-i18n="btn_cart">Cart</span> 
+        <b id="cartCountTop" class="cart-badge">0</b>
+      </button>
+    </div>
+  </header>
+
+  <main id="home" class="content">
+    
+    <section class="hero-banner-section">
+      <div class="hero-banner-card">
+        <div class="hero-content">
+          <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
+          
+          <div class="hero-cta-buttons">
+            <button onclick="scrollToId('products')" class="shop-now-btn">
+              <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
+            </button>
+            <button onclick="scrollToId('trending')" class="browse-cat-btn">
+              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+            </button>
+          </div>
+
+          <div class="hero-features">
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+          </div>
+        </div>
+
+        <div class="banner-game-logos">
+          <span class="game-logo-item">PUBG MOBILE</span>
+          <span class="game-logo-item">VALORANT</span>
+          <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
+          <span class="game-logo-item"><i class="fab fa-playstation"></i> PlayStation</span>
+          <span class="game-logo-item"><i class="fab fa-xbox"></i> XBOX</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="products">
+      <div class="sectionHead reveal">
+        <div>
+          <h2 data-i18n="title_popular">Popular Products</h2>
+        </div>
+        <div class="filters">
+          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam..." data-i18n-holder="search_placeholder">
+          <select id="categoryFilter" onchange="renderProducts()"></select>
+          <select id="sortFilter" onchange="renderProducts()">
+            <option value="popular" data-i18n="sort_popular">Most Popular</option>
+            <option value="low" data-i18n="sort_low">Price Low</option>
+            <option value="high" data-i18n="sort_high">Price High</option>
+          </select>
+        </div>
+      </div>
+      <div class="productGrid" id="productGrid"></div>
+    </section>
+
+    <section class="section" id="trending">
+      <div class="sectionHead reveal">
+        <div>
+          <h2 data-i18n="title_categories">Shop by Categories</h2>
+        </div>
+        <button class="view-all-btn" onclick="resetCategoryFilter()" data-i18n="btn_view_all">View All <i class="fas fa-arrow-right"></i></button>
+      </div>
+      <div class="trendGrid" id="categoryGrid"></div>
+    </section>
+
+    <section class="benefits">
+      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
+    </section>
+
+    <section class="section" id="checkout">
+      <div class="checkoutShowcase reveal">
+        <div>
+          <h2 data-i18n="check_title">Secure Payment Methods</h2>
+          <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
+        </div>
+        
+        <div class="paymentMethods">
+          <div class="method-card" title="Visa">
+            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <span>Visa</span>
+          </div>
+          <div class="method-card" title="MasterCard">
+            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 28px;"></i>
+            <span>MasterCard</span>
+          </div>
+          <div class="method-card" title="Vodafone Cash">
+            <i class="fas fa-wallet" style="color: #e60000; font-size: 22px;"></i>
+            <span>Vodafone Cash</span>
+          </div>
+          <div class="method-card" title="Fawry">
+            <i class="fas fa-money-bill-wave" style="color: #ffcc00; font-size: 22px;"></i>
+            <span>Fawry</span>
+          </div>
+          <div class="method-card" title="InstaPay">
+            <i class="fas fa-university" style="color: #00bfa5; font-size: 22px;"></i>
+            <span>InstaPay</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="support">
+      <div class="supportBox reveal">
+        <div>
+          <h2 data-i18n="sup_title">Need Help With Your Order?</h2>
+          <p data-i18n="sup_desc">Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
+        </div>
+        <div class="supportActions">
+          <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="cartDrawer" id="cartDrawer">
+    <div class="cartHead">
+      <h3 data-i18n="cart_title">Your Cart</h3>
+      <button onclick="toggleCart()">×</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="coupon">
+      <input id="couponInput" placeholder="Coupon: FOX10">
+      <button onclick="applyCoupon()" data-i18n="btn_apply">Apply</button>
+    </div>
+    <div class="summary">
+      <p><span data-i18n="cart_subtotal">Subtotal</span><b id="subtotal">0 EGP</b></p>
+      <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
+      <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
+    </div>
+    <div class="checkoutForm">
+      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name">
+      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone">
+      <select id="paymentMethod">
+        <option data-i18n="opt_visa">Visa / MasterCard</option>
+        <option data-i18n="opt_wallet">Wallet</option>
+        <option data-i18n="opt_vodafone">Vodafone Cash</option>
+        <option data-i18n="opt_fawry">Fawry</option>
+        <option data-i18n="opt_bank">Bank Transfer</option>
+      </select>
+      <button class="primary full" onclick="checkout()" data-i18n="btn_pay_now">Pay Now</button>
+      <button class="whatsapp full" onclick="sendWhatsappOrder()" data-i18n="btn_wa_order">WhatsApp Order</button>
+      <small data-i18n="secure_checkout_notice">Secure checkout connected through the backend.</small>
+    </div>
+  </aside>
+
+  <div class="chat" id="chat">
+    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatBody">
+      <p>Hey gamer 👋 How can we help?</p>
+      <small>This is a demo chat widget.</small>
+    </div>
+    <div class="chatInput">
+      <input placeholder="Write message...">
+      <button>Send</button>
+    </div>
+  </div>
+  <button class="chatBubble" onclick="toggleChat()">💬</button>
+
+  <footer>
+    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Fox Games Market</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  
+  <script src="/firebase-config.js"></script>
+  
+  <script src="/js/store-firebase.js"></script>
+  <script src="/js/store-account.js"></script>
+  <script src="/js/script.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainLoginBtn = document.getElementById('mainLoginBtn');
+      const userProfileWrapper = document.getElementById('userProfileWrapper');
+      const userProfileTrigger = document.getElementById('userProfileTrigger');
+      const userProfileDropdown = document.getElementById('userProfileDropdown');
+      
+      const topNavUserName = document.getElementById('topNavUserName');
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      const profileUserAvatar = document.getElementById('profileUserAvatar');
+      const authMethodBadge = document.getElementById('authMethodBadge');
+      const profileLogoutBtn = document.getElementById('profileLogoutBtn');
+
+      function cleanOldProfiles() {
+        if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+          const btnText = mainLoginBtn.innerText.trim().toLowerCase();
+          if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+        }
+        
+        const actionsContainer = document.querySelector('.navActions');
+        if (actionsContainer) {
+          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
+          textButtons.forEach(btn => {
+            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
+              btn.remove();
+            }
+          });
+        }
+      }
+
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
+            if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
+
+            const displayName = user.displayName || "Gamer";
+            const email = user.email || "No Email";
+            const photoURL = user.photoURL || "https://via.placeholder.com/150";
+
+            if (topNavUserName) topNavUserName.innerText = displayName.split(' ')[0]; 
+            if (dropdownUserName) dropdownUserName.innerText = displayName;
+            if (dropdownUserEmail) dropdownUserEmail.innerText = email;
+            if (profileUserAvatar) profileUserAvatar.src = photoURL;
+
+            let providerId = "email";
+            if (user.providerData && user.providerData.length > 0) {
+              providerId = user.providerData[0].providerId;
+            }
+
+            if (authMethodBadge) {
+              if (providerId === 'google.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-google"><i class="fab fa-google"></i> Google</span>`;
+              } else if (providerId === 'facebook.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-facebook"><i class="fab fa-facebook"></i> Facebook</span>`;
+              } else {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-email"><i class="fas fa-envelope"></i> حسابك</span>`;
+              }
+            }
+          } else {
+            if (mainLoginBtn) {
+              mainLoginBtn.classList.remove('foxHidden');
+              mainLoginBtn.innerText = "Login";
+            }
+            if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
+          }
+          cleanOldProfiles();
+        });
+      }
+
+      const observer = new MutationObserver(() => {
+        cleanOldProfiles();
+        if (firebase.auth().currentUser) {
+          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
+            userProfileWrapper.classList.remove('foxHidden');
+          }
+        }
+      });
+
+      const navActionsContainer = document.querySelector('.navActions');
+      if (navActionsContainer) {
+        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
+      }
+
+      if (userProfileTrigger && userProfileDropdown) {
+        userProfileTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userProfileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', () => {
+          userProfileDropdown.classList.remove('active');
+        });
+      }
+
+      if (profileLogoutBtn) {
+        profileLogoutBtn.addEventListener('click', () => {
+          if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut().then(() => {
+              window.location.reload();
+            }).catch((error) => {
+              console.error("Logout Error: ", error);
+            });
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
