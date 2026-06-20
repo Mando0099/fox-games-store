@@ -318,6 +318,343 @@
         <div class="banner-game-logos">
           <span class="game-logo-item">PUBG MOBILE</span>
           <span class="game-logo-item">VALORANT</span>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fox Games Market</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    /* ================= START FOX CYBERPUNK THEME ENGINE ================= */
+    :root {
+      --fox-bg: #050b14;
+      --fox-card: rgba(13, 23, 34, 0.65);
+      --fox-accent: #65cc00;
+      --fox-line: rgba(30, 58, 99, 0.35);
+      --fox-glow: rgba(101, 204, 0, 0.2);
+    }
+
+    /* تأثير الأنيميشن التلقائي للخلفية المتحركة للنجوم والموقع */
+    body {
+      background-color: var(--fox-bg) !important;
+      overflow-x: hidden;
+    }
+
+    /* كروت المنتجات الاحترافية المستوحاة من بدوي شوب بألوان فوكس */
+    .product-card-cyber {
+      background: var(--fox-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--fox-line);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .product-card-cyber:hover {
+      transform: translateY(-6px);
+      border-color: var(--fox-accent);
+      box-shadow: 0 12px 30px var(--fox-glow);
+    }
+
+    /* صورة المنتج مع زوم خفيف عند التمرير */
+    .product-img-wrapper {
+      width: 100%;
+      height: 180px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .product-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .product-card-cyber:hover .product-img-wrapper img {
+      transform: scale(1.06);
+    }
+
+    /* شارات توفر المنتج والخصم */
+    .fox-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--fox-accent);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px var(--fox-glow);
+      z-index: 2;
+    }
+
+    .product-info-cyber {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .product-title-cyber {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .product-meta-cyber {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .product-price-cyber {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--fox-accent);
+    }
+
+    .product-btn-cyber {
+      background: rgba(101, 204, 0, 0.1);
+      border: 1px solid var(--fox-accent);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .product-btn-cyber:hover {
+      background: var(--fox-accent);
+      color: #000;
+      box-shadow: 0 0 15px var(--fox-accent);
+    }
+
+    /* كروت الأقسام (Categories) الدائرية والفخمة */
+    .cat-card-cyber {
+      background: var(--fox-card);
+      border: 1px solid var(--fox-line);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .cat-card-cyber:hover {
+      border-color: var(--fox-accent);
+      background: rgba(101, 204, 0, 0.04);
+      transform: scale(1.03);
+    }
+
+    .cat-icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--fox-line);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      color: var(--fox-accent);
+      transition: 0.3s;
+    }
+
+    .cat-card-cyber:hover .cat-icon-wrap {
+      background: var(--fox-accent);
+      color: #000;
+      box-shadow: 0 0 20px var(--fox-accent);
+    }
+
+    /* إشعارات الـ Toasts المنبثقة التلقائية عند الإضافة للسلة */
+    .fox-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0d1722;
+      border-left: 4px solid var(--fox-accent);
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 10000;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: foxSlideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes foxSlideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+    /* تعديل الحاوية الشبكية لتكون متجاوبة 100% بين الـ PC والموبايل */
+    .productGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    /* ================= END FOX CYBERPUNK THEME ENGINE ================= */
+
+    /* ================= START USER PROFILE STYLE ================= */
+    .user-profile-wrapper { position: relative; display: inline-block; }
+    .user-profile-btn {
+      background: #0d1722; border: 1px solid rgba(101, 204, 0, 0.4); color: #fff;
+      padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; transition: 0.2s;
+    }
+    .user-profile-btn:hover { background: rgba(101, 204, 0, 0.1); box-shadow: 0 0 10px rgba(101, 204, 0, 0.2); }
+    .user-profile-dropdown {
+      position: absolute; top: 50px; right: 0; width: 300px; background: #0d1722;
+      border: 1px solid rgba(101, 204, 0, 0.25); border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); padding: 16px; z-index: 1000;
+      color: #fff; text-align: left; opacity: 0; pointer-events: none;
+      transform: translateY(-10px); transition: all 0.3s ease;
+    }
+    .user-profile-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .profile-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .profile-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #65cc00; object-fit: cover; }
+    .profile-info { display: flex; flex-direction: column; gap: 2px; }
+    .profile-name { font-size: 15px; font-weight: 700; }
+    .profile-email { font-size: 12px; color: #94a3b8; word-break: break-all; }
+    .auth-method-badge { display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.04); padding: 4px 10px; border-radius: 20px; font-size: 11px; color: #94a3b8; width: fit-content; }
+    .auth-google { color: #ea4335; font-weight: bold; }
+    .auth-facebook { color: #1877f2; font-weight: bold; }
+    .auth-email { color: #65cc00; font-weight: bold; }
+    .profile-menu-links { margin: 12px 0; display: flex; flex-direction: column; gap: 2px; }
+    .profile-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 500; border-radius: 6px; transition: 0.2s; }
+    .profile-link:hover { background: rgba(101, 204, 0, 0.08); color: #65cc00; }
+    .logout-btn-new { width: 100%; height: 38px; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+    .logout-btn-new:hover { background: #ef4444; color: #fff; }
+    html[dir="rtl"] .user-profile-dropdown { right: auto; left: 0; text-align: right; }
+    html[dir="rtl"] .profile-header { flex-direction: row-reverse; }
+    .foxHidden { display: none !important; }
+    /* ================= END USER PROFILE STYLE ================= */
+
+    /* ================= START MODERN CART STYLE ================= */
+    .cartDrawer { width: 420px; background: #090f17; border-left: 1px solid rgba(101, 204, 0, 0.15); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    html[dir="rtl"] .cartDrawer { border-left: none; border-right: 1px solid rgba(101, 204, 0, 0.15); }
+    .cartItem { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: 0.3s; }
+    .cartItem:hover { border-color: rgba(101, 204, 0, 0.3); background: rgba(101, 204, 0, 0.02); }
+    .cartItem-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .cartItem-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .cartItem-name { font-size: 14px; font-weight: 700; color: #fff; }
+    .cartItem-cat { font-size: 11px; color: #94a3b8; }
+    .cartItem-price { font-size: 14px; font-weight: 800; color: #65cc00; }
+    .cartItem-remove-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .cartItem-remove-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
+    .coupon input, .checkoutForm input, .checkoutForm select { background: #0d1722 !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; }
+    .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus { border-color: #65cc00 !important; }
+    /* ================= END MODERN CART STYLE ================= */
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
+      <span>FOX <b class="green-text">GAMES</b></span>
+    </a>
+
+    <nav class="mainNav">
+      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
+    </nav>
+
+    <div class="topSearch">
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()" data-i18n-holder="search_placeholder">
+      <span class="search-icon-btn"><i class="fas fa-search"></i></span>
+    </div>
+
+    <div class="navActions">
+      <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
+      
+      <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
+      
+      <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
+        <button class="user-profile-btn" id="userProfileTrigger">
+          <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
+        </button>
+        
+        <div class="user-profile-dropdown" id="userProfileDropdown">
+          <div class="profile-header">
+            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
+            <div class="profile-info">
+              <span class="profile-name" id="dropdownUserName">Gamer User</span>
+              <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
+            </div>
+          </div>
+          <div class="profile-menu-links">
+            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
+          </div>
+          <button class="logout-btn-new" id="profileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+          </button>
+        </div>
+      </div>
+
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">
+        <i class="fas fa-shopping-cart"></i> <span data-i18n="btn_cart">Cart</span> 
+        <b id="cartCountTop" class="cart-badge">0</b>
+      </button>
+    </div>
+  </header>
+
+  <main id="home" class="content">
+    
+    <section class="hero-banner-section">
+      <div class="hero-banner-card">
+        <div class="hero-content">
+          <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
+          
+          <div class="hero-cta-buttons">
+            <button onclick="scrollToId('products')" class="shop-now-btn">
+              <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
+            </button>
+            <button onclick="scrollToId('trending')" class="browse-cat-btn">
+              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+            </button>
+          </div>
+
+          <div class="hero-features">
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+          </div>
+        </div>
+
+        <div class="banner-game-logos">
+          <span class="game-logo-item">PUBG MOBILE</span>
+          <span class="game-logo-item">VALORANT</span>
           <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
           <span class="game-logo-item"><i class="fab fa-playstation"></i> PlayStation</span>
           <span class="game-logo-item"><i class="fab fa-xbox"></i> XBOX</span>
@@ -420,164 +757,5 @@
     <div class="summary">
       <p><span data-i18n="cart_subtotal">Subtotal</span><b id="subtotal">0 EGP</b></p>
       <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
-      <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
-    </div>
-    <div class="checkoutForm">
-      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name">
-      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone">
-      <select id="paymentMethod">
-        <option data-i18n="opt_visa">Visa / MasterCard</option>
-        <option data-i18n="opt_wallet">Wallet</option>
-        <option data-i18n="opt_vodafone">Vodafone Cash</option>
-        <option data-i18n="opt_fawry">Fawry</option>
-        <option data-i18n="opt_bank">Bank Transfer</option>
-      </select>
-      <button class="primary full" onclick="checkout()" data-i18n="btn_pay_now">Pay Now</button>
-      <button class="whatsapp full" onclick="sendWhatsappOrder()" data-i18n="btn_wa_order">WhatsApp Order</button>
-      <small data-i18n="secure_checkout_notice">Secure checkout connected through the backend.</small>
-    </div>
-  </aside>
+      <p class="grand"><span data-i18n="cart_total
 
-  <div class="chat" id="chat">
-    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
-    <div class="chatBody">
-      <p>Hey gamer 👋 How can we help?</p>
-      <small>This is a demo chat widget.</small>
-    </div>
-    <div class="chatInput">
-      <input placeholder="Write message...">
-      <button>Send</button>
-    </div>
-  </div>
-  <button class="chatBubble" onclick="toggleChat()">💬</button>
-
-  <footer>
-    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
-    <p>© 2026 Fox Games Market</p>
-  </footer>
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  
-  <script src="/firebase-config.js"></script>
-  
-  <script src="/js/store-firebase.js"></script>
-  <script src="/js/store-account.js"></script>
-  <script src="/js/script.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const mainLoginBtn = document.getElementById('mainLoginBtn');
-      const userProfileWrapper = document.getElementById('userProfileWrapper');
-      const userProfileTrigger = document.getElementById('userProfileTrigger');
-      const userProfileDropdown = document.getElementById('userProfileDropdown');
-      
-      const topNavUserName = document.getElementById('topNavUserName');
-      const dropdownUserName = document.getElementById('dropdownUserName');
-      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
-      const profileUserAvatar = document.getElementById('profileUserAvatar');
-      const authMethodBadge = document.getElementById('authMethodBadge');
-      const profileLogoutBtn = document.getElementById('profileLogoutBtn');
-
-      function cleanOldProfiles() {
-        if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
-          const btnText = mainLoginBtn.innerText.trim().toLowerCase();
-          if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
-            mainLoginBtn.classList.add('foxHidden');
-          }
-        }
-        
-        const actionsContainer = document.querySelector('.navActions');
-        if (actionsContainer) {
-          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
-          textButtons.forEach(btn => {
-            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
-              btn.remove();
-            }
-          });
-        }
-      }
-
-      if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged((user) => {
-          if (user) {
-            if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
-            if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
-
-            const displayName = user.displayName || "Gamer";
-            const email = user.email || "No Email";
-            const photoURL = user.photoURL || "https://via.placeholder.com/150";
-
-            if (topNavUserName) topNavUserName.innerText = displayName.split(' ')[0]; 
-            if (dropdownUserName) dropdownUserName.innerText = displayName;
-            if (dropdownUserEmail) dropdownUserEmail.innerText = email;
-            if (profileUserAvatar) profileUserAvatar.src = photoURL;
-
-            let providerId = "email";
-            if (user.providerData && user.providerData.length > 0) {
-              providerId = user.providerData[0].providerId;
-            }
-
-            if (authMethodBadge) {
-              if (providerId === 'google.com') {
-                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-google"><i class="fab fa-google"></i> Google</span>`;
-              } else if (providerId === 'facebook.com') {
-                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-facebook"><i class="fab fa-facebook"></i> Facebook</span>`;
-              } else {
-                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-email"><i class="fas fa-envelope"></i> حسابك</span>`;
-              }
-            }
-          } else {
-            if (mainLoginBtn) {
-              mainLoginBtn.classList.remove('foxHidden');
-              mainLoginBtn.innerText = "Login";
-            }
-            if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
-          }
-          cleanOldProfiles();
-        });
-      }
-
-      const observer = new MutationObserver(() => {
-        cleanOldProfiles();
-        if (firebase.auth().currentUser) {
-          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
-            mainLoginBtn.classList.add('foxHidden');
-          }
-          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
-            userProfileWrapper.classList.remove('foxHidden');
-          }
-        }
-      });
-
-      const navActionsContainer = document.querySelector('.navActions');
-      if (navActionsContainer) {
-        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
-      }
-
-      if (userProfileTrigger && userProfileDropdown) {
-        userProfileTrigger.addEventListener('click', (e) => {
-          e.stopPropagation();
-          userProfileDropdown.classList.toggle('active');
-        });
-        document.addEventListener('click', () => {
-          userProfileDropdown.classList.remove('active');
-        });
-      }
-
-      if (profileLogoutBtn) {
-        profileLogoutBtn.addEventListener('click', () => {
-          if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().signOut().then(() => {
-              window.location.reload();
-            }).catch((error) => {
-              console.error("Logout Error: ", error);
-            });
-          }
-        });
-      }
-    });
-  </script>
-</body>
-</html>
