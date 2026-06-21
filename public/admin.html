@@ -42,7 +42,7 @@
       <div class="avatar"><i class="fa-solid fa-circle-user"></i></div>
       <div class="admin-info">
         <strong>مدير المتجر</strong>
-        <small id="adminEmail">namy9585@gmail.com</small>
+        <small id="adminEmail">جاري التحميل...</small>
       </div>
     </div>
 
@@ -171,7 +171,11 @@
         <input id="productId" type="hidden" />
         <div class="form-grid">
           <input id="name" placeholder="اسم المنتج" />
-          <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
+          
+          <select id="productCategorySelect">
+              <option value="">جاري تحميل التصنيفات المتاحة...</option>
+          </select>
+
           <input id="game" placeholder="اسم اللعبة" />
           <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
           <input id="price" type="number" placeholder="السعر EGP" />
@@ -180,11 +184,11 @@
         </div>
         <textarea id="description" placeholder="وصف المنتج"></textarea>
         <label class="check">
-          <input id="active" type="checkbox" checked /> المنتج مفعل
+          <input id="active" type="checkbox" checked /> المنتج مفعل بالمتجر
         </label>
         <div class="actions">
           <button onclick="saveProduct()">حفظ المنتج</button>
-          <button class="ghost" onclick="clearProductForm()">تفريغ</button>
+          <button class="ghost" onclick="clearProductForm()">تفريغ الحقول</button>
         </div>
       </div>
       <div id="productsList" class="cards-grid"></div>
@@ -235,7 +239,7 @@
       <div class="panel form-panel">
         <div class="form-grid">
           <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
-          <input id="couponValue" type="number" placeholder="نسبة الخصم" />
+          <input id="couponValue" type="number" placeholder="نسبة الخصم %" />
         </div>
         <button onclick="saveCoupon()">حفظ الكوبون</button>
       </div>
@@ -263,19 +267,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    window.showPage = function(id, btn){
-      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-      var page = document.getElementById(id);
-      if(page){ page.classList.add('active'); }
-      document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
-      if(btn){ btn.classList.add('active'); }
-    };
-
-    window.logout = function(){
-      firebase.auth().signOut().then(function(){ location.href = '/login.html'; });
-    };
-
-    // تشغيل المنحنى البياني فوراً ليعطي نفس مظهر لوحة الألعاب المضيئة
+    // تشغيل المنحنى البياني فوراً ليعطي مظهر لوحة الألعاب المضيئة
     document.addEventListener("DOMContentLoaded", function() {
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
