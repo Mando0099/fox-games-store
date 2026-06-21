@@ -221,8 +221,19 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
           continue;
         }
 
-        const codesRef = db.collection('products').doc(productId).collection('digital_codes');
-        const availableCodeQuery = codesRef.where('isUsed', '==', false).limit(1);
+        // Codes are stored in top-level collection: productCodes
+        // Document example:
+        // {
+        //   code: "XXXX-XXXX",
+        //   productId: "PRODUCT_DOC_ID",
+        //   status: "available"
+        // }
+        const codesRef = db.collection('productCodes');
+        const availableCodeQuery = codesRef
+          .where('productId', '==', productId)
+          .where('status', '==', 'available')
+          .limit(1);
+
         const codeSnapshot = await transaction.get(availableCodeQuery);
 
         if (codeSnapshot.empty) {
@@ -234,15 +245,18 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
         const codeData = codeDoc.data();
 
         transaction.update(codeDoc.ref, {
-          isUsed: true,
+          status: 'used',
           orderId,
           customerEmail,
+          usedAt: admin.firestore.FieldValue.serverTimestamp(),
           purchasedAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
         purchasedCodes.push({
           productName: item.name || productId,
-          code: codeData.code
+          code: codeData.code,
+          codeDocId: codeDoc.id,
+          productId
         });
       }
     });
@@ -253,6 +267,38 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       console.error('Payment paid, but no codes were pulled from Firebase.');
       return res.status(200).send('No codes available');
     }
+
+    await db.collection('orders').doc(String(orderId)).set({
+      orderId: String(orderId),
+      invoiceId: String(orderId),
+      customerEmail,
+      customerName: paymentData.CustomerName || req.body?.Data?.Customer?.Name || '',
+      customerPhone: paymentData.CustomerMobile || req.body?.Data?.Customer?.Mobile || '',
+      amount: Number(paymentData.InvoiceValue || paymentData.InvoiceDisplayValue || req.body?.Data?.Amount?.ValueInBaseCurrency || 0),
+      currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
+      orderStatus: 'paid',
+      paymentStatus: 'paid',
+      paymentProvider: 'myfatoorah',
+      items: cartItems,
+      codes: purchasedCodes,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    await db.collection('transactions').doc(String(orderId)).set({
+      orderId: String(orderId),
+      invoiceId: String(orderId),
+      transactionId: paymentData.InvoiceTransactions?.[0]?.TransactionId || req.body?.Data?.Invoice?.Id || '',
+      customerEmail,
+      amount: Number(paymentData.InvoiceValue || paymentData.InvoiceDisplayValue || req.body?.Data?.Amount?.ValueInBaseCurrency || 0),
+      currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
+      paymentStatus: 'paid',
+      provider: 'myfatoorah',
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    console.log('ORDER SAVED:', orderId);
+    console.log('TRANSACTION SAVED:', orderId);
 
     await sendCodesEmail(customerEmail, orderId, purchasedCodes);
     console.log('Codes email sent to:', customerEmail);
