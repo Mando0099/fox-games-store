@@ -224,18 +224,26 @@
       color: #fff;
       transform: scale(1.05);
     }
-    .coupon input, .checkoutForm input, .checkoutForm select {
+    .coupon .checkoutForm {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .coupon input, .checkoutForm input {
       background: #0d1722 !important;
       border: 1px solid rgba(255,255,255,0.08) !important;
       color: #fff !important;
       border-radius: 8px !important;
       padding: 10px 12px !important;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus {
+    .coupon input:focus, .checkoutForm input:focus {
       border-color: #65cc00 !important;
+      outline: none;
     }
     
-    /* ستايل مخصص لزر إتمام الشراء المطور والاحترافي */
+    /* ستايل زر إتمام الشراء المطور والاحترافي المدمج بشعارات الفيزا والماستركارد */
     .btn-pay-now-pro {
       width: 100%;
       background: linear-gradient(135deg, #65cc00 0%, #4da200 100%);
@@ -249,7 +257,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
     }
@@ -257,6 +265,18 @@
       background: linear-gradient(135deg, #76de0c 0%, #59ba00 100%);
       box-shadow: 0 6px 20px rgba(101, 204, 0, 0.4);
       transform: translateY(-1px);
+    }
+    .payment-logos-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .pay-mini-logo {
+      height: 14px;
+      display: block;
     }
     /* ================= END MODERN CART STYLE ================= */
   </style>
@@ -454,20 +474,16 @@
       <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name" required>
       <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
       <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
-      <select id="paymentMethod" required>
-        <option data-i18n="opt_visa">Visa / MasterCard</option>
-        <option data-i18n="opt_wallet">Wallet</option>
-        <option data-i18n="opt_vodafone">Vodafone Cash</option>
-        <option data-i18n="opt_fawry">Fawry</option>
-        <option data-i18n="opt_bank">Bank Transfer</option>
-      </select>
       
-      <button class="btn-pay-now-pro" onclick="checkout()" data-i18n="btn_pay_now">
-        <i class="fa-solid fa-credit-card"></i> 
-        <span>Pay Now</span>
+      <button class="btn-pay-now-pro" onclick="checkout()">
+        <div class="payment-logos-container">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="pay-mini-logo">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="pay-mini-logo">
+        </div>
+        <span data-i18n="btn_pay_now">Pay Now</span>
       </button>
       
-      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 10px;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 4px;">
         <i class="fa-solid fa-shield-halved" style="color: #65cc00;"></i>
         <span>Secure Secure 256-bit Connection</span>
       </div>
