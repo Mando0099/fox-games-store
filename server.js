@@ -6,8 +6,9 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-  });
+  projectId: process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT,
+  databaseURL: process.env.FIREBASE_DATABASE_URL
+});
 }
 const db = admin.firestore();
 
