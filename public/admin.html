@@ -15,6 +15,93 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js"></script>
+
+  <style>
+    .custom-table-container {
+      background: #0b1320;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      margin-top: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    }
+    
+    .table-toolbar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pro-input-search, .pro-select-filter {
+      background: #142032 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 8px !important;
+      color: #fff !important;
+      padding: 12px 16px !important;
+      font-family: 'Cairo', sans-serif !important;
+      font-size: 14px !important;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .pro-input-search:focus, .pro-select-filter:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .table-responsive-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    #codesTablePro {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      min-width: 600px; /* يضمن عدم انضغاط البيانات على الموبايل وظهور شريط تمرير مريح */
+    }
+
+    #codesTablePro th {
+      background: #101a26;
+      padding: 16px;
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 600;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    }
+
+    #codesTablePro td {
+      padding: 14px 16px;
+      color: #e2e8f0;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      vertical-align: middle;
+    }
+
+    #codesTablePro tbody tr:hover {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    /* تحسين مظهر التمرير (Scrollbar) ليناسب طابع الجيمنج المظلم */
+    .table-responsive-wrapper::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .table-responsive-wrapper::-webkit-scrollbar-track {
+      background: #0b1320;
+    }
+    .table-responsive-wrapper::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+    .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6;
+    }
+  </style>
 </head>
 
 <body>
@@ -173,11 +260,9 @@
         <input id="productId" type="hidden" />
         <div class="form-grid">
           <input id="name" placeholder="اسم المنتج" />
-           
           <select id="category">
               <option value="">جاري تحميل التصنيفات المتاحة...</option>
           </select>
-
           <input id="game" placeholder="اسم اللعبة" />
           <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
           <input id="price" type="number" placeholder="السعر EGP" />
@@ -222,7 +307,8 @@
         <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
         <button onclick="saveCodes()">حفظ الأكواد</button>
       </div>
-      <div id="codesList" style="margin-top: 25px;"></div>
+
+      <div id="codesList" class="custom-table-container"></div>
     </section>
 
     <section id="orders" class="page">
@@ -271,8 +357,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // الرسوم البيانية التلقائية الافتراضية لحين تحميل بيانات الـ Firestore
     document.addEventListener("DOMContentLoaded", function() {
-      // 1. تهيئة الرسم البياني الأساسي (الإيرادات)
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
@@ -317,13 +403,8 @@
         });
       }
 
-      // 2. تهيئة الرسم البياني المتقدم في صفحة التقارير (تجنب بقائه فارغاً)
       const ctxDetailed = document.getElementById('detailedReportChart');
       if(ctxDetailed) {
-        const detailGradient = ctxDetailed.getContext('2d').createLinearGradient(0, 0, 0, 350);
-        detailGradient.addColorStop(0, 'rgba(157, 78, 221, 0.3)');
-        detailGradient.addColorStop(1, 'rgba(157, 78, 221, 0)');
-
         new Chart(ctxDetailed, {
           type: 'bar', 
           data: {
