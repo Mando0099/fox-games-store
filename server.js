@@ -52,7 +52,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
 
-    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/ExecutePayment`);
 
     const response = await axios.post(`${MYFATOORAH_API_URL}/ExecutePayment`, {
       PaymentMethodId: 0, 
