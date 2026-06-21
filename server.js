@@ -5,10 +5,9 @@ const axios = require('axios');
 const admin = require('firebase-admin'); 
 const nodemailer = require('nodemailer'); 
 
-// تهيئة الفايربيز باستخدام الـ Database URL (بدون الحاجة لملف الـ json السري)
+// تهيئة الفايربيز باستخدام الـ Database URL
 if (!admin.apps.length) {
   admin.initializeApp({
-    // سيتم جلب رابط قاعدة البيانات تلقائياً من ملف الـ .env لحماية بياناتك
     databaseURL: process.env.FIREBASE_DATABASE_URL 
   });
 }
@@ -41,7 +40,7 @@ function money(amount) {
   return value.toFixed(2);
 }
 
-// 1. مسار استقبال طلب الدفع من المتجر وتوليد رابط ماي فاتورة
+// 1. مسار استقبال طلب الدفع وتوليد رابط الدفع المباشر (تعديل دالة كاشير)
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   try {
     if (!MYFATOORAH_TOKEN) return res.status(500).json({ message: 'Missing MyFatoorah token in .env file.' });
@@ -53,8 +52,9 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
 
-    const response = await axios.post(`${MYFATOORAH_API_URL}/SendPayment`, {
-      NotificationOption: 'LNK',
+    // 🌟 التعديل السحري: استخدام ExecutePayment لتخطي كاشير العام وفتح الفاتورة فوراً
+    const response = await axios.post(`${MYFATOORAH_API_URL}/ExecutePayment`, {
+      PaymentMethodId: 0, // 0 يعرض جميع وسائل الدفع المتاحة لمتجرك (فيزا، فودافون كاش، فوري) في صفحة فاتورة احترافية باسمك
       InvoiceValue: amount,
       CustomerEmail: customerEmail,
       CustomerName: order.customer?.name || 'Fox Games Customer',
@@ -67,9 +67,10 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
     });
 
     if (response.data.IsSuccess) {
-      res.json({ success: true, paymentUrl: response.data.Data.InvoiceURL });
+      // الروابط المباشرة في ExecutePayment تكون داخل PaymentURL وليس InvoiceURL
+      res.json({ success: true, paymentUrl: response.data.Data.PaymentURL });
     } else {
-      res.status(400).json({ success: false, message: 'Failed to create MyFatoorah invoice.' });
+      res.status(400).json({ success: false, message: 'Failed to create MyFatoorah execution link.' });
     }
   } catch (e) {
     res.status(400).json({ success: false, message: e.response?.data?.Message || e.message });
