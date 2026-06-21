@@ -1,313 +1,569 @@
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
+/* ==========================================================================
+   Fox Store Admin - Ultimate Gaming Dark Theme
+   ========================================================================== */
+
+:root {
+  /* نظام الألوان الأساسي */
+  --bg-main: #060b11;         /* خلفية المتصفح الأساسية */
+  --bg-card: #0d1520;         /* خلفية الكروت والأقسام */
+  --bg-input: #080d14;        /* خلفية حقول الإدخال */
+  --bg-accent: #142032;       /* حقول التركيز والـ Hover */
+  
+  /* ألوان الهوية والإضاءة النيون */
+  --neon-blue: #3b82f6;       /* الأزرق المضيء الأساسي */
+  --neon-purple: #9d4edd;     /* البنفسجي */
+  --neon-green: #65cc00;      /* الأخضر للأرباح */
+  --neon-orange: #ff9f1c;     /* البرتقالي للتنبيهات */
+  --neon-pink: #f72585;       /* الوردي */
+  
+  /* النصوص */
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  
+  /* المؤثرات */
+  --transition-fast: 0.25s ease;
+  --radius-main: 14px;
 }
 
-body{
-background:#070b1d;
-color:#fff;
-display:flex;
-min-height:100vh;
+/* --- الإعدادات العامة --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Cairo', 'Segoe UI', sans-serif;
 }
 
-.sidebar{
-width:260px;
-background:#090f24;
-border-left:1px solid rgba(255,255,255,.08);
-padding:25px;
-display:flex;
-flex-direction:column;
-gap:20px;
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  display: flex;
+  min-height: 100vh;
 }
 
-.brand{
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:15px;
+/* ==========================================================================
+   القائمة الجانبية (Sidebar)
+   ========================================================================== */
+.sidebar {
+  width: 270px;
+  background-color: var(--bg-card);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
-.logo{
-font-size:40px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  padding: 0 10px;
 }
 
-.brand h1{
-font-size:28px;
-color:#9c5cff;
+.logo {
+  font-size: 28px;
+  color: var(--neon-blue);
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
-.brand span{
-font-size:12px;
-opacity:.7;
+.brand h1 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #fff, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.sidebar nav{
-display:flex;
-flex-direction:column;
-gap:10px;
+.brand span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--neon-blue);
+  opacity: 0.9;
 }
 
-.nav-btn{
-background:transparent;
-border:none;
-color:#fff;
-padding:14px;
-border-radius:12px;
-cursor:pointer;
-text-align:right;
-font-size:15px;
-transition:.3s;
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.nav-btn:hover,
-.nav-btn.active{
-background:linear-gradient(135deg,#8f48ff,#5d5cff);
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 14px 18px;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: var(--transition-fast);
 }
 
-.admin-box{
-margin-top:auto;
-background:#111a35;
-padding:15px;
-border-radius:14px;
-display:flex;
-align-items:center;
-gap:10px;
+.nav-btn i {
+  font-size: 17px;
+  width: 20px;
 }
 
-.avatar{
-font-size:35px;
+.nav-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-accent);
 }
 
-.logout{
-margin-top:10px;
-background:#ff3d67;
-border:none;
-color:white;
-padding:14px;
-border-radius:12px;
-cursor:pointer;
+.nav-btn.active {
+  color: var(--text-main);
+  background: linear-gradient(270deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%);
+  border-right: 4px solid var(--neon-blue);
+  padding-right: 14px; /* موازنة المسافة بعد إضافة البوردر */
 }
 
-.main{
-flex:1;
-padding:30px;
+.admin-box {
+  margin-top: auto;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  border-radius: var(--radius-main);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px;
+.avatar {
+  font-size: 26px;
+  color: var(--text-muted);
 }
 
-.top-actions{
-display:flex;
-align-items:center;
-gap:15px;
+.admin-info strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-main);
 }
 
-.icon-btn,
-.lang-btn{
-background:#111a35;
-border:none;
-color:white;
-padding:10px 15px;
-border-radius:12px;
-cursor:pointer;
+.admin-info small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-.page{
-display:none;
+.logout {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  padding: 14px;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: var(--transition-fast);
 }
 
-.page.active{
-display:block;
+.logout:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
-.page-head{
-margin-bottom:25px;
+/* ==========================================================================
+   المحتوى الرئيسي والـ Topbar
+   ========================================================================== */
+.main {
+  flex: 1;
+  padding: 35px;
+  background-color: var(--bg-main);
+  max-width: calc(100% - 270px);
 }
 
-.page-head h2{
-font-size:42px;
-margin-bottom:8px;
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
-.page-head p{
-color:#9aa4c3;
+.menu-btn {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: white;
+  padding: 12px;
+  border-radius: var(--radius-main);
+  cursor: pointer;
 }
 
-.stats-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-margin-bottom:30px;
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.stat-card{
-padding:25px;
-border-radius:20px;
-display:flex;
-gap:15px;
-align-items:center;
-color:white;
+.search-container {
+  position: relative;
+  width: 280px;
 }
 
-.purple{background:linear-gradient(135deg,#7d3cff,#b44dff);}
-.blue{background:linear-gradient(135deg,#2448ff,#2b74ff);}
-.green{background:linear-gradient(135deg,#0d6e4e,#17b26a);}
-.orange{background:linear-gradient(135deg,#b56b0a,#ff9d00);}
-.pink{background:linear-gradient(135deg,#8a215e,#d93d9c);}
-
-.stat-icon{
-font-size:38px;
+.search-container i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
 }
 
-.stat-card strong{
-display:block;
-font-size:30px;
-margin-top:8px;
+.search-container input {
+  padding: 11px 40px 11px 15px;
+  font-size: 13px;
 }
 
-.dashboard-grid{
-display:grid;
-grid-template-columns:2fr 1fr;
-gap:20px;
+.icon-btn, .lang-btn {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: white;
+  padding: 11px 16px;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  font-weight: 600;
+  position: relative;
+  transition: var(--transition-fast);
 }
 
-.panel{
-background:#0f1731;
-border:1px solid rgba(255,255,255,.08);
-border-radius:20px;
-padding:20px;
-margin-bottom:20px;
+.icon-btn:hover, .lang-btn:hover {
+  background-color: var(--bg-accent);
 }
 
-.panel-head{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:15px;
+.icon-btn .badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  background: var(--neon-pink);
+  box-shadow: 0 0 8px var(--neon-pink);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 20px;
 }
 
-.panel-head button{
-background:#151f42;
-border:none;
-color:white;
-padding:8px 15px;
-border-radius:10px;
+.welcome {
+  text-align: left;
+  margin-right: 5px;
 }
 
-.big{
-grid-column:span 1;
+.welcome small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
 }
 
-.chart-placeholder{
-height:280px;
-border-radius:15px;
-background:#0b1228;
-position:relative;
-overflow:hidden;
+/* ==========================================================================
+   الصفحات وكروت الإحصائيات (المضيئة كلياً)
+   ========================================================================== */
+.page-head {
+  margin-bottom: 35px;
 }
 
-.line{
-position:absolute;
-width:100%;
-height:100%;
-background:linear-gradient(to top,rgba(153,76,255,.3),transparent);
+.page-head h2 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 6px;
 }
 
-.form-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-margin-bottom:15px;
+.page-head p {
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
-input,
-textarea,
-select{
-width:100%;
-background:#0a1022;
-border:1px solid rgba(255,255,255,.08);
-padding:14px;
-border-radius:12px;
-color:white;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 35px;
 }
 
-textarea{
-min-height:120px;
-resize:vertical;
+/* الكروت بستايل الـ Glow المطور للتصميم الجديد */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 25px;
+  border-radius: 18px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.actions{
-display:flex;
-gap:10px;
-margin-top:15px;
+.stat-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
 }
 
-.actions button,
-.form-panel button{
-background:linear-gradient(135deg,#8f48ff,#5d5cff);
-border:none;
-padding:12px 20px;
-color:white;
-border-radius:12px;
-cursor:pointer;
+.stat-content {
+  display: flex;
+  flex-direction: column;
 }
 
-.ghost{
-background:#222 !important;
+.stat-content span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.cards-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:20px;
+.stat-content strong {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 4px 0;
 }
 
-.table-box{
-overflow:auto;
+.stat-content small {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-.alert{
-padding:14px;
-border-radius:12px;
-margin-bottom:10px;
+/* تلوين تأثيرات الـ Glow الفريدة لكل كارت */
+.purple .stat-icon { background: rgba(157, 78, 221, 0.12); color: var(--neon-purple); }
+.purple { border-bottom: 3px solid var(--neon-purple); }
+
+.blue .stat-icon { background: rgba(59, 130, 246, 0.12); color: var(--neon-blue); }
+.blue { border-bottom: 3px solid var(--neon-blue); }
+
+.green .stat-icon { background: rgba(101, 204, 0, 0.12); color: var(--neon-green); }
+.green { border-bottom: 3px solid var(--neon-green); }
+
+.orange .stat-icon { background: rgba(255, 159, 28, 0.12); color: var(--neon-orange); }
+.orange { border-bottom: 3px solid var(--neon-orange); }
+
+.pink .stat-icon { background: rgba(247, 37, 133, 0.12); color: var(--neon-pink); }
+.pink { border-bottom: 3px solid var(--neon-pink); }
+
+.trend.positive {
+  color: var(--neon-green);
+  font-weight: 700;
 }
 
-.warning{
-background:#7a54001f;
-border:1px solid #ffb300;
+/* ==========================================================================
+   الـ Panels والـ Dashboard Layout
+   ========================================================================== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1.1fr;
+  gap: 25px;
 }
 
-.success{
-background:#006f421f;
-border:1px solid #00d47e;
+.panel {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 0; /* تم إلغاء المارجن السفلية لتناسق الـ Grid */
 }
 
-.danger{
-background:#7f001f1f;
-border:1px solid #ff3d67;
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-@media(max-width:1000px){
-
-body{
-flex-direction:column;
+.panel-head h3 {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.sidebar{
-width:100%;
+.panel-head h3 i {
+  color: var(--neon-blue);
 }
 
-.dashboard-grid{
-grid-template-columns:1fr;
+.panel-head button, .view-all-btn {
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
 }
 
-.page-head h2{
-font-size:28px;
+.panel-head button:hover, .view-all-btn:hover {
+  background: var(--bg-accent);
+  color: white;
 }
+
+.big {
+  grid-column: span 1;
+}
+
+/* إعدادات مساحة الـ Chart */
+.chart-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neon-blue);
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 260px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   الفورم وعناصر الإدخال (Forms & Inputs)
+   ========================================================================== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+input, textarea, select {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 14px 18px;
+  border-radius: var(--radius-main);
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--neon-blue);
+  background-color: var(--bg-accent);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* الأزرار الاحترافية بنظام التدرج النيوني */
+.actions button, .form-panel button {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border: none;
+  padding: 14px 25px;
+  color: white;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transition: var(--transition-fast);
+}
+
+.actions button:hover, .form-panel button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.ghost {
+  background: var(--bg-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-muted) !important;
+  box-shadow: none !important;
+}
+
+.ghost:hover {
+  background: var(--bg-accent) !important;
+  color: white !important;
+}
+
+/* ==========================================================================
+   التنبيهات والجداول (Alerts & Tables)
+   ========================================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.table-box {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--radius-main);
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.warning {
+  background: rgba(255, 159, 28, 0.07);
+  border: 1px solid rgba(255, 159, 28, 0.2);
+  color: var(--neon-orange);
+}
+
+.success {
+  background: rgba(101, 204, 0, 0.07);
+  border: 1px solid rgba(101, 204, 0, 0.2);
+  color: var(--neon-green);
+}
+
+.danger {
+  background: rgba(247, 37, 133, 0.07);
+  border: 1px solid rgba(247, 37, 133, 0.2);
+  color: var(--neon-pink);
+}
+
+/* ==========================================================================
+   التوافق مع الشاشات (Responsive Design)
+   ========================================================================== */
+@media(max-width: 1150px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media(max-width: 1000px) {
+  body {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  
+  .main {
+    max-width: 100%;
+    padding: 20px;
+  }
+  
+  .page-head h2 {
+    font-size: 28px;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
 }
