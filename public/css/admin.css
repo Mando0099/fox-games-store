@@ -538,7 +538,7 @@ input:focus, textarea:focus, select:focus {
 .table-box {
   width: 100% !important;
   overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch; /* سحب ناعم ومريح للموبايل */
+  -webkit-overflow-scrolling: touch; 
   background: var(--bg-card);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -547,10 +547,10 @@ input:focus, textarea:focus, select:focus {
 
 table {
   width: 100%;
-  border-collapse: collapse; /* تفضيل الـ collapse للتحكم الكامل بالحواف */
+  border-collapse: collapse; 
   text-align: right;
   margin-top: 10px;
-  min-width: 650px; /* يمنع الجدول من الانضغاط بشكل مشوه ويُجبر الـ Scroll Horizontal */
+  min-width: 650px; 
 }
 
 th {
@@ -568,8 +568,8 @@ td {
   font-size: 14px;
   color: var(--text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  white-space: nowrap;      /* منع الكلمات من التداخل والنزول المشوه */
-  text-overflow: ellipsis;  /* إضافة النقاط الثلاثة إذا زاد النص عن العرض */
+  white-space: nowrap;      
+  text-overflow: ellipsis;  
   overflow: hidden;
   max-width: 250px;         
 }
@@ -613,6 +613,22 @@ select option {
   background-color: var(--bg-card);
   color: var(--text-main);
   padding: 10px;
+}
+
+/* ==========================================================================
+   🛠️ التنسيقات الإضافية لـ SweetAlert2 وصور المعاينة
+   ========================================================================== */
+/* توحيد نوع الخط داخل نوافذ تنبيهات SweetAlert ليكون متناسقاً */
+.swal2-popup, .swal2-title, .swal2-content, .swal2-html-container {
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* ستايل مخصص لصور المعاينة لتبدو كأنها جزء مدمج من الـ Form */
+#imagePreview, #categoryImagePreview {
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+  max-width: 120px;
+  max-height: 120px;
 }
 
 /* ==========================================================================
@@ -676,10 +692,10 @@ select option {
 
 @media (max-width: 680px) {
   .top-actions .welcome {
-    display: none; /* إخفاء الاسم والترحيب لتوفير مساحة للأزرار الملحقة */
+    display: none; 
   }
   
   .search-container {
-    display: none; /* إخفاء شريط البحث الطويل من التوب بار بالموبايل حمايةً للشاشة */
+    display: none; 
   }
 }
