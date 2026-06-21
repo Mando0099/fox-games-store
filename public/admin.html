@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fox Store Admin</title>
+  <title>Fox Store Admin - لوحة التحكم</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <link rel="stylesheet" href="/css/admin.css" />
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -17,45 +20,52 @@
 <body>
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo">🦊</div>
-      <div>
+      <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
+      <div class="brand-text">
         <h1>FOX STORE</h1>
-        <span>ADMIN</span>
+        <span>ADMIN SYSTEM</span>
       </div>
     </div>
 
     <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard', this)">🏠 الرئيسية</button>
-      <button class="nav-btn" onclick="showPage('products', this)">📦 المنتجات</button>
-      <button class="nav-btn" onclick="showPage('categories', this)">📁 التصنيفات</button>
-      <button class="nav-btn" onclick="showPage('codes', this)">🎟️ أكواد المنتجات</button>
-      <button class="nav-btn" onclick="showPage('orders', this)">🛒 الطلبات</button>
-      <button class="nav-btn" onclick="showPage('coupons', this)">٪ أكواد الخصم</button>
-      <button class="nav-btn" onclick="showPage('customers', this)">👥 العملاء</button>
-      <button class="nav-btn" onclick="showPage('reports', this)">📊 التقارير</button>
+      <button class="nav-btn active" onclick="showPage('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products', this)"><i class="fa-solid fa-cubes"></i> المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories', this)"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes', this)"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders', this)"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons', this)"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
     </nav>
 
     <div class="admin-box">
-      <div class="avatar">👤</div>
-      <div>
+      <div class="avatar"><i class="fa-solid fa-circle-user"></i></div>
+      <div class="admin-info">
         <strong>مدير المتجر</strong>
         <small id="adminEmail">namy9585@gmail.com</small>
       </div>
     </div>
 
-    <button class="logout" onclick="logout()">تسجيل الخروج</button>
+    <button class="logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
   </aside>
 
   <main class="main">
     <header class="topbar">
-      <button class="menu-btn">☰</button>
+      <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
 
       <div class="top-actions">
-        <button class="icon-btn">🔔 <span>5</span></button>
-        <button class="lang-btn">🌐 العربية</button>
+        <div class="search-container">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="بحث عن طلب، منتج، عميل...">
+        </div>
+        <button class="icon-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span class="badge">5</span>
+        </button>
+        <button class="lang-btn"><i class="fa-solid fa-earth-americas"></i> العربية</button>
         <div class="welcome">
-          <small>مرحباً بك</small>
-          <strong>مدير المتجر</strong>
+          <small>مرحباً بك،</small>
+          <strong>محمد أشرف 👋</strong>
         </div>
       </div>
     </header>
@@ -63,52 +73,52 @@
     <section id="dashboard" class="page active">
       <div class="page-head">
         <h2>لوحة التحكم</h2>
-        <p>مرحباً بك في لوحة إدارة المتجر</p>
+        <p>إليك نظرة عامة على أداء متجرك الرقمي اليوم</p>
       </div>
 
       <div class="stats-grid">
         <div class="stat-card purple">
-          <div class="stat-icon">💰</div>
-          <div>
+          <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+          <div class="stat-content">
             <span>إجمالي المبيعات</span>
             <strong id="salesTotal">0 EGP</strong>
-            <small>+12.5% عن الشهر الماضي</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +23.5% من الشهر الماضي</small>
           </div>
         </div>
 
         <div class="stat-card blue">
-          <div class="stat-icon">📦</div>
-          <div>
+          <div class="stat-icon"><i class="fa-solid fa-box-open"></i></div>
+          <div class="stat-content">
             <span>إجمالي المنتجات</span>
             <strong id="productsCount">0</strong>
-            <small>منتجات مضافة</small>
+            <small>منتج متاح بالمتجر</small>
           </div>
         </div>
 
         <div class="stat-card green">
-          <div class="stat-icon">🛒</div>
-          <div>
+          <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+          <div class="stat-content">
             <span>إجمالي الطلبات</span>
             <strong id="ordersCount">0</strong>
-            <small>طلب جديد</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +18.7% اليوم</small>
           </div>
         </div>
 
         <div class="stat-card orange">
-          <div class="stat-icon">🎟️</div>
-          <div>
+          <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+          <div class="stat-content">
             <span>الأكواد المتاحة</span>
             <strong id="codesCount">0</strong>
-            <small>كود متاح</small>
+            <small>جاهزة للتسليم الفوري</small>
           </div>
         </div>
 
         <div class="stat-card pink">
-          <div class="stat-icon">👥</div>
-          <div>
+          <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-content">
             <span>إجمالي العملاء</span>
             <strong id="customersCount">0</strong>
-            <small>عميل مسجل</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +15.2% عميل جديد</small>
           </div>
         </div>
       </div>
@@ -116,37 +126,37 @@
       <div class="dashboard-grid">
         <div class="panel big">
           <div class="panel-head">
-            <h3>آخر الطلبات</h3>
-            <button>عرض الكل</button>
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> آخر الطلبات</h3>
+            <button class="view-all-btn" onclick="showPage('orders')">عرض الكل</button>
           </div>
           <div id="latestOrders" class="table-box"></div>
         </div>
 
-        <div class="panel">
+        <div class="panel chart-panel">
           <div class="panel-head">
-            <h3>المبيعات آخر 7 أيام</h3>
-            <button>7 أيام</button>
+            <h3><i class="fa-solid fa-chart-line"></i> الإيرادات (آخر 30 يوم)</h3>
+            <span class="chart-amount">3,245.60 EGP اليوم</span>
           </div>
-          <div class="chart-placeholder">
-            <div class="line"></div>
+          <div class="chart-wrapper">
+            <canvas id="revenueChart"></canvas>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel list-panel">
           <div class="panel-head">
-            <h3>أفضل المنتجات</h3>
+            <h3><i class="fa-solid fa-fire"></i> أفضل المنتجات مبيعاً</h3>
           </div>
           <div id="topProducts" class="mini-list"></div>
         </div>
 
-        <div class="panel">
+        <div class="panel alerts-panel">
           <div class="panel-head">
-            <h3>تنبيهات</h3>
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> مركز التنبيهات الذكي</h3>
           </div>
           <div class="alerts">
-            <div class="alert warning">⚠️ نفاد بعض الأكواد قريباً</div>
-            <div class="alert success">✅ طلب جديد تم استلامه</div>
-            <div class="alert danger">٪ كوبون منتهي</div>
+            <div class="alert warning"><i class="fa-solid fa-gauge-high"></i> نفاد بعض أكواد PUBG UC قريباً!</div>
+            <div class="alert success"><i class="fa-solid fa-circle-check"></i> تم تأكيد طلب العميل وتوصيل الكود تلقائياً.</div>
+            <div class="alert danger"><i class="fa-solid fa-circle-xmark"></i> كود الخصم FOX10 انتهت صلاحيته.</div>
           </div>
         </div>
       </div>
@@ -157,10 +167,8 @@
         <h2>إدارة المنتجات</h2>
         <p>إضافة وتعديل المنتجات الرقمية</p>
       </div>
-
       <div class="panel form-panel">
         <input id="productId" type="hidden" />
-
         <div class="form-grid">
           <input id="name" placeholder="اسم المنتج" />
           <input id="category" placeholder="التصنيف مثل PUBG / Fortnite" />
@@ -168,23 +176,17 @@
           <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
           <input id="price" type="number" placeholder="السعر EGP" />
           <input type="file" id="imageFile" accept="image/*">
-          <img id="imagePreview"
-          style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
+          <img id="imagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
         </div>
-
         <textarea id="description" placeholder="وصف المنتج"></textarea>
-
         <label class="check">
-          <input id="active" type="checkbox" checked />
-          المنتج مفعل
+          <input id="active" type="checkbox" checked /> المنتج مفعل
         </label>
-
         <div class="actions">
           <button onclick="saveProduct()">حفظ المنتج</button>
           <button class="ghost" onclick="clearProductForm()">تفريغ</button>
         </div>
       </div>
-
       <div id="productsList" class="cards-grid"></div>
     </section>
 
@@ -193,17 +195,14 @@
         <h2>التصنيفات</h2>
         <p>إدارة تصنيفات المنتجات</p>
       </div>
-
       <div class="panel form-panel">
         <div class="form-grid">
           <input id="catName" placeholder="اسم التصنيف" />
           <input type="file" id="categoryImageFile" accept="image/*" />
-          <img id="categoryImagePreview"
-           style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
+          <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
         </div>
         <button onclick="saveCategory()">حفظ التصنيف</button>
       </div>
-
       <div id="categoriesList" class="cards-grid"></div>
     </section>
 
@@ -212,17 +211,11 @@
         <h2>أكواد المنتجات</h2>
         <p>ربط مجموعة أكواد بكل منتج</p>
       </div>
-
       <div class="panel form-panel">
-        <select id="codeProductId">
-          <option value="">اختر المنتج</option>
-        </select>
-
+        <select id="codeProductId"><option value="">اختر المنتج</option></select>
         <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
-
         <button onclick="saveCodes()">حفظ الأكواد</button>
       </div>
-
       <div id="codesList" class="cards-grid"></div>
     </section>
 
@@ -231,7 +224,6 @@
         <h2>الطلبات</h2>
         <p>متابعة الطلبات وتسليم الأكواد</p>
       </div>
-
       <div id="ordersList" class="panel table-box"></div>
     </section>
 
@@ -240,7 +232,6 @@
         <h2>أكواد الخصم</h2>
         <p>إنشاء وإدارة كوبونات الخصم</p>
       </div>
-
       <div class="panel form-panel">
         <div class="form-grid">
           <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
@@ -248,7 +239,6 @@
         </div>
         <button onclick="saveCoupon()">حفظ الكوبون</button>
       </div>
-
       <div id="couponsList" class="cards-grid"></div>
     </section>
 
@@ -257,50 +247,71 @@
         <h2>العملاء</h2>
         <p>بيانات العملاء المسجلين</p>
       </div>
-
       <div id="customersList" class="panel table-box"></div>
     </section>
 
     <section id="reports" class="page">
       <div class="page-head">
-        <h2>التقارير</h2>
-        <p>إحصائيات المبيعات والمنتجات</p>
+        <h2>التقارير التفصيلية</h2>
+        <p>إحصائيات المبيعات والمنتجات المتقدمة</p>
       </div>
-
       <div class="panel">
-        <h3>قريباً: تقارير تفصيلية ورسوم بيانية</h3>
+        <canvas id="detailedReportChart"></canvas>
       </div>
     </section>
   </main>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-window.showPage = function(id, btn){
-  document.querySelectorAll('.page').forEach(function(p){
-    p.classList.remove('active');
-  });
+    window.showPage = function(id, btn){
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+      var page = document.getElementById(id);
+      if(page){ page.classList.add('active'); }
+      document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+      if(btn){ btn.classList.add('active'); }
+    };
 
-  var page = document.getElementById(id);
-  if(page){
-    page.classList.add('active');
-  }
+    window.logout = function(){
+      firebase.auth().signOut().then(function(){ location.href = '/login.html'; });
+    };
 
-  document.querySelectorAll('.nav-btn').forEach(function(b){
-    b.classList.remove('active');
-  });
+    // تشغيل المنحنى البياني فوراً ليعطي نفس مظهر لوحة الألعاب المضيئة
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('revenueChart');
+      if(ctx) {
+        const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
-  if(btn){
-    btn.classList.add('active');
-  }
-};
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['أبريل', '27 أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'],
+            datasets: [{
+              data: [1200, 2900, 2100, 3800, 3245.60, 4200],
+              borderColor: '#3b82f6',
+              borderWidth: 3,
+              backgroundColor: ctxGradient,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#3b82f6',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
+              y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+            }
+          }
+        });
+      }
+    });
+  </script>
 
-window.logout = function(){
-  firebase.auth().signOut().then(function(){
-    location.href = '/login.html';
-  });
-};
-</script>
-
-<script src="/js/admin.js?v=200"></script>
-</body>
+  <script src="/js/admin.js?v=200"></script>
 </body>
 </html>
