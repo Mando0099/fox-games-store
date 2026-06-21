@@ -6,11 +6,13 @@ const $ = id => document.getElementById(id);
 if (typeof cart === 'undefined') {
   var cart = JSON.parse(localStorage.getItem('foxgames_cart')) || [];
 }
+// إلغاء أي خصم تلقائي مسبق - الكوبون يبدأ دائماً من الصفر
 if (typeof coupon === 'undefined') {
-  var coupon = Number(localStorage.getItem('foxgames_coupon')) || 0;
+  var coupon = 0; 
+  localStorage.setItem('foxgames_coupon', '0');
 }
 
-// مصفوفة الترجمة الحقيقية المتوافقة مع أوسمة الـ HTML الجديدة
+// مصفوفة الترجمة الحقيقية المتوافقة مع أوسمة الـ HTML والتعديلات الجديدة
 const translations = {
   en: {
     nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
@@ -28,8 +30,7 @@ const translations = {
     sup_title: "Need Help With Your Order?", sup_desc: "Payment failed, code delayed, top-up issue, account problem — contact support instantly.",
     btn_live_chat: "Live Chat", cart_title: "Your Cart", btn_apply: "Apply",
     cart_subtotal: "Subtotal", cart_discount: "Discount", cart_total: "Total",
-    holder_name: "Full Name", holder_phone: "Phone Number", opt_visa: "Visa / MasterCard",
-    opt_wallet: "Wallet", opt_vodafone: "Vodafone Cash", opt_fawry: "Fawry", opt_bank: "Bank Transfer",
+    holder_name: "Full Name", holder_phone: "Phone Number",
     btn_pay_now: "Pay Now", secure_checkout_notice: "Secure checkout connected through the backend.",
     lang_btn: "العربية"
   },
@@ -49,9 +50,8 @@ const translations = {
     sup_title: "هل تحتاج مساعدة في طلبك؟", sup_desc: "تأخر الكود، مشكلة في الشحن، فشل عملية الدفع — تواصل مع الدعم فوراً.",
     btn_live_chat: "المحادثة المباشرة", cart_title: "سلة المشتريات", btn_apply: "تطبيق",
     cart_subtotal: "المجموع الفرعي", cart_discount: "الخصم", cart_total: "الإجمالي الكلي",
-    holder_name: "الاسم بالكامل", holder_phone: "رقم الهاتف المحمول", opt_visa: "فيزا / ماستركارد",
-    opt_wallet: "المحافظ الإلكترونية", opt_vodafone: "فودافون كاش", opt_fawry: "فوري", opt_bank: "تحويل بنكي",
-    btn_pay_now: "ادفع الآن بأمان", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
+    holder_name: "الاسم بالكامل", holder_phone: "رقم الهاتف المحمول",
+    btn_pay_now: "Pay Now", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
     lang_btn: "English"
   }
 };
@@ -205,6 +205,7 @@ function updateCart() {
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
+  // الحساب يعتمد حصراً على الكوبون المدخل يدوياً
   const discountValue = Math.round(subtotal * coupon / 100);
   
   if ($('subtotal')) $('subtotal').textContent = `${subtotal} EGP`;
@@ -216,7 +217,7 @@ function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'ar' : 'en';
   localStorage.setItem('foxgames_lang', currentLang);
   applyLanguage(currentLang);
-  updateCart(); // لتحديث نص السلة الفارغة باللغة الجديدة فوراً
+  updateCart();
 }
 
 function applyLanguage(lang) {
@@ -249,7 +250,7 @@ function applyLanguage(lang) {
   }
 }
 
-// دالة فحص الكوبون الاحترافية والديناميكية بالكامل من الـ Firestore مع الفايربيز بدون كود ثابت
+// دالة فحص وتطبيق الكوبون يدوياً من الـ Firestore
 async function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
   
@@ -269,12 +270,11 @@ async function applyCoupon() {
   }
 
   try {
-    // جلب بيانات الكوبون مباشرة ومطابقته باسم الـ Document المعرّف في الفايربيز
     const couponDoc = await firebase.firestore().collection('coupons').doc(code).get();
 
     if (couponDoc.exists) {
       const couponData = couponDoc.data();
-      coupon = parseFloat(couponData.value || 0); // جلب نسبة الخصم المخزنة في خانة value
+      coupon = parseFloat(couponData.value || 0); 
       save();
       updateCart();
 
@@ -299,7 +299,7 @@ async function applyCoupon() {
   }
 }
 
-// دالة الدفع وإتمام الطلب المحدثة بنظام الحقول الإلزامية الصارمة والـ SweetAlert2 الداكنة
+// دالة الدفع الآلي المباشر عبر بوابة الدفع (بدون حقل Dropdown)
 async function checkout() {
   if (!cart.length) {
     Swal.fire({
@@ -315,7 +315,6 @@ async function checkout() {
   const phone = ($('customerPhone')?.value || '').trim();
   const email = ($('customerEmail')?.value || '').trim();
 
-  // 1. التحقق من ملء جميع الحقول المطلوبة من قبل العميل
   if (!name || !phone || !email) {
     Swal.fire({
       icon: 'warning',
@@ -327,7 +326,6 @@ async function checkout() {
     return;
   }
 
-  // 2. فحص البنية التقنية الصحيحة للإيميل المتلقي للأكواد الرقمية
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     Swal.fire({
@@ -340,7 +338,6 @@ async function checkout() {
     return;
   }
 
-  // 3. التأكد من أن الهاتف يتكون من أرقام فقط ومناسب
   if (isNaN(phone) || phone.length < 11) {
     Swal.fire({
       icon: 'warning',
@@ -361,7 +358,6 @@ async function checkout() {
     return;
   }
 
-  // إظهار مؤشر تحميل احترافي أثناء معالجة الطلب مع السيرفر الخلفي
   Swal.fire({
     title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
     allowOutsideClick: false,
@@ -390,7 +386,6 @@ async function checkout() {
       throw new Error(data.message || 'Payment link was not created.');
     }
 
-    // الانتقال التلقائي لبوابة ماي فاتورة الآمنة
     window.location.href = data.paymentUrl;
 
   } catch (e) {
