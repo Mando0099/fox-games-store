@@ -66,6 +66,35 @@ async function myfatoorahPost(endpoint, body) {
   });
 }
 
+app.get('/api/myfatoorah/payment-methods', async (req, res) => {
+  try {
+    const amount = money(req.query.amount || 1);
+
+    const initiateResponse = await myfatoorahPost('InitiatePayment', {
+      InvoiceAmount: amount,
+      CurrencyIso: 'EGP'
+    });
+
+    if (!initiateResponse.data?.IsSuccess) {
+      return res.status(400).json({
+        success: false,
+        message: getMyFatoorahError(initiateResponse.data)
+      });
+    }
+
+    return res.json({
+      success: true,
+      methods: initiateResponse.data?.Data?.PaymentMethods || []
+    });
+  } catch (e) {
+    console.error('Payment methods error:', e.response?.data || e.message);
+    return res.status(400).json({
+      success: false,
+      message: getMyFatoorahError(e.response?.data) || e.message
+    });
+  }
+});
+
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   try {
     if (!MYFATOORAH_TOKEN) {
@@ -105,14 +134,28 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       });
     }
 
-    const paymentMethodId = paymentMethods[0].PaymentMethodId; 
+    // Use an actually supported payment method returned by MyFatoorah.
+    // MyFatoorah only returns methods active for your account/currency.
+    const selectedPaymentMethodId = Number(order.paymentMethodId || 0);
+    const selectedMethod = selectedPaymentMethodId
+      ? paymentMethods.find(m => Number(m.PaymentMethodId) === selectedPaymentMethodId)
+      : null;
 
-console.log('Available Methods:', paymentMethods);
-console.log('Using PaymentMethodId:', paymentMethodId);
+    const defaultMethod =
+      selectedMethod ||
+      paymentMethods.find(m => /visa|master|card/i.test(`${m.PaymentMethodEn || ''} ${m.PaymentMethodAr || ''}`)) ||
+      paymentMethods[0];
 
-const executeBody = {
-  PaymentMethodId: paymentMethodId, // القيمة هنا هتبقى 0
-  InvoiceValue: amount,
+    const paymentMethodId = Number(defaultMethod.PaymentMethodId);
+
+    console.log('Available MyFatoorah Methods:', JSON.stringify(paymentMethods, null, 2));
+    console.log('Using PaymentMethodId:', paymentMethodId);
+    console.log('Using PaymentMethod:', defaultMethod.PaymentMethodEn || defaultMethod.PaymentMethodAr || '');
+    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+
+    const executeBody = {
+      PaymentMethodId: paymentMethodId,
+      InvoiceValue: amount,
       DisplayCurrencyIso: 'EGP',
       CustomerEmail: customerEmail,
       CustomerName: customerName,
