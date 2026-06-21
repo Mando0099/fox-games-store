@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Fox Store Admin - Ultimate Core Logic & Live Database Sync
+   Fox Store Admin - Ultimate Core Logic & Live Database Sync (Updated)
    ========================================================================== */
 
 let db = null;
@@ -12,26 +12,39 @@ const $ = (id) => document.getElementById(id);
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
-    if (sidebar && overlay) {
+    if (sidebar) {
         sidebar.classList.toggle('active');
+    }
+    if (overlay) {
         overlay.classList.toggle('active');
     }
 }
 
-// تنقل التابات والصفحات مع الإغلاق التلقائي في الموبايل
+// 🔄 تنقل التابات والصفحات مع الإغلاق التلقائي الأكيد للموبايل
 function showPage(id, btn){
+    // 1. إخفاء كافة الصفحات وتفعيل الصفحة المطلوبة
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     if($(id)) $(id).classList.add('active');
 
+    // 2. تحديث حالة أزرار القائمة الجانبية (الزر النشط)
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if(btn) btn.classList.add('active');
+    if(btn) {
+        btn.classList.add('active');
+    } else {
+        // تأمين إضافي: إذا لم يتم تمرير الزر برمجياً، ابحث عنه واجعله نشطاً
+        const targetBtn = document.querySelector(`[onclick*="${id}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+    }
 
-    // إغلاق السايدبار فوراً بعد اختيار الصفحة إن كان المتصفح على الموبايل
+    // 3. الحل الجذري للموبايل: إجبار القائمة والـ Overlay على الإغلاق فوراً عند التنقل
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
-    if (sidebar && sidebar.classList.contains('active')) {
+    
+    if (sidebar) {
         sidebar.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
+    }
+    if (overlay) {
+        overlay.classList.remove('active');
     }
 }
 
