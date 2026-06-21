@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+  
   <link rel="stylesheet" href="/css/admin.css" />
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -62,7 +64,7 @@
       width: 100%;
       border-collapse: collapse;
       text-align: right;
-      min-width: 600px; /* يضمن عدم انضغاط البيانات على الموبايل وظهور شريط تمرير مريح */
+      min-width: 600px;
     }
 
     #codesTablePro th {
@@ -86,7 +88,6 @@
       background: rgba(255, 255, 255, 0.01);
     }
 
-    /* تحسين مظهر التمرير (Scrollbar) ليناسب طابع الجيمنج المظلم */
     .table-responsive-wrapper::-webkit-scrollbar {
       height: 6px;
       width: 6px;
@@ -267,7 +268,7 @@
           <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
           <input id="price" type="number" placeholder="السعر EGP" />
           <input type="file" id="imageFile" accept="image/*">
-          <img id="imagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
+          <img id="imagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;margin-top:10px;">
         </div>
         <textarea id="description" placeholder="وصف المنتج"></textarea>
         <label class="check">
@@ -290,7 +291,7 @@
         <div class="form-grid">
           <input id="catName" placeholder="اسم التصنيف" />
           <input type="file" id="categoryImageFile" accept="image/*" />
-          <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
+          <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;margin-top:10px;">
         </div>
         <button onclick="saveCategory()">حفظ التصنيف</button>
       </div>
@@ -356,9 +357,35 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script>
-    // الرسوم البيانية التلقائية الافتراضية لحين تحميل بيانات الـ Firestore
     document.addEventListener("DOMContentLoaded", function() {
+      // دالة مساعدة مضافة لعرض معاينة الصور فور اختيار الملف مباشرة لجعل الواجهة تفاعلية
+      function setupImagePreview(fileInputId, previewImgId) {
+        const fileInput = document.getElementById(fileInputId);
+        const previewImg = document.getElementById(previewImgId);
+        if (fileInput && previewImg) {
+          fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+              }
+              reader.readAsDataURL(file);
+            } else {
+              previewImg.style.display = 'none';
+            }
+          });
+        }
+      }
+      setupImagePreview('imageFile', 'imagePreview');
+      setupImagePreview('categoryImageFile', 'categoryImagePreview');
+
+      // الرسوم البيانية التلقائية الافتراضية
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
