@@ -1,6 +1,6 @@
 let db = null;
 let currentUser = null;
-let revenueChartInstance = null; // الاحتفاظ بنسخة المنحنى البياني لتحديثه ديناميكياً
+let revenueChartInstance = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -46,8 +46,8 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 // تحميل كافة البيانات والعدادات فور الدخول للوحة
 async function loadAll(){
+  await loadCategories(); // جلب التصنيفات أولاً لتغذية القوائم المنسدلة
   await loadProducts();
-  await loadCategories();
   await loadCodes();
   await loadOrders();
   await loadCoupons();
@@ -73,14 +73,15 @@ function clearProductForm(){
 // حفظ أو تحديث منتج
 async function saveProduct(){
   const file = document.getElementById('imageFile').files[0];
-  let imageUrl = '';
+  let imageUrl = val('image'); // الاحتفاظ بالصورة القديمة عند التعديل إذا لم ترفع صورة جديدة
+  
   if(file){
     imageUrl = await uploadImage(file);
   }
 
   const data = {
     name: val('name'),
-    category: val('category'),
+    category: val('category'), // سيسحب القيمة المحددة من الـ select الحقيقي الآن
     game: val('game'),
     amount: Number(val('amount') || 0),
     price: Number(val('price') || 0),
@@ -90,8 +91,8 @@ async function saveProduct(){
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if(!data.name || !data.price){
-    alert('اسم المنتج والسعر مطلوبين');
+  if(!data.name || !data.price || !data.category){
+    alert('اسم المنتج، التصنيف، والسعر حقول مطلوبة');
     return;
   }
 
@@ -160,6 +161,7 @@ async function editProduct(id){
   if($('game')) $('game').value = p.game || '';
   if($('amount')) $('amount').value = p.amount || '';
   if($('price')) $('price').value = p.price || '';
+  if($('image')) $('image').value = p.image || '';
   if($('description')) $('description').value = p.description || '';
   if($('active')) $('active').checked = p.active !== false;
 
@@ -216,14 +218,26 @@ async function saveCategory(){
   alert('تم حفظ التصنيف بنجاح');
 }
 
-// جلب التصنيفات
+// جلب التصنيفات الحقيقية وتحديث قائمة الخيارات (Dropdown) في صفحة المنتجات فوراً
 async function loadCategories(){
   const snap = await db.collection('categories').get();
   const list = $('categoriesList');
+  const productCatSelect = $('category'); // استهداف عنصر السيلكت في إضافة المنتجات
+  
   if(list) list.innerHTML = '';
+  if(productCatSelect){
+     productCatSelect.innerHTML = '<option value="">اختر التصنيف المتاح...</option>';
+  }
 
   snap.forEach(doc => {
     const c = doc.data();
+    
+    // 1. إضافة التصنيف كخيار داخل قائمة إضافة المنتجات لمنع التعليق
+    if(productCatSelect && c.name){
+       productCatSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+    }
+
+    // 2. عرض التصنيفات في قسم إدارة التصنيفات المخصصة باللوحة
     if(list){
       list.innerHTML += `
         <div class="panel">
@@ -336,7 +350,7 @@ async function loadCoupons(){
   });
 }
 
-// جلب وعرض الطلبات بالبيانات والمبالغ والأسماء الحقيقية
+// جلب وعرض الطلبات
 async function loadOrders(){
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
@@ -352,8 +366,6 @@ async function loadOrders(){
       </tr>
       ${snap.docs.map(doc => {
         const o = doc.data();
-        
-        // التحقق من المسميات المختلفة المخزنة في الـ Database لضمان عدم خروج خانة فارغة أو صفر
         const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
         const orderPrice = Number(o.total || o.price || o.amount || 0);
         const customer = o.customerName || o.email || o.username || '-';
@@ -407,7 +419,7 @@ async function loadCustomers(){
   }
 }
 
-// حساب المبيعات الحقيقية، العدادات، وتحديث الرسم البياني ديناميكياً
+// حساب المبيعات الحقيقية، العدادات، وتحديث الرسم البياني
 async function loadStats(){
   try {
     const products = await db.collection('products').get();
@@ -416,14 +428,13 @@ async function loadStats(){
     const codes = await db.collection('productCodes').where('status','==','available').get();
 
     let totalSales = 0;
-    let chartDataMap = {}; // لتجميع الإيرادات حسب الأيام
+    let chartDataMap = {};
 
     orders.forEach(doc => {
       const o = doc.data();
       const price = Number(o.total || o.price || o.amount || 0);
       totalSales += price;
 
-      // استخراج التاريخ لربطه بالرسم البياني الحقيقي
       let dateKey = 'أخرى';
       if(o.createdAt) {
          const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
@@ -436,16 +447,12 @@ async function loadStats(){
     if($('ordersCount')) $('ordersCount').textContent = orders.size;
     if($('codesCount')) $('codesCount').textContent = codes.size;
     if($('customersCount')) $('customersCount').textContent = users.size;
-    
-    // 1. تحديث إجمالي المبيعات بالداتا الحقيقية
     if($('salesTotal')) $('salesTotal').textContent = totalSales.toLocaleString() + ' EGP';
 
-    // 2. تحديث الرسم البياني بالإيرادات الحقيقية للأيام
     const chartLabels = Object.keys(chartDataMap).reverse();
     const chartValues = Object.values(chartDataMap).reverse();
     updateRevenueChart(chartLabels, chartValues);
 
-    // تحديث قائمة أفضل المنتجات مبيعاً
     if($('topProducts')){
       $('topProducts').innerHTML = products.docs.slice(0,3).map((doc, i) => {
         const p = doc.data();
@@ -462,22 +469,19 @@ async function loadStats(){
   }
 }
 
-// دالة تحديث ومنشئ المنحنى البياني بالبيانات الحية
+// دالة تحديث الرسوم البيانية
 function updateRevenueChart(labels, dataValues) {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
 
-    // إذا لم تكن هناك بيانات حقيقية بعد، ضع قيم افتراضية حتى لا يظهر مفرغاً
     const finalLabels = labels.length ? labels : ['أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'];
     const finalData = dataValues.length ? dataValues : [0, 0, 0, 0, 0];
 
     if (revenueChartInstance) {
-        // تحديث البيانات حياً إذا كان المنحنى منشأ بالفعل
         revenueChartInstance.data.labels = finalLabels;
         revenueChartInstance.data.datasets[0].data = finalData;
         revenueChartInstance.update();
     } else {
-        // إنشاء المنحنى لأول مرة بشكل مضيء ومميز متناسق مع الواجهة
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
         ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
         ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
