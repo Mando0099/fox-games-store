@@ -264,7 +264,7 @@ function applyCoupon() {
   }
 }
 
-// الدالة المحدثة بالكامل لربط متجرك مع ماي فاتورة (MyFatoorah) تلقائياً
+// الدالة المحدثة بالكامل لربط متجرك مع ماي فاتورة (MyFatoorah) تلقائياً عبر سيرفر ريندر المباشر
 async function checkout() {
   if (!cart.length) {
     return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
@@ -289,8 +289,8 @@ async function checkout() {
   }
 
   try {
-    // الاتصال بالـ API الجديد في سيرفر الـ Node.js
-    const res = await fetch('/api/myfatoorah/create-payment', {
+    // 🌟 تم تعديل الرابط هنا ليرتبط مباشرة بسيرفر ريندر الخلفي الخاص بك بدلاً من المسار الداخلي المكسور
+    const res = await fetch('https://fox-games-store-1.onrender.com/api/myfatoorah/create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
