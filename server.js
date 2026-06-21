@@ -240,7 +240,18 @@ async function sendCodesEmail(email, orderId, codes) {
 
   await transporter.sendMail(mailOptions);
 }
+app.get('/test-email', async (req, res) => {
+  try {
+    await sendCodesEmail('namy9585@gmail.com', 'TEST-001', [
+      { productName: 'PUBG UC Test', code: 'TEST-CODE-1234' }
+    ]);
 
+    res.send('Email sent successfully');
+  } catch (err) {
+    console.error('TEST EMAIL ERROR:', err);
+    res.status(500).send(err.message);
+  }
+});
 app.listen(PORT, () => {
   console.log(`Fox Games running on http://localhost:${PORT}`);
   console.log(`MyFatoorah API URL: ${MYFATOORAH_API_URL}`);
