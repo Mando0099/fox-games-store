@@ -20,65 +20,56 @@ const swalConfig = {
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-    }
-    if (overlay) {
-        overlay.classList.toggle('active');
-    }
+    if (sidebar) sidebar.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
 }
 
 // 🔄 تنقل التابات والصفحات مع الإغلاق التلقائي الأكيد للموبايل
-function showPage(id, btn){
-    // 1. إخفاء كافة الصفحات وتفعيل الصفحة المطلوبة
+function showPage(pageName, btn) {
+    // إخفاء كافة الصفحات وتفعيل الصفحة المطلوبة بناءً على الصيغة الجديدة id-page
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    if($(id)) $(id).classList.add('active');
+    const targetPage = $(`${pageName}-page`);
+    if (targetPage) targetPage.classList.add('active');
 
-    // 2. تحديث حالة أزرار القائمة الجانبية (الزر النشط)
+    // تحديث حالة أزرار القائمة الجانبية (الزر النشط)
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if(btn) {
+    if (btn) {
         btn.classList.add('active');
     } else {
-        // تأمين إضافي: إذا لم يتم تمرير الزر برمجياً، ابحث عنه واجعله نشطاً
-        const targetBtn = document.querySelector(`[onclick*="${id}"]`);
+        const targetBtn = document.querySelector(`[onclick*="'${pageName}'"]`);
         if (targetBtn) targetBtn.classList.add('active');
     }
 
-    // 3. الحل الجذري للموبايل: إجبار القائمة والـ Overlay على الإغلاق فوراً عند التنقل
+    // إغلاق القائمة والـ Overlay فوراً عند التنقل على الأجهزة المحمولة
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
-    
-    if (sidebar) {
-        sidebar.classList.remove('active');
-    }
-    if (overlay) {
-        overlay.classList.remove('active');
-    }
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
 }
 
 // دالة جلب قيم المدخلات
-function val(id){
+function val(id) {
     return ($(id)?.value || '').trim();
 }
 
 // التحقق من صلاحيات الأدمن والـ Authentication
 firebase.auth().onAuthStateChanged(async (user) => {
-  if(!user){
+  if (!user) {
     location.href = '/login.html';
     return;
   }
 
   currentUser = user;
   db = firebase.firestore();
-  if($('adminEmail')) $('adminEmail').textContent = user.email;
+  if ($('adminEmail')) $('adminEmail').textContent = user.email;
 
   const adminCheck = await db.collection('admins')
-    .where('email','==',user.email)
-    .where('active','==',true)
+    .where('email', '==', user.email)
+    .where('active', '==', true)
     .limit(1)
     .get();
 
-  if(adminCheck.empty){
+  if (adminCheck.empty) {
     Swal.fire({
       icon: 'error',
       title: 'وصول مرفوض',
@@ -90,11 +81,13 @@ firebase.auth().onAuthStateChanged(async (user) => {
     return;
   }
 
+  // تهيئة مستمعي الأحداث والـ Drag & Drop فور تأكيد الصلاحيات
+  initEventListeners();
   await loadAll();
 });
 
 // تحميل كافة البيانات والعدادات فور الدخول للوحة
-async function loadAll(){
+async function loadAll() {
   await loadCategories(); // جلب التصنيفات أولاً لتغذية القوائم المنسدلة
   await loadProducts();
   await loadCodes();
@@ -104,47 +97,138 @@ async function loadAll(){
   await loadStats();
 }
 
-// تفريغ فورم المنتجات
-function clearProductForm(){
-  ['productId','name','category','game','amount','price','description']
+// 🌐 تهيئة مستمعي الأحداث والـ Drag & Drop لمنطقة رفع صور المنتجات
+function initEventListeners() {
+    const dropzone = $('dropzone');
+    const fileInput = $('product-image');
+    const previewContainer = $('img-preview-container');
+    const imagePreview = $('imagePreview');
+    const removeImgBtn = $('remove-img');
+    const clearFormBtn = $('clear-form');
+    const menuBtn = $('menuBtn');
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', toggleSidebar);
+    }
+
+    if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', function() {
+            handleProductFileSelect(this.files[0]);
+        });
+
+        // تأثيرات السحب فوق المنطقة
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleProductFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // زر إزالة معاينة الصورة
+    if (removeImgBtn) {
+        removeImgBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // منع فتح نافذة اختيار الملفات
+            if (fileInput) fileInput.value = '';
+            if (previewContainer) previewContainer.classList.remove('active');
+            if (imagePreview) imagePreview.src = '';
+        });
+    }
+
+    if (clearFormBtn) {
+        clearFormBtn.addEventListener('click', clearProductForm);
+    }
+
+    // ربط فلاتر جدول الأكواد المتقدم تلقائياً
+    if ($('search-codes-input')) {
+        $('search-codes-input').addEventListener('input', filterCodesTablePro);
+    }
+    if ($('filter-status-select')) {
+        $('filter-status-select').addEventListener('change', filterCodesTablePro);
+    }
+}
+
+// دالة معالجة وعرض معاينة ملف الصورة المرفوع
+function handleProductFileSelect(file) {
+    const previewContainer = $('img-preview-container');
+    const imagePreview = $('imagePreview');
+    
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (imagePreview) imagePreview.src = e.target.result;
+            if (previewContainer) previewContainer.classList.add('active');
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// تفريغ فورم المنتجات بالكامل وإعادة ضبط غلاف المعاينة التفاعلي
+function clearProductForm() {
+  ['productId', 'name', 'category', 'game', 'amount', 'price', 'description']
     .forEach(id => {
       const el = $(id);
-      if(el) el.value = '';
+      if (el) el.value = '';
     });
 
-  const imageFile = $('imageFile');
-  if(imageFile) imageFile.value = '';
+  const fileInput = $('product-image');
+  if (fileInput) fileInput.value = '';
+
+  const previewContainer = $('img-preview-container');
+  if (previewContainer) previewContainer.classList.remove('active');
+
+  const imagePreview = $('imagePreview');
+  if (imagePreview) imagePreview.src = '';
 
   const active = $('active');
-  if(active) active.checked = true;
+  if (active) active.checked = true;
 }
 
 // حفظ أو تحديث منتج
-async function saveProduct(){
-  const file = document.getElementById('imageFile').files[0];
-  let imageUrl = val('image'); // الاحتفاظ بالصورة القديمة عند التعديل إذا لم ترفع صورة جديدة
+async function saveProduct() {
+  const file = $('product-image')?.files[0];
+  let imageUrl = $('imagePreview')?.src || '';
   
-  if(file){
+  // إذا كانت الصورة الحالية عبارة عن معاينة محلية Base64 أو تم رفع ملف جديد، نقوم برفعه لكلاوديناري
+  if (file) {
+    Swal.fire({
+      title: 'جاري رفع صورة غلاف المنتج...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); },
+      ...swalConfig
+    });
     imageUrl = await uploadImage(file);
   }
 
   const data = {
     name: val('name'),
-    category: val('category'), // سيسحب القيمة المحددة من الـ select الحقيقي الآن
+    category: val('category'), 
     game: val('game'),
     amount: Number(val('amount') || 0),
     price: Number(val('price') || 0),
-    image: imageUrl,
+    image: imageUrl.startsWith('data:') ? '' : imageUrl, // تأمين خلو الرابط من بيانات الكاش المحلية
     description: val('description'),
     active: $('active').checked,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if(!data.name || !data.price || !data.category){
+  if (!data.name || !data.price || !data.category) {
     Swal.fire({
       icon: 'warning',
       title: 'حقول ناقصة',
-      text: 'اسم المنتج، التصنيف، والسعر حقول مطلوبة!',
+      text: 'اسم المنتج، التصنيف، والسعر حقول مطلوبة لإتمام العملية!',
       ...swalConfig
     });
     return;
@@ -152,9 +236,9 @@ async function saveProduct(){
 
   const id = val('productId');
 
-  if(id){
-    await db.collection('products').doc(id).set(data, {merge:true});
-  }else{
+  if (id) {
+    await db.collection('products').doc(id).set(data, { merge: true });
+  } else {
     await db.collection('products').add({
       ...data,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -167,8 +251,8 @@ async function saveProduct(){
   
   Swal.fire({
     icon: 'success',
-    title: 'تم الحفظ',
-    text: 'تم حفظ المنتج بنجاح داخل اللوحة.',
+    title: 'تم الحفظ بنجاح',
+    text: 'تمت مزامنة بيانات المنتج وتحديثها في اللوحة فوراً.',
     timer: 2000,
     showConfirmButton: false,
     ...swalConfig
@@ -176,24 +260,24 @@ async function saveProduct(){
 }
 
 // جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
-async function loadProducts(){
+async function loadProducts() {
   const snap = await db.collection('products').get();
   const list = $('productsList');
   const select = $('codeProductId');
 
-  if(list) list.innerHTML = '';
-  if(select){
-    select.innerHTML = '<option value="">اختر المنتج</option>';
+  if (list) list.innerHTML = '';
+  if (select) {
+    select.innerHTML = '<option value="">-- اضغط لتحديد المنتج الرقمي --</option>';
   }
 
   snap.forEach(doc => {
     const p = doc.data();
 
-    if(select){
+    if (select) {
       select.innerHTML += `<option value="${doc.id}">${p.name || 'منتج بدون اسم'}</option>`;
     }
 
-    if(list){
+    if (list) {
       list.innerHTML += `
         <div class="product-card-custom" id="product-${doc.id}">
           <div class="product-card-hero">
@@ -209,8 +293,8 @@ async function loadProducts(){
             <div class="product-card-footer">
               <span class="price-tag">${p.price || 0} EGP</span>
               <div class="card-actions">
-                <button class="edit-btn" onclick="editProduct('${doc.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button class="delete-btn" onclick="deleteProduct('${doc.id}')"><i class="fa-solid fa-trash-can"></i></button>
+                <button class="edit-btn" onclick="editProduct('${doc.id}')" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="delete-btn" onclick="deleteProduct('${doc.id}')" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
           </div>
@@ -220,30 +304,37 @@ async function loadProducts(){
   });
 }
 
-// تعديل منتج
-async function editProduct(id){
+// تعديل منتج وإرسال بياناته للفورم مع تفعيل الغلاف التفاعلي
+async function editProduct(id) {
   const doc = await db.collection('products').doc(id).get();
   const p = doc.data();
 
-  if($('productId')) $('productId').value = id;
-  if($('name')) $('name').value = p.name || '';
-  if($('category')) $('category').value = p.category || '';
-  if($('game')) $('game').value = p.game || '';
-  if($('amount')) $('amount').value = p.amount || '';
-  if($('price')) $('price').value = p.price || '';
-  if($('image')) $('image').value = p.image || '';
-  if($('description')) $('description').value = p.description || '';
-  if($('active')) $('active').checked = p.active !== false;
+  if ($('productId')) $('productId').value = id;
+  if ($('name')) $('name').value = p.name || '';
+  if ($('category')) $('category').value = p.category || '';
+  if ($('game')) $('game').value = p.game || '';
+  if ($('amount')) $('amount').value = p.amount || '';
+  if ($('price')) $('price').value = p.price || '';
+  if ($('description')) $('description').value = p.description || '';
+  if ($('active')) $('active').checked = p.active !== false;
 
-  showPage('products', document.querySelector('[onclick*="products"]'));
-  scrollTo({top:0, behavior:'smooth'});
+  // إظهار غلاف المعاينة إذا كانت للمنتج صورة سابقة مخزنة
+  const previewContainer = $('img-preview-container');
+  const imagePreview = $('imagePreview');
+  if (p.image && imagePreview && previewContainer) {
+      imagePreview.src = p.image;
+      previewContainer.classList.add('active');
+  }
+
+  showPage('products');
+  scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// حذف منتج بأكشن وتأكيد داخلي
-async function deleteProduct(id){
+// حذف منتج بأكشن وتأكيد داخلي متقدم
+async function deleteProduct(id) {
   Swal.fire({
     title: 'تأكيد حذف المنتج؟',
-    text: "سيتم إزالة هذا المنتج نهائياً من المتجر واختفاء كروته!",
+    text: "سيتم إزالة هذا المنتج نهائياً من المتجر واختفاء كروته التعريفية للعملاء!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -255,7 +346,7 @@ async function deleteProduct(id){
       await db.collection('products').doc(id).delete();
       
       const prodCard = document.getElementById(`product-${id}`);
-      if(prodCard) {
+      if (prodCard) {
         prodCard.style.transition = "all 0.3s";
         prodCard.style.opacity = "0";
         setTimeout(() => prodCard.remove(), 300);
@@ -295,11 +386,11 @@ async function uploadImage(file) {
 }
 
 // حفظ تصنيف جديد
-async function saveCategory(){
+async function saveCategory() {
   const name = val('catName');
   const file = document.getElementById('categoryImageFile')?.files?.[0];
   
-  if(!name){
+  if (!name) {
     Swal.fire({
       icon: 'warning',
       title: 'عذراً',
@@ -309,9 +400,8 @@ async function saveCategory(){
     return;
   }
 
-  // إشعار تحميل بسيط من قلب اللوحة لحين الرفع لكلاوديناري
   Swal.fire({
-    title: 'جاري رفع البيانات...',
+    title: 'جاري رفع البيانات والتصنيف...',
     allowOutsideClick: false,
     didOpen: () => { Swal.showLoading(); },
     ...swalConfig
@@ -326,16 +416,17 @@ async function saveCategory(){
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  if($('catName')) $('catName').value = '';
+  if ($('catName')) $('catName').value = '';
   const catFile = document.getElementById('categoryImageFile');
-  if(catFile) catFile.value = '';
+  if (catFile) catFile.value = '';
+  if ($('categoryImagePreview')) $('categoryImagePreview').style.display = 'none';
 
   await loadCategories();
   
   Swal.fire({
     icon: 'success',
-    title: 'تم الإضافة',
-    text: 'تم حفظ التصنيف بنجاح فوري.',
+    title: 'تم إضافة التصنيف',
+    text: 'تم حفظ التصنيف بنجاح فوري وجاري تغذية الفورم.',
     timer: 1500,
     showConfirmButton: false,
     ...swalConfig
@@ -343,24 +434,24 @@ async function saveCategory(){
 }
 
 // جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
-async function loadCategories(){
+async function loadCategories() {
   const snap = await db.collection('categories').get();
   const list = $('categoriesList');
   const productCatSelect = $('category');
   
-  if(list) list.innerHTML = '';
-  if(productCatSelect){
-     productCatSelect.innerHTML = '<option value="">اختر التصنيف المتاح...</option>';
+  if (list) list.innerHTML = '';
+  if (productCatSelect) {
+     productCatSelect.innerHTML = '<option value="">-- اختر التصنيف المتاح حالياً --</option>';
   }
 
   snap.forEach(doc => {
     const c = doc.data();
     
-    if(productCatSelect && c.name){
+    if (productCatSelect && c.name) {
        productCatSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
     }
 
-    if(list){
+    if (list) {
       list.innerHTML += `
         <div class="product-card-custom" id="cat-${doc.id}">
           <div class="product-card-hero" style="height: 140px;">
@@ -377,10 +468,10 @@ async function loadCategories(){
 }
 
 // حذف تصنيف بأكشن داخلي
-async function deleteCategory(id){
+async function deleteCategory(id) {
   Swal.fire({
     title: 'هل تريد حذف هذا التصنيف؟',
-    text: "تأكد أنه لا توجد منتجات معتمدة عليه حالياً.",
+    text: "تأكد أنه لا توجد منتجات نشطة معتمدة عليه حالياً لتفادي تلف العرض الداخلي للعميل.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -392,7 +483,7 @@ async function deleteCategory(id){
       await db.collection('categories').doc(id).delete();
       
       const catCard = document.getElementById(`cat-${id}`);
-      if(catCard) {
+      if (catCard) {
         catCard.style.transition = "all 0.3s";
         catCard.style.opacity = "0";
         setTimeout(() => catCard.remove(), 300);
@@ -415,15 +506,15 @@ async function deleteCategory(id){
 }
 
 // 💎 حفظ أكواد المنتجات بدعم الـ Batch والـ SweetAlert2 الداخلي
-async function saveCodes(){
+async function saveCodes() {
   const productId = val('codeProductId');
   const raw = val('codesInput');
 
-  if(!productId || !raw){
+  if (!productId || !raw) {
     Swal.fire({
       icon: 'warning',
       title: 'بيانات غير مكتملة',
-      text: 'اختر المنتج واكتب الأكواد أولاً داخل الحقل المخصص.',
+      text: 'برجاء اختيار المنتج واكتب الأكواد أولاً داخل الحقل المخصص للشحن التلقائي.',
       ...swalConfig
     });
     return;
@@ -444,22 +535,22 @@ async function saveCodes(){
 
   await batch.commit();
 
-  if($('codesInput')) $('codesInput').value = '';
+  if ($('codesInput')) $('codesInput').value = '';
   await loadCodes();
   await loadStats();
 
   Swal.fire({
     icon: 'success',
-    title: 'اكتمل التخزين',
-    text: `تم حفظ وتخزين (${codes.length}) كود رقمي بنجاح فوري!`,
+    title: 'اكتمل التخزين والتعبئة',
+    text: `تم حفظ وحقن (${codes.length}) كود رقمي بنجاح فوري وجاهز للتسليم الآلي!`,
     ...swalConfig
   });
 }
 
-// 📊 جلب الأكواد وتحديث صفوف الـ tbody فقط دون وميض البانل
+// 📊 جلب وتوليد صفوف جدول الأكواد المتطورة داخل الحاوية الجديدة
 async function loadCodes() {
-  const list = $('codesList');
-  if (!list) return;
+  const container = $('codes-list-container');
+  if (!container) return;
 
   const productsSnap = await db.collection('products').get();
   const productsMap = {};
@@ -470,6 +561,12 @@ async function loadCodes() {
   const snap = await db.collection('productCodes').orderBy('createdAt', 'desc').limit(200).get();
 
   let rowsHtml = '';
+  if (snap.empty) {
+      rowsHtml = '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>';
+      container.innerHTML = rowsHtml;
+      return;
+  }
+
   snap.forEach(doc => {
     const c = doc.data();
     const productName = productsMap[c.productId] || 'منتج غير معروف أو محذوف';
@@ -477,18 +574,17 @@ async function loadCodes() {
     const isAvailable = c.status === 'available';
     const statusText = isAvailable ? 'متاح' : 'مُستخدم';
     
-    // الألوان الافتراضية السلسة للأكواد (الأخضر للمتاح والأحمر للمستعمل)
     const badgeStyle = isAvailable 
       ? 'background: rgba(101, 204, 0, 0.1); color: #65cc00; border: 1px solid rgba(101, 204, 0, 0.2);' 
       : 'background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2);';
 
     rowsHtml += `
-      <tr id="row-${doc.id}" data-status="${c.status}" data-product="${c.productId}">
-        <td style="font-family: monospace; letter-spacing: 1px; font-weight: 600; color: #fff; text-align: left; padding-left: 20px;">${c.code || '-'}</td>
+      <tr id="row-${doc.id}" data-status="${c.status}" data-product-name="${productName.toLowerCase()}">
+        <td style="font-family: monospace; letter-spacing: 1px; font-weight: 600; color: #fff; text-align: right; direction: ltr; padding-right: 20px;">${c.code || '-'}</td>
         <td><span style="color: #3b82f6; font-weight: 600; font-size: 14px;">${productName}</span></td>
         <td><span class="status-badge" style="padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; ${badgeStyle}">${statusText}</span></td>
         <td>
-          <button class="delete-btn" style="padding: 6px 10px; font-size: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.1);" onclick="deleteCode('${doc.id}')">
+          <button class="delete-btn" style="padding: 6px 10px; font-size: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.1);" onclick="deleteCode('${doc.id}')" title="حذف الكود نهائياً">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </td>
@@ -496,56 +592,23 @@ async function loadCodes() {
     `;
   });
 
-  // التحكم الذكي: تحديث صفوف الجدول فقط لتفادي الفلكر ومسح حقول فلاتر العميل
-  const existingTableBody = document.querySelector('#codesTablePro tbody');
-  if (existingTableBody) {
-    existingTableBody.innerHTML = rowsHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً</td></tr>';
-    return;
-  }
-
-  list.innerHTML = `
-    <div class="table-toolbar" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-      <div style="position: relative; flex: 1; min-width: 250px;">
-        <input type="text" id="codeSearch" placeholder="🔍 ابحث عن كود رقمي محدد..." oninput="filterCodesTable()" style="width: 100%; padding: 11px 15px; background: #142032; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; color: #fff; font-size: 14px;">
-      </div>
-      <select id="filterStatus" onchange="filterCodesTable()" style="padding: 11px 15px; background: #142032; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; color: #94a3b8; width: 160px; font-family: 'Cairo'; cursor: pointer;">
-        <option value="all">كل الأكواد</option>
-        <option value="available">🔓 المتاحة فقط</option>
-        <option value="used">🔒 المُستخدمة فقط</option>
-      </select>
-    </div>
-    
-    <div class="table-responsive" style="max-height: 550px; overflow-y: auto; background: #0b1320; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
-      <table id="codesTablePro" style="width: 100%; border-collapse: collapse; text-align: right;">
-        <thead>
-          <tr style="background: #101a26; position: sticky; top: 0; z-index: 10;">
-            <th style="padding: 14px; color: #94a3b8; font-size: 13px; font-weight: 600; text-align: left; padding-left: 20px;">الكود الرقمي</th>
-            <th style="padding: 14px; color: #94a3b8; font-size: 13px; font-weight: 600;">المنتج التابع له</th>
-            <th style="padding: 14px; color: #94a3b8; font-size: 13px; font-weight: 600;">الحالة</th>
-            <th style="padding: 14px; color: #94a3b8; font-size: 13px; font-weight: 600; width: 80px;">إجراء</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>'}
-        </tbody>
-      </table>
-    </div>
-  `;
+  container.innerHTML = rowsHtml;
 }
 
-// 🔍 دالة الفلترة والبحث اللحظي
-function filterCodesTable() {
-  const query = $('codeSearch').value.toLowerCase().trim();
-  const statusFilter = $('filterStatus').value;
+// 🔍 محرك الفلترة والبحث اللحظي لجدول الأكواد المحدث 
+function filterCodesTablePro() {
+  const query = ($('search-codes-input')?.value || '').toLowerCase().trim();
+  const statusFilter = $('filter-status-select')?.value || 'all';
   const rows = document.querySelectorAll('#codesTablePro tbody tr');
 
   rows.forEach(row => {
-    if(row.cells.length < 4) return;
+    if (row.cells.length < 4) return;
     
     const codeText = row.cells[0].textContent.toLowerCase();
+    const productName = row.getAttribute('data-product-name') || '';
     const rowStatus = row.getAttribute('data-status');
     
-    const matchesSearch = codeText.includes(query);
+    const matchesSearch = codeText.includes(query) || productName.includes(query);
     const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
 
     if (matchesSearch && matchesStatus) {
@@ -556,11 +619,11 @@ function filterCodesTable() {
   });
 }
 
-// 🗑️ دالة حذف كود محدد نهائياً مع أنيميشن سلس وبوب-آب داخلي تماماً
+// 🗑️ دالة حذف كود محدد نهائياً مع أنيميشن سلس وبوب-آب داخلي
 async function deleteCode(id) {
   Swal.fire({
     title: 'هل أنت متأكد؟',
-    text: "لن تتمكن من استعادة هذا الكود الرقمي بعد حذفه!",
+    text: "لن تتمكن من استعادة هذا الكود الرقمي التسلسلي بعد حذفه من السجلات!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -576,20 +639,19 @@ async function deleteCode(id) {
         if (row) {
           row.style.transition = "all 0.3s ease";
           row.style.opacity = "0";
-          row.style.transform = "translateX(30px)";
+          row.style.transform = "translateX(-30px)";
           
           setTimeout(() => {
             row.remove();
-            const tbody = document.querySelector('#codesTablePro tbody');
-            if (tbody && tbody.children.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً</td></tr>';
+            const container = $('codes-list-container');
+            if (container && container.children.length === 0) {
+              container.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>';
             }
           }, 300);
         }
         
         await loadStats();
 
-        // إشعار هادئ صغير أعلى الصفحة دون تجميد اللوحة
         Swal.fire({
           toast: true,
           position: 'top-end',
@@ -602,22 +664,22 @@ async function deleteCode(id) {
         });
 
       } catch (err) {
-        console.error("حدث خطأ أثناء محاولة حذف الكود السلس:", err);
+        console.error("حدث خطأ أثناء محاولة حذف الكود: ", err);
       }
     }
   });
 }
 
-// حفظ الكوبونات
-async function saveCoupon(){
+// حفظ الكوبونات وقسائم التخفيض المالي
+async function saveCoupon() {
   const code = val('couponCode').toUpperCase();
   const value = Number(val('couponValue') || 0);
 
-  if(!code || !value){
+  if (!code || !value) {
     Swal.fire({
       icon: 'warning',
       title: 'بيانات ناقصة',
-      text: 'الرمز وقيمة نسبة الخصم مطلوبين لتوليد الكوبون!',
+      text: 'الرمز وقيمة نسبة الخصم المئوية مطلوبين لتوليد الكوبون الفعال الحركي!',
       ...swalConfig
     });
     return;
@@ -631,15 +693,15 @@ async function saveCoupon(){
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  if($('couponCode')) $('couponCode').value = '';
-  if($('couponValue')) $('couponValue').value = '';
+  if ($('couponCode')) $('couponCode').value = '';
+  if ($('couponValue')) $('couponValue').value = '';
 
   await loadCoupons();
   
   Swal.fire({
     icon: 'success',
     title: 'تم تفعيل الكوبون',
-    text: 'تم حفظ الكوبون وهو جاهز للاستخدام حالياً.',
+    text: 'تم حفظ الكوبون بنجاح وهو متاح للمستعملين بالمتجر الرقمي حالياً.',
     timer: 1500,
     showConfirmButton: false,
     ...swalConfig
@@ -647,20 +709,20 @@ async function saveCoupon(){
 }
 
 // جلب الكوبونات لعرضها
-async function loadCoupons(){
+async function loadCoupons() {
   const snap = await db.collection('coupons').get();
   const list = $('couponsList');
-  if(list) list.innerHTML = '';
+  if (list) list.innerHTML = '';
 
   snap.forEach(doc => {
     const c = doc.data();
-    if(list){
+    if (list) {
       list.innerHTML += `
-        <div class="panel" style="border-bottom: 3px solid var(--neon-orange);">
-          <h4>رمز الكوبون: <span style="color:var(--neon-orange); font-family:monospace;">${c.code}</span></h4>
-          <p style="margin: 8px 0 4px 0;">نسبة الخصم: <strong>${c.value}%</strong></p>
-          <small style="color: ${c.active ? 'var(--neon-green)' : 'var(--neon-pink)'}; font-weight: 600;">
-            ${c.active ? '● مفعل حالياً' : '○ معطل'}
+        <div class="panel" style="border-bottom: 3px solid #f97316;">
+          <h4>رمز الكوبون: <span style="color:#f97316; font-family:monospace;">${c.code}</span></h4>
+          <p style="margin: 8px 0 4px 0;">نسبة الخصم الحالية: <strong>${c.value}%</strong></p>
+          <small style="color: ${c.active ? '#22c55e' : '#ec4899'}; font-weight: 600;">
+            ${c.active ? '● مفعل حالياً بالمتجر' : '○ معطل وموقوف'}
           </small>
         </div>
       `;
@@ -668,23 +730,26 @@ async function loadCoupons(){
   });
 }
 
-// جلب وعرض الطلبات في جدول منسق ومحمي للموبايل
-async function loadOrders(){
+// جلب وعرض الطلبات وفواتير الشراء تلقائياً
+async function loadOrders() {
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
   const table = `
     <table>
-      <tr>
-        <th>رقم الطلب</th>
-        <th>العميل</th>
-        <th>المنتج</th>
-        <th>الإجمالي</th>
-        <th>الحالة</th>
-        <th>الكود</th>
-      </tr>
+      <thead>
+        <tr>
+          <th>رقم الطلب</th>
+          <th>العميل</th>
+          <th>المنتج</th>
+          <th>الإجمالي</th>
+          <th>الحالة</th>
+          <th>الكود الرقمي</th>
+        </tr>
+      </thead>
+      <tbody>
       ${snap.docs.map(doc => {
         const o = doc.data();
-        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
+        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي الشحنة';
         const orderPrice = Number(o.total || o.price || o.amount || 0);
         const customer = o.customerName || o.email || o.username || '-';
         const status = o.status || o.paymentStatus || o.payment_status || '-';
@@ -701,26 +766,30 @@ async function loadOrders(){
           </tr>
         `;
       }).join('')}
+      </tbody>
     </table>
   `;
 
-  if($('ordersList')) $('ordersList').innerHTML = table;
-  if($('latestOrders')) $('latestOrders').innerHTML = table;
+  if ($('ordersList')) $('ordersList').innerHTML = table;
+  if ($('latestOrders')) $('latestOrders').innerHTML = table;
 }
 
-// جلب بيانات العملاء
-async function loadCustomers(){
+// جلب وسجلات قاعدة بيانات العملاء
+async function loadCustomers() {
   const snap = await db.collection('users').limit(100).get();
 
-  if($('customersList')){
+  if ($('customersList')) {
     $('customersList').innerHTML = `
       <table>
-        <tr>
-          <th>الاسم</th>
-          <th>الإيميل</th>
-          <th>الهاتف</th>
-          <th>الدور</th>
-        </tr>
+        <thead>
+          <tr>
+            <th>الاسم الكامل</th>
+            <th>البريد الإلكتروني</th>
+            <th>الهاتف المحمول</th>
+            <th>الدور الوظيفي</th>
+          </tr>
+        </thead>
+        <tbody>
         ${snap.docs.map(doc => {
           const u = doc.data();
           return `
@@ -732,18 +801,19 @@ async function loadCustomers(){
             </tr>
           `;
         }).join('')}
+        </tbody>
       </table>
     `;
   }
 }
 
-// حساب المبيعات الحقيقية، العدادات، وتحديث الرسم البياني
-async function loadStats(){
+// حساب المبيعات الحقيقية والعدادات الشاملة وتدفق المخططات البيانية
+async function loadStats() {
   try {
     const products = await db.collection('products').get();
     const orders = await db.collection('orders').get();
     const users = await db.collection('users').get();
-    const codes = await db.collection('productCodes').where('status','==','available').get();
+    const codes = await db.collection('productCodes').where('status', '==', 'available').get();
 
     let totalSales = 0;
     let chartDataMap = {};
@@ -754,40 +824,40 @@ async function loadStats(){
       totalSales += price;
 
       let dateKey = 'أخرى';
-      if(o.createdAt) {
+      if (o.createdAt) {
          const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
          dateKey = d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
       }
       chartDataMap[dateKey] = (chartDataMap[dateKey] || 0) + price;
     });
 
-    if($('productsCount')) $('productsCount').textContent = products.size;
-    if($('ordersCount')) $('ordersCount').textContent = orders.size;
-    if($('codesCount')) $('codesCount').textContent = codes.size;
-    if($('customersCount')) $('customersCount').textContent = users.size;
-    if($('salesTotal')) $('salesTotal').textContent = totalSales.toLocaleString() + ' EGP';
+    if ($('productsCount')) $('productsCount').textContent = products.size;
+    if ($('ordersCount')) $('ordersCount').textContent = orders.size;
+    if ($('codesCount')) $('codesCount').textContent = codes.size;
+    if ($('customersCount')) $('customersCount').textContent = users.size;
+    if ($('salesTotal')) $('salesTotal').textContent = totalSales.toLocaleString() + ' EGP';
 
     const chartLabels = Object.keys(chartDataMap).reverse();
     const chartValues = Object.values(chartDataMap).reverse();
     updateRevenueChart(chartLabels, chartValues);
 
-    if($('topProducts')){
-      $('topProducts').innerHTML = products.docs.slice(0,3).map((doc, i) => {
+    if ($('topProducts')) {
+      $('topProducts').innerHTML = products.docs.slice(0, 3).map((doc, i) => {
         const p = doc.data();
         return `
           <div class="alert success" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(101,204,0,0.05); border:1px solid rgba(101,204,0,0.1); padding:10px; border-radius:10px;">
             <span style="font-size:13px; font-weight:600;">#${i+1} — ${p.name || 'منتج'}</span>
-            <strong style="color:var(--neon-green); font-size:14px;">${p.price || 0} EGP</strong>
+            <strong style="color:#22c55e; font-size:14px;">${p.price || 0} EGP</strong>
           </div>
         `;
       }).join('');
     }
   } catch (error) {
-      console.error("حدث خطأ أثناء جلب العدادات والرسم البياني: ", error);
+      console.error("حدث خطأ أثناء جلب العدادات الشاملة والرسم البياني: ", error);
   }
 }
 
-// دالة تحديث الرسوم البيانية بسلاسة وبدون تداخلات
+// دالة تحديث الرسوم البيانية بسلاسة وبدون تداخلات برمجية للـ Canvas
 function updateRevenueChart(labels, dataValues) {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
@@ -832,15 +902,15 @@ function updateRevenueChart(labels, dataValues) {
     }
 }
 
-// تسجيل الخروج بأكشن تأكيدي فخم
-function logout(){
+// تسجيل الخروج بأكشن تأكيدي فخم ومتكامل
+function logout() {
   Swal.fire({
     title: 'تسجيل الخروج؟',
-    text: "هل أنت متأكد من رغبتك في مغادرة اللوحة الحالية؟",
+    text: "هل أنت متأكد من رغبتك في مغادرة لوحة التحكم الحالية؟",
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#3b82f6',
-    confirmButtonText: 'خروج اكيد',
+    confirmButtonText: 'خروج أكيد',
     cancelButtonText: 'بقاء',
     ...swalConfig
   }).then((result) => {
