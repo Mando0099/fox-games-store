@@ -297,7 +297,7 @@ async function loadCategories(){
 
 // حذف تصنيف
 async function deleteCategory(id){
-  if(!confirm('هل تريد حذف هذا التصنيف؟')) return;
+  if(!confirm('هل تريد حذف هذا التصنيف?')) return;
   await db.collection('categories').doc(id).delete();
   await loadCategories();
 }
@@ -334,33 +334,38 @@ async function saveCodes(){
   alert(`تم حفظ وتخزين (${codes.length}) كود رقمي بنجاح فوري!`);
 }
 
-// 📊 جلب الأكواد وعرضها في جدول ذكي مريح للعين ومفلتر تلقائياً
+// 📊 جلب الأكواد وعرضها في جدول ذكي مريح للعين ومفلتر تلقائياً (تم تصحيح جلب أسماء المنتجات)
 async function loadCodes() {
-  const snap = await db.collection('productCodes').orderBy('createdAt', 'desc').limit(200).get();
   const list = $('codesList');
   if (!list) return;
 
+  // 1. جلب خريطة المنتجات أولاً لربط الـ ID بالاسم الحقيقي فوراً ومنع كلمة جاري التحميل
   const productsSnap = await db.collection('products').get();
   const productsMap = {};
   productsSnap.forEach(pDoc => {
     productsMap[pDoc.id] = pDoc.data().name || 'منتج غير معروف';
   });
 
+  // 2. جلب الأكواد من الكوليكشن الصحيحة (productCodes) مرتبة تنازلياً
+  const snap = await db.collection('productCodes').orderBy('createdAt', 'desc').limit(200).get();
+
   let rows = '';
   snap.forEach(doc => {
     const c = doc.data();
-    const productName = productsMap[c.productId] || 'جاري التحميل...';
+    
+    // جلب اسم المنتج الفعلي من الخريطة المجهزة سابقاً
+    const productName = productsMap[c.productId] || 'منتج غير معروف أو محذوف';
     
     const isAvailable = c.status === 'available';
     const statusText = isAvailable ? 'متاح' : 'مُستخدم';
     const badgeStyle = isAvailable 
-      ? 'background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2);' 
+      ? 'background: rgba(101, 204, 0, 0.1); color: #65cc00; border: 1px solid rgba(101, 204, 0, 0.2);' 
       : 'background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2);';
 
     rows += `
       <tr data-status="${c.status}" data-product="${c.productId}">
         <td style="font-family: monospace; letter-spacing: 1px; font-weight: 600; color: #fff; text-align: left; padding-left: 20px;">${c.code || '-'}</td>
-        <td><span style="color: #94a3b8; font-size: 13px;">${productName}</span></td>
+        <td><span style="color: #3b82f6; font-weight: 600; font-size: 14px;">${productName}</span></td>
         <td><span class="status-badge" style="padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; ${badgeStyle}">${statusText}</span></td>
         <td>
           <button class="delete-btn" style="padding: 6px 10px; font-size: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.1);" onclick="deleteCode('${doc.id}')">
@@ -403,37 +408,37 @@ async function loadCodes() {
 
 // 🔍 دالة الفلترة والبحث اللحظي (Client-side التوفيرية)
 function filterCodesTable() {
-  const query = $('codeSearch').value.toLowerCase().trim();
-  const statusFilter = $('filterStatus').value;
-  const rows = document.querySelectorAll('#codesTablePro tbody tr');
+    const query = $('codeSearch').value.toLowerCase().trim();
+    const statusFilter = $('filterStatus').value;
+    const rows = document.querySelectorAll('#codesTablePro tbody tr');
 
-  rows.forEach(row => {
-    if(row.cells.length < 4) return;
-    
-    const codeText = row.cells[0].textContent.toLowerCase();
-    const rowStatus = row.getAttribute('data-status');
-    
-    const matchesSearch = codeText.includes(query);
-    const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
+    rows.forEach(row => {
+        if(row.cells.length < 4) return;
+        
+        const codeText = row.cells[0].textContent.toLowerCase();
+        const rowStatus = row.getAttribute('data-status');
+        
+        const matchesSearch = codeText.includes(query);
+        const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
 
-    if (matchesSearch && matchesStatus) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 // 🗑️ دالة حذف كود محدد نهائياً
 async function deleteCode(id) {
-  if (!confirm('هل أنت متأكد من حذف هذا الكود نهائياً من اللوحة؟')) return;
-  try {
-    await db.collection('productCodes').doc(id).delete();
-    await loadCodes();
-    await loadStats();
-  } catch (err) {
-    console.error("حدث خطأ أثناء محاولة حذف الكود:", err);
-  }
+    if (!confirm('هل أنت متأكد من حذف هذا الكود نهائياً من اللوحة؟')) return;
+    try {
+        await db.collection('productCodes').doc(id).delete();
+        await loadCodes();
+        await loadStats();
+    } catch (err) {
+        console.error("حدث خطأ أثناء محاولة حذف الكود:", err);
+    }
 }
 
 // حفظ الكوبونات
