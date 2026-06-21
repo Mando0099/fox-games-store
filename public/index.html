@@ -95,7 +95,7 @@
     .auth-google { color: #ea4335; font-weight: bold; }
     .auth-facebook { color: #1877f2; font-weight: bold; }
     .auth-email { color: #65cc00; font-weight: bold; }
-    
+     
     .profile-menu-links {
       margin: 12px 0;
       display: flex;
@@ -257,14 +257,14 @@
 
     <div class="navActions">
       <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
-      
+       
       <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
-      
+       
       <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
         <button class="user-profile-btn" id="userProfileTrigger">
           <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
         </button>
-        
+         
         <div class="user-profile-dropdown" id="userProfileDropdown">
           <div class="profile-header">
             <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
@@ -292,13 +292,13 @@
   </header>
 
   <main id="home" class="content">
-    
+     
     <section class="hero-banner-section">
       <div class="hero-banner-card">
         <div class="hero-content">
           <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
           <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
-          
+           
           <div class="hero-cta-buttons">
             <button onclick="scrollToId('products')" class="shop-now-btn">
               <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
@@ -366,7 +366,7 @@
           <h2 data-i18n="check_title">Secure Payment Methods</h2>
           <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
         </div>
-        
+         
         <div class="paymentMethods">
           <div class="method-card" title="Visa">
             <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
@@ -425,6 +425,7 @@
     <div class="checkoutForm">
       <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name">
       <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone">
+      <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
       <select id="paymentMethod">
         <option data-i18n="opt_visa">Visa / MasterCard</option>
         <option data-i18n="opt_wallet">Wallet</option>
@@ -459,9 +460,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  
+   
   <script src="/firebase-config.js"></script>
-  
+   
   <script src="/js/store-firebase.js"></script>
   <script src="/js/store-account.js"></script>
   <script src="/js/script.js"></script>
@@ -472,7 +473,7 @@
       const userProfileWrapper = document.getElementById('userProfileWrapper');
       const userProfileTrigger = document.getElementById('userProfileTrigger');
       const userProfileDropdown = document.getElementById('userProfileDropdown');
-      
+       
       const topNavUserName = document.getElementById('topNavUserName');
       const dropdownUserName = document.getElementById('dropdownUserName');
       const dropdownUserEmail = document.getElementById('dropdownUserEmail');
@@ -487,7 +488,7 @@
             mainLoginBtn.classList.add('foxHidden');
           }
         }
-        
+         
         const actionsContainer = document.querySelector('.navActions');
         if (actionsContainer) {
           const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
