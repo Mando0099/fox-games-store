@@ -1,486 +1,309 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم | FOX STORE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
-        :root {
-            --bg-dark: #0b1329;
-            --panel-bg: #1c2541;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --neon-green: #65cc00;
-            --danger: #ef4444;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fox Store Admin - لوحة التحكم</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-        }
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/css/admin.css" />
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* القائمة الجانبية */
-        aside {
-            width: 260px;
-            background-color: var(--panel-bg);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .brand {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .brand h2 {
-            color: var(--text-main);
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .brand span {
-            color: var(--primary);
-            font-size: 11px;
-            display: block;
-            margin-top: 2px;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            text-align: right;
-            padding: 12px 15px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-        }
-
-        .logout-btn {
-            margin-top: auto;
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .logout-btn:hover {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        /* المحتوى الرئيسي */
-        main {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            height: 100vh;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--panel-bg);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* العدادات (Cards) */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            position: relative;
-        }
-
-        .stat-card h4 {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        /* الرسومات والبيانات الحية */
-        .dashboard-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 16px;
-            height: 350px;
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-        }
-
-        /* الجداول */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background: var(--panel-bg);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 14px;
-            text-align: right;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        th {
-            background-color: rgba(0, 0, 0, 0.15);
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        /* الفورم والمدخلات */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        input, select, textarea {
-            width: 100%;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: opacity 0.3s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button.ghost {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-muted);
-        }
-
-        button.delete-btn {
-            background: var(--danger);
-        }
-
-        .status-badge {
-            background: rgba(101, 204, 0, 0.1);
-            color: var(--neon-green);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-
-        code {
-            background: rgba(0,0,0,0.3);
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: #f43f5e;
-        }
-    </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+  <script src="/firebase-config.js"></script>
 </head>
+
 <body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
+      <div class="brand-text">
+        <h1>FOX STORE</h1>
+        <span>ADMIN SYSTEM</span>
+      </div>
+    </div>
 
-    <aside>
-        <div class="brand">
-            <h2>FOX STORE</h2>
-            <span>ADMIN SYSTEM</span>
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products', this)"><i class="fa-solid fa-cubes"></i> المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories', this)"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes', this)"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders', this)"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons', this)"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
+    </nav>
+
+    <div class="admin-box">
+      <div class="avatar"><i class="fa-solid fa-circle-user"></i></div>
+      <div class="admin-info">
+        <strong>مدير المتجر</strong>
+        <small id="adminEmail">جاري التحميل...</small>
+      </div>
+    </div>
+
+    <button class="logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+
+      <div class="top-actions">
+        <div class="search-container">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="بحث عن طلب، منتج، عميل...">
         </div>
-        <button class="nav-btn active" onclick="showPage('dashboard', this)">الرئيسية</button>
-        <button class="nav-btn" onclick="showPage('products', this)">المنتجات</button>
-        <button class="nav-btn" onclick="showPage('categories', this)">التصنيفات</button>
-        <button class="nav-btn" onclick="showPage('codes', this)">أكواد المنتجات</button>
-        <button class="nav-btn" onclick="showPage('orders', this)">الطلبات</button>
-        <button class="nav-btn" onclick="showPage('coupons', this)">الكوبونات</button>
-        <button class="nav-btn" onclick="showPage('customers', this)">العملاء</button>
-        
-        <button class="nav-btn logout-btn" onclick="logout()">تسجيل الخروج</button>
-    </aside>
+        <button class="icon-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span class="badge">5</span>
+        </button>
+        <button class="lang-btn"><i class="fa-solid fa-earth-americas"></i> العربية</button>
+        <div class="welcome">
+          <small>مرحباً بك،</small>
+          <strong>محمد أشرف 👋</strong>
+        </div>
+      </div>
+    </header>
 
-    <main>
-        <header>
-            <h1 id="pageTitle">لوحة التحكم</h1>
-            <div class="admin-profile">
-                <span>مرحباً بك،</span>
-                <strong id="adminEmail">الأدمن</strong>
-            </div>
-        </header>
+    <section id="dashboard" class="page active">
+      <div class="page-head">
+        <h2>لوحة التحكم</h2>
+        <p>إليك نظرة عامة على أداء متجرك الرقمي اليوم</p>
+      </div>
 
-        <section id="dashboard" class="page active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4>إجمالي المبيعات</h4>
-                    <div class="number" id="salesTotal" style="color: var(--neon-green);">0 EGP</div>
-                </div>
-                <div class="stat-card">
-                    <h4>إجمالي المنتجات</h4>
-                    <div class="number" id="productsCount">0</div>
-                </div>
-                <div class="stat-card">
-                    <h4>إجمالي الطلبات</h4>
-                    <div class="number" id="ordersCount">0</div>
-                </div>
-                <div class="stat-card">
-                    <h4>الأكواد المتاحة</h4>
-                    <div class="number" id="codesCount">0</div>
-                </div>
-                <div class="stat-card">
-                    <h4>إجمالي العملاء</h4>
-                    <div class="number" id="customersCount">0</div>
-                </div>
-            </div>
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+          <div class="stat-content">
+            <span>إجمالي المبيعات</span>
+            <strong id="salesTotal">0 EGP</strong>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +23.5% من الشهر الماضي</small>
+          </div>
+        </div>
 
-            <div class="dashboard-row">
-                <div class="chart-container">
-                    <h3 style="margin-bottom: 15px;">الإيرادات الحقيقية</h3>
-                    <div style="position: relative; height: calc(100% - 40px);">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="panel">
-                    <h3 style="margin-bottom: 15px;">أفضل المنتجات مبيعاً</h3>
-                    <div id="topProducts">
-                        </div>
-                </div>
-            </div>
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fa-solid fa-box-open"></i></div>
+          <div class="stat-content">
+            <span>إجمالي المنتجات</span>
+            <strong id="productsCount">0</strong>
+            <small>منتج متاح بالمتجر</small>
+          </div>
+        </div>
 
-            <div class="panel">
-                <h3>آخر الطلبات الحالية</h3>
-                <div id="latestOrders" style="margin-top: 15px;">
-                    </div>
-            </div>
-        </section>
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+          <div class="stat-content">
+            <span>إجمالي الطلبات</span>
+            <strong id="ordersCount">0</strong>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +18.7% اليوم</small>
+          </div>
+        </div>
 
-        <section id="products" class="page">
-            <div class="panel">
-                <h3>إضافة / تعديل منتج</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <input type="hidden" id="productId">
-                    <div class="form-group">
-                        <label>اسم المنتج</label>
-                        <input type="text" id="name" placeholder="مثال: 60 UC PUBG">
-                    </div>
-                    <div class="form-group">
-                        <label>التصنيف</label>
-                        <input type="text" id="category" placeholder="PUBG MOBILE">
-                    </div>
-                    <div class="form-group">
-                        <label>اللعبة</label>
-                        <input type="text" id="game" placeholder="PUBG">
-                    </div>
-                    <div class="form-group">
-                        <label>السعر (EGP)</label>
-                        <input type="number" id="price" placeholder="150">
-                    </div>
-                    <div class="form-group">
-                        <label>الكمية المتاحة</label>
-                        <input type="number" id="amount" placeholder="10">
-                    </div>
-                    <div class="form-group">
-                        <label>صورة المنتج</label>
-                        <input type="file" id="imageFile">
-                        <input type="hidden" id="image">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>الوصف</label>
-                    <textarea id="description" rows="3" placeholder="اكتب تفاصيل أو شروط المنتج هنا..."></textarea>
-                </div>
-                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="active" checked style="width: auto;">
-                    <label for="active" style="margin: 0;">عرض المنتج بالمتجر فوراً</label>
-                </div>
-                <button onclick="saveProduct()">حفظ المنتج بالداتا</button>
-                <button class="ghost" onclick="clearProductForm()">تفريغ الخانات</button>
-            </div>
+        <div class="stat-card orange">
+          <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+          <div class="stat-content">
+            <span>الأكواد المتاحة</span>
+            <strong id="codesCount">0</strong>
+            <small>جاهزة للتسليم الفوري</small>
+          </div>
+        </div>
 
-            <h3>قائمة المنتجات الحالية بالمتجر</h3>
-            <div id="productsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 15px;">
-                </div>
-        </section>
+        <div class="stat-card pink">
+          <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-content">
+            <span>إجمالي العملاء</span>
+            <strong id="customersCount">0</strong>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +15.2% عميل جديد</small>
+          </div>
+        </div>
+      </div>
 
-        <section id="categories" class="page">
-            <div class="panel">
-                <h3>إدارة تصنيفات المنتجات</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <div class="form-group">
-                        <label>اسم التصنيف الجديد</label>
-                        <input type="text" id="catName" placeholder="FREE FIRE">
-                    </div>
-                    <div class="form-group">
-                        <label>صورة التصنيف</label>
-                        <input type="file" id="categoryImageFile">
-                    </div>
-                </div>
-                <button onclick="saveCategory()">حفظ التصنيف</button>
-            </div>
-            <h3>التصنيفات الحالية</h3>
-            <div id="categoriesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 15px;"></div>
-        </section>
+      <div class="dashboard-grid">
+        <div class="panel big">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> آخر الطلبات</h3>
+            <button class="view-all-btn" onclick="showPage('orders')">عرض الكل</button>
+          </div>
+          <div id="latestOrders" class="table-box"></div>
+        </div>
 
-        <section id="codes" class="page">
-            <div class="panel">
-                <h3>شحن وربط مجموعة أكواد جديدة لمنتج</h3>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>اختر المنتج المراد شحنه</label>
-                    <select id="codeProductId"></select>
-                </div>
-                <div class="form-group">
-                    <label>الأكواد الرقمية (ضع كل كود في سطر منفصل لوحده)</label>
-                    <textarea id="codesInput" rows="6" placeholder="FOX-122342-X&#10;FOX-533421-Y&#10;FOX-908331-Z"></textarea>
-                </div>
-                <button onclick="saveCodes()">حفظ الأكواد المضافة</button>
-            </div>
-            <h3>قائمة الأكواد المخزنة بالسيستم</h3>
-            <div id="codesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;"></div>
-        </section>
+        <div class="panel chart-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-chart-line"></i> الإيرادات (آخر 30 يوم)</h3>
+            <span class="chart-amount">3,245.60 EGP اليوم</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
 
-        <section id="orders" class="page">
-            <div class="panel">
-                <h3>أرشيف طلبات المتجر بالكامل</h3>
-                <div id="ordersList" style="overflow-x: auto;">
-                    </div>
-            </div>
-        </section>
+        <div class="panel list-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-fire"></i> أفضل المنتجات مبيعاً</h3>
+          </div>
+          <div id="topProducts" class="mini-list"></div>
+        </div>
 
-        <section id="coupons" class="page">
-            <div class="panel">
-                <h3>إنشاء كود خصم جديد (كوبون)</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <div class="form-group">
-                        <label>كود الخصم (مثل: FOX10)</label>
-                        <input type="text" id="couponCode" placeholder="FOX10">
-                    </div>
-                    <div class="form-group">
-                        <label>نسبة الخصم %</label>
-                        <input type="number" id="couponValue" placeholder="10">
-                    </div>
-                </div>
-                <button onclick="saveCoupon()">تفعيل وحفظ الكوبون</button>
-            </div>
-            <h3>الكوبونات المفعلة بالمتجر</h3>
-            <div id="couponsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;"></div>
-        </section>
+        <div class="panel alerts-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> مركز التنبيهات الذكي</h3>
+          </div>
+          <div class="alerts">
+            <div class="alert warning"><i class="fa-solid fa-gauge-high"></i> نفاد بعض أكواد PUBG UC قريباً!</div>
+            <div class="alert success"><i class="fa-solid fa-circle-check"></i> تم تأكيد طلب العميل وتوصيل الكود تلقائياً.</div>
+            <div class="alert danger"><i class="fa-solid fa-circle-xmark"></i> كود الخصم FOX10 انتهت صلاحيته.</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <section id="customers" class="page">
-            <div class="panel">
-                <h3>بيانات المستخدمين المسجلين بالموقع</h3>
-                <div id="customersList" style="overflow-x: auto;"></div>
-            </div>
-        </section>
-    </main>
+    <section id="products" class="page">
+      <div class="page-head">
+        <h2>إدارة المنتجات</h2>
+        <p>إضافة وتعديل المنتجات الرقمية</p>
+      </div>
+      <div class="panel form-panel">
+        <input id="productId" type="hidden" />
+        <div class="form-grid">
+          <input id="name" placeholder="اسم المنتج" />
+          
+          <select id="productCategorySelect">
+              <option value="">جاري تحميل التصنيفات المتاحة...</option>
+          </select>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    <script>
-      // تأكد أن إعدادات الـ Config الخاصة بـ Firebase هنا صحيحة وتطابق مشروعك
-      const firebaseConfig = {
-        apiKey: "AIzaSy...",
-        authDomain: "fox-games-...",
-        projectId: "fox-games-...",
-        storageBucket: "fox-games-...",
-        messagingSenderId: "...",
-        appId: "..."
-      };
-      // بدء تهيئة التطبيق إذا لم يكن مهيأ بالفعل
-      if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
+          <input id="game" placeholder="اسم اللعبة" />
+          <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
+          <input id="price" type="number" placeholder="السعر EGP" />
+          <input type="file" id="imageFile" accept="image/*">
+          <img id="imagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;">
+        </div>
+        <textarea id="description" placeholder="وصف المنتج"></textarea>
+        <label class="check">
+          <input id="active" type="checkbox" checked /> المنتج مفعل بالمتجر
+        </label>
+        <div class="actions">
+          <button onclick="saveProduct()">حفظ المنتج</button>
+          <button class="ghost" onclick="clearProductForm()">تفريغ الحقول</button>
+        </div>
+      </div>
+      <div id="productsList" class="cards-grid"></div>
+    </section>
+
+    <section id="categories" class="page">
+      <div class="page-head">
+        <h2>التصنيفات</h2>
+        <p>إدارة تصنيفات المنتجات</p>
+      </div>
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="catName" placeholder="اسم التصنيف" />
+          <input type="file" id="categoryImageFile" accept="image/*" />
+          <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;">
+        </div>
+        <button onclick="saveCategory()">حفظ التصنيف</button>
+      </div>
+      <div id="categoriesList" class="cards-grid"></div>
+    </section>
+
+    <section id="codes" class="page">
+      <div class="page-head">
+        <h2>أكواد المنتجات</h2>
+        <p>ربط مجموعة أكواد بكل منتج</p>
+      </div>
+      <div class="panel form-panel">
+        <select id="codeProductId"><option value="">اختر المنتج</option></select>
+        <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
+        <button onclick="saveCodes()">حفظ الأكواد</button>
+      </div>
+      <div id="codesList" class="cards-grid"></div>
+    </section>
+
+    <section id="orders" class="page">
+      <div class="page-head">
+        <h2>الطلبات</h2>
+        <p>متابعة الطلبات وتسليم الأكواد</p>
+      </div>
+      <div id="ordersList" class="panel table-box"></div>
+    </section>
+
+    <section id="coupons" class="page">
+      <div class="page-head">
+        <h2>أكواد الخصم</h2>
+        <p>إنشاء وإدارة كوبونات الخصم</p>
+      </div>
+      <div class="panel form-panel">
+        <div class="form-grid">
+          <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
+          <input id="couponValue" type="number" placeholder="نسبة الخصم %" />
+        </div>
+        <button onclick="saveCoupon()">حفظ الكوبون</button>
+      </div>
+      <div id="couponsList" class="cards-grid"></div>
+    </section>
+
+    <section id="customers" class="page">
+      <div class="page-head">
+        <h2>العملاء</h2>
+        <p>بيانات العملاء المسجلين</p>
+      </div>
+      <div id="customersList" class="panel table-box"></div>
+    </section>
+
+    <section id="reports" class="page">
+      <div class="page-head">
+        <h2>التقارير التفصيلية</h2>
+        <p>إحصائيات المبيعات والمنتجات المتقدمة</p>
+      </div>
+      <div class="panel">
+        <canvas id="detailedReportChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // تشغيل المنحنى البياني فوراً ليعطي مظهر لوحة الألعاب المضيئة
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('revenueChart');
+      if(ctx) {
+        const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['أبريل', '27 أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'],
+            datasets: [{
+              data: [1200, 2900, 2100, 3800, 3245.60, 4200],
+              borderColor: '#3b82f6',
+              borderWidth: 3,
+              backgroundColor: ctxGradient,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#3b82f6',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
+              y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+            }
+          }
+        });
       }
-    </script>
+    });
+  </script>
 
-    <script src="admin.js"></script>
+  <script src="/js/admin.js?v=200"></script>
 </body>
 </html>
