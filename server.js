@@ -40,7 +40,7 @@ function money(amount) {
   return value.toFixed(2);
 }
 
-// 1. مسار استقبال طلب الدفع وتوليد رابط الدفع المباشر (تعديل دالة كاشير)
+// 1. مسار استقبال طلب الدفع وتوليد رابط الدفع المباشر مع ميزة كشف تفاصيل الأخطاء
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   try {
     if (!MYFATOORAH_TOKEN) return res.status(500).json({ message: 'Missing MyFatoorah token in .env file.' });
@@ -52,9 +52,12 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
 
-    // 🌟 التعديل السحري: استخدام ExecutePayment لتخطي كاشير العام وفتح الفاتورة فوراً
+    // طباعة البيانات في الـ Logs للتأكد عند التشغيل
+    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/ExecutePayment`);
+    console.log('Token snippet:', MYFATOORAH_TOKEN ? MYFATOORAH_TOKEN.substring(0, 15) + '...' : 'MISSING');
+
     const response = await axios.post(`${MYFATOORAH_API_URL}/ExecutePayment`, {
-      PaymentMethodId: 0, // 0 يعرض جميع وسائل الدفع المتاحة لمتجرك (فيزا، فودافون كاش، فوري) في صفحة فاتورة احترافية باسمك
+      PaymentMethodId: 0, 
       InvoiceValue: amount,
       CustomerEmail: customerEmail,
       CustomerName: order.customer?.name || 'Fox Games Customer',
@@ -67,13 +70,21 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
     });
 
     if (response.data.IsSuccess) {
-      // الروابط المباشرة في ExecutePayment تكون داخل PaymentURL وليس InvoiceURL
       res.json({ success: true, paymentUrl: response.data.Data.PaymentURL });
     } else {
       res.status(400).json({ success: false, message: 'Failed to create MyFatoorah execution link.' });
     }
   } catch (e) {
-    res.status(400).json({ success: false, message: e.response?.data?.Message || e.message });
+    // طباعة تفاصيل الـ 403 كاملة في سيرفر ريندر لمعرفة السبب
+    console.error('=== MYFATOORAH FULL ERROR DETAILS ===');
+    console.error('Status:', e.response?.status);
+    console.error('Data from MyFatoorah:', e.response?.data);
+    console.error('======================================');
+    
+    res.status(400).json({ 
+      success: false, 
+      message: e.response?.data?.Message || e.response?.data?.ValidationErrors?.[0]?.Error || e.message 
+    });
   }
 });
 
