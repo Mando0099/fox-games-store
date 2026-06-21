@@ -8,6 +8,14 @@ let revenueChartInstance = null;
 
 const $ = (id) => document.getElementById(id);
 
+// تيسير تخصيص التنبيهات المظلمة المتناسقة مع اللوحة
+const swalConfig = {
+  background: '#0b1320',
+  color: '#fff',
+  confirmButtonColor: '#3b82f6',
+  cancelButtonColor: '#475569'
+};
+
 // 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي)
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
@@ -71,8 +79,14 @@ firebase.auth().onAuthStateChanged(async (user) => {
     .get();
 
   if(adminCheck.empty){
-    alert('هذا الحساب ليس أدمن');
-    location.href = '/';
+    Swal.fire({
+      icon: 'error',
+      title: 'وصول مرفوض',
+      text: 'هذا الحساب ليس لديه صلاحيات أدمن!',
+      ...swalConfig
+    }).then(() => {
+      location.href = '/';
+    });
     return;
   }
 
@@ -127,7 +141,12 @@ async function saveProduct(){
   };
 
   if(!data.name || !data.price || !data.category){
-    alert('اسم المنتج، التصنيف، والسعر حقول مطلوبة');
+    Swal.fire({
+      icon: 'warning',
+      title: 'حقول ناقصة',
+      text: 'اسم المنتج، التصنيف، والسعر حقول مطلوبة!',
+      ...swalConfig
+    });
     return;
   }
 
@@ -145,7 +164,15 @@ async function saveProduct(){
   clearProductForm();
   await loadProducts();
   await loadStats();
-  alert('تم حفظ المنتج بنجاح');
+  
+  Swal.fire({
+    icon: 'success',
+    title: 'تم الحفظ',
+    text: 'تم حفظ المنتج بنجاح داخل اللوحة.',
+    timer: 2000,
+    showConfirmButton: false,
+    ...swalConfig
+  });
 }
 
 // جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
@@ -168,7 +195,7 @@ async function loadProducts(){
 
     if(list){
       list.innerHTML += `
-        <div class="product-card-custom">
+        <div class="product-card-custom" id="product-${doc.id}">
           <div class="product-card-hero">
             <img src="${p.image || '/assets/default-game.jpg'}" alt="${p.name}">
             <span class="product-badge">${p.active ? 'نشط' : 'مخفي'}</span>
@@ -212,12 +239,44 @@ async function editProduct(id){
   scrollTo({top:0, behavior:'smooth'});
 }
 
-// حذف منتج
+// حذف منتج بأكشن وتأكيد داخلي
 async function deleteProduct(id){
-  if(!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
-  await db.collection('products').doc(id).delete();
-  await loadProducts();
-  await loadStats();
+  Swal.fire({
+    title: 'تأكيد حذف المنتج؟',
+    text: "سيتم إزالة هذا المنتج نهائياً من المتجر واختفاء كروته!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#f43f5e',
+    confirmButtonText: 'نعم، احذفه',
+    cancelButtonText: 'إلغاء',
+    ...swalConfig
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await db.collection('products').doc(id).delete();
+      
+      const prodCard = document.getElementById(`product-${id}`);
+      if(prodCard) {
+        prodCard.style.transition = "all 0.3s";
+        prodCard.style.opacity = "0";
+        setTimeout(() => prodCard.remove(), 300);
+      } else {
+        await loadProducts();
+      }
+      
+      await loadStats();
+      
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'تم حذف المنتج بنجاح',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#101a26',
+        color: '#fff'
+      });
+    }
+  });
 }
 
 // رفع الصور إلى Cloudinary
@@ -239,12 +298,26 @@ async function uploadImage(file) {
 async function saveCategory(){
   const name = val('catName');
   const file = document.getElementById('categoryImageFile')?.files?.[0];
-  const image = file ? await uploadImage(file) : '';
-
+  
   if(!name){
-    alert('اسم التصنيف مطلوب');
+    Swal.fire({
+      icon: 'warning',
+      title: 'عذراً',
+      text: 'اسم التصنيف مطلوب لإتمام العملية!',
+      ...swalConfig
+    });
     return;
   }
+
+  // إشعار تحميل بسيط من قلب اللوحة لحين الرفع لكلاوديناري
+  Swal.fire({
+    title: 'جاري رفع البيانات...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); },
+    ...swalConfig
+  });
+
+  const image = file ? await uploadImage(file) : '';
 
   await db.collection('categories').add({
     name,
@@ -258,7 +331,15 @@ async function saveCategory(){
   if(catFile) catFile.value = '';
 
   await loadCategories();
-  alert('تم حفظ التصنيف بنجاح');
+  
+  Swal.fire({
+    icon: 'success',
+    title: 'تم الإضافة',
+    text: 'تم حفظ التصنيف بنجاح فوري.',
+    timer: 1500,
+    showConfirmButton: false,
+    ...swalConfig
+  });
 }
 
 // جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
@@ -281,7 +362,7 @@ async function loadCategories(){
 
     if(list){
       list.innerHTML += `
-        <div class="product-card-custom">
+        <div class="product-card-custom" id="cat-${doc.id}">
           <div class="product-card-hero" style="height: 140px;">
             <img src="${c.image || '/assets/default-cat.jpg'}" alt="${c.name}">
           </div>
@@ -295,20 +376,56 @@ async function loadCategories(){
   });
 }
 
-// حذف تصنيف
+// حذف تصنيف بأكشن داخلي
 async function deleteCategory(id){
-  if(!confirm('هل تريد حذف هذا التصنيف?')) return;
-  await db.collection('categories').doc(id).delete();
-  await loadCategories();
+  Swal.fire({
+    title: 'هل تريد حذف هذا التصنيف؟',
+    text: "تأكد أنه لا توجد منتجات معتمدة عليه حالياً.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#f43f5e',
+    confirmButtonText: 'نعم، احذفه',
+    cancelButtonText: 'إلغاء',
+    ...swalConfig
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await db.collection('categories').doc(id).delete();
+      
+      const catCard = document.getElementById(`cat-${id}`);
+      if(catCard) {
+        catCard.style.transition = "all 0.3s";
+        catCard.style.opacity = "0";
+        setTimeout(() => catCard.remove(), 300);
+      } else {
+        await loadCategories();
+      }
+      
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'تم حذف التصنيف',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#101a26',
+        color: '#fff'
+      });
+    }
+  });
 }
 
-// 💎 حفظ أكواد المنتجات مع التحديث الفوري المطور (دعم الـ Batch للحفظ السريع)
+// 💎 حفظ أكواد المنتجات بدعم الـ Batch والـ SweetAlert2 الداخلي
 async function saveCodes(){
   const productId = val('codeProductId');
   const raw = val('codesInput');
 
   if(!productId || !raw){
-    alert('اختر المنتج واكتب الأكواد أولاً');
+    Swal.fire({
+      icon: 'warning',
+      title: 'بيانات غير مكتملة',
+      text: 'اختر المنتج واكتب الأكواد أولاً داخل الحقل المخصص.',
+      ...swalConfig
+    });
     return;
   }
 
@@ -331,39 +448,42 @@ async function saveCodes(){
   await loadCodes();
   await loadStats();
 
-  alert(`تم حفظ وتخزين (${codes.length}) كود رقمي بنجاح فوري!`);
+  Swal.fire({
+    icon: 'success',
+    title: 'اكتمل التخزين',
+    text: `تم حفظ وتخزين (${codes.length}) كود رقمي بنجاح فوري!`,
+    ...swalConfig
+  });
 }
 
-// 📊 جلب الأكواد وعرضها في جدول ذكي مريح للعين ومفلتر تلقائياً (تم تصحيح جلب أسماء المنتجات)
+// 📊 جلب الأكواد وتحديث صفوف الـ tbody فقط دون وميض البانل
 async function loadCodes() {
   const list = $('codesList');
   if (!list) return;
 
-  // 1. جلب خريطة المنتجات أولاً لربط الـ ID بالاسم الحقيقي فوراً ومنع كلمة جاري التحميل
   const productsSnap = await db.collection('products').get();
   const productsMap = {};
   productsSnap.forEach(pDoc => {
     productsMap[pDoc.id] = pDoc.data().name || 'منتج غير معروف';
   });
 
-  // 2. جلب الأكواد من الكوليكشن الصحيحة (productCodes) مرتبة تنازلياً
   const snap = await db.collection('productCodes').orderBy('createdAt', 'desc').limit(200).get();
 
-  let rows = '';
+  let rowsHtml = '';
   snap.forEach(doc => {
     const c = doc.data();
-    
-    // جلب اسم المنتج الفعلي من الخريطة المجهزة سابقاً
     const productName = productsMap[c.productId] || 'منتج غير معروف أو محذوف';
     
     const isAvailable = c.status === 'available';
     const statusText = isAvailable ? 'متاح' : 'مُستخدم';
+    
+    // الألوان الافتراضية السلسة للأكواد (الأخضر للمتاح والأحمر للمستعمل)
     const badgeStyle = isAvailable 
       ? 'background: rgba(101, 204, 0, 0.1); color: #65cc00; border: 1px solid rgba(101, 204, 0, 0.2);' 
       : 'background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2);';
 
-    rows += `
-      <tr data-status="${c.status}" data-product="${c.productId}">
+    rowsHtml += `
+      <tr id="row-${doc.id}" data-status="${c.status}" data-product="${c.productId}">
         <td style="font-family: monospace; letter-spacing: 1px; font-weight: 600; color: #fff; text-align: left; padding-left: 20px;">${c.code || '-'}</td>
         <td><span style="color: #3b82f6; font-weight: 600; font-size: 14px;">${productName}</span></td>
         <td><span class="status-badge" style="padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; ${badgeStyle}">${statusText}</span></td>
@@ -375,6 +495,13 @@ async function loadCodes() {
       </tr>
     `;
   });
+
+  // التحكم الذكي: تحديث صفوف الجدول فقط لتفادي الفلكر ومسح حقول فلاتر العميل
+  const existingTableBody = document.querySelector('#codesTablePro tbody');
+  if (existingTableBody) {
+    existingTableBody.innerHTML = rowsHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً</td></tr>';
+    return;
+  }
 
   list.innerHTML = `
     <div class="table-toolbar" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -399,46 +526,86 @@ async function loadCodes() {
           </tr>
         </thead>
         <tbody>
-          ${rows || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>'}
+          ${rowsHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>'}
         </tbody>
       </table>
     </div>
   `;
 }
 
-// 🔍 دالة الفلترة والبحث اللحظي (Client-side التوفيرية)
+// 🔍 دالة الفلترة والبحث اللحظي
 function filterCodesTable() {
-    const query = $('codeSearch').value.toLowerCase().trim();
-    const statusFilter = $('filterStatus').value;
-    const rows = document.querySelectorAll('#codesTablePro tbody tr');
+  const query = $('codeSearch').value.toLowerCase().trim();
+  const statusFilter = $('filterStatus').value;
+  const rows = document.querySelectorAll('#codesTablePro tbody tr');
 
-    rows.forEach(row => {
-        if(row.cells.length < 4) return;
-        
-        const codeText = row.cells[0].textContent.toLowerCase();
-        const rowStatus = row.getAttribute('data-status');
-        
-        const matchesSearch = codeText.includes(query);
-        const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
+  rows.forEach(row => {
+    if(row.cells.length < 4) return;
+    
+    const codeText = row.cells[0].textContent.toLowerCase();
+    const rowStatus = row.getAttribute('data-status');
+    
+    const matchesSearch = codeText.includes(query);
+    const matchesStatus = statusFilter === 'all' || rowStatus === statusFilter;
 
-        if (matchesSearch && matchesStatus) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    if (matchesSearch && matchesStatus) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
 }
 
-// 🗑️ دالة حذف كود محدد نهائياً
+// 🗑️ دالة حذف كود محدد نهائياً مع أنيميشن سلس وبوب-آب داخلي تماماً
 async function deleteCode(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا الكود نهائياً من اللوحة؟')) return;
-    try {
+  Swal.fire({
+    title: 'هل أنت متأكد؟',
+    text: "لن تتمكن من استعادة هذا الكود الرقمي بعد حذفه!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#f43f5e',
+    confirmButtonText: 'نعم، احذفه!',
+    cancelButtonText: 'إلغاء',
+    ...swalConfig
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
         await db.collection('productCodes').doc(id).delete();
-        await loadCodes();
+        
+        const row = document.getElementById(`row-${id}`);
+        if (row) {
+          row.style.transition = "all 0.3s ease";
+          row.style.opacity = "0";
+          row.style.transform = "translateX(30px)";
+          
+          setTimeout(() => {
+            row.remove();
+            const tbody = document.querySelector('#codesTablePro tbody');
+            if (tbody && tbody.children.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً</td></tr>';
+            }
+          }, 300);
+        }
+        
         await loadStats();
-    } catch (err) {
-        console.error("حدث خطأ أثناء محاولة حذف الكود:", err);
+
+        // إشعار هادئ صغير أعلى الصفحة دون تجميد اللوحة
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'تم حذف الكود بنجاح',
+          showConfirmButton: false,
+          timer: 1500,
+          background: '#101a26',
+          color: '#fff'
+        });
+
+      } catch (err) {
+        console.error("حدث خطأ أثناء محاولة حذف الكود السلس:", err);
+      }
     }
+  });
 }
 
 // حفظ الكوبونات
@@ -447,7 +614,12 @@ async function saveCoupon(){
   const value = Number(val('couponValue') || 0);
 
   if(!code || !value){
-    alert('الكود وقيمة الخصم مطلوبين');
+    Swal.fire({
+      icon: 'warning',
+      title: 'بيانات ناقصة',
+      text: 'الرمز وقيمة نسبة الخصم مطلوبين لتوليد الكوبون!',
+      ...swalConfig
+    });
     return;
   }
 
@@ -463,7 +635,15 @@ async function saveCoupon(){
   if($('couponValue')) $('couponValue').value = '';
 
   await loadCoupons();
-  alert('تم حفظ الكوبون بنجاح');
+  
+  Swal.fire({
+    icon: 'success',
+    title: 'تم تفعيل الكوبون',
+    text: 'تم حفظ الكوبون وهو جاهز للاستخدام حالياً.',
+    timer: 1500,
+    showConfirmButton: false,
+    ...swalConfig
+  });
 }
 
 // جلب الكوبونات لعرضها
@@ -652,9 +832,22 @@ function updateRevenueChart(labels, dataValues) {
     }
 }
 
-// تسجيل الخروج
+// تسجيل الخروج بأكشن تأكيدي فخم
 function logout(){
-  firebase.auth().signOut().then(() => {
-      location.href = '/login.html';
+  Swal.fire({
+    title: 'تسجيل الخروج؟',
+    text: "هل أنت متأكد من رغبتك في مغادرة اللوحة الحالية؟",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3b82f6',
+    confirmButtonText: 'خروج اكيد',
+    cancelButtonText: 'بقاء',
+    ...swalConfig
+  }).then((result) => {
+    if (result.isConfirmed) {
+      firebase.auth().signOut().then(() => {
+          location.href = '/login.html';
+      });
+    }
   });
 }
