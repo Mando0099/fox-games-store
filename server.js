@@ -105,10 +105,10 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       });
     }
 
-    const paymentMethodId = 0; 
+    const paymentMethodId = paymentMethods[0].PaymentMethodId; 
 
-console.log('Using PaymentMethodId: 0');
-console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+console.log('Available Methods:', paymentMethods);
+console.log('Using PaymentMethodId:', paymentMethodId);
 
 const executeBody = {
   PaymentMethodId: paymentMethodId, // القيمة هنا هتبقى 0
