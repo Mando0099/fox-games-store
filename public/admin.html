@@ -18,6 +18,8 @@
 </head>
 
 <body>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
   <aside class="sidebar">
     <div class="brand">
       <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
@@ -51,7 +53,7 @@
 
   <main class="main">
     <header class="topbar">
-      <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
 
       <div class="top-actions">
         <div class="search-container">
