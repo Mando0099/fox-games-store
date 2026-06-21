@@ -164,14 +164,19 @@ function resetCategoryFilter() {
 
 function addToCart(i) {
   if (typeof products === 'undefined' || !products[i]) return;
-  cart.push({ ...products[i], id: Date.now() + Math.random() });
+  // نحتفظ بـ firebaseId والبيانات الأساسية لربطها بـ السيرفر وسحب الكود بدقة
+  cart.push({ 
+    ...products[i], 
+    cartId: Date.now() + Math.random(),
+    id: products[i].id || products[i].docId || i // الـ id الأصلي للمنتج في الفايربيز
+  });
   save();
   updateCart();
   $('cartDrawer')?.classList.add('open');
 }
 
-function removeItem(id) {
-  cart = cart.filter(x => x.id !== id);
+function removeItem(cartId) {
+  cart = cart.filter(x => x.cartId !== cartId);
   save();
   updateCart();
 }
@@ -184,7 +189,6 @@ function updateCart() {
   if ($('cartItems')) {
     $('cartItems').innerHTML = cart.length 
       ? cart.map(item => {
-          // قراءة الصورة المرفوعة على الفايربيز وإذا لم توجد نضع صورة ديمو
           const imgUrl = item.img || item.image || 'https://via.placeholder.com/150';
           
           return `
@@ -195,7 +199,7 @@ function updateCart() {
                 <span class="cartItem-cat">${item.category || ''}</span>
                 <span class="cartItem-price">${item.price} EGP</span>
               </div>
-              <button class="cartItem-remove-btn" onclick="removeItem(${item.id})" title="Remove">
+              <button class="cartItem-remove-btn" onclick="removeItem(${item.cartId})" title="Remove">
                 <i class="fas fa-trash-alt"></i>
               </button>
             </div>`;
@@ -219,15 +223,12 @@ function toggleLanguage() {
 }
 
 function applyLanguage(lang) {
-  // 1. تحديث اتجاه لغة الصفحة بالكامل
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.lang = lang;
 
-  // 2. ترجمة النصوص العادية التي تحتوي على وسم data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[lang][key]) {
-      // لو العنصر جواه أيقونة Font Awesome نحتفظ بها ونغير النص فقط
       const icon = el.querySelector('i');
       if (icon) {
         el.innerHTML = '';
@@ -239,7 +240,6 @@ function applyLanguage(lang) {
     }
   });
 
-  // 3. ترجمة نصوص الـ Placeholders (خانات البحث والبيانات)
   document.querySelectorAll('[data-i18n-holder]').forEach(el => {
     const key = el.getAttribute('data-i18n-holder');
     if (translations[lang][key]) {
@@ -247,7 +247,6 @@ function applyLanguage(lang) {
     }
   });
 
-  // 4. تحديث نص زرار التبديل نفسه
   if ($('langToggleBtn')) {
     $('langToggleBtn').textContent = translations[lang]['lang_btn'];
   }
@@ -265,6 +264,7 @@ function applyCoupon() {
   }
 }
 
+// الدالة المحدثة بالكامل لربط متجرك مع ماي فاتورة (MyFatoorah) تلقائياً
 async function checkout() {
   if (!cart.length) {
     return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
@@ -272,7 +272,13 @@ async function checkout() {
 
   const name = ($('customerName')?.value || '').trim() || 'Fox Games Customer';
   const phone = ($('customerPhone')?.value || '').trim();
-  const payment = $('paymentMethod')?.value || 'Visa / MasterCard';
+  
+  // هام جداً: سحب الإيميل من الواجهة، تأكد من وجود حقل بـ id="customerEmail" في الـ HTML لديك
+  const email = ($('customerEmail')?.value || '').trim();
+  
+  if (!email) {
+    return alert(currentLang === 'ar' ? 'برجاء إدخال البريد الإلكتروني أولاً لاستلام الأكواد الرقمية المتوفرة!' : 'Please enter your email to receive your digital codes!');
+  }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
   const discountValue = Math.round(subtotal * coupon / 100);
@@ -283,7 +289,8 @@ async function checkout() {
   }
 
   try {
-    const res = await fetch('/api/kashier/create-payment', {
+    // الاتصال بالـ API الجديد في سيرفر الـ Node.js
+    const res = await fetch('/api/myfatoorah/create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -291,14 +298,12 @@ async function checkout() {
       body: JSON.stringify({
         customer: {
           name,
-          phone
+          phone,
+          email
         },
-        paymentMethod: payment,
-        currency: 'EGP',
-        subtotal,
-        discount: discountValue,
         total,
         items: cart.map(item => ({
+          id: item.id, // كود التعريف الخاص بالفايربيز لسحب الكود منه
           name: item.name,
           category: item.category || '',
           price: Number(item.price || 0)
@@ -312,11 +317,12 @@ async function checkout() {
       throw new Error(data.message || 'Payment link was not created.');
     }
 
+    // التوجيه التلقائي والآمن لبوابة ماي فاتورة
     window.location.href = data.paymentUrl;
 
   } catch (e) {
-    console.error('Kashier checkout error:', e);
-    alert((currentLang === 'ar' ? 'خطأ في بوابة الدفع: ' : 'Kashier error: ') + e.message);
+    console.error('MyFatoorah checkout error:', e);
+    alert((currentLang === 'ar' ? 'حدث خطأ أثناء معالجة الدفع: ' : 'Payment process error: ') + e.message);
   }
 }
 
