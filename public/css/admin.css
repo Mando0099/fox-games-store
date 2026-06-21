@@ -398,7 +398,69 @@ body {
   margin-bottom: 20px;
 }
 
-/* حقول الإدخال والفورم */
+/* ==========================================================================
+   💎 تنظيم وهيكلة فورم إدارة المنتجات الاحترافية
+   ========================================================================== */
+.form-container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.form-inputs-side {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-upload-side {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* تسميات وعناوين الحقول المتقدمة فوق الإنبوكس */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.form-group label, .upload-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  padding-right: 4px;
+}
+
+.form-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.form-checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--neon-blue);
+  cursor: pointer;
+}
+
+.form-checkbox-group label {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+/* حقول الإدخال والفورم الافتراضية */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -424,7 +486,154 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
-/* ستايل كروت المنتجات */
+/* ==========================================================================
+   🚀 تصميم منطقة رفع الصور الحديثة (Custom Drag & Drop Dropzone)
+   ========================================================================== */
+.dropzone-area {
+  flex: 1;
+  border: 2px dashed rgba(59, 130, 246, 0.25);
+  background: var(--bg-input);
+  border-radius: var(--radius-main);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px 20px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  min-height: 220px;
+}
+
+.dropzone-area:hover, .dropzone-area.dragover {
+  border-color: var(--neon-blue);
+  background: var(--bg-accent);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+/* إخفاء الزر التقليدي السيء والافتراضي من المتصفح */
+.dropzone-area input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.dropzone-content i {
+  font-size: 45px;
+  color: var(--neon-blue);
+  margin-bottom: 12px;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  transition: transform var(--transition-fast);
+}
+
+.dropzone-area:hover .dropzone-content i {
+  transform: translateY(-5px);
+}
+
+.dropzone-content p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.dropzone-content p span {
+  color: var(--neon-blue);
+  text-decoration: underline;
+}
+
+.dropzone-content small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* صندوق وطبقة المعاينة الذكية الفورية للصورة داخل صندوق الرفع */
+.image-preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-card);
+  border-radius: var(--radius-main);
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.image-preview-overlay img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: calc(var(--radius-main) - 4px);
+}
+
+.remove-img-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(239, 68, 68, 0.85);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 12;
+  transition: var(--transition-fast);
+}
+
+.remove-img-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+/* أزرار التحكم السفلية داخل الـ Forms */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  justify-content: flex-end;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #2563eb, var(--neon-blue)) !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  padding: 12px 25px !important;
+  font-size: 14px !important;
+}
+
+.btn-submit:hover {
+  box-shadow: 0 4px 25px rgba(59, 130, 246, 0.5);
+}
+
+.btn-clear {
+  background: var(--bg-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-muted) !important;
+  padding: 12px 22px !important;
+  font-size: 14px !important;
+}
+
+.btn-clear:hover {
+  background: var(--bg-accent) !important;
+  color: var(--text-main) !important;
+}
+
+/* ==========================================================================
+   ستايل كروت المنتجات
+   ========================================================================== */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -533,12 +742,12 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* ==========================================================================
-   💎 حماية وتجاوب الجداول الاحترافية (Responsive & Pro Table Box)
+   💎 حماية وتجاوب الجداول وحمايتها من النصوص الطويلة جداً
    ========================================================================== */
 .table-box {
   width: 100% !important;
   overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch; 
+  -webkit-overflow-scrolling: touch; /* سحب ناعم ومريح للموبايل */
   background: var(--bg-card);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -550,7 +759,7 @@ table {
   border-collapse: collapse; 
   text-align: right;
   margin-top: 10px;
-  min-width: 650px; 
+  min-width: 650px; /* يمنع الجدول من الانضغاط بشكل مشوه ويُجبر الـ Scroll Horizontal */
 }
 
 th {
@@ -568,8 +777,8 @@ td {
   font-size: 14px;
   color: var(--text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  white-space: nowrap;      
-  text-overflow: ellipsis;  
+  white-space: nowrap;      /* منع الكلمات من التداخل والنزول المشوه */
+  text-overflow: ellipsis;  /* إضافة النقاط الثلاثة إذا زاد النص عن العرض */
   overflow: hidden;
   max-width: 250px;         
 }
@@ -578,6 +787,29 @@ tr:hover td {
   background-color: rgba(59, 130, 246, 0.03); 
   color: #fff;
   transition: background-color var(--transition-fast);
+}
+
+/* فئة الحماية الخاصة بنصوص الأكواد الطويلة لمنعها من اختراق الخلايا والكروت */
+.code-text-protect {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 600;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  display: inline-block;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr; /* لضمان عرض الرموز والأكواد الرقمية بشكل سليم */
+}
+
+.product-relation-badge {
+  color: var(--neon-blue);
+  font-weight: 700;
+  font-size: 13px;
 }
 
 /* 💎 استايل بادج الحالة الاحترافي (متاح / مستخدم) */
@@ -613,22 +845,6 @@ select option {
   background-color: var(--bg-card);
   color: var(--text-main);
   padding: 10px;
-}
-
-/* ==========================================================================
-   🛠️ التنسيقات الإضافية لـ SweetAlert2 وصور المعاينة
-   ========================================================================== */
-/* توحيد نوع الخط داخل نوافذ تنبيهات SweetAlert ليكون متناسقاً */
-.swal2-popup, .swal2-title, .swal2-content, .swal2-html-container {
-  font-family: 'Cairo', sans-serif !important;
-}
-
-/* ستايل مخصص لصور المعاينة لتبدو كأنها جزء مدمج من الـ Form */
-#imagePreview, #categoryImagePreview {
-  border: 2px dashed rgba(59, 130, 246, 0.3);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
-  max-width: 120px;
-  max-height: 120px;
 }
 
 /* ==========================================================================
@@ -690,12 +906,21 @@ select option {
   }
 }
 
+@media (max-width: 768px) {
+  .form-container {
+    flex-direction: column;
+  }
+  .form-inputs-side, .form-upload-side {
+    width: 100%;
+  }
+}
+
 @media (max-width: 680px) {
   .top-actions .welcome {
-    display: none; 
+    display: none; /* إخفاء الاسم والترحيب لتوفير مساحة للأزرار الملحقة */
   }
   
   .search-container {
-    display: none; 
+    display: none; /* إخفاء شريط البحث الطويل من التوب بار بالموبايل حمايةً للشاشة */
   }
 }
