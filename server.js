@@ -105,15 +105,14 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       });
     }
 
-    const selectedMethod = paymentMethods.find(m => m.IsDirectPayment === false) || paymentMethods[0];
-    const paymentMethodId = selectedMethod.PaymentMethodId;
+    const paymentMethodId = 0; 
 
-    console.log('Selected PaymentMethodId:', paymentMethodId, selectedMethod.PaymentMethodEn || selectedMethod.PaymentMethodAr);
-    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+console.log('Using PaymentMethodId: 0');
+console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
 
-    const executeBody = {
-      PaymentMethodId: paymentMethodId,
-      InvoiceValue: amount,
+const executeBody = {
+  PaymentMethodId: paymentMethodId, // القيمة هنا هتبقى 0
+  InvoiceValue: amount,
       DisplayCurrencyIso: 'EGP',
       CustomerEmail: customerEmail,
       CustomerName: customerName,
