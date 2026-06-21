@@ -182,7 +182,7 @@ body {
   flex: 1;
   padding: 35px;
   background-color: var(--bg-main);
-  min-width: 0; /* يمنع تمدد العناصر خارج الهيكل الرئيسي */
+  min-width: 0; 
 }
 
 .topbar {
@@ -247,7 +247,7 @@ body {
   border-radius: 20px;
 }
 
-/* زر الهامبرجر للموبايل - مخفي على الديسكتوب */
+/* زر الهامبرجر للموبايل */
 .menu-btn {
   display: none;
   background: var(--bg-card);
@@ -280,16 +280,16 @@ body {
 }
 
 /* ==========================================================================
-   حل مشكلة تداخل الصفحات والتابات التحت بعضها
+   حل مشكلة تداخل الصفحات والتابات
    ========================================================================== */
 .page {
-  display: none !important; /* إخفاء إجباري لكل الصفحات الافتراضية */
+  display: none !important; 
   width: 100%;
   animation: fadeIn 0.4s ease-in-out;
 }
 
 .page.active {
-  display: block !important; /* إظهار الصفحة النشطة فقط المحددة بالتاب */
+  display: block !important; 
 }
 
 @keyframes fadeIn {
@@ -383,10 +383,6 @@ body {
   gap: 25px;
 }
 
-@media(max-width: 1150px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
-}
-
 .panel {
   background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -428,7 +424,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
-/* ستايل كروت المنتجات الجديد */
+/* ستايل كروت المنتجات */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -536,26 +532,27 @@ input:focus, textarea:focus, select:focus {
   color: white !important;
 }
 
+/* ==========================================================================
+   💎 حماية وتجاوب الجداول الاحترافية (Responsive & Pro Table Box)
+   ========================================================================== */
 .table-box {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* سحب ناعم على أجهزة iOS */
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch; /* سحب ناعم ومريح للموبايل */
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 20px;
 }
 
-/* ==========================================================================
-   💎 Professional Table & Select Component Styling 
-   ========================================================================== */
-
-/* ستايل الجدول الأساسي وتوزيعه */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse; /* تفضيل الـ collapse للتحكم الكامل بالحواف */
   text-align: right;
   margin-top: 10px;
+  min-width: 650px; /* يمنع الجدول من الانضغاط بشكل مشوه ويُجبر الـ Scroll Horizontal */
 }
 
-/* تنسيق عناوين الجدول العلوية */
 th {
   background-color: rgba(255, 255, 255, 0.02);
   color: var(--text-muted);
@@ -566,38 +563,52 @@ th {
   letter-spacing: 0.5px;
 }
 
-/* تنسيق خلايا البيانات وحمايتها من التداخل */
 td {
   padding: 16px 20px;
   font-size: 14px;
   color: var(--text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  white-space: nowrap;         /* منع الكلمات من النزول لسطر جديد وتدمير الطول */
-  text-overflow: ellipsis;    /* إضافة ثلاث نقاط إذا كان النص أطول من المساحة */
+  white-space: nowrap;      /* منع الكلمات من التداخل والنزول المشوه */
+  text-overflow: ellipsis;  /* إضافة النقاط الثلاثة إذا زاد النص عن العرض */
   overflow: hidden;
-  max-width: 250px;           /* أقصى عرض للخلية الواحدة لحماية تصميم الجدول */
+  max-width: 250px;         
 }
 
-/* تأثير احترافي عند تمرير الماوس على سطر الجدول */
 tr:hover td {
-  background-color: rgba(59, 130, 246, 0.03); /* إضاءة زرقاء خفيفة نيون */
+  background-color: rgba(59, 130, 246, 0.03); 
   color: #fff;
   transition: background-color var(--transition-fast);
 }
 
-/* تخصيص مظهر قوائم الاختيار Dropdown لتليق بالـ Gaming theme */
+/* 💎 استايل بادج الحالة الاحترافي (متاح / مستخدم) */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+.status-badge.available {
+  background: rgba(101, 204, 0, 0.15);
+  color: var(--neon-green);
+}
+.status-badge.used {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* تخصيص مظهر قوائم الاختيار Dropdown */
 select {
-  appearance: none; /* إزالة سهم المتصفح الافتراضي القبيح */
+  appearance: none; 
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
   background-repeat: no-repeat;
-  background-position: left 15px center; /* وضع السهم المخصص في اليسار ليتناسب مع الكتابة العربية */
-  padding-left: 40px; /* ترك مساحة للسهم */
+  background-position: left 15px center; 
+  padding-left: 40px; 
   cursor: pointer;
 }
 
-/* تنسيق الخيارات الداخلية للـ Select */
 select option {
   background-color: var(--bg-card);
   color: var(--text-main);
@@ -605,18 +616,21 @@ select option {
 }
 
 /* ==========================================================================
-   ⚙️ تحسين نظام التجاوب الشامل (Responsive Update) ⚙️
+   ⚙️ تحسين نظام التجاوب الشامل للموبايل (Media Queries)
    ========================================================================== */
+@media (max-width: 1150px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 1000px) {
   body {
     flex-direction: column;
   }
 
-  /* تحويل السايدبار إلى Drawer مخفي ينزلق من اليمين */
   .sidebar {
     position: fixed;
     top: 0;
-    right: -280px; /* سحب خارج الشاشة يميناً */
+    right: -280px; 
     width: 280px;
     height: 100vh;
     z-index: 999;
@@ -624,19 +638,16 @@ select option {
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
   }
 
-  /* تفعيل ظهور السايدبار عند إضافة الكلاس */
   .sidebar.active {
     right: 0;
   }
 
-  /* تمديد المحتوى بالكامل */
   .main {
     max-width: 100%;
     padding: 20px;
     width: 100%;
   }
 
-  /* إظهار زر الهامبرجر */
   .menu-btn {
     display: flex;
   }
@@ -650,11 +661,7 @@ select option {
     width: auto;
     flex-grow: 1;
     justify-content: flex-end;
-  }
-
-  /* حماية الجداول من الانضغاط وتفعيل السحب الأفقي المريح */
-  table {
-    min-width: 700px; 
+    gap: 10px;
   }
 
   .search-container {
@@ -663,16 +670,16 @@ select option {
   }
 
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)); /* كرت واحد كامل العرض لكل سطر بالموبايل */
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)); 
   }
 }
 
-@media (max-width: 580px) {
+@media (max-width: 680px) {
   .top-actions .welcome {
-    display: none; /* إخفاء نص الترحيب لتوفير مساحة على الشاشات الصغيرة جداً */
+    display: none; /* إخفاء الاسم والترحيب لتوفير مساحة للأزرار الملحقة */
   }
   
   .search-container {
-    max-width: 150px;
+    display: none; /* إخفاء شريط البحث الطويل من التوب بار بالموبايل حمايةً للشاشة */
   }
 }
