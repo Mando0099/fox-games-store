@@ -171,8 +171,8 @@
         <input id="productId" type="hidden" />
         <div class="form-grid">
           <input id="name" placeholder="اسم المنتج" />
-          
-          <select id="productCategorySelect">
+           
+          <select id="category">
               <option value="">جاري تحميل التصنيفات المتاحة...</option>
           </select>
 
@@ -267,7 +267,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // تشغيل المنحنى البياني فوراً ليعطي مظهر لوحة الألعاب المضيئة
     document.addEventListener("DOMContentLoaded", function() {
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
