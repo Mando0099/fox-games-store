@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const axios = require('axios');
 const admin = require('firebase-admin');
-const nodemailer = require('nodemailer');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -27,18 +26,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000
-});
+// Resend email settings
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
+
 
 function money(amount) {
   const value = Number(amount || 0);
@@ -168,54 +159,110 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   console.log('WEBHOOK BODY:', JSON.stringify(req.body, null, 2));
-  const { TransactionId, OrderStatus } = req.body;
 
-  if (OrderStatus === 'Paid') {
-    try {
-      const verification = await myfatoorahPost('GetPaymentStatus', {
-        Key: TransactionId,
-        KeyType: 'TransactionId'
-      });
+  try {
+    const invoice = req.body?.Data?.Invoice;
+    const status = String(invoice?.Status || '').toUpperCase();
 
-      const paymentData = verification.data.Data;
-      const customerEmail = paymentData.CustomerEmail;
-      const cartItems = JSON.parse(paymentData.UserDefinedField || '[]');
-      const orderId = paymentData.InvoiceId;
-
-      const purchasedCodes = [];
-
-      await db.runTransaction(async (transaction) => {
-        for (const item of cartItems) {
-          if (!item.id) continue;
-
-          const codesRef = db.collection('products').doc(item.id).collection('digital_codes');
-          const availableCodeQuery = codesRef.where('isUsed', '==', false).limit(1);
-          const codeSnapshot = await transaction.get(availableCodeQuery);
-
-          if (!codeSnapshot.empty) {
-            const codeDoc = codeSnapshot.docs[0];
-            transaction.update(codeDoc.ref, {
-              isUsed: true,
-              orderId: orderId,
-              purchasedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            purchasedCodes.push({ productName: item.name, code: codeDoc.data().code });
-          }
-        }
-      });
-
-      if (purchasedCodes.length > 0 && customerEmail && customerEmail !== 'customer@foxgames.local') {
-        await sendCodesEmail(customerEmail, orderId, purchasedCodes);
-      }
-
-      return res.status(200).send('SUCCESS');
-    } catch (error) {
-      console.error('Webhook processing error:', error.response?.data || error.message);
-      return res.status(500).send('Internal Server Error');
+    if (!invoice || status !== 'PAID') {
+      console.log('Webhook ignored. Invoice status:', status || 'NO_STATUS');
+      return res.status(200).send('Ignored');
     }
-  }
 
-  res.status(200).send('Ignored');
+    const invoiceId = invoice.Id;
+    if (!invoiceId) {
+      console.error('Webhook paid but missing invoice id.');
+      return res.status(200).send('Missing invoice id');
+    }
+
+    const verification = await myfatoorahPost('GetPaymentStatus', {
+      Key: invoiceId,
+      KeyType: 'InvoiceId'
+    });
+
+    const paymentData = verification.data?.Data || {};
+    console.log('VERIFIED PAYMENT:', JSON.stringify(paymentData, null, 2));
+
+    const customerEmail =
+      paymentData.CustomerEmail ||
+      req.body?.Data?.Customer?.Email ||
+      invoice.CustomerEmail ||
+      '';
+
+    let cartItems = [];
+    try {
+      cartItems = JSON.parse(paymentData.UserDefinedField || invoice.UserDefinedField || '[]');
+    } catch (parseErr) {
+      console.error('Could not parse UserDefinedField:', parseErr.message);
+      cartItems = [];
+    }
+
+    console.log('CART ITEMS FROM PAYMENT:', JSON.stringify(cartItems, null, 2));
+
+    if (!customerEmail || customerEmail === 'customer@foxgames.local') {
+      console.error('No valid customer email found. Codes cannot be delivered.');
+      return res.status(200).send('No customer email');
+    }
+
+    if (!Array.isArray(cartItems) || !cartItems.length) {
+      console.error('No cart items found in payment UserDefinedField.');
+      return res.status(200).send('No cart items');
+    }
+
+    const orderId = paymentData.InvoiceId || invoiceId;
+    const purchasedCodes = [];
+
+    await db.runTransaction(async (transaction) => {
+      for (const item of cartItems) {
+        const productId = item.id || item.productId;
+
+        if (!productId) {
+          console.error('Item missing product id:', item);
+          continue;
+        }
+
+        const codesRef = db.collection('products').doc(productId).collection('digital_codes');
+        const availableCodeQuery = codesRef.where('isUsed', '==', false).limit(1);
+        const codeSnapshot = await transaction.get(availableCodeQuery);
+
+        if (codeSnapshot.empty) {
+          console.error('No available code for product:', productId, item.name);
+          continue;
+        }
+
+        const codeDoc = codeSnapshot.docs[0];
+        const codeData = codeDoc.data();
+
+        transaction.update(codeDoc.ref, {
+          isUsed: true,
+          orderId,
+          customerEmail,
+          purchasedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        purchasedCodes.push({
+          productName: item.name || productId,
+          code: codeData.code
+        });
+      }
+    });
+
+    console.log('PURCHASED CODES:', JSON.stringify(purchasedCodes, null, 2));
+
+    if (!purchasedCodes.length) {
+      console.error('Payment paid, but no codes were pulled from Firebase.');
+      return res.status(200).send('No codes available');
+    }
+
+    await sendCodesEmail(customerEmail, orderId, purchasedCodes);
+    console.log('Codes email sent to:', customerEmail);
+
+    return res.status(200).send('SUCCESS');
+
+  } catch (error) {
+    console.error('Webhook processing error:', error.response?.data || error.message);
+    return res.status(500).send('Internal Server Error');
+  }
 });
 
 async function sendCodesEmail(email, orderId, codes) {
@@ -229,7 +276,7 @@ async function sendCodesEmail(email, orderId, codes) {
   });
 
   const mailOptions = {
-    from: `"Fox Games Support" <${process.env.EMAIL_USER}>`,
+    from: RESEND_FROM,
     to: email,
     subject: `أكواد طلبك رقم #${orderId} - Fox Games`,
     html: `
@@ -243,7 +290,28 @@ async function sendCodesEmail(email, orderId, codes) {
       </div>`
   };
 
-  await transporter.sendMail(mailOptions);
+  if (!RESEND_API_KEY) {
+    throw new Error('Missing RESEND_API_KEY in Render Environment Variables.');
+  }
+
+  const resendResponse = await axios.post(
+    'https://api.resend.com/emails',
+    {
+      from: RESEND_FROM,
+      to: [email],
+      subject: mailOptions.subject,
+      html: mailOptions.html
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    }
+  );
+
+  console.log('RESEND RESPONSE:', JSON.stringify(resendResponse.data, null, 2));
 }
 app.get('/test-email', async (req, res) => {
   try {
