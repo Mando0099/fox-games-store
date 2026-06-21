@@ -6,6 +6,10 @@
   <title>Fox Games Market</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/style.css"/>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     /* ================= START USER PROFILE STYLE ================= */
     .user-profile-wrapper {
@@ -95,7 +99,7 @@
     .auth-google { color: #ea4335; font-weight: bold; }
     .auth-facebook { color: #1877f2; font-weight: bold; }
     .auth-email { color: #65cc00; font-weight: bold; }
-     
+      
     .profile-menu-links {
       margin: 12px 0;
       display: flex;
@@ -138,7 +142,6 @@
       background: #ef4444;
       color: #fff;
     }
-    /* دعم الاتجاه العربي تلقائياً إذا قلب المتصفح عربي */
     html[dir="rtl"] .user-profile-dropdown {
       right: auto;
       left: 0;
@@ -231,6 +234,30 @@
     .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus {
       border-color: #65cc00 !important;
     }
+    
+    /* ستايل مخصص لزر إتمام الشراء المطور والاحترافي */
+    .btn-pay-now-pro {
+      width: 100%;
+      background: linear-gradient(135deg, #65cc00 0%, #4da200 100%);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
+    }
+    .btn-pay-now-pro:hover {
+      background: linear-gradient(135deg, #76de0c 0%, #59ba00 100%);
+      box-shadow: 0 6px 20px rgba(101, 204, 0, 0.4);
+      transform: translateY(-1px);
+    }
     /* ================= END MODERN CART STYLE ================= */
   </style>
 </head>
@@ -257,14 +284,14 @@
 
     <div class="navActions">
       <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
-       
+        
       <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
-       
+        
       <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
         <button class="user-profile-btn" id="userProfileTrigger">
           <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
         </button>
-         
+          
         <div class="user-profile-dropdown" id="userProfileDropdown">
           <div class="profile-header">
             <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
@@ -292,7 +319,7 @@
   </header>
 
   <main id="home" class="content">
-     
+      
     <section class="hero-banner-section">
       <div class="hero-banner-card">
         <div class="hero-content">
@@ -414,7 +441,7 @@
     </div>
     <div id="cartItems"></div>
     <div class="coupon">
-      <input id="couponInput" placeholder="Coupon: FOX10">
+      <input id="couponInput" placeholder="أدخل كود الخصم هنا...">
       <button onclick="applyCoupon()" data-i18n="btn_apply">Apply</button>
     </div>
     <div class="summary">
@@ -422,20 +449,28 @@
       <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
       <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
     </div>
+    
     <div class="checkoutForm">
-      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name">
-      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone">
+      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name" required>
+      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
       <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
-      <select id="paymentMethod">
+      <select id="paymentMethod" required>
         <option data-i18n="opt_visa">Visa / MasterCard</option>
         <option data-i18n="opt_wallet">Wallet</option>
         <option data-i18n="opt_vodafone">Vodafone Cash</option>
         <option data-i18n="opt_fawry">Fawry</option>
         <option data-i18n="opt_bank">Bank Transfer</option>
       </select>
-      <button class="primary full" onclick="checkout()" data-i18n="btn_pay_now">Pay Now</button>
-      <button class="whatsapp full" onclick="sendWhatsappOrder()" data-i18n="btn_wa_order">WhatsApp Order</button>
-      <small data-i18n="secure_checkout_notice">Secure checkout connected through the backend.</small>
+      
+      <button class="btn-pay-now-pro" onclick="checkout()" data-i18n="btn_pay_now">
+        <i class="fa-solid fa-credit-card"></i> 
+        <span>Pay Now</span>
+      </button>
+      
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 10px;">
+        <i class="fa-solid fa-shield-halved" style="color: #65cc00;"></i>
+        <span>Secure Secure 256-bit Connection</span>
+      </div>
     </div>
   </aside>
 
@@ -473,7 +508,7 @@
       const userProfileWrapper = document.getElementById('userProfileWrapper');
       const userProfileTrigger = document.getElementById('userProfileTrigger');
       const userProfileDropdown = document.getElementById('userProfileDropdown');
-       
+        
       const topNavUserName = document.getElementById('topNavUserName');
       const dropdownUserName = document.getElementById('dropdownUserName');
       const dropdownUserEmail = document.getElementById('dropdownUserEmail');
@@ -488,7 +523,7 @@
             mainLoginBtn.classList.add('foxHidden');
           }
         }
-         
+          
         const actionsContainer = document.querySelector('.navActions');
         if (actionsContainer) {
           const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
