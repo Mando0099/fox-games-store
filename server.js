@@ -1,8 +1,164 @@
 require('dotenv').config();
-const express=require('express');const path=require('path');const crypto=require('crypto');
-const app=express();const PORT=process.env.PORT||9000;const KASHIER_BASE_URL=process.env.KASHIER_BASE_URL||'https://checkout.kashier.io';const KASHIER_MODE=process.env.KASHIER_MODE||'test';const KASHIER_MERCHANT_ID=process.env.KASHIER_MERCHANT_ID;const KASHIER_API_KEY=process.env.KASHIER_API_KEY;const PUBLIC_BASE_URL=process.env.PUBLIC_BASE_URL||`http://localhost:${PORT}`;
-app.use(express.json());app.use(express.urlencoded({extended:true}));app.use(express.static(path.join(__dirname,'public')));
-function money(amount){const value=Number(amount||0);if(!Number.isFinite(value)||value<=0)throw new Error('Invalid payment amount.');return value.toFixed(2)}
-function hash({merchantId,orderId,amount,currency,secret}){const pathToSign=`/?payment=${merchantId}.${orderId}.${amount}.${currency}`;return crypto.createHmac('sha256',secret).update(pathToSign).digest('hex')}
-app.post('/api/kashier/create-payment',(req,res)=>{try{if(!KASHIER_MERCHANT_ID||!KASHIER_API_KEY)return res.status(500).json({message:'Missing Kashier credentials in .env file.'});const order=req.body||{};const amount=money(order.total);const currency=order.currency||'EGP';const merchantOrderId=`FG-${Date.now()}`;const items=Array.isArray(order.items)?order.items:[];const signature=hash({merchantId:KASHIER_MERCHANT_ID,orderId:merchantOrderId,amount,currency,secret:KASHIER_API_KEY});const params=new URLSearchParams({merchantId:KASHIER_MERCHANT_ID,orderId:merchantOrderId,amount,currency,hash:signature,merchantRedirect:`${PUBLIC_BASE_URL}/payment-result.html`,failureRedirect:'true',redirectMethod:'get',display:'ar',allowedMethods:'card,wallet,bank_installments',mode:KASHIER_MODE,brandColor:'rgba(255, 46, 138, 1)',metaData:JSON.stringify({'Customer Name':order.customer?.name||'Fox Games Customer','Customer Phone':order.customer?.phone||'','Store':'Fox Games','Items':items.map(i=>i.name).join(', ')})});res.json({success:true,orderId:merchantOrderId,paymentUrl:`${KASHIER_BASE_URL}?${params.toString()}`})}catch(e){res.status(400).json({success:false,message:e.message})}});
-app.listen(PORT,()=>{console.log(`Fox Games running on http://localhost:${PORT}`);console.log(`Kashier mode: ${KASHIER_MODE}`)})
+const express = require('express');
+const path = require('path');
+const axios = require('axios'); // تم إضافتها لإرسال الطلبات لماي فاتورة
+const admin = require('firebase-admin'); // تم إضافتها للربط مع الفايربيز
+const nodemailer = require('nodemailer'); // تم إضافتها لإرسال الإيميلات للمشترين
+
+// تهيئة الفايربيز (تأكد من وجود ملف الخدمة السري firebase-service-account.json في الفولدر الرئيسي)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(require('./firebase-service-account.json'))
+  });
+}
+const db = admin.firestore();
+
+const app = express();
+const PORT = process.env.PORT || 9000;
+
+// إعدادات ماي فاتورة (MyFatoorah)
+const MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
+const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api.myfatoorah.com/v2'; // الرابط التجريبي أو الفعلي
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// إعداد مرسل الإيميلات (Nodemailer)
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER, // إيميل متجرك في الـ .env
+    pass: process.env.EMAIL_PASS  // كلمة مرور التطبيقات App Password
+  }
+});
+
+function money(amount) {
+  const value = Number(amount || 0);
+  if (!Number.isFinite(value) || value <= 0) throw new Error('Invalid payment amount.');
+  return value.toFixed(2);
+}
+
+// 1. مسار استقبال طلب الدفع من المتجر وتوليد رابط ماي فاتورة
+app.post('/api/myfatoorah/create-payment', async (req, res) => {
+  try {
+    if (!MYFATOORAH_TOKEN) return res.status(500).json({ message: 'Missing MyFatoorah token in .env file.' });
+
+    const order = req.body || {};
+    const amount = money(order.total);
+    const customerEmail = order.customer?.email;
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
+
+    // إرسال الفاتورة لماي فاتورة واستلام رابط الدفع
+    const response = await axios.post(`${MYFATOORAH_API_URL}/SendPayment`, {
+      NotificationOption: 'LNK',
+      InvoiceValue: amount,
+      CustomerEmail: customerEmail,
+      CustomerName: order.customer?.name || 'Fox Games Customer',
+      CustomerMobile: order.customer?.phone || '',
+      CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
+      ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+      UserDefinedField: JSON.stringify(items) // حفظ المنتجات داخل الفاتورة لاستعادتها في الـ Webhook
+    }, {
+      headers: { 'Authorization': `Bearer ${MYFATOORAH_TOKEN}` }
+    });
+
+    if (response.data.IsSuccess) {
+      res.json({ success: true, paymentUrl: response.data.Data.InvoiceURL });
+    } else {
+      res.status(400).json({ success: false, message: 'Failed to create MyFatoorah invoice.' });
+    }
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.response?.data?.Message || e.message });
+  }
+});
+
+// 2. الـ Webhook الفعلي لاستقبال إشارة نجاح الدفع وسحب الأكواد تلقائياً
+app.post('/api/myfatoorah/webhook', async (req, res) => {
+  const { TransactionId, OrderStatus } = req.body;
+
+  if (OrderStatus === 'Paid') {
+    try {
+      // التحقق الإضافي والأمان من سيرفر ماي فاتورة مباشرة
+      const verification = await axios.post(`${MYFATOORAH_API_URL}/GetPaymentStatus`, {
+        Key: TransactionId,
+        KeyType: 'TransactionId'
+      }, {
+        headers: { 'Authorization': `Bearer ${MYFATOORAH_TOKEN}` }
+      });
+
+      const paymentData = verification.data.Data;
+      const customerEmail = paymentData.CustomerEmail;
+      const cartItems = JSON.parse(paymentData.UserDefinedField); // استرجاع المنتجات المباعة
+      const orderId = paymentData.InvoiceId;
+
+      const purchasedCodes = [];
+
+      // معالجة سحب الأكواد من Firestore بشكل آمن (Transaction)
+      await db.runTransaction(async (transaction) => {
+        for (const item of cartItems) {
+          const codesRef = db.collection('products').doc(item.id).collection('digital_codes');
+          const availableCodeQuery = codesRef.where('isUsed', '==', false).limit(1);
+          const codeSnapshot = await transaction.get(availableCodeQuery);
+
+          if (!codeSnapshot.empty) {
+            const codeDoc = codeSnapshot.docs[0];
+            // تحويل حالة الكود في Firestore إلى "مباع"
+            transaction.update(codeDoc.ref, {
+              isUsed: true,
+              orderId: orderId,
+              purchasedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+            purchasedCodes.push({ productName: item.name, code: codeDoc.data().code });
+          }
+        }
+      });
+
+      // إرسال الأكواد فوراً للإيميل
+      if (purchasedCodes.length > 0) {
+        await sendCodesEmail(customerEmail, orderId, purchasedCodes);
+      }
+
+      return res.status(200).send('SUCCESS');
+    } catch (error) {
+      console.error('Webhook processing error:', error.message);
+      return res.status(500).send('Internal Server Error');
+    }
+  }
+  res.status(200).send('Ignored');
+});
+
+// دالة تنسيق وإرسال الإيميل للاعبين بالـ HTML والتصميم الجديد لمتجرك
+async function sendCodesEmail(email, orderId, codes) {
+  let codesHtml = '';
+  codes.forEach(c => {
+    codesHtml += `
+      <div style="background: #0d1722; border: 1px solid #65cc00; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #fff; text-align: center;">
+        <h3 style="margin: 0 0 5px 0; color: #94a3b8;">${c.productName}</h3>
+        <p style="font-size: 20px; font-weight: bold; letter-spacing: 2px; margin: 0; color: #65cc00;">${c.code}</p>
+      </div>`;
+  });
+
+  const mailOptions = {
+    from: `"Fox Games Support" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `أكواد طلبك رقم #${orderId} - Fox Games`,
+    html: `
+      <div style="font-family: sans-serif; direction: rtl; text-align: right; padding: 20px; background: #090f17; color: #fff; max-width: 500px; margin: auto; border: 1px solid rgba(101,204,0,0.2); border-radius: 12px;">
+        <h2 style="color: #65cc00; text-align: center;">شكرًا لشرائك من Fox Games!</h2>
+        <p>تم تأكيد دفع طلبك بنجاح. إليك الأكواد الرقمية الفورية الخاصة بك:</p>
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        ${codesHtml}
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">إذا واجهت أي مشكلة في الشحن، تواصل مع الدعم الفني فوراً عبر الواتساب.</p>
+      </div>`
+  };
+  await transporter.sendMail(mailOptions);
+}
+
+app.listen(PORT, () => {
+  console.log(`Fox Games running on http://localhost:${PORT}`);
+});
