@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg: #050b14;        /* درجة اللون الغامق جداً المطابقة للتصميم */
+  --bg: #050b14;        /* درجة اللون الغامق جداً المطابقة للصورة */
   --panel: #08101e;     /* لون البانل والـ Header */
   --card: #0d1722;      /* لون كروت الألعاب والتصنيفات */
   --text: #ffffff;
@@ -360,7 +360,6 @@ body {
 .filters select,
 .coupon input,
 .checkoutForm input,
-.checkoutForm select,
 .chatInput input {
   background: #0d192d;
   border: 1px solid var(--line);
@@ -684,7 +683,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* ================= CART DRAWER (التحسين الاحترافي لعناصر السلة المضافة حديثاً) ================= */
+/* ================= CART DRAWER ================= */
 
 .cartDrawer {
   position: fixed;
@@ -725,90 +724,18 @@ body {
   cursor: pointer;
 }
 
-/* الكود المطور لتنسيق عناصر المنتجات بداخل سلة المشتريات بشكل تفاعلي */
 .cartItem {
-  display: flex;
-  align-items: center;
-  gap: 14px;
   border: 1px solid var(--line);
   background: #0d1722;
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px;
   margin-bottom: 12px;
-  position: relative;
-  transition: border-color 0.2s ease;
-}
-
-.cartItem:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.cartItem-img {
-  width: 70px;
-  height: 70px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: #1a2635;
-}
-
-.cartItem-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex-grow: 1;
-  min-width: 0;
-}
-
-.cartItem-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cartItem-cat {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.cartItem-price {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-top: 4px;
-}
-
-.cartItem-remove-btn {
-  background: transparent;
-  border: none;
-  color: #ef4444;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: background 0.2s ease, color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.cartItem-remove-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
 }
 
 .coupon {
   display: flex;
   gap: 8px;
   margin: 20px 0;
-}
-
-.coupon input {
-  flex-grow: 1;
 }
 
 .coupon button {
@@ -819,11 +746,6 @@ body {
   padding: 0 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.coupon button:hover {
-  opacity: 0.9;
 }
 
 .summary p {
@@ -852,20 +774,52 @@ body {
   width: 100%;
 }
 
-.primary.full {
-  background: var(--accent);
+/* تحديث تنسيق زر الدفع المطور (Pay Now) المحتوي على الشعارات */
+.primary.full.pay-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--accent) !important;
+  color: #000000 !important;
+  border: 0;
+  padding: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.primary.full.pay-now-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+/* حاوية الشعارات المدمجة داخل الزر */
+.payment-logos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95); /* خلفية بيضاء تبرز الشعارات بوضوح */
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* أحجام شعارات فيزا وماستر كارد داخل الزر */
+.pay-logo {
+  height: 14px;
+  object-fit: contain;
+  display: block;
+}
+
+.whatsapp.full {
+  background: #22c55e;
   color: black;
   border: 0;
   padding: 14px;
   font-weight: 700;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 15px;
-  transition: opacity 0.2s;
-}
-
-.primary.full:hover {
-  opacity: 0.9;
 }
 
 /* ================= CHAT ================= */
@@ -1001,7 +955,7 @@ html[dir="rtl"] .chatBubble {
   left: 24px;
 }
 
-/* ================= RESPONSIVE (التحديث الشامل والمنظم لكل الشاشات) ================= */
+/* ================= RESPONSIVE ================= */
 
 /* الشاشات المتوسطة وأجهزة التابلت الكبيرة */
 @media(max-width:1280px) {
@@ -1031,7 +985,7 @@ html[dir="rtl"] .chatBubble {
 /* أجهزة التابلت المتوسطة والصغيرة */
 @media(max-width:1024px) {
   .mainNav {
-    display: none; /* إخفاء التابات العادية لمنع تداخل الهيدر */
+    display: none;
   }
   .topSearch {
     width: 280px;
@@ -1070,7 +1024,6 @@ html[dir="rtl"] .chatBubble {
     margin-right: 0;
   }
   
-  /* تكييف البانر للموبايل */
   .hero-banner-card {
     padding: 32px 20px;
     min-height: 320px;
@@ -1096,10 +1049,9 @@ html[dir="rtl"] .chatBubble {
     justify-content: center;
   }
   .banner-game-logos, .hero-features {
-    display: none; /* توفير مساحة في الموبايل */
+    display: none;
   }
 
-  /* كروت الألعاب والأقسام - قطعتين في الصف بشكل منظم جداً */
   .productGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1128,7 +1080,6 @@ html[dir="rtl"] .chatBubble {
     gap: 16px;
   }
 
-  /* الفلاتر وصناديق الدفع والدعم الفني */
   .filters {
     width: 100%;
     flex-direction: column;
@@ -1153,7 +1104,6 @@ html[dir="rtl"] .chatBubble {
     justify-content: center;
   }
 
-  /* السلة تملأ الشاشة في الموبايل لسهولة الاستخدام */
   .cartDrawer {
     width: 100%;
   }
@@ -1169,6 +1119,6 @@ html[dir="rtl"] .chatBubble {
 /* شاشات الموبايل الصغيرة جداً */
 @media(max-width:375px) {
   .productGrid, .trendGrid {
-    grid-template-columns: 1fr; /* عرض كارت واحد بالصف لمنع انضغاط النصوص */
+    grid-template-columns: 1fr;
   }
 }
