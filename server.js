@@ -1,14 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const axios = require('axios'); 
-const admin = require('firebase-admin'); 
-const nodemailer = require('nodemailer'); 
+const axios = require('axios');
+const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
 
-// تهيئة الفايربيز باستخدام الـ Database URL
 if (!admin.apps.length) {
   admin.initializeApp({
-    databaseURL: process.env.FIREBASE_DATABASE_URL 
+    databaseURL: process.env.FIREBASE_DATABASE_URL
   });
 }
 const db = admin.firestore();
@@ -16,98 +15,173 @@ const db = admin.firestore();
 const app = express();
 const PORT = process.env.PORT || 9000;
 
-// إعدادات ماي فاتورة (MyFatoorah)
+// MyFatoorah settings
+// Render value should be WITHOUT /v2, for example:
+// Live Egypt: https://api-eg.myfatoorah.com
+// Test: https://apitest.myfatoorah.com
 const MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
-const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com'; 
+const MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// إعداد مرسل الإيميلات (Nodemailer)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS  
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
 function money(amount) {
   const value = Number(amount || 0);
   if (!Number.isFinite(value) || value <= 0) throw new Error('Invalid payment amount.');
-  return value.toFixed(2);
+  return Number(value.toFixed(2));
 }
 
-// 1. مسار استقبال طلب الدفع وتوليد رابط الدفع المباشر (إضافة العملة لحل الـ 403)
+function cleanPhone(phone = '') {
+  return String(phone).replace(/[^\d+]/g, '').slice(0, 20);
+}
+
+function getMyFatoorahError(data) {
+  if (!data) return 'Unknown MyFatoorah error.';
+  if (typeof data === 'string') return data;
+  if (data.Message) return data.Message;
+  if (Array.isArray(data.ValidationErrors) && data.ValidationErrors.length) {
+    return data.ValidationErrors.map(e => e.Error || e.Name || JSON.stringify(e)).join(' | ');
+  }
+  if (data.Data?.Message) return data.Data.Message;
+  return JSON.stringify(data);
+}
+
+async function myfatoorahPost(endpoint, body) {
+  return axios.post(`${MYFATOORAH_API_URL}/v2/${endpoint}`, body, {
+    headers: {
+      Authorization: `Bearer ${MYFATOORAH_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    timeout: 30000
+  });
+}
+
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   try {
-    if (!MYFATOORAH_TOKEN) return res.status(500).json({ message: 'Missing MyFatoorah token in .env file.' });
+    if (!MYFATOORAH_TOKEN) {
+      return res.status(500).json({ success: false, message: 'Missing MyFatoorah token in .env file.' });
+    }
 
     const order = req.body || {};
     const amount = money(order.total);
-    const customerEmail = order.customer?.email;
+    const customerName = order.customer?.name || 'Fox Games Customer';
+    const customerPhone = cleanPhone(order.customer?.phone || '');
+    const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
+    console.log('MYFATOORAH_BASE_URL:', MYFATOORAH_API_URL);
+    console.log('Initiating payment methods:', `${MYFATOORAH_API_URL}/v2/InitiatePayment`);
 
-    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/ExecutePayment`);
-
-    const response = await axios.post(`${MYFATOORAH_API_URL}/ExecutePayment`, {
-      PaymentMethodId: 0, 
-      InvoiceValue: amount,
-      DisplayCurrencyIso: 'EGP', // 🌟 تحدديد العملة رسمياً لحل مشكلة الرفض 403 للحسابات الحقيقية
-      CustomerEmail: customerEmail,
-      CustomerName: order.customer?.name || 'Fox Games Customer',
-      CustomerMobile: order.customer?.phone || '',
-      CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-      ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-      UserDefinedField: JSON.stringify(items) 
-    }, {
-      headers: { 'Authorization': `Bearer ${MYFATOORAH_TOKEN}` }
+    // Step 1: get a valid PaymentMethodId for this account/currency instead of using 0
+    const initiateResponse = await myfatoorahPost('InitiatePayment', {
+      InvoiceAmount: amount,
+      CurrencyIso: 'EGP'
     });
 
-    if (response.data.IsSuccess) {
-      res.json({ success: true, paymentUrl: response.data.Data.PaymentURL });
-    } else {
-      res.status(400).json({ success: false, message: 'Failed to create MyFatoorah execution link.' });
+    console.log('InitiatePayment response:', JSON.stringify(initiateResponse.data, null, 2));
+
+    if (!initiateResponse.data?.IsSuccess) {
+      return res.status(400).json({
+        success: false,
+        message: getMyFatoorahError(initiateResponse.data)
+      });
     }
+
+    const paymentMethods = initiateResponse.data?.Data?.PaymentMethods || [];
+    if (!paymentMethods.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'No payment methods returned from MyFatoorah. Check account/currency activation.'
+      });
+    }
+
+    const selectedMethod = paymentMethods.find(m => m.IsDirectPayment === false) || paymentMethods[0];
+    const paymentMethodId = selectedMethod.PaymentMethodId;
+
+    console.log('Selected PaymentMethodId:', paymentMethodId, selectedMethod.PaymentMethodEn || selectedMethod.PaymentMethodAr);
+    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+
+    const executeBody = {
+      PaymentMethodId: paymentMethodId,
+      InvoiceValue: amount,
+      DisplayCurrencyIso: 'EGP',
+      CustomerEmail: customerEmail,
+      CustomerName: customerName,
+      CustomerMobile: customerPhone,
+      CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
+      ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+      UserDefinedField: JSON.stringify(items.map(item => ({
+        id: item.id || item.productId || '',
+        name: item.name || '',
+        category: item.category || '',
+        price: item.price || 0
+      })))
+    };
+
+    console.log('ExecutePayment body:', JSON.stringify(executeBody, null, 2));
+
+    const executeResponse = await myfatoorahPost('ExecutePayment', executeBody);
+
+    console.log('ExecutePayment response:', JSON.stringify(executeResponse.data, null, 2));
+
+    if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.PaymentURL) {
+      return res.json({
+        success: true,
+        invoiceId: executeResponse.data.Data.InvoiceId,
+        paymentMethodId,
+        paymentUrl: executeResponse.data.Data.PaymentURL
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: getMyFatoorahError(executeResponse.data) || 'Failed to create MyFatoorah execution link.'
+    });
   } catch (e) {
     console.error('=== MYFATOORAH FULL ERROR DETAILS ===');
     console.error('Status:', e.response?.status);
     console.error('Data from MyFatoorah:', JSON.stringify(e.response?.data, null, 2));
+    console.error('Message:', e.message);
     console.error('======================================');
-    
-    res.status(400).json({ 
-      success: false, 
-      message: e.response?.data?.Message || e.response?.data?.ValidationErrors?.[0]?.Error || e.message 
+
+    return res.status(400).json({
+      success: false,
+      message: getMyFatoorahError(e.response?.data) || e.message
     });
   }
 });
 
-// 2. الـ Webhook الفعلي لاستقبال إشارة نجاح الدفع وسحب الأكواد تلقائياً
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   const { TransactionId, OrderStatus } = req.body;
 
   if (OrderStatus === 'Paid') {
     try {
-      const verification = await axios.post(`${MYFATOORAH_API_URL}/GetPaymentStatus`, {
+      const verification = await myfatoorahPost('GetPaymentStatus', {
         Key: TransactionId,
         KeyType: 'TransactionId'
-      }, {
-        headers: { 'Authorization': `Bearer ${MYFATOORAH_TOKEN}` }
       });
 
       const paymentData = verification.data.Data;
       const customerEmail = paymentData.CustomerEmail;
-      const cartItems = JSON.parse(paymentData.UserDefinedField); 
+      const cartItems = JSON.parse(paymentData.UserDefinedField || '[]');
       const orderId = paymentData.InvoiceId;
 
       const purchasedCodes = [];
 
       await db.runTransaction(async (transaction) => {
         for (const item of cartItems) {
+          if (!item.id) continue;
+
           const codesRef = db.collection('products').doc(item.id).collection('digital_codes');
           const availableCodeQuery = codesRef.where('isUsed', '==', false).limit(1);
           const codeSnapshot = await transaction.get(availableCodeQuery);
@@ -124,20 +198,20 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
         }
       });
 
-      if (purchasedCodes.length > 0) {
+      if (purchasedCodes.length > 0 && customerEmail && customerEmail !== 'customer@foxgames.local') {
         await sendCodesEmail(customerEmail, orderId, purchasedCodes);
       }
 
       return res.status(200).send('SUCCESS');
     } catch (error) {
-      console.error('Webhook processing error:', error.message);
+      console.error('Webhook processing error:', error.response?.data || error.message);
       return res.status(500).send('Internal Server Error');
     }
   }
+
   res.status(200).send('Ignored');
 });
 
-// دالة تنسيق وإرسال الإيميل للاعبين بالـ HTML
 async function sendCodesEmail(email, orderId, codes) {
   let codesHtml = '';
   codes.forEach(c => {
@@ -162,9 +236,11 @@ async function sendCodesEmail(email, orderId, codes) {
         <p style="font-size: 12px; color: #94a3b8; text-align: center;">إذا واجهت أي مشكلة في الشحن، تواصل مع الدعم الفني فوراً عبر الواتساب.</p>
       </div>`
   };
+
   await transporter.sendMail(mailOptions);
 }
 
 app.listen(PORT, () => {
   console.log(`Fox Games running on http://localhost:${PORT}`);
+  console.log(`MyFatoorah API URL: ${MYFATOORAH_API_URL}`);
 });
