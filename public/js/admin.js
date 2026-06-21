@@ -1,16 +1,38 @@
+/* ==========================================================================
+   Fox Store Admin - Ultimate Core Logic & Live Database Sync
+   ========================================================================== */
+
 let db = null;
 let currentUser = null;
 let revenueChartInstance = null;
 
 const $ = (id) => document.getElementById(id);
 
-// تنقل التابات والصفحات
+// 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي)
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = $('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+}
+
+// تنقل التابات والصفحات مع الإغلاق التلقائي في الموبايل
 function showPage(id, btn){
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     if($(id)) $(id).classList.add('active');
 
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
+
+    // إغلاق السايدبار فوراً بعد اختيار الصفحة إن كان المتصفح على الموبايل
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = $('sidebarOverlay');
+    if (sidebar && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+    }
 }
 
 // دالة جلب قيم المدخلات
@@ -113,7 +135,7 @@ async function saveProduct(){
   alert('تم حفظ المنتج بنجاح');
 }
 
-// جلب المنتجات وعرضها
+// جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
 async function loadProducts(){
   const snap = await db.collection('products').get();
   const list = $('productsList');
@@ -133,16 +155,24 @@ async function loadProducts(){
 
     if(list){
       list.innerHTML += `
-        <div class="panel">
-          ${p.image ? `<img src="${p.image}" style="width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px">` : ''}
-          <h3>${p.name || '-'}</h3>
-          <p>التصنيف: ${p.category || '-'}</p>
-          <p>اللعبة: ${p.game || '-'}</p>
-          <p>السعر: ${p.price || 0} EGP</p>
-          <p>الحالة: ${p.active ? 'نشط' : 'مخفي'}</p>
-          <div class="actions">
-            <button onclick="editProduct('${doc.id}')">تعديل</button>
-            <button class="ghost delete-btn" onclick="deleteProduct('${doc.id}')">حذف</button>
+        <div class="product-card-custom">
+          <div class="product-card-hero">
+            <img src="${p.image || '/assets/default-game.jpg'}" alt="${p.name}">
+            <span class="product-badge">${p.active ? 'نشط' : 'مخفي'}</span>
+          </div>
+          <div class="product-card-body">
+            <div>
+              <h4>${p.name || '-'}</h4>
+              <p>التصنيف: ${p.category || '-'}</p>
+              <p>اللعبة: ${p.game || '-'}</p>
+            </div>
+            <div class="product-card-footer">
+              <span class="price-tag">${p.price || 0} EGP</span>
+              <div class="card-actions">
+                <button class="edit-btn" onclick="editProduct('${doc.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="delete-btn" onclick="deleteProduct('${doc.id}')"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -218,11 +248,11 @@ async function saveCategory(){
   alert('تم حفظ التصنيف بنجاح');
 }
 
-// جلب التصنيفات الحقيقية وتحديث قائمة الخيارات (Dropdown) في صفحة المنتجات فوراً
+// جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
 async function loadCategories(){
   const snap = await db.collection('categories').get();
   const list = $('categoriesList');
-  const productCatSelect = $('category'); // استهداف عنصر السيلكت في إضافة المنتجات
+  const productCatSelect = $('category');
   
   if(list) list.innerHTML = '';
   if(productCatSelect){
@@ -232,18 +262,20 @@ async function loadCategories(){
   snap.forEach(doc => {
     const c = doc.data();
     
-    // 1. إضافة التصنيف كخيار داخل قائمة إضافة المنتجات لمنع التعليق
     if(productCatSelect && c.name){
        productCatSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
     }
 
-    // 2. عرض التصنيفات في قسم إدارة التصنيفات المخصصة باللوحة
     if(list){
       list.innerHTML += `
-        <div class="panel">
-          ${c.image ? `<img src="${c.image}" style="width:100%;height:140px;object-fit:cover;border-radius:14px;margin-bottom:12px">` : ''}
-          <h3>${c.name || '-'}</h3>
-          <button class="delete-btn" onclick="deleteCategory('${doc.id}')">حذف</button>
+        <div class="product-card-custom">
+          <div class="product-card-hero" style="height: 140px;">
+            <img src="${c.image || '/assets/default-cat.jpg'}" alt="${c.name}">
+          </div>
+          <div class="product-card-body" style="padding: 15px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0;">${c.name || '-'}</h4>
+            <button class="delete-btn" style="padding: 8px 12px;" onclick="deleteCategory('${doc.id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
+          </div>
         </div>
       `;
     }
@@ -285,7 +317,7 @@ async function saveCodes(){
   alert('تم حفظ الأكواد بنجاح، العدد: ' + codes.length);
 }
 
-// جلب الأكواد
+// جلب الأكواد لعرضها في الكروت
 async function loadCodes(){
   const snap = await db.collection('productCodes').limit(100).get();
   const list = $('codesList');
@@ -295,10 +327,10 @@ async function loadCodes(){
     const c = doc.data();
     if(list){
       list.innerHTML += `
-        <div class="panel">
-          <h3>${c.code || '-'}</h3>
-          <p>Product ID: ${c.productId || '-'}</p>
-          <p>الحالة: ${c.status || '-'}</p>
+        <div class="panel" style="border-left: 3px solid var(--neon-blue); padding: 15px;">
+          <h3 style="font-size:15px; color:var(--text-main); font-family: monospace; letter-spacing: 1px;">${c.code || '-'}</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Product: ${c.productId || '-'}</p>
+          <span class="status-badge" style="display:inline-block; margin-top:8px; font-size:11px;">${c.status || '-'}</span>
         </div>
       `;
     }
@@ -330,7 +362,7 @@ async function saveCoupon(){
   alert('تم حفظ الكوبون بنجاح');
 }
 
-// جلب الكوبونات
+// جلب الكوبونات لعرضها
 async function loadCoupons(){
   const snap = await db.collection('coupons').get();
   const list = $('couponsList');
@@ -340,17 +372,19 @@ async function loadCoupons(){
     const c = doc.data();
     if(list){
       list.innerHTML += `
-        <div class="panel">
-          <h3>${c.code}</h3>
-          <p>خصم: ${c.value}%</p>
-          <p>${c.active ? 'مفعل' : 'مغلق'}</p>
+        <div class="panel" style="border-bottom: 3px solid var(--neon-orange);">
+          <h4>رمز الكوبون: <span style="color:var(--neon-orange); font-family:monospace;">${c.code}</span></h4>
+          <p style="margin: 8px 0 4px 0;">نسبة الخصم: <strong>${c.value}%</strong></p>
+          <small style="color: ${c.active ? 'var(--neon-green)' : 'var(--neon-pink)'}; font-weight: 600;">
+            ${c.active ? '● مفعل حالياً' : '○ معطل'}
+          </small>
         </div>
       `;
     }
   });
 }
 
-// جلب وعرض الطلبات
+// جلب وعرض الطلبات في جدول منسق ومحمي للموبايل
 async function loadOrders(){
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
@@ -469,7 +503,7 @@ async function loadStats(){
   }
 }
 
-// دالة تحديث الرسوم البيانية
+// دالة تحديث الرسوم البيانية بسلاسة وبدون تداخلات
 function updateRevenueChart(labels, dataValues) {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
