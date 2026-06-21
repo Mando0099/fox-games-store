@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fox Store Admin - لوحة التحكم</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
@@ -17,96 +17,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js"></script>
-
-  <style>
-    .custom-table-container {
-      background: #0b1320;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 20px;
-      margin-top: 25px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-    }
-    
-    .table-toolbar {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .pro-input-search, .pro-select-filter {
-      background: #142032 !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      border-radius: 8px !important;
-      color: #fff !important;
-      padding: 12px 16px !important;
-      font-family: 'Cairo', sans-serif !important;
-      font-size: 14px !important;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .pro-input-search:focus, .pro-select-filter:focus {
-      border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-
-    .table-responsive-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    #codesTablePro {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: right;
-      min-width: 600px;
-    }
-
-    #codesTablePro th {
-      background: #101a26;
-      padding: 16px;
-      color: #94a3b8;
-      font-size: 14px;
-      font-weight: 600;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-    }
-
-    #codesTablePro td {
-      padding: 14px 16px;
-      color: #e2e8f0;
-      font-size: 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      vertical-align: middle;
-    }
-
-    #codesTablePro tbody tr:hover {
-      background: rgba(255, 255, 255, 0.01);
-    }
-
-    .table-responsive-wrapper::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    .table-responsive-wrapper::-webkit-scrollbar-track {
-      background: #0b1320;
-    }
-    .table-responsive-wrapper::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 10px;
-    }
-    .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
-      background: #3b82f6;
-    }
-  </style>
 </head>
 
 <body>
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <aside class="sidebar">
     <div class="brand">
@@ -118,14 +32,14 @@
     </div>
 
     <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
-      <button class="nav-btn" onclick="showPage('products', this)"><i class="fa-solid fa-cubes"></i> المنتجات</button>
-      <button class="nav-btn" onclick="showPage('categories', this)"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
-      <button class="nav-btn" onclick="showPage('codes', this)"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
-      <button class="nav-btn" onclick="showPage('orders', this)"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
-      <button class="nav-btn" onclick="showPage('coupons', this)"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
-      <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
-      <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
+      <button class="nav-btn active" onclick="showPage('dashboard')"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products')"><i class="fa-solid fa-cubes"></i> المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories')"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes')"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders')"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons')"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers')"><i class="fa-solid fa-users"></i> العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports')"><i class="fa-solid fa-chart-line"></i> التقارير</button>
     </nav>
 
     <div class="admin-box">
@@ -140,8 +54,9 @@
   </aside>
 
   <main class="main">
+    
     <header class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <button class="menu-btn" id="menuBtn"><i class="fa-solid fa-bars"></i></button>
 
       <div class="top-actions">
         <div class="search-container">
@@ -160,7 +75,7 @@
       </div>
     </header>
 
-    <section id="dashboard" class="page active">
+    <section id="dashboard-page" class="page active">
       <div class="page-head">
         <h2>لوحة التحكم</h2>
         <p>إليك نظرة عامة على أداء متجرك الرقمي اليوم</p>
@@ -217,7 +132,7 @@
         <div class="panel big">
           <div class="panel-head">
             <h3><i class="fa-solid fa-clock-rotate-left"></i> آخر الطلبات</h3>
-            <button class="view-all-btn" onclick="showPage('orders', null)">عرض الكل</button>
+            <button class="view-all-btn" onclick="showPage('orders')">عرض الكل</button>
           </div>
           <div id="latestOrders" class="table-box"></div>
         </div>
@@ -252,40 +167,87 @@
       </div>
     </section>
 
-    <section id="products" class="page">
+    <section id="products-page" class="page">
       <div class="page-head">
         <h2>إدارة المنتجات</h2>
-        <p>إضافة وتعديل المنتجات الرقمية</p>
+        <p>إضافة وتعديل المنتجات الرقمية داخل المتجر</p>
       </div>
+      
       <div class="panel form-panel">
-        <input id="productId" type="hidden" />
-        <div class="form-grid">
-          <input id="name" placeholder="اسم المنتج" />
-          <select id="category">
-              <option value="">جاري تحميل التصنيفات المتاحة...</option>
-          </select>
-          <input id="game" placeholder="اسم اللعبة" />
-          <input id="amount" type="number" placeholder="الكمية / UC / Diamonds" />
-          <input id="price" type="number" placeholder="السعر EGP" />
-          <input type="file" id="imageFile" accept="image/*">
-          <img id="imagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:10px;display:none;margin-top:10px;">
-        </div>
-        <textarea id="description" placeholder="وصف المنتج"></textarea>
-        <label class="check">
-          <input id="active" type="checkbox" checked /> المنتج مفعل بالمتجر
-        </label>
-        <div class="actions">
-          <button onclick="saveProduct()">حفظ المنتج</button>
-          <button class="ghost" onclick="clearProductForm()">تفريغ الحقول</button>
-        </div>
+        <form id="product-form" onsubmit="event.preventDefault();">
+          <input id="productId" type="hidden" />
+          
+          <div class="form-container">
+            <div class="form-inputs-side">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="name">اسم المنتج</label>
+                  <input id="name" type="text" placeholder="مثال: 660 PUBG UC" required />
+                </div>
+                <div class="form-group">
+                  <label for="category">التصنيفات</label>
+                  <select id="category" required>
+                    <option value="">جاري تحميل التصنيفات المتاحة...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="game">اسم اللعبة</label>
+                  <input id="game" type="text" placeholder="مثال: PUBG Mobile" required />
+                </div>
+                <div class="form-group">
+                  <label for="amount">الكمية المستلمة للشحنة</label>
+                  <input id="amount" type="number" placeholder="مثال: 660" required />
+                </div>
+                <div class="form-group">
+                  <label for="price">السعر الافتراضي بالعملة المحلية</label>
+                  <input id="price" type="number" placeholder="0.00 EGP" required />
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="description">وصف وتفاصيل المنتج الشاملة</label>
+                <textarea id="description" rows="4" placeholder="اكتب شروط الاستخدام أو تفاصيل المنتج هنا..."></textarea>
+              </div>
+
+              <div class="form-checkbox-group">
+                <input id="active" type="checkbox" checked />
+                <label for="active">المنتج مفعل ويظهر للعملاء في المتجر فوراً</label>
+              </div>
+            </div>
+
+            <div class="form-upload-side">
+              <span class="upload-label">صورة غلاف المنتج تفاعلية</span>
+              <div class="dropzone-area" id="dropzone">
+                <input type="file" id="product-image" accept="image/*" />
+                <div class="dropzone-content">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <p>اسحب الصورة وأفلتها هنا أو <span>تصفح الملفات</span></p>
+                  <small>يدعم صيغ JPG, PNG, WEBP بمقاس مناسب</small>
+                </div>
+                <div class="image-preview-overlay" id="img-preview-container">
+                  <img id="imagePreview" src="" alt="Product Preview">
+                  <button type="button" class="remove-img-btn" id="remove-img" title="حذف الصورة">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-submit" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> حفظ وإضافة المنتج</button>
+            <button type="button" class="btn-clear" id="clear-form"><i class="fa-solid fa-broom"></i> تفريغ الحقول</button>
+          </div>
+        </form>
       </div>
+      
       <div id="productsList" class="cards-grid"></div>
     </section>
 
-    <section id="categories" class="page">
+    <section id="categories-page" class="page">
       <div class="page-head">
         <h2>التصنيفات</h2>
-        <p>إدارة تصنيفات المنتجات</p>
+        <p>إدارة تصنيفات المنتجات والألعاب الأساسية</p>
       </div>
       <div class="panel form-panel">
         <div class="form-grid">
@@ -293,60 +255,97 @@
           <input type="file" id="categoryImageFile" accept="image/*" />
           <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;margin-top:10px;">
         </div>
-        <button onclick="saveCategory()">حفظ التصنيف</button>
+        <button onclick="saveCategory()"><i class="fa-solid fa-folder-plus"></i> حفظ التصنيف الجديد</button>
       </div>
       <div id="categoriesList" class="cards-grid"></div>
     </section>
 
-    <section id="codes" class="page">
+    <section id="codes-page" class="page">
       <div class="page-head">
-        <h2>أكواد المنتجات</h2>
-        <p>ربط مجموعة أكواد بكل منتج</p>
-      </div>
-      <div class="panel form-panel">
-        <select id="codeProductId"><option value="">اختر المنتج</option></select>
-        <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
-        <button onclick="saveCodes()">حفظ الأكواد</button>
+        <h2>أكواد المنتجات الرقمية</h2>
+        <p>شحن وربط حزم الأكواد التسلسلية لكل منتج مفعل بالمتجر للتسليم التلقائي</p>
       </div>
 
-      <div id="codesList" class="custom-table-container"></div>
+      <div class="panel form-panel">
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+          <div class="form-group">
+            <label for="codeProductId">اختر المنتج المستهدف</label>
+            <select id="codeProductId">
+              <option value="">-- اضغط لتحديد المنتج الرقمي --</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 15px;">
+          <label for="codesInput">قائمة الأكواد الرقمية (مجمعة)</label>
+          <textarea id="codesInput" rows="6" placeholder="أدخل الأكواد هنا... ضع كل كود مستقل في سطر منفصل تلقائياً دون فواصل خطية."></textarea>
+        </div>
+        <div class="form-actions" style="margin-top: 15px;">
+          <button class="btn-submit" onclick="saveCodes()"><i class="fa-solid fa-plus"></i> حقن الأكواد بقاعدة البيانات</button>
+        </div>
+      </div>
+
+      <div class="custom-table-container">
+        <div class="table-toolbar">
+          <input type="text" id="search-codes-input" class="pro-input-search" placeholder="🔍 ابحث عن كود معين أو منتج..." style="flex: 1; min-width: 200px;">
+          <select id="filter-status-select" class="pro-select-filter" style="min-width: 160px;">
+            <option value="all">كل الحالات المتاحة</option>
+            <option value="available">متاح فقط (جاهز للبيع)</option>
+            <option value="used">مباع / مستخدم مسبقاً</option>
+          </select>
+        </div>
+
+        <div class="table-responsive-wrapper">
+          <table id="codesTablePro">
+            <thead>
+              <tr>
+                <th>الكود الرقمي المشفر</th>
+                <th>مرتبط بمنتج</th>
+                <th>حالة التوفر الحالية</th>
+                <th>إجراءات إدارية</th>
+              </tr>
+            </thead>
+            <tbody id="codes-list-container">
+              </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
-    <section id="orders" class="page">
+    <section id="orders-page" class="page">
       <div class="page-head">
-        <h2>الطلبات</h2>
-        <p>متابعة الطلبات وتسليم الأكواد</p>
+        <h2>إدارة فواتير وطلبات العملاء</h2>
+        <p>متابعة عمليات الشراء وتسليم الأكواد الذكية</p>
       </div>
       <div id="ordersList" class="panel table-box"></div>
     </section>
 
-    <section id="coupons" class="page">
+    <section id="coupons-page" class="page">
       <div class="page-head">
-        <h2>أكواد الخصم</h2>
-        <p>إنشاء وإدارة كوبونات الخصم</p>
+        <h2>أكواد وقسائم الخصم</h2>
+        <p>إنشاء وتوليد كوبونات التخفيض المالي لعملائك</p>
       </div>
       <div class="panel form-panel">
         <div class="form-grid">
           <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
           <input id="couponValue" type="number" placeholder="نسبة الخصم %" />
         </div>
-        <button onclick="saveCoupon()">حفظ الكوبون</button>
+        <button onclick="saveCoupon()"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
       </div>
       <div id="couponsList" class="cards-grid"></div>
     </section>
 
-    <section id="customers" class="page">
+    <section id="customers-page" class="page">
       <div class="page-head">
-        <h2>العملاء</h2>
-        <p>بيانات العملاء المسجلين</p>
+        <h2>قاعدة بيانات العملاء المسجلين</h2>
+        <p>بيانات الهوية والاتصال للمستخدمين المشتركين بالمتجر</p>
       </div>
       <div id="customersList" class="panel table-box"></div>
     </section>
 
-    <section id="reports" class="page">
+    <section id="reports-page" class="page">
       <div class="page-head">
-        <h2>التقارير التفصيلية</h2>
-        <p>إحصائيات المبيعات والمنتجات المتقدمة</p>
+        <h2>التقارير الإحصائية التفصيلية</h2>
+        <p>تحليل بياني متقدم للمبيعات، الأرباح، وتدفق الإيرادات المالي</p>
       </div>
       <div class="panel">
         <div class="chart-wrapper" style="position: relative; height: 380px; width: 100%;">
@@ -357,12 +356,11 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+    // نظام الـ Image Preview المدمج للتصنيفات
     document.addEventListener("DOMContentLoaded", function() {
-      // دالة مساعدة مضافة لعرض معاينة الصور فور اختيار الملف مباشرة لجعل الواجهة تفاعلية
       function setupImagePreview(fileInputId, previewImgId) {
         const fileInput = document.getElementById(fileInputId);
         const previewImg = document.getElementById(previewImgId);
@@ -382,10 +380,11 @@
           });
         }
       }
-      setupImagePreview('imageFile', 'imagePreview');
       setupImagePreview('categoryImageFile', 'categoryImagePreview');
 
-      // الرسوم البيانية التلقائية الافتراضية
+      // ---------------------------------------------------------
+      // الرسوم البيانية التلقائية الافتراضية (Chart.js Configuration)
+      // ---------------------------------------------------------
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
@@ -460,6 +459,17 @@
         });
       }
     });
+
+    // دالة التنقل القديمة المحدثة لمنع أي تضارب مع السكربت الخارجي
+    function showPage(pageId) {
+      if(typeof window.initNavigation === 'function') return; 
+      const pages = document.querySelectorAll('.page');
+      const buttons = document.querySelectorAll('.nav-btn');
+      pages.forEach(p => p.classList.remove('active'));
+      buttons.forEach(b => b.classList.remove('active'));
+      const targetPage = document.getElementById(`${pageId}-page`);
+      if(targetPage) targetPage.classList.add('active');
+    }
   </script>
 
   <script src="/js/admin.js?v=200"></script>
