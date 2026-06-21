@@ -1,5 +1,5 @@
 // ================= FOX GAMES LIVE DATABASE LINK =================
-// الاعتماد بالكامل على المصفوفات القادمة من الفايربيز والبانل بدون كود تجريبي
+// الاعتماد بالكامل على مصفوفات الفايربيز والبانل بدون كود تجريبي
 const $ = id => document.getElementById(id);
 
 // هنا بنضمن إن لو الفايربيز اتأخر في التحميل، المتجر ما يضربش ويفضل مستني الداتا
@@ -30,7 +30,7 @@ const translations = {
     cart_subtotal: "Subtotal", cart_discount: "Discount", cart_total: "Total",
     holder_name: "Full Name", holder_phone: "Phone Number", opt_visa: "Visa / MasterCard",
     opt_wallet: "Wallet", opt_vodafone: "Vodafone Cash", opt_fawry: "Fawry", opt_bank: "Bank Transfer",
-    btn_pay_now: "Pay Now", btn_wa_order: "WhatsApp Order", secure_checkout_notice: "Secure checkout connected through the backend.",
+    btn_pay_now: "Pay Now", secure_checkout_notice: "Secure checkout connected through the backend.",
     lang_btn: "العربية"
   },
   ar: {
@@ -51,7 +51,7 @@ const translations = {
     cart_subtotal: "المجموع الفرعي", cart_discount: "الخصم", cart_total: "الإجمالي الكلي",
     holder_name: "الاسم بالكامل", holder_phone: "رقم الهاتف المحمول", opt_visa: "فيزا / ماستركارد",
     opt_wallet: "المحافظ الإلكترونية", opt_vodafone: "فودافون كاش", opt_fawry: "فوري", opt_bank: "تحويل بنكي",
-    btn_pay_now: "ادفع الآن بأمان", btn_wa_order: "طلب عبر الواتساب", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
+    btn_pay_now: "ادفع الآن بأمان", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
     lang_btn: "English"
   }
 };
@@ -154,7 +154,6 @@ function selectCategory(c) {
   scrollToId('products');
 }
 
-// دالة إعادة تعيين الفلتر عند الضغط على View All
 function resetCategoryFilter() {
   const f = $('categoryFilter');
   if (f) f.value = 'All';
@@ -164,11 +163,10 @@ function resetCategoryFilter() {
 
 function addToCart(i) {
   if (typeof products === 'undefined' || !products[i]) return;
-  // نحتفظ بـ firebaseId والبيانات الأساسية لربطها بـ السيرفر وسحب الكود بدقة
   cart.push({ 
     ...products[i], 
     cartId: Date.now() + Math.random(),
-    id: products[i].id || products[i].docId || i // الـ id الأصلي للمنتج في الفايربيز
+    id: products[i].id || products[i].docId || i
   });
   save();
   updateCart();
@@ -181,7 +179,6 @@ function removeItem(cartId) {
   updateCart();
 }
 
-// تحديث السلة بالتصميم الاحترافي الجديد (عرض الصور + أيقونة الحذف)
 function updateCart() {
   if ($('cartCount')) $('cartCount').textContent = cart.length;
   if ($('cartCountTop')) $('cartCountTop').textContent = cart.length;
@@ -204,7 +201,7 @@ function updateCart() {
               </button>
             </div>`;
         }).join('')
-      : `<p style="color:#94a3b8; text-align:center; padding:30px; font-size:13px;">Your cart is empty.</p>`;
+      : `<p style="color:#94a3b8; text-align:center; padding:30px; font-size:13px;">${currentLang === 'ar' ? 'سلة المشتريات فارغة حالياً.' : 'Your cart is empty.'}</p>`;
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
@@ -215,11 +212,11 @@ function updateCart() {
   if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
 }
 
-// نظام تبديل اللغة الاحترافي والآمن
 function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'ar' : 'en';
   localStorage.setItem('foxgames_lang', currentLang);
   applyLanguage(currentLang);
+  updateCart(); // لتحديث نص السلة الفارغة باللغة الجديدة فوراً
 }
 
 function applyLanguage(lang) {
@@ -252,32 +249,107 @@ function applyLanguage(lang) {
   }
 }
 
-function applyCoupon() {
+// دالة فحص الكوبون الاحترافية والديناميكية بالكامل من الـ Firestore مع الفايربيز بدون كود ثابت
+async function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
-  if (code === 'FOX10') {
-    coupon = 10;
-    save();
-    updateCart();
-    alert(currentLang === 'ar' ? 'تم تطبيق كود الخصم بنجاح! 🎉' : 'Coupon FOX10 applied successfully! 🎉');
-  } else {
-    alert(currentLang === 'ar' ? 'كود غير صحيح. جرب: FOX10' : 'Invalid coupon. Try: FOX10');
+  
+  if (!code) {
+    Swal.fire({
+      icon: 'warning',
+      text: currentLang === 'ar' ? 'يرجى إدخال كود الخصم أولاً!' : 'Please enter a coupon code first!',
+      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  if (typeof firebase === 'undefined' || !firebase.firestore) {
+    console.error("Firebase Firestore is not loaded.");
+    return;
+  }
+
+  try {
+    // جلب بيانات الكوبون مباشرة ومطابقته باسم الـ Document المعرّف في الفايربيز
+    const couponDoc = await firebase.firestore().collection('coupons').doc(code).get();
+
+    if (couponDoc.exists) {
+      const couponData = couponDoc.data();
+      coupon = parseFloat(couponData.value || 0); // جلب نسبة الخصم المخزنة في خانة value
+      save();
+      updateCart();
+
+      Swal.fire({
+        icon: 'success',
+        title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!',
+        text: currentLang === 'ar' ? `تم تفعيل خصم بقيمة ${coupon}% بنجاح 🎉` : `Successfully applied ${coupon}% discount 🎉`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon',
+        text: currentLang === 'ar' ? 'قسيمة الخصم هذه غير موجودة أو انتهت صلاحيتها.' : 'This coupon code does not exist or has expired.',
+        confirmButtonText: currentLang === 'ar' ? 'محاولة أخرى' : 'Try Again',
+        confirmButtonColor: '#ef4444'
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching coupon from Firebase:", error);
   }
 }
 
-// الدالة المحدثة بالكامل لربط متجرك مع ماي فاتورة (MyFatoorah) تلقائياً عبر سيرفر ريندر المباشر
+// دالة الدفع وإتمام الطلب المحدثة بنظام الحقول الإلزامية الصارمة والـ SweetAlert2 الداكنة
 async function checkout() {
   if (!cart.length) {
-    return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
+    Swal.fire({
+      icon: 'warning',
+      text: currentLang === 'ar' ? 'سلة المشتريات فارغة تماماً.' : 'Your cart is empty.',
+      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
   }
 
-  const name = ($('customerName')?.value || '').trim() || 'Fox Games Customer';
+  const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
-  
-  // هام جداً: سحب الإيميل من الواجهة، تأكد من وجود حقل بـ id="customerEmail" في الـ HTML لديك
   const email = ($('customerEmail')?.value || '').trim();
-  
-  if (!email) {
-    return alert(currentLang === 'ar' ? 'برجاء إدخال البريد الإلكتروني أولاً لاستلام الأكواد الرقمية المتوفرة!' : 'Please enter your email to receive your digital codes!');
+
+  // 1. التحقق من ملء جميع الحقول المطلوبة من قبل العميل
+  if (!name || !phone || !email) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
+      text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء بنجاح.' : 'Please fill out all fields (Name, Phone, and Email) to complete your order.',
+      confirmButtonText: currentLang === 'ar' ? 'تعديل البيانات' : 'Edit Info',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  // 2. فحص البنية التقنية الصحيحة للإيميل المتلقي للأكواد الرقمية
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'البريد الإلكتروني غير صحيح' : 'Invalid Email Address',
+      text: currentLang === 'ar' ? 'يرجى كتابة بريد إلكتروني حقيقي وصحيح لاستلام الأكواد الرقمية عليه!' : 'Please enter a valid email address to receive your digital codes!',
+      confirmButtonText: currentLang === 'ar' ? 'تصحيح' : 'Fix',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  // 3. التأكد من أن الهاتف يتكون من أرقام فقط ومناسب
+  if (isNaN(phone) || phone.length < 11) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'رقم الهاتف غير دقيق' : 'Invalid Phone Number',
+      text: currentLang === 'ar' ? 'برجاء كتابة رقم هاتف خلوي صحيح مكون من أرقام فقط.' : 'Please enter a valid phone number consisting of numbers only.',
+      confirmButtonText: currentLang === 'ar' ? 'تصحيح' : 'Fix',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
@@ -285,25 +357,26 @@ async function checkout() {
   const total = subtotal - discountValue;
 
   if (total <= 0) {
-    return alert(currentLang === 'ar' ? 'قيمة الطلب غير صحيحة.' : 'Invalid order amount.');
+    Swal.fire({ icon: 'error', text: currentLang === 'ar' ? 'قيمة الطلب غير صحيحة.' : 'Invalid order amount.' });
+    return;
   }
 
+  // إظهار مؤشر تحميل احترافي أثناء معالجة الطلب مع السيرفر الخلفي
+  Swal.fire({
+    title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
   try {
-    // 🌟 تم تعديل الرابط هنا ليرتبط مباشرة بسيرفر ريندر الخلفي الخاص بك بدلاً من المسار الداخلي المكسور
     const res = await fetch('https://fox-games-store-1.onrender.com/api/myfatoorah/create-payment', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customer: {
-          name,
-          phone,
-          email
-        },
+        customer: { name, phone, email },
         total,
         items: cart.map(item => ({
-          id: item.id, // كود التعريف الخاص بالفايربيز لسحب الكود منه
+          id: item.id,
           name: item.name,
           category: item.category || '',
           price: Number(item.price || 0)
@@ -317,43 +390,19 @@ async function checkout() {
       throw new Error(data.message || 'Payment link was not created.');
     }
 
-    // التوجيه التلقائي والآمن لبوابة ماي فاتورة
+    // الانتقال التلقائي لبوابة ماي فاتورة الآمنة
     window.location.href = data.paymentUrl;
 
   } catch (e) {
     console.error('MyFatoorah checkout error:', e);
-    alert((currentLang === 'ar' ? 'حدث خطأ أثناء معالجة الدفع: ' : 'Payment process error: ') + e.message);
+    Swal.fire({
+      icon: 'error',
+      title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
+      text: e.message,
+      confirmButtonText: currentLang === 'ar' ? 'إغلاق' : 'Close',
+      confirmButtonColor: '#ef4444'
+    });
   }
-}
-
-function sendWhatsappOrder() {
-  if (!cart.length) return alert(currentLang === 'ar' ? 'السلة فارغة.' : 'Your cart is empty.');
-
-  const name = ($('customerName')?.value || '').trim();
-  const phone = ($('customerPhone')?.value || '').trim();
-  const payment = $('paymentMethod')?.value || 'Not Specified';
-  
-  if (!name || !phone) {
-    return alert(currentLang === 'ar' ? 'برجاء إدخال الاسم ورقم الهاتف لإكمال الطلب.' : 'Please enter your Name and Phone Number to complete the order.');
-  }
-
-  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const discountValue = Math.round(subtotal * coupon / 100);
-  const finalTotal = subtotal - discountValue;
-
-  let msg = `🎮 *New Order from Fox Games* 🎮%0A%0A`;
-  msg += `👤 *Customer Name:* ${encodeURIComponent(name)}%0A`;
-  msg += `📞 *Phone Number:* ${encodeURIComponent(phone)}%0A`;
-  msg += `💳 *Payment Method:* ${encodeURIComponent(payment)}%0A%0A`;
-  msg += `📦 *Products:*%0A`;
-  
-  cart.forEach((item, i) => {
-    msg += `${i + 1}- ${encodeURIComponent(item.name)} (${item.price} EGP)%0A`;
-  });
-
-  msg += `%0A💰 *Total Amount:* ${finalTotal} EGP`;
-  
-  window.open(`https://wa.me/201010502795?text=${msg}`, '_blank');
 }
 
 function save() {
