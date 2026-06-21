@@ -1,5 +1,6 @@
 let db = null;
 let currentUser = null;
+let revenueChartInstance = null; // الاحتفاظ بنسخة المنحنى البياني لتحديثه ديناميكياً
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,7 +13,7 @@ function showPage(id, btn){
     if(btn) btn.classList.add('active');
 }
 
-// دالة جلب قيم المدخلات بدون تكرار
+// دالة جلب قيم المدخلات
 function val(id){
     return ($(id)?.value || '').trim();
 }
@@ -54,7 +55,7 @@ async function loadAll(){
   await loadStats();
 }
 
-// تفريغ فورم المنتجات بعد الحفظ أو التعديل
+// تفريغ فورم المنتجات
 function clearProductForm(){
   ['productId','name','category','game','amount','price','description']
     .forEach(id => {
@@ -72,12 +73,9 @@ function clearProductForm(){
 // حفظ أو تحديث منتج
 async function saveProduct(){
   const file = document.getElementById('imageFile').files[0];
-  console.log("FILE =", file);
-
   let imageUrl = '';
   if(file){
     imageUrl = await uploadImage(file);
-    console.log("IMAGE URL =", imageUrl);
   }
 
   const data = {
@@ -114,7 +112,7 @@ async function saveProduct(){
   alert('تم حفظ المنتج بنجاح');
 }
 
-// جلب المنتجات وعرضها في كروت اللوحة والـ Select
+// جلب المنتجات وعرضها
 async function loadProducts(){
   const snap = await db.collection('products').get();
   const list = $('productsList');
@@ -151,7 +149,7 @@ async function loadProducts(){
   });
 }
 
-// تعديل منتج موجود مسبقاً
+// تعديل منتج
 async function editProduct(id){
   const doc = await db.collection('products').doc(id).get();
   const p = doc.data();
@@ -185,14 +183,10 @@ async function uploadImage(file) {
 
   const res = await fetch(
     'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
-    {
-      method: 'POST',
-      body: formData
-    }
+    { method: 'POST', body: formData }
   );
 
   const data = await res.json();
-  console.log(data);
   return data.secure_url;
 }
 
@@ -249,7 +243,7 @@ async function deleteCategory(id){
   await loadCategories();
 }
 
-// حفظ أكواد المنتجات الرقمية
+// حفظ أكواد المنتجات
 async function saveCodes(){
   const productId = val('codeProductId');
   const raw = val('codesInput');
@@ -277,7 +271,7 @@ async function saveCodes(){
   alert('تم حفظ الأكواد بنجاح، العدد: ' + codes.length);
 }
 
-// جلب وعرض الأكواد
+// جلب الأكواد
 async function loadCodes(){
   const snap = await db.collection('productCodes').limit(100).get();
   const list = $('codesList');
@@ -342,9 +336,9 @@ async function loadCoupons(){
   });
 }
 
-// جلب وعرض الطلبات
+// جلب وعرض الطلبات بالبيانات والمبالغ والأسماء الحقيقية
 async function loadOrders(){
-  const snap = await db.collection('orders').limit(50).get();
+  const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
   const table = `
     <table>
@@ -358,14 +352,22 @@ async function loadOrders(){
       </tr>
       ${snap.docs.map(doc => {
         const o = doc.data();
+        
+        // التحقق من المسميات المختلفة المخزنة في الـ Database لضمان عدم خروج خانة فارغة أو صفر
+        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
+        const orderPrice = Number(o.total || o.price || o.amount || 0);
+        const customer = o.customerName || o.email || o.username || '-';
+        const status = o.status || o.paymentStatus || o.payment_status || '-';
+        const code = o.assignedCode || o.code || '-';
+
         return `
           <tr>
-            <td>${o.orderId || doc.id}</td>
-            <td>${o.customerName || o.email || '-'}</td>
-            <td>${o.productName || '-'}</td>
-            <td>${o.total || o.price || 0} EGP</td>
-            <td>${o.status || o.paymentStatus || '-'}</td>
-            <td>${o.assignedCode || '-'}</td>
+            <td>${o.orderId || doc.id.substring(0,8)}</td>
+            <td>${customer}</td>
+            <td>${pName}</td>
+            <td><strong>${orderPrice} EGP</strong></td>
+            <td><span class="status-badge">${status}</span></td>
+            <td><code>${code}</code></td>
           </tr>
         `;
       }).join('')}
@@ -376,7 +378,7 @@ async function loadOrders(){
   if($('latestOrders')) $('latestOrders').innerHTML = table;
 }
 
-// جلب بيانات العملاء المسجلين بالـ Database
+// جلب بيانات العملاء
 async function loadCustomers(){
   const snap = await db.collection('users').limit(100).get();
 
@@ -405,7 +407,7 @@ async function loadCustomers(){
   }
 }
 
-// 🔧 دالة حساب المبيعات والعدادات الذكية الحية 🔧
+// حساب المبيعات الحقيقية، العدادات، وتحديث الرسم البياني ديناميكياً
 async function loadStats(){
   try {
     const products = await db.collection('products').get();
@@ -413,11 +415,21 @@ async function loadStats(){
     const users = await db.collection('users').get();
     const codes = await db.collection('productCodes').where('status','==','available').get();
 
-    let total = 0;
+    let totalSales = 0;
+    let chartDataMap = {}; // لتجميع الإيرادات حسب الأيام
+
     orders.forEach(doc => {
       const o = doc.data();
-      // جمع الحقل المتاح سواء كان اسمه total أو price وتحويله لرقم لضمان عدم حدوث مشاكل
-      total += Number(o.total || o.price || 0);
+      const price = Number(o.total || o.price || o.amount || 0);
+      totalSales += price;
+
+      // استخراج التاريخ لربطه بالرسم البياني الحقيقي
+      let dateKey = 'أخرى';
+      if(o.createdAt) {
+         const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+         dateKey = d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+      }
+      chartDataMap[dateKey] = (chartDataMap[dateKey] || 0) + price;
     });
 
     if($('productsCount')) $('productsCount').textContent = products.size;
@@ -425,10 +437,15 @@ async function loadStats(){
     if($('codesCount')) $('codesCount').textContent = codes.size;
     if($('customersCount')) $('customersCount').textContent = users.size;
     
-    // عرض إجمالي المبيعات بتنسيق قراءة مميز وحقيقي
-    if($('salesTotal')) $('salesTotal').textContent = total.toLocaleString() + ' EGP';
+    // 1. تحديث إجمالي المبيعات بالداتا الحقيقية
+    if($('salesTotal')) $('salesTotal').textContent = totalSales.toLocaleString() + ' EGP';
 
-    // تحديث قائمة أفضل المنتجات مبيعاً باللوحة بشكل فخم
+    // 2. تحديث الرسم البياني بالإيرادات الحقيقية للأيام
+    const chartLabels = Object.keys(chartDataMap).reverse();
+    const chartValues = Object.values(chartDataMap).reverse();
+    updateRevenueChart(chartLabels, chartValues);
+
+    // تحديث قائمة أفضل المنتجات مبيعاً
     if($('topProducts')){
       $('topProducts').innerHTML = products.docs.slice(0,3).map((doc, i) => {
         const p = doc.data();
@@ -441,11 +458,59 @@ async function loadStats(){
       }).join('');
     }
   } catch (error) {
-      console.error("حدث خطأ أثناء جلب العدادات: ", error);
+      console.error("حدث خطأ أثناء جلب العدادات والرسم البياني: ", error);
   }
 }
 
-// دالة تسجيل الخروج ونقل المستخدم لصفحة تسجيل الدخول
+// دالة تحديث ومنشئ المنحنى البياني بالبيانات الحية
+function updateRevenueChart(labels, dataValues) {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    // إذا لم تكن هناك بيانات حقيقية بعد، ضع قيم افتراضية حتى لا يظهر مفرغاً
+    const finalLabels = labels.length ? labels : ['أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'];
+    const finalData = dataValues.length ? dataValues : [0, 0, 0, 0, 0];
+
+    if (revenueChartInstance) {
+        // تحديث البيانات حياً إذا كان المنحنى منشأ بالفعل
+        revenueChartInstance.data.labels = finalLabels;
+        revenueChartInstance.data.datasets[0].data = finalData;
+        revenueChartInstance.update();
+    } else {
+        // إنشاء المنحنى لأول مرة بشكل مضيء ومميز متناسق مع الواجهة
+        const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+        revenueChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: finalLabels,
+                datasets: [{
+                    data: finalData,
+                    borderColor: '#3b82f6',
+                    borderWidth: 3,
+                    backgroundColor: ctxGradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
+                    y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
+}
+
+// تسجيل الخروج
 function logout(){
   firebase.auth().signOut().then(() => {
       location.href = '/login.html';
