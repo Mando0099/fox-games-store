@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Fox Store Admin - Ultimate Core Logic & Live Database Sync (Updated)
+   Fox Store Admin - Ultimate Core Logic & Live Database Sync (Fixed & Pro)
    ========================================================================== */
 
 let db = null;
@@ -12,12 +12,8 @@ const $ = (id) => document.getElementById(id);
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-    }
-    if (overlay) {
-        overlay.classList.toggle('active');
-    }
+    if (sidebar) sidebar.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
 }
 
 // 🔄 تنقل التابات والصفحات مع الإغلاق التلقائي الأكيد للموبايل
@@ -31,7 +27,6 @@ function showPage(id, btn){
     if(btn) {
         btn.classList.add('active');
     } else {
-        // تأمين إضافي: إذا لم يتم تمرير الزر برمجياً، ابحث عنه واجعله نشطاً
         const targetBtn = document.querySelector(`[onclick*="${id}"]`);
         if (targetBtn) targetBtn.classList.add('active');
     }
@@ -40,15 +35,11 @@ function showPage(id, btn){
     const sidebar = document.querySelector('.sidebar');
     const overlay = $('sidebarOverlay');
     
-    if (sidebar) {
-        sidebar.classList.remove('active');
-    }
-    if (overlay) {
-        overlay.classList.remove('active');
-    }
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
 }
 
-// دالة جلب قيم المدخلات
+// دالة جلب قيم المدخلات بأمان
 function val(id){
     return ($(id)?.value || '').trim();
 }
@@ -64,19 +55,23 @@ firebase.auth().onAuthStateChanged(async (user) => {
   db = firebase.firestore();
   if($('adminEmail')) $('adminEmail').textContent = user.email;
 
-  const adminCheck = await db.collection('admins')
-    .where('email','==',user.email)
-    .where('active','==',true)
-    .limit(1)
-    .get();
+  try {
+    const adminCheck = await db.collection('admins')
+      .where('email','==',user.email)
+      .where('active','==',true)
+      .limit(1)
+      .get();
 
-  if(adminCheck.empty){
-    alert('هذا الحساب ليس أدمن');
-    location.href = '/';
-    return;
+    if(adminCheck.empty){
+      alert('عذراً، هذا الحساب ليس لديه صلاحيات المسؤول (Admin)');
+      location.href = '/';
+      return;
+    }
+
+    await loadAll();
+  } catch (error) {
+      console.error("خطأ أثناء فحص صلاحيات الأدمن:", error);
   }
-
-  await loadAll();
 });
 
 // تحميل كافة البيانات والعدادات فور الدخول للوحة
@@ -90,7 +85,7 @@ async function loadAll(){
   await loadStats();
 }
 
-// تفريغ فورم المنتجات
+// تفريغ فورم المنتجات بالكامل وإعادة ضبط المعاينة
 function clearProductForm(){
   ['productId','name','category','game','amount','price','description']
     .forEach(id => {
@@ -101,6 +96,12 @@ function clearProductForm(){
   const imageFile = $('imageFile');
   if(imageFile) imageFile.value = '';
 
+  const preview = $('imagePreview');
+  if(preview) {
+      preview.src = '';
+      preview.style.display = 'none';
+  }
+
   const active = $('active');
   if(active) active.checked = true;
 }
@@ -108,7 +109,13 @@ function clearProductForm(){
 // حفظ أو تحديث منتج
 async function saveProduct(){
   const file = document.getElementById('imageFile').files[0];
-  let imageUrl = val('image'); // الاحتفاظ بالصورة القديمة عند التعديل إذا لم ترفع صورة جديدة
+  let imageUrl = '';
+  
+  // حل مشكلة الاحتفاظ بالصورة القديمة عند تعديل المنتج
+  const preview = $('imagePreview');
+  if (preview && preview.style.display !== 'none') {
+      imageUrl = preview.src;
+  }
   
   if(file){
     imageUrl = await uploadImage(file);
@@ -116,7 +123,7 @@ async function saveProduct(){
 
   const data = {
     name: val('name'),
-    category: val('category'), // سيسحب القيمة المحددة من الـ select الحقيقي الآن
+    category: val('category'), 
     game: val('game'),
     amount: Number(val('amount') || 0),
     price: Number(val('price') || 0),
@@ -127,25 +134,30 @@ async function saveProduct(){
   };
 
   if(!data.name || !data.price || !data.category){
-    alert('اسم المنتج، التصنيف، والسعر حقول مطلوبة');
+    alert('اسم المنتج، التصنيف، والسعر حقول مطلوبة واجبارية!');
     return;
   }
 
   const id = val('productId');
 
-  if(id){
-    await db.collection('products').doc(id).set(data, {merge:true});
-  }else{
-    await db.collection('products').add({
-      ...data,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  }
+  try {
+    if(id){
+      await db.collection('products').doc(id).set(data, {merge:true});
+    }else{
+      await db.collection('products').add({
+        ...data,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
 
-  clearProductForm();
-  await loadProducts();
-  await loadStats();
-  alert('تم حفظ المنتج بنجاح');
+    clearProductForm();
+    await loadProducts();
+    await loadStats();
+    alert('تم حفظ المنتج وتحديث قواعد البيانات بنجاح 💎');
+  } catch(err) {
+      console.error("خطأ أثناء حفظ المنتج:", err);
+      alert("فشل حفظ المنتج، راجع 콘솔 اللوحة لمزيد من التفاصيل.");
+  }
 }
 
 // جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
@@ -155,9 +167,7 @@ async function loadProducts(){
   const select = $('codeProductId');
 
   if(list) list.innerHTML = '';
-  if(select){
-    select.innerHTML = '<option value="">اختر المنتج</option>';
-  }
+  if(select) select.innerHTML = '<option value="">اختر المنتج</option>';
 
   snap.forEach(doc => {
     const p = doc.data();
@@ -171,13 +181,15 @@ async function loadProducts(){
         <div class="product-card-custom">
           <div class="product-card-hero">
             <img src="${p.image || '/assets/default-game.jpg'}" alt="${p.name}">
-            <span class="product-badge">${p.active ? 'نشط' : 'مخفي'}</span>
+            <span class="product-badge" style="background: ${p.active ? 'var(--neon-blue)' : 'var(--neon-pink)'};">
+                ${p.active ? 'نشط' : 'مخفي'}
+            </span>
           </div>
           <div class="product-card-body">
             <div>
               <h4>${p.name || '-'}</h4>
-              <p>التصنيف: ${p.category || '-'}</p>
-              <p>اللعبة: ${p.game || '-'}</p>
+              <p style="margin-bottom: 4px;">التصنيف: <span style="color:var(--text-main);">${p.category || '-'}</span></p>
+              <p>اللعبة: <span style="color:var(--text-main);">${p.game || '-'}</span></p>
             </div>
             <div class="product-card-footer">
               <span class="price-tag">${p.price || 0} EGP</span>
@@ -193,7 +205,7 @@ async function loadProducts(){
   });
 }
 
-// تعديل منتج
+// تعديل منتج وجلبه للفورم علوياً
 async function editProduct(id){
   const doc = await db.collection('products').doc(id).get();
   const p = doc.data();
@@ -204,9 +216,15 @@ async function editProduct(id){
   if($('game')) $('game').value = p.game || '';
   if($('amount')) $('amount').value = p.amount || '';
   if($('price')) $('price').value = p.price || '';
-  if($('image')) $('image').value = p.image || '';
   if($('description')) $('description').value = p.description || '';
   if($('active')) $('active').checked = p.active !== false;
+
+  // إظهار معاينة الصورة القديمة بالفورم
+  const preview = $('imagePreview');
+  if(preview && p.image) {
+      preview.src = p.image;
+      preview.style.display = 'block';
+  }
 
   showPage('products', document.querySelector('[onclick*="products"]'));
   scrollTo({top:0, behavior:'smooth'});
@@ -214,13 +232,13 @@ async function editProduct(id){
 
 // حذف منتج
 async function deleteProduct(id){
-  if(!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+  if(!confirm('هل أنت متأكد من حذف هذا المنتج نهائياً من المتجر؟')) return;
   await db.collection('products').doc(id).delete();
   await loadProducts();
   await loadStats();
 }
 
-// رفع الصور إلى Cloudinary
+// رفع الصور إلى سيرفرات Cloudinary
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -242,7 +260,7 @@ async function saveCategory(){
   const image = file ? await uploadImage(file) : '';
 
   if(!name){
-    alert('اسم التصنيف مطلوب');
+    alert('اسم التصنيف حقل إلزامي!');
     return;
   }
 
@@ -258,7 +276,7 @@ async function saveCategory(){
   if(catFile) catFile.value = '';
 
   await loadCategories();
-  alert('تم حفظ التصنيف بنجاح');
+  alert('تم إضافة التصنيف الجديد بنجاح');
 }
 
 // جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
@@ -268,9 +286,7 @@ async function loadCategories(){
   const productCatSelect = $('category');
   
   if(list) list.innerHTML = '';
-  if(productCatSelect){
-     productCatSelect.innerHTML = '<option value="">اختر التصنيف المتاح...</option>';
-  }
+  if(productCatSelect) productCatSelect.innerHTML = '<option value="">اختر التصنيف المتاح...</option>';
 
   snap.forEach(doc => {
     const c = doc.data();
@@ -297,18 +313,18 @@ async function loadCategories(){
 
 // حذف تصنيف
 async function deleteCategory(id){
-  if(!confirm('هل تريد حذف هذا التصنيف؟')) return;
+  if(!confirm('هل تريد حذف هذا التصنيف بالكامل؟')) return;
   await db.collection('categories').doc(id).delete();
   await loadCategories();
 }
 
-// حفظ أكواد المنتجات
+// حفظ أكواد المنتجات (تسريب الأكواد كأجزاء منفصلة)
 async function saveCodes(){
   const productId = val('codeProductId');
   const raw = val('codesInput');
 
   if(!productId || !raw){
-    alert('اختر المنتج واكتب الأكواد أولاً');
+    alert('الرجاء اختيار المنتج أولاً ثم كتابة الأكواد');
     return;
   }
 
@@ -327,7 +343,7 @@ async function saveCodes(){
   await loadCodes();
   await loadStats();
 
-  alert('تم حفظ الأكواد بنجاح، العدد: ' + codes.length);
+  alert(`تم حفظ وتخزين (${codes.length}) كود رقمي بنجاح فوري!`);
 }
 
 // جلب الأكواد لعرضها في الكروت
@@ -340,23 +356,23 @@ async function loadCodes(){
     const c = doc.data();
     if(list){
       list.innerHTML += `
-        <div class="panel" style="border-left: 3px solid var(--neon-blue); padding: 15px;">
+        <div class="panel" style="border-left: 3px solid var(--neon-blue); padding: 15px; margin-bottom:10px;">
           <h3 style="font-size:15px; color:var(--text-main); font-family: monospace; letter-spacing: 1px;">${c.code || '-'}</h3>
-          <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Product: ${c.productId || '-'}</p>
-          <span class="status-badge" style="display:inline-block; margin-top:8px; font-size:11px;">${c.status || '-'}</span>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">ID المنتج: ${c.productId || '-'}</p>
+          <span class="status-badge" style="display:inline-block; margin-top:8px; font-size:11px; background: rgba(59,130,246,0.1); color: var(--neon-blue); padding:2px 8px; border-radius:4px;">${c.status || '-'}</span>
         </div>
       `;
     }
   });
 }
 
-// حفظ الكوبونات
+// حفظ الكوبونات لـ داتابيز فوكس استور
 async function saveCoupon(){
   const code = val('couponCode').toUpperCase();
   const value = Number(val('couponValue') || 0);
 
   if(!code || !value){
-    alert('الكود وقيمة الخصم مطلوبين');
+    alert('رمز الكوبون وقيمة الخصم مطلوبين');
     return;
   }
 
@@ -372,7 +388,7 @@ async function saveCoupon(){
   if($('couponValue')) $('couponValue').value = '';
 
   await loadCoupons();
-  alert('تم حفظ الكوبون بنجاح');
+  alert('تم تفعيل وحفظ كوبون الخصم بنجاح');
 }
 
 // جلب الكوبونات لعرضها
@@ -385,7 +401,7 @@ async function loadCoupons(){
     const c = doc.data();
     if(list){
       list.innerHTML += `
-        <div class="panel" style="border-bottom: 3px solid var(--neon-orange);">
+        <div class="panel" style="border-bottom: 3px solid var(--neon-orange); margin-bottom:15px;">
           <h4>رمز الكوبون: <span style="color:var(--neon-orange); font-family:monospace;">${c.code}</span></h4>
           <p style="margin: 8px 0 4px 0;">نسبة الخصم: <strong>${c.value}%</strong></p>
           <small style="color: ${c.active ? 'var(--neon-green)' : 'var(--neon-pink)'}; font-weight: 600;">
@@ -397,11 +413,37 @@ async function loadCoupons(){
   });
 }
 
-// جلب وعرض الطلبات في جدول منسق ومحمي للموبايل
+// جلب وعرض الطلبات في جدول منسق ومحمي للموبايل مع تلوين الحالات ذكياً
 async function loadOrders(){
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
-  const table = `
+  const tableBody = snap.docs.map(doc => {
+        const o = doc.data();
+        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
+        const orderPrice = Number(o.total || o.price || o.amount || 0);
+        const customer = o.customerName || o.email || o.username || '-';
+        const status = (o.status || o.paymentStatus || o.payment_status || '-').toLowerCase();
+        const code = o.assignedCode || o.code || 'في انتظار الدفع';
+
+        // تلوين ذكي لحالة الطلب والدفع لقيم احترافية نيون بالجدول
+        let statusColor = 'var(--text-muted)';
+        if(status === 'completed' || status === 'paid' || status === 'نجاح') statusColor = 'var(--neon-green)';
+        if(status === 'pending' || status === 'قيد الانتظار') statusColor = 'var(--neon-orange)';
+        if(status === 'failed' || status === 'فشل') statusColor = 'var(--neon-pink)';
+
+        return `
+          <tr>
+            <td>${o.orderId || doc.id.substring(0,8)}</td>
+            <td>${customer}</td>
+            <td>${pName}</td>
+            <td><strong style="color:var(--neon-green);">${orderPrice} EGP</strong></td>
+            <td><span class="status-badge" style="color: ${statusColor}; font-weight:700;">${status.toUpperCase()}</span></td>
+            <td><code style="background:var(--bg-input); padding:4px 8px; border-radius:6px; color:var(--neon-purple);">${code}</code></td>
+          </tr>
+        `;
+  }).join('');
+
+  const tableHTML = `
     <table>
       <tr>
         <th>رقم الطلب</th>
@@ -409,35 +451,17 @@ async function loadOrders(){
         <th>المنتج</th>
         <th>الإجمالي</th>
         <th>الحالة</th>
-        <th>الكود</th>
+        <th>الكود المُسلم</th>
       </tr>
-      ${snap.docs.map(doc => {
-        const o = doc.data();
-        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
-        const orderPrice = Number(o.total || o.price || o.amount || 0);
-        const customer = o.customerName || o.email || o.username || '-';
-        const status = o.status || o.paymentStatus || o.payment_status || '-';
-        const code = o.assignedCode || o.code || '-';
-
-        return `
-          <tr>
-            <td>${o.orderId || doc.id.substring(0,8)}</td>
-            <td>${customer}</td>
-            <td>${pName}</td>
-            <td><strong>${orderPrice} EGP</strong></td>
-            <td><span class="status-badge">${status}</span></td>
-            <td><code>${code}</code></td>
-          </tr>
-        `;
-      }).join('')}
+      ${tableBody}
     </table>
   `;
 
-  if($('ordersList')) $('ordersList').innerHTML = table;
-  if($('latestOrders')) $('latestOrders').innerHTML = table;
+  if($('ordersList')) $('ordersList').innerHTML = tableHTML;
+  if($('latestOrders')) $('latestOrders').innerHTML = tableHTML;
 }
 
-// جلب بيانات العملاء
+// جلب بيانات العملاء بالجدول الخاص بهم
 async function loadCustomers(){
   const snap = await db.collection('users').limit(100).get();
 
@@ -457,7 +481,7 @@ async function loadCustomers(){
               <td>${u.name || '-'}</td>
               <td>${u.email || '-'}</td>
               <td>${u.phone || '-'}</td>
-              <td>${u.role || 'user'}</td>
+              <td><span style="color: ${u.role === 'admin' ? 'var(--neon-purple)' : 'var(--text-muted)'}; font-weight:600;">${u.role || 'user'}</span></td>
             </tr>
           `;
         }).join('')}
@@ -498,13 +522,14 @@ async function loadStats(){
 
     const chartLabels = Object.keys(chartDataMap).reverse();
     const chartValues = Object.values(chartDataMap).reverse();
+    
     updateRevenueChart(chartLabels, chartValues);
 
     if($('topProducts')){
       $('topProducts').innerHTML = products.docs.slice(0,3).map((doc, i) => {
         const p = doc.data();
         return `
-          <div class="alert success" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(101,204,0,0.05); border:1px solid rgba(101,204,0,0.1); padding:10px; border-radius:10px;">
+          <div class="alert success" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(101,204,0,0.03); border:1px solid rgba(101,204,0,0.08); padding:12px; border-radius:10px;">
             <span style="font-size:13px; font-weight:600;">#${i+1} — ${p.name || 'منتج'}</span>
             <strong style="color:var(--neon-green); font-size:14px;">${p.price || 0} EGP</strong>
           </div>
@@ -524,13 +549,14 @@ function updateRevenueChart(labels, dataValues) {
     const finalLabels = labels.length ? labels : ['أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'];
     const finalData = dataValues.length ? dataValues : [0, 0, 0, 0, 0];
 
+    // الحل النهائي: منع تداخل كائنات الرسم البياني وتحديث البيانات حياً بشكل مباشر ومستقر
     if (revenueChartInstance) {
         revenueChartInstance.data.labels = finalLabels;
         revenueChartInstance.data.datasets[0].data = finalData;
         revenueChartInstance.update();
     } else {
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
         ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
         revenueChartInstance = new Chart(ctx, {
@@ -545,16 +571,27 @@ function updateRevenueChart(labels, dataValues) {
                     fill: true,
                     tension: 0.4,
                     pointBackgroundColor: '#3b82f6',
-                    pointRadius: 4
+                    pointHoverBackgroundColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: '#142032',
+                      titleFont: { family: 'Cairo' },
+                      bodyFont: { family: 'Cairo' },
+                      borderColor: 'rgba(255,255,255,0.08)',
+                      borderWidth: 1
+                    }
+                },
                 scales: {
                     x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } }
                 }
             }
         });
@@ -563,6 +600,7 @@ function updateRevenueChart(labels, dataValues) {
 
 // تسجيل الخروج
 function logout(){
+  if(!confirm('هل تود تسجيل الخروج من لوحة التحكم؟')) return;
   firebase.auth().signOut().then(() => {
       location.href = '/login.html';
   });
