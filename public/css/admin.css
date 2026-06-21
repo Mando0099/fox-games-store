@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Fox Store Admin - Ultimate Gaming Dark Theme (Fully Responsive)
+   Fox Store Admin - Ultimate Gaming Dark Theme (Fully Responsive & Pro)
    ========================================================================== */
 
 :root {
@@ -540,6 +540,68 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* سحب ناعم على أجهزة iOS */
+}
+
+/* ==========================================================================
+   💎 Professional Table & Select Component Styling 
+   ========================================================================== */
+
+/* ستايل الجدول الأساسي وتوزيعه */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* تنسيق عناوين الجدول العلوية */
+th {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 16px 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+  letter-spacing: 0.5px;
+}
+
+/* تنسيق خلايا البيانات وحمايتها من التداخل */
+td {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  white-space: nowrap;         /* منع الكلمات من النزول لسطر جديد وتدمير الطول */
+  text-overflow: ellipsis;    /* إضافة ثلاث نقاط إذا كان النص أطول من المساحة */
+  overflow: hidden;
+  max-width: 250px;           /* أقصى عرض للخلية الواحدة لحماية تصميم الجدول */
+}
+
+/* تأثير احترافي عند تمرير الماوس على سطر الجدول */
+tr:hover td {
+  background-color: rgba(59, 130, 246, 0.03); /* إضاءة زرقاء خفيفة نيون */
+  color: #fff;
+  transition: background-color var(--transition-fast);
+}
+
+/* تخصيص مظهر قوائم الاختيار Dropdown لتليق بالـ Gaming theme */
+select {
+  appearance: none; /* إزالة سهم المتصفح الافتراضي القبيح */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: left 15px center; /* وضع السهم المخصص في اليسار ليتناسب مع الكتابة العربية */
+  padding-left: 40px; /* ترك مساحة للسهم */
+  cursor: pointer;
+}
+
+/* تنسيق الخيارات الداخلية للـ Select */
+select option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  padding: 10px;
 }
 
 /* ==========================================================================
