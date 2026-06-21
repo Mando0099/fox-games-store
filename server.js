@@ -76,7 +76,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
   } catch (e) {
     console.error('=== MYFATOORAH FULL ERROR DETAILS ===');
     console.error('Status:', e.response?.status);
-    console.error('Data from MyFatoorah:', e.response?.data);
+    console.error('Data from MyFatoorah:', JSON.stringify(e.response?.data, null, 2));
     console.error('======================================');
     
     res.status(400).json({ 
