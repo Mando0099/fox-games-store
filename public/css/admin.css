@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Fox Store Admin - Ultimate Gaming Dark Theme (Fixed Tabs & Layout)
+   Fox Store Admin - Ultimate Gaming Dark Theme (Fully Responsive)
    ========================================================================== */
 
 :root {
@@ -53,6 +53,7 @@ body {
   flex-direction: column;
   gap: 25px;
   flex-shrink: 0;
+  transition: transform var(--transition-fast), right var(--transition-fast);
 }
 
 .brand {
@@ -189,12 +190,15 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
+  gap: 15px;
 }
 
 .top-actions {
   display: flex;
   align-items: center;
   gap: 15px;
+  width: 100%;
+  justify-content: flex-end;
 }
 
 .search-container {
@@ -243,8 +247,40 @@ body {
   border-radius: 20px;
 }
 
+/* زر الهامبرجر للموبايل - مخفي على الديسكتوب */
+.menu-btn {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: white;
+  padding: 11px 14px;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+/* طبقة الـ Overlay الخلفية للموبايل */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
 /* ==========================================================================
-   🔧 حل مشكلة تداخل الصفحات والتابات التحت بعضها 🔧
+   حل مشكلة تداخل الصفحات والتابات التحت بعضها
    ========================================================================== */
 .page {
   display: none !important; /* إخفاء إجباري لكل الصفحات الافتراضية */
@@ -503,13 +539,78 @@ input:focus, textarea:focus, select:focus {
 .table-box {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* سحب ناعم على أجهزة iOS */
 }
 
 /* ==========================================================================
-   التوافق مع الشاشات (Responsive Design)
+   ⚙️ تحسين نظام التجاوب الشامل (Responsive Update) ⚙️
    ========================================================================== */
-@media(max-width: 1000px) {
-  body { flex-direction: column; }
-  .sidebar { width: 100%; border-left: none; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
-  .main { max-width: 100%; padding: 20px; }
+@media (max-width: 1000px) {
+  body {
+    flex-direction: column;
+  }
+
+  /* تحويل السايدبار إلى Drawer مخفي ينزلق من اليمين */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px; /* سحب خارج الشاشة يميناً */
+    width: 280px;
+    height: 100vh;
+    z-index: 999;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
+  }
+
+  /* تفعيل ظهور السايدبار عند إضافة الكلاس */
+  .sidebar.active {
+    right: 0;
+  }
+
+  /* تمديد المحتوى بالكامل */
+  .main {
+    max-width: 100%;
+    padding: 20px;
+    width: 100%;
+  }
+
+  /* إظهار زر الهامبرجر */
+  .menu-btn {
+    display: flex;
+  }
+
+  .topbar {
+    justify-content: space-between;
+    margin-bottom: 25px;
+  }
+
+  .top-actions {
+    width: auto;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  /* حماية الجداول من الانضغاط وتفعيل السحب الأفقي المريح */
+  table {
+    min-width: 700px; 
+  }
+
+  .search-container {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)); /* كرت واحد كامل العرض لكل سطر بالموبايل */
+  }
+}
+
+@media (max-width: 580px) {
+  .top-actions .welcome {
+    display: none; /* إخفاء نص الترحيب لتوفير مساحة على الشاشات الصغيرة جداً */
+  }
+  
+  .search-container {
+    max-width: 150px;
+  }
 }
