@@ -5,10 +5,13 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
   admin.initializeApp({
-  projectId: process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT,
-  databaseURL: process.env.FIREBASE_DATABASE_URL
-});
+    credential: admin.credential.cert(serviceAccount),
+    projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id,
+    databaseURL: process.env.FIREBASE_DATABASE_URL
+  });
 }
 const db = admin.firestore();
 
