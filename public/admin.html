@@ -139,7 +139,7 @@
             <h3><i class="fa-solid fa-chart-line"></i> الإيرادات (آخر 30 يوم)</h3>
             <span class="chart-amount">3,245.60 EGP اليوم</span>
           </div>
-          <div class="chart-wrapper">
+          <div class="chart-wrapper" style="position: relative; height: 300px; width: 100%;">
             <canvas id="revenueChart"></canvas>
           </div>
         </div>
@@ -262,19 +262,21 @@
         <p>إحصائيات المبيعات والمنتجات المتقدمة</p>
       </div>
       <div class="panel">
-        <canvas id="detailedReportChart"></canvas>
+        <div class="chart-wrapper" style="position: relative; height: 380px; width: 100%;">
+          <canvas id="detailedReportChart"></canvas>
+        </div>
       </div>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // شفرة تهيئة الرسم البياني الأساسي المبدئي
     document.addEventListener("DOMContentLoaded", function() {
+      // 1. تهيئة الرسم البياني الأساسي (الإيرادات)
       const ctx = document.getElementById('revenueChart');
       if(ctx) {
         const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
         ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
         new Chart(ctx, {
@@ -289,16 +291,62 @@
               fill: true,
               tension: 0.4,
               pointBackgroundColor: '#3b82f6',
-              pointRadius: 4
+              pointHoverBackgroundColor: '#fff',
+              pointRadius: 4,
+              pointHoverRadius: 6
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#142032',
+                titleFont: { family: 'Cairo' },
+                bodyFont: { family: 'Cairo' },
+                borderColor: 'rgba(255,255,255,0.08)',
+                borderWidth: 1
+              }
+            },
             scales: {
               x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
-              y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } }
+            }
+          }
+        });
+      }
+
+      // 2. تهيئة الرسم البياني المتقدم في صفحة التقارير (تجنب بقائه فارغاً)
+      const ctxDetailed = document.getElementById('detailedReportChart');
+      if(ctxDetailed) {
+        const detailGradient = ctxDetailed.getContext('2d').createLinearGradient(0, 0, 0, 350);
+        detailGradient.addColorStop(0, 'rgba(157, 78, 221, 0.3)');
+        detailGradient.addColorStop(1, 'rgba(157, 78, 221, 0)');
+
+        new Chart(ctxDetailed, {
+          type: 'bar', // تغيير النوع إلى أعمدة لشكل تقارير احترافي ومختلف
+          data: {
+            labels: ['ببجي موبايل', 'فلاي ديجي', 'ستيم ستور', 'بلايستيشن نيتورك', 'رايزر جولد', 'فري فاير'],
+            datasets: [{
+              label: 'حجم المبيعات بالـ EGP',
+              data: [5400, 3200, 7100, 4800, 9600, 2100],
+              backgroundColor: 'rgba(59, 130, 246, 0.6)',
+              borderColor: '#3b82f6',
+              borderWidth: 1,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } },
+              tooltip: { backgroundColor: '#142032', titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } }
             }
           }
         });
