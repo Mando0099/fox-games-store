@@ -222,7 +222,7 @@
         <textarea id="codesInput" rows="8" placeholder="كل كود في سطر لوحده"></textarea>
         <button onclick="saveCodes()">حفظ الأكواد</button>
       </div>
-      <div id="codesList" class="cards-grid"></div>
+      <div id="codesList" style="margin-top: 25px;"></div>
     </section>
 
     <section id="orders" class="page">
@@ -325,7 +325,7 @@
         detailGradient.addColorStop(1, 'rgba(157, 78, 221, 0)');
 
         new Chart(ctxDetailed, {
-          type: 'bar', // تغيير النوع إلى أعمدة لشكل تقارير احترافي ومختلف
+          type: 'bar', 
           data: {
             labels: ['ببجي موبايل', 'فلاي ديجي', 'ستيم ستور', 'بلايستيشن نيتورك', 'رايزر جولد', 'فري فاير'],
             datasets: [{
