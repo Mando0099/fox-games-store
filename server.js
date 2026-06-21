@@ -1,14 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const axios = require('axios'); // تم إضافتها لإرسال الطلبات لماي فاتورة
-const admin = require('firebase-admin'); // تم إضافتها للربط مع الفايربيز
-const nodemailer = require('nodemailer'); // تم إضافتها لإرسال الإيميلات للمشترين
+const axios = require('axios'); 
+const admin = require('firebase-admin'); 
+const nodemailer = require('nodemailer'); 
 
-// تهيئة الفايربيز (تأكد من وجود ملف الخدمة السري firebase-service-account.json في الفولدر الرئيسي)
+// تهيئة الفايربيز باستخدام الـ Database URL (بدون الحاجة لملف الـ json السري)
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(require('./firebase-service-account.json'))
+    // سيتم جلب رابط قاعدة البيانات تلقائياً من ملف الـ .env لحماية بياناتك
+    databaseURL: process.env.FIREBASE_DATABASE_URL 
   });
 }
 const db = admin.firestore();
@@ -18,7 +19,7 @@ const PORT = process.env.PORT || 9000;
 
 // إعدادات ماي فاتورة (MyFatoorah)
 const MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
-const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api.myfatoorah.com/v2'; // الرابط التجريبي أو الفعلي
+const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api.myfatoorah.com/v2'; 
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 app.use(express.json());
@@ -29,8 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // إيميل متجرك في الـ .env
-    pass: process.env.EMAIL_PASS  // كلمة مرور التطبيقات App Password
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS  
   }
 });
 
@@ -52,7 +53,6 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     if (!customerEmail) return res.status(400).json({ success: false, message: 'Customer email is required to deliver codes.' });
 
-    // إرسال الفاتورة لماي فاتورة واستلام رابط الدفع
     const response = await axios.post(`${MYFATOORAH_API_URL}/SendPayment`, {
       NotificationOption: 'LNK',
       InvoiceValue: amount,
@@ -61,7 +61,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       CustomerMobile: order.customer?.phone || '',
       CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
       ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-      UserDefinedField: JSON.stringify(items) // حفظ المنتجات داخل الفاتورة لاستعادتها في الـ Webhook
+      UserDefinedField: JSON.stringify(items) 
     }, {
       headers: { 'Authorization': `Bearer ${MYFATOORAH_TOKEN}` }
     });
@@ -82,7 +82,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
   if (OrderStatus === 'Paid') {
     try {
-      // التحقق الإضافي والأمان من سيرفر ماي فاتورة مباشرة
       const verification = await axios.post(`${MYFATOORAH_API_URL}/GetPaymentStatus`, {
         Key: TransactionId,
         KeyType: 'TransactionId'
@@ -92,12 +91,11 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
       const paymentData = verification.data.Data;
       const customerEmail = paymentData.CustomerEmail;
-      const cartItems = JSON.parse(paymentData.UserDefinedField); // استرجاع المنتجات المباعة
+      const cartItems = JSON.parse(paymentData.UserDefinedField); 
       const orderId = paymentData.InvoiceId;
 
       const purchasedCodes = [];
 
-      // معالجة سحب الأكواد من Firestore بشكل آمن (Transaction)
       await db.runTransaction(async (transaction) => {
         for (const item of cartItems) {
           const codesRef = db.collection('products').doc(item.id).collection('digital_codes');
@@ -106,7 +104,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
           if (!codeSnapshot.empty) {
             const codeDoc = codeSnapshot.docs[0];
-            // تحويل حالة الكود في Firestore إلى "مباع"
             transaction.update(codeDoc.ref, {
               isUsed: true,
               orderId: orderId,
@@ -117,7 +114,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
         }
       });
 
-      // إرسال الأكواد فوراً للإيميل
       if (purchasedCodes.length > 0) {
         await sendCodesEmail(customerEmail, orderId, purchasedCodes);
       }
@@ -131,7 +127,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   res.status(200).send('Ignored');
 });
 
-// دالة تنسيق وإرسال الإيميل للاعبين بالـ HTML والتصميم الجديد لمتجرك
+// دالة تنسيق وإرسال الإيميل للاعبين بالـ HTML
 async function sendCodesEmail(email, orderId, codes) {
   let codesHtml = '';
   codes.forEach(c => {
