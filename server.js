@@ -162,6 +162,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 });
 
 app.post('/api/myfatoorah/webhook', async (req, res) => {
+  console.log('WEBHOOK BODY:', JSON.stringify(req.body, null, 2));
   const { TransactionId, OrderStatus } = req.body;
 
   if (OrderStatus === 'Paid') {
