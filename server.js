@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 9000;
 
 // إعدادات ماي فاتورة (MyFatoorah)
 const MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
-const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api.myfatoorah.com'; 
+const MYFATOORAH_API_URL = process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com'; 
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 app.use(express.json());
@@ -54,7 +54,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
 
-    const response = await axios.post(`${MYFATOORAH_API_URL}/v2/ExecutePayment`, {
+    const response = await axios.post(`${MYFATOORAH_API_URL}/ExecutePayment`, {
       PaymentMethodId: 0, 
       InvoiceValue: amount,
       DisplayCurrencyIso: 'EGP', // 🌟 تحدديد العملة رسمياً لحل مشكلة الرفض 403 للحسابات الحقيقية
@@ -92,7 +92,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
   if (OrderStatus === 'Paid') {
     try {
-      const verification = await axios.post(`${MYFATOORAH_API_URL}/v2/GetPaymentStatus`, {
+      const verification = await axios.post(`${MYFATOORAH_API_URL}/GetPaymentStatus`, {
         Key: TransactionId,
         KeyType: 'TransactionId'
       }, {
