@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Fox Store Admin - Ultimate Gaming Dark Theme
+   Fox Store Admin - Ultimate Gaming Dark Theme (Fixed Tabs & Layout)
    ========================================================================== */
 
 :root {
@@ -38,10 +38,11 @@ body {
   color: var(--text-main);
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ==========================================================================
-   القائمة الجانبية (Sidebar)
+   القائمة الجانبية (Sidebar) - مثبتة على اليمين
    ========================================================================== */
 .sidebar {
   width: 270px;
@@ -51,6 +52,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  flex-shrink: 0;
 }
 
 .brand {
@@ -103,6 +105,7 @@ body {
   align-items: center;
   gap: 15px;
   transition: var(--transition-fast);
+  width: 100%;
 }
 
 .nav-btn i {
@@ -119,7 +122,7 @@ body {
   color: var(--text-main);
   background: linear-gradient(270deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%);
   border-right: 4px solid var(--neon-blue);
-  padding-right: 14px; /* موازنة المسافة بعد إضافة البوردر */
+  padding-right: 14px;
 }
 
 .admin-box {
@@ -178,7 +181,7 @@ body {
   flex: 1;
   padding: 35px;
   background-color: var(--bg-main);
-  max-width: calc(100% - 270px);
+  min-width: 0; /* يمنع تمدد العناصر خارج الهيكل الرئيسي */
 }
 
 .topbar {
@@ -186,15 +189,6 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
-}
-
-.menu-btn {
-  background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  color: white;
-  padding: 12px;
-  border-radius: var(--radius-main);
-  cursor: pointer;
 }
 
 .top-actions {
@@ -249,19 +243,26 @@ body {
   border-radius: 20px;
 }
 
-.welcome {
-  text-align: left;
-  margin-right: 5px;
+/* ==========================================================================
+   🔧 حل مشكلة تداخل الصفحات والتابات التحت بعضها 🔧
+   ========================================================================== */
+.page {
+  display: none !important; /* إخفاء إجباري لكل الصفحات الافتراضية */
+  width: 100%;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
-.welcome small {
-  display: block;
-  color: var(--text-muted);
-  font-size: 11px;
+.page.active {
+  display: block !important; /* إظهار الصفحة النشطة فقط المحددة بالتاب */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
-   الصفحات وكروت الإحصائيات (المضيئة كلياً)
+   العناصر الداخلية للإحصائيات والكروت
    ========================================================================== */
 .page-head {
   margin-bottom: 35px;
@@ -285,7 +286,6 @@ body {
   margin-bottom: 35px;
 }
 
-/* الكروت بستايل الـ Glow المطور للتصميم الجديد */
 .stat-card {
   background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -295,7 +295,6 @@ body {
   gap: 20px;
   align-items: center;
   position: relative;
-  overflow: hidden;
 }
 
 .stat-icon {
@@ -325,12 +324,7 @@ body {
   margin: 4px 0;
 }
 
-.stat-content small {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* تلوين تأثيرات الـ Glow الفريدة لكل كارت */
+/* تلوين حواف وإضاءات كروت الإحصائيات */
 .purple .stat-icon { background: rgba(157, 78, 221, 0.12); color: var(--neon-purple); }
 .purple { border-bottom: 3px solid var(--neon-purple); }
 
@@ -346,18 +340,15 @@ body {
 .pink .stat-icon { background: rgba(247, 37, 133, 0.12); color: var(--neon-pink); }
 .pink { border-bottom: 3px solid var(--neon-pink); }
 
-.trend.positive {
-  color: var(--neon-green);
-  font-weight: 700;
-}
-
-/* ==========================================================================
-   الـ Panels والـ Dashboard Layout
-   ========================================================================== */
+/* الجداول والأقسام */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.6fr 1.1fr;
   gap: 25px;
+}
+
+@media(max-width: 1150px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
 }
 
 .panel {
@@ -365,7 +356,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 18px;
   padding: 25px;
-  margin-bottom: 0; /* تم إلغاء المارجن السفلية لتناسق الـ Grid */
+  margin-bottom: 25px;
 }
 
 .panel-head {
@@ -375,61 +366,7 @@ body {
   margin-bottom: 20px;
 }
 
-.panel-head h3 {
-  font-size: 16px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.panel-head h3 i {
-  color: var(--neon-blue);
-}
-
-.panel-head button, .view-all-btn {
-  background: var(--bg-input);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  color: var(--text-muted);
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.panel-head button:hover, .view-all-btn:hover {
-  background: var(--bg-accent);
-  color: white;
-}
-
-.big {
-  grid-column: span 1;
-}
-
-/* إعدادات مساحة الـ Chart */
-.chart-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-amount {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--neon-blue);
-}
-
-.chart-wrapper {
-  position: relative;
-  height: 260px;
-  width: 100%;
-  margin-top: 10px;
-}
-
-/* ==========================================================================
-   الفورم وعناصر الإدخال (Forms & Inputs)
-   ========================================================================== */
+/* حقول الإدخال والفورم */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -455,49 +392,112 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
-textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-/* الأزرار الاحترافية بنظام التدرج النيوني */
-.actions button, .form-panel button {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  border: none;
-  padding: 14px 25px;
-  color: white;
-  border-radius: var(--radius-main);
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-  transition: var(--transition-fast);
-}
-
-.actions button:hover, .form-panel button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-}
-
-.ghost {
-  background: var(--bg-input) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  color: var(--text-muted) !important;
-  box-shadow: none !important;
-}
-
-.ghost:hover {
-  background: var(--bg-accent) !important;
-  color: white !important;
-}
-
-/* ==========================================================================
-   التنبيهات والجداول (Alerts & Tables)
-   ========================================================================== */
+/* ستايل كروت المنتجات الجديد */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
+}
+
+.product-card-custom {
+  background: var(--bg-card);
+  border-radius: var(--radius-main);
+  overflow: hidden;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-fast);
+}
+
+.product-card-custom:hover {
+  transform: translateY(-5px);
+}
+
+.product-card-hero {
+  position: relative;
+  height: 160px;
+}
+
+.product-card-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--neon-blue);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.product-card-body {
+  padding: 15px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-card-body h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.product-card-body p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.product-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.price-tag {
+  color: var(--neon-green);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-actions button, .actions button, .form-panel button {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border: none;
+  padding: 10px 18px;
+  color: white;
+  border-radius: var(--radius-main);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  transition: var(--transition-fast);
+}
+
+.actions button.ghost, .edit-btn {
+  background: var(--bg-accent) !important;
+  color: var(--text-main);
+}
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.delete-btn:hover {
+  background: #ef4444 !important;
+  color: white !important;
 }
 
 .table-box {
@@ -505,65 +505,11 @@ textarea {
   overflow-x: auto;
 }
 
-.alert {
-  padding: 14px 18px;
-  border-radius: var(--radius-main);
-  margin-bottom: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.warning {
-  background: rgba(255, 159, 28, 0.07);
-  border: 1px solid rgba(255, 159, 28, 0.2);
-  color: var(--neon-orange);
-}
-
-.success {
-  background: rgba(101, 204, 0, 0.07);
-  border: 1px solid rgba(101, 204, 0, 0.2);
-  color: var(--neon-green);
-}
-
-.danger {
-  background: rgba(247, 37, 133, 0.07);
-  border: 1px solid rgba(247, 37, 133, 0.2);
-  color: var(--neon-pink);
-}
-
 /* ==========================================================================
    التوافق مع الشاشات (Responsive Design)
    ========================================================================== */
-@media(max-width: 1150px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media(max-width: 1000px) {
-  body {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    width: 100%;
-    border-left: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  }
-  
-  .main {
-    max-width: 100%;
-    padding: 20px;
-  }
-  
-  .page-head h2 {
-    font-size: 28px;
-  }
-  
-  .search-container {
-    width: 100%;
-  }
+  body { flex-direction: column; }
+  .sidebar { width: 100%; border-left: none; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+  .main { max-width: 100%; padding: 20px; }
 }
