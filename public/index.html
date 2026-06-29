@@ -279,6 +279,118 @@
       display: block;
     }
     /* ================= END MODERN CART STYLE ================= */
+
+    /* ================= START MOBILE RESPONSIVE OVERRIDES ================= */
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 991px) {
+      body {
+        padding-bottom: 65px !important; /* مساحة للقائمة السفلية في الهاتف */
+      }
+      .topbar {
+        flex-wrap: wrap;
+        padding: 10px 12px !important;
+        gap: 10px;
+      }
+      .mainNav {
+        display: none !important; /* إخفاء القائمة العلوية في الموبايل واستبدالها بالسفلية */
+      }
+      .topSearch {
+        order: 3;
+        width: 100% !important;
+        margin: 5px 0 0 0 !important;
+      }
+      .topSearch input {
+        width: 100% !important;
+      }
+      .navActions {
+        margin-left: auto;
+        gap: 6px;
+      }
+      html[dir="rtl"] .navActions {
+        margin-left: 0;
+        margin-right: auto;
+      }
+      .langBtn, .loginBtn, .user-profile-btn, .cartBtn {
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+      }
+      .cartDrawer {
+        width: 100% !important; /* العربة تملأ الهاتف بالكامل */
+      }
+      .user-profile-dropdown {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 65px !important;
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        box-sizing: border-box;
+      }
+      .hero-title { font-size: 26px !important; }
+      .hero-subtitle { font-size: 14px !important; }
+      .hero-cta-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-cta-buttons button { width: 100%; }
+      .sectionHead {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+      }
+      .filters {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .filters input, .filters select {
+        flex: 1 1 100%;
+      }
+      .paymentMethods {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .benefits {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+      }
+
+      /* شريط التنقل السفلي للهواتف */
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #090f17;
+        border-top: 1px solid rgba(101, 204, 0, 0.2);
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+      }
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 11px;
+        gap: 4px;
+        flex: 1;
+        height: 100%;
+        transition: 0.2s;
+      }
+      .mobile-nav-item i { font-size: 18px; }
+      .mobile-nav-item:hover, .mobile-nav-item.active {
+        color: #65cc00;
+        background: rgba(101, 204, 0, 0.05);
+      }
+    }
+    /* ================= END MOBILE RESPONSIVE OVERRIDES ================= */
   </style>
 </head>
 <body>
@@ -345,7 +457,7 @@
         <div class="hero-content">
           <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
           <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
-           
+            
           <div class="hero-cta-buttons">
             <button onclick="scrollToId('products')" class="shop-now-btn">
               <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
@@ -413,7 +525,7 @@
           <h2 data-i18n="check_title">Secure Payment Methods</h2>
           <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
         </div>
-         
+          
         <div class="paymentMethods">
           <div class="method-card" title="Visa">
             <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
@@ -490,6 +602,26 @@
     </div>
   </aside>
 
+  <!-- القائمة السفلية الخاصة بالهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="#home" class="mobile-nav-item active">
+      <i class="fas fa-home"></i>
+      <span data-i18n="nav_home">Home</span>
+    </a>
+    <a href="#products" class="mobile-nav-item">
+      <i class="fas fa-gamepad"></i>
+      <span data-i18n="nav_store">Store</span>
+    </a>
+    <a href="#trending" class="mobile-nav-item">
+      <i class="fas fa-th-large"></i>
+      <span data-i18n="nav_categories">Categories</span>
+    </a>
+    <a href="#support" class="mobile-nav-item">
+      <i class="fas fa-headset"></i>
+      <span data-i18n="nav_support">Support</span>
+    </a>
+  </nav>
+
   <div class="chat" id="chat">
     <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
     <div class="chatBody">
@@ -511,9 +643,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-   
+    
   <script src="/firebase-config.js"></script>
-   
+    
   <script src="/js/store-firebase.js"></script>
   <script src="/js/store-account.js"></script>
   <script src="/js/script.js"></script>
