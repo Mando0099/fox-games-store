@@ -32,7 +32,6 @@ const ALGORITHM = 'aes-256-cbc';
 
 function encrypt(text) {
   if (!text) return '';
-  // Ensure key is 32 bytes
   const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -66,21 +65,49 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get current active gateway from DB (or fallback to .env)
+// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway)
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
       const data = doc.data();
+
+      const isLive = Boolean(data.isLive);
+      const provider = (data.provider || data.name || 'myfatoorah').toLowerCase();
+
+      // روابط التخلف الافتراضية للـ Demo والـ Live حسب كل بوابة
+      let defaultSandbox = 'https://apitest.myfatoorah.com';
+      let defaultLive = 'https://api-eg.myfatoorah.com';
+
+      if (provider === 'paymob') {
+        defaultSandbox = 'https://accept.paymob.com/api';
+        defaultLive = 'https://accept.paymob.com/api';
+      } else if (provider === 'kashier') {
+        defaultSandbox = 'https://test-iframe.kashier.io';
+        defaultLive = 'https://iframe.kashier.io';
+      }
+
+      const sandboxUrl = data.sandboxUrl || defaultSandbox;
+      const liveUrl = data.liveUrl || defaultLive;
+
+      // اختيار رابط الـ API تلقائياً بناءً على وضع isLive
+      const targetApiUrl = (isLive ? liveUrl : sandboxUrl).replace(/\/v2\/?$/, '');
+
       return {
         id: doc.id,
-        name: data.name || 'myfatoorah',
+        name: data.name || provider,
+        provider: provider,
+        isLive: isLive,
         token: decrypt(data.token || data.apiKey),
-        apiUrl: (data.apiUrl || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, ''),
-        merchantId: data.merchantId || '',
+        apiKey: decrypt(data.apiKey || data.token),
         secretKey: decrypt(data.secretKey),
-        webhookSecret: decrypt(data.webhookSecret)
+        webhookSecret: decrypt(data.webhookSecret),
+        apiUrl: targetApiUrl,
+        sandboxUrl: sandboxUrl,
+        liveUrl: liveUrl,
+        merchantId: data.merchantId || '',
+        iframeId: data.iframeId || ''
       };
     }
   } catch (err) {
@@ -91,8 +118,13 @@ async function getActivePaymentGateway() {
   return {
     id: 'env_default',
     name: 'myfatoorah',
+    provider: 'myfatoorah',
+    isLive: true,
     token: ENV_MYFATOORAH_TOKEN,
+    apiKey: ENV_MYFATOORAH_TOKEN,
     apiUrl: ENV_MYFATOORAH_API_URL,
+    sandboxUrl: 'https://apitest.myfatoorah.com',
+    liveUrl: ENV_MYFATOORAH_API_URL,
     merchantId: '',
     secretKey: '',
     webhookSecret: ''
@@ -148,12 +180,16 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
       gateways.push({
         id: doc.id,
         name: data.name,
-        apiUrl: data.apiUrl,
+        provider: data.provider || 'myfatoorah',
+        isLive: Boolean(data.isLive),
+        isActive: Boolean(data.isActive),
+        apiUrl: data.apiUrl || '',
+        sandboxUrl: data.sandboxUrl || '',
+        liveUrl: data.liveUrl || '',
         merchantId: data.merchantId || '',
-        isActive: data.isActive || false,
-        // Mask sensitive data for display
-        tokenSet: !!data.token || !!data.apiKey,
+        tokenSet: !!(data.token || data.apiKey),
         secretKeySet: !!data.secretKey,
+        webhookSecretSet: !!data.webhookSecret,
         updatedAt: data.updatedAt
       });
     });
@@ -167,8 +203,13 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
 // 2. Add or Update a Payment Gateway (Encrypts keys before saving)
 app.post('/api/admin/payment-gateways', async (req, res) => {
   try {
-    const { id, name, apiUrl, token, secretKey, merchantId, webhookSecret, isActive } = req.body;
-    const docId = id || (name ? name.toLowerCase() : 'gateway_' + Date.now());
+    const { 
+      id, name, provider, apiUrl, sandboxUrl, liveUrl, 
+      token, secretKey, apiKey, merchantId, iframeId, webhookSecret, 
+      isActive, isLive 
+    } = req.body;
+    
+    const docId = id || (provider ? provider.toLowerCase() : (name ? name.toLowerCase() : 'gateway_' + Date.now()));
 
     // If activating this gateway, deactivate all others first
     if (isActive) {
@@ -184,16 +225,22 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     const existingDoc = await docRef.get();
     const existingData = existingDoc.exists ? existingDoc.data() : {};
 
+    const inputToken = token || apiKey;
+
     const gatewayPayload = {
       name: name || existingData.name || 'MyFatoorah',
-      apiUrl: apiUrl ? apiUrl.replace(/\/v2\/?$/, '') : (existingData.apiUrl || 'https://api-eg.myfatoorah.com'),
+      provider: provider || existingData.provider || 'myfatoorah',
+      sandboxUrl: sandboxUrl || existingData.sandboxUrl || 'https://apitest.myfatoorah.com',
+      liveUrl: liveUrl || existingData.liveUrl || 'https://api-eg.myfatoorah.com',
       merchantId: merchantId ?? existingData.merchantId ?? '',
+      iframeId: iframeId ?? existingData.iframeId ?? '',
       isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
+      isLive: isLive !== undefined ? Boolean(isLive) : (existingData.isLive || false),
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
     // Only re-encrypt if a new key/token is provided
-    if (token) gatewayPayload.token = encrypt(token);
+    if (inputToken) gatewayPayload.token = encrypt(inputToken);
     if (secretKey) gatewayPayload.secretKey = encrypt(secretKey);
     if (webhookSecret) gatewayPayload.webhookSecret = encrypt(webhookSecret);
 
@@ -225,6 +272,25 @@ app.post('/api/admin/payment-gateways/activate', async (req, res) => {
     await batch.commit();
 
     return res.json({ success: true, message: `تم تفعيل البوابة (${id}) وباقي البوابات معطلة الآن.` });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 4. Quick Toggle Live / Demo Mode
+app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
+  try {
+    const { id, isLive } = req.body;
+    if (!id) return res.status(400).json({ success: false, message: 'Gateway ID is required.' });
+
+    const docRef = db.collection('payment_gateways').doc(id);
+    await docRef.update({
+      isLive: Boolean(isLive),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    const modeName = isLive ? 'الوضع الحقيقي (Live)' : 'وضع التجربة (Demo)';
+    return res.json({ success: true, message: `تم تغيير وضع البوابة إلى: ${modeName}` });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -279,16 +345,13 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    console.log('ACTIVE_GATEWAY_URL:', gateway.apiUrl);
-    console.log('Initiating payment methods:', `${gateway.apiUrl}/v2/InitiatePayment`);
+    console.log(`[MODE: ${gateway.isLive ? 'LIVE' : 'DEMO'}] ACTIVE_GATEWAY_URL:`, gateway.apiUrl);
 
-    // Step 1: get a valid PaymentMethodId for this account/currency
+    // Step 1: get a valid PaymentMethodId
     const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
       InvoiceAmount: amount,
       CurrencyIso: 'EGP'
     });
-
-    console.log('InitiatePayment response:', JSON.stringify(initiateResponse.data, null, 2));
 
     if (!initiateResponse.data?.IsSuccess) {
       return res.status(400).json({
@@ -317,10 +380,6 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     const paymentMethodId = Number(defaultMethod.PaymentMethodId);
 
-    console.log('Available MyFatoorah Methods:', JSON.stringify(paymentMethods, null, 2));
-    console.log('Using PaymentMethodId:', paymentMethodId);
-    console.log('Sending request to URL:', `${gateway.apiUrl}/v2/ExecutePayment`);
-
     const executeBody = {
       PaymentMethodId: paymentMethodId,
       InvoiceValue: amount,
@@ -338,11 +397,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       })))
     };
 
-    console.log('ExecutePayment body:', JSON.stringify(executeBody, null, 2));
-
     const executeResponse = await myfatoorahPost(gateway, 'ExecutePayment', executeBody);
-
-    console.log('ExecutePayment response:', JSON.stringify(executeResponse.data, null, 2));
 
     if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.PaymentURL) {
       return res.json({
@@ -396,8 +451,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
     });
 
     const paymentData = verification.data?.Data || {};
-    console.log('VERIFIED PAYMENT:', JSON.stringify(paymentData, null, 2));
-
     const customerEmail =
       paymentData.CustomerEmail ||
       req.body?.Data?.Customer?.Email ||
@@ -411,8 +464,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       console.error('Could not parse UserDefinedField:', parseErr.message);
       cartItems = [];
     }
-
-    console.log('CART ITEMS FROM PAYMENT:', JSON.stringify(cartItems, null, 2));
 
     if (!customerEmail || customerEmail === 'customer@foxgames.local') {
       console.error('No valid customer email found. Codes cannot be delivered.');
@@ -431,10 +482,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       for (const item of cartItems) {
         const productId = item.id || item.productId;
 
-        if (!productId) {
-          console.error('Item missing product id:', item);
-          continue;
-        }
+        if (!productId) continue;
 
         const codesRef = db.collection('productCodes');
         const availableCodeQuery = codesRef
@@ -469,8 +517,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       }
     });
 
-    console.log('PURCHASED CODES:', JSON.stringify(purchasedCodes, null, 2));
-
     if (!purchasedCodes.length) {
       console.error('Payment paid, but no codes were pulled from Firebase.');
       return res.status(200).send('No codes available');
@@ -487,6 +533,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       orderStatus: 'paid',
       paymentStatus: 'paid',
       paymentProvider: gateway.name || 'myfatoorah',
+      isLive: gateway.isLive,
       items: cartItems,
       codes: purchasedCodes,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -505,12 +552,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 
-    console.log('ORDER SAVED:', orderId);
-    console.log('TRANSACTION SAVED:', orderId);
-
     await sendCodesEmail(customerEmail, orderId, purchasedCodes);
-    console.log('Codes email sent to:', customerEmail);
-
     return res.status(200).send('SUCCESS');
 
   } catch (error) {
@@ -548,7 +590,7 @@ async function sendCodesEmail(email, orderId, codes) {
     throw new Error('Missing RESEND_API_KEY in Render Environment Variables.');
   }
 
-  const resendResponse = await axios.post(
+  await axios.post(
     'https://api.resend.com/emails',
     {
       from: RESEND_FROM,
@@ -564,8 +606,6 @@ async function sendCodesEmail(email, orderId, codes) {
       timeout: 30000
     }
   );
-
-  console.log('RESEND RESPONSE:', JSON.stringify(resendResponse.data, null, 2));
 }
 
 app.get('/test-email', async (req, res) => {
