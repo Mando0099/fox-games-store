@@ -3,15 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tech Admin - لوحة التحكم</title>
+  <title>Fox Store - لوحة التحكم الإدارية</title>
 
+  <!-- الخطوط والأيقونات -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- مكتبة SweetAlert2 المظلمة -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
   
+  <!-- الملف المنسق للوحة -->
   <link rel="stylesheet" href="/css/admin.css" />
 
+  <!-- حزمة SDK الخاصة بـ Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -20,8 +24,9 @@
 </head>
 
 <body>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
+  <!-- السايدبار الجانبي -->
   <aside class="sidebar">
     <div class="brand">
       <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
@@ -32,14 +37,14 @@
     </div>
 
     <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard')"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
-      <button class="nav-btn" onclick="showPage('products')"><i class="fa-solid fa-cubes"></i> المنتجات</button>
-      <button class="nav-btn" onclick="showPage('categories')"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
-      <button class="nav-btn" onclick="showPage('codes')"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
-      <button class="nav-btn" onclick="showPage('orders')"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
-      <button class="nav-btn" onclick="showPage('coupons')"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
-      <button class="nav-btn" onclick="showPage('customers')"><i class="fa-solid fa-users"></i> العملاء</button>
-      <button class="nav-btn" onclick="showPage('reports')"><i class="fa-solid fa-chart-line"></i> التقارير</button>
+      <button class="nav-btn active" onclick="showPage('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('products', this)"><i class="fa-solid fa-cubes"></i> المنتجات</button>
+      <button class="nav-btn" onclick="showPage('categories', this)"><i class="fa-solid fa-folder-open"></i> التصنيفات</button>
+      <button class="nav-btn" onclick="showPage('codes', this)"><i class="fa-solid fa-key"></i> أكواد المنتجات</button>
+      <button class="nav-btn" onclick="showPage('orders', this)"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
+      <button class="nav-btn" onclick="showPage('coupons', this)"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
+      <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
+      <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
     </nav>
 
     <div class="admin-box">
@@ -53,8 +58,10 @@
     <button class="logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
   </aside>
 
+  <!-- المحتوى الرئيسي -->
   <main class="main">
     
+    <!-- الشريط العلوي -->
     <header class="topbar">
       <button class="menu-btn" id="menuBtn"><i class="fa-solid fa-bars"></i></button>
 
@@ -75,6 +82,7 @@
       </div>
     </header>
 
+    <!-- صفحة الرئيسية (Dashboard) -->
     <section id="dashboard-page" class="page active">
       <div class="page-head">
         <h2>لوحة التحكم</h2>
@@ -87,7 +95,7 @@
           <div class="stat-content">
             <span>إجمالي المبيعات</span>
             <strong id="salesTotal">0 EGP</strong>
-            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +23.5% من الشهر الماضي</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> محدث مباشرة</small>
           </div>
         </div>
 
@@ -105,7 +113,7 @@
           <div class="stat-content">
             <span>إجمالي الطلبات</span>
             <strong id="ordersCount">0</strong>
-            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +18.7% اليوم</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> طلبات العملاء</small>
           </div>
         </div>
 
@@ -123,7 +131,7 @@
           <div class="stat-content">
             <span>إجمالي العملاء</span>
             <strong id="customersCount">0</strong>
-            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> +15.2% عميل جديد</small>
+            <small class="trend positive"><i class="fa-solid fa-arrow-up"></i> عميل مسجل</small>
           </div>
         </div>
       </div>
@@ -139,8 +147,7 @@
 
         <div class="panel chart-panel">
           <div class="panel-head">
-            <h3><i class="fa-solid fa-chart-line"></i> الإيرادات (آخر 30 يوم)</h3>
-            <span class="chart-amount">3,245.60 EGP اليوم</span>
+            <h3><i class="fa-solid fa-chart-line"></i> الإيرادات والمبيعات الحقيقية</h3>
           </div>
           <div class="chart-wrapper" style="position: relative; height: 300px; width: 100%;">
             <canvas id="revenueChart"></canvas>
@@ -149,7 +156,7 @@
 
         <div class="panel list-panel">
           <div class="panel-head">
-            <h3><i class="fa-solid fa-fire"></i> أفضل المنتجات مبيعاً</h3>
+            <h3><i class="fa-solid fa-fire"></i> أحدث المنتجات</h3>
           </div>
           <div id="topProducts" class="mini-list"></div>
         </div>
@@ -159,14 +166,14 @@
             <h3><i class="fa-solid fa-triangle-exclamation"></i> مركز التنبيهات الذكي</h3>
           </div>
           <div class="alerts">
-            <div class="alert warning"><i class="fa-solid fa-gauge-high"></i> نفاد بعض أكواد PUBG UC قريباً!</div>
-            <div class="alert success"><i class="fa-solid fa-circle-check"></i> تم تأكيد طلب العميل وتوصيل الكود تلقائياً.</div>
-            <div class="alert danger"><i class="fa-solid fa-circle-xmark"></i> كود الخصم FOX10 انتهت صلاحيته.</div>
+            <div class="alert warning"><i class="fa-solid fa-gauge-high"></i> تابع حالة المخزون بصفة دورية!</div>
+            <div class="alert success"><i class="fa-solid fa-circle-check"></i> الربط اللحظي مفعل ومستقر مع Firestore.</div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- صفحة المنتجات -->
     <section id="products-page" class="page">
       <div class="page-head">
         <h2>إدارة المنتجات</h2>
@@ -218,11 +225,11 @@
             <div class="form-upload-side">
               <span class="upload-label">صورة غلاف المنتج تفاعلية</span>
               <div class="dropzone-area" id="dropzone">
-                <input type="file" id="product-image" accept="image/*" />
+                <input type="file" id="product-image" accept="image/*" style="display: none;" />
                 <div class="dropzone-content">
                   <i class="fa-solid fa-cloud-arrow-up"></i>
                   <p>اسحب الصورة وأفلتها هنا أو <span>تصفح الملفات</span></p>
-                  <small>يدعم صيغ JPG, PNG, WEBP بمقاس مناسب</small>
+                  <small>يدعم صيغ JPG, PNG, WEBP</small>
                 </div>
                 <div class="image-preview-overlay" id="img-preview-container">
                   <img id="imagePreview" src="" alt="Product Preview">
@@ -235,7 +242,7 @@
           </div>
 
           <div class="form-actions">
-            <button class="btn-submit" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> حفظ وإضافة المنتج</button>
+            <button type="button" class="btn-submit" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> حفظ وإضافة المنتج</button>
             <button type="button" class="btn-clear" id="clear-form"><i class="fa-solid fa-broom"></i> تفريغ الحقول</button>
           </div>
         </form>
@@ -244,6 +251,7 @@
       <div id="productsList" class="cards-grid"></div>
     </section>
 
+    <!-- صفحة التصنيفات -->
     <section id="categories-page" class="page">
       <div class="page-head">
         <h2>التصنيفات</h2>
@@ -255,11 +263,12 @@
           <input type="file" id="categoryImageFile" accept="image/*" />
           <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;margin-top:10px;">
         </div>
-        <button onclick="saveCategory()"><i class="fa-solid fa-folder-plus"></i> حفظ التصنيف الجديد</button>
+        <button style="margin-top: 15px;" onclick="saveCategory()"><i class="fa-solid fa-folder-plus"></i> حفظ التصنيف الجديد</button>
       </div>
-      <div id="categoriesList" class="cards-grid"></div>
+      <div id="categoriesList" class="cards-grid" style="margin-top: 20px;"></div>
     </section>
 
+    <!-- صفحة الأكواد -->
     <section id="codes-page" class="page">
       <div class="page-head">
         <h2>أكواد المنتجات الرقمية</h2>
@@ -277,15 +286,15 @@
         </div>
         <div class="form-group" style="margin-top: 15px;">
           <label for="codesInput">قائمة الأكواد الرقمية (مجمعة)</label>
-          <textarea id="codesInput" rows="6" placeholder="أدخل الأكواد هنا... ضع كل كود مستقل في سطر منفصل تلقائياً دون فواصل خطية."></textarea>
+          <textarea id="codesInput" rows="6" placeholder="أدخل الأكواد هنا... ضع كل كود مستقل في سطر منفصل تلقائياً."></textarea>
         </div>
         <div class="form-actions" style="margin-top: 15px;">
           <button class="btn-submit" onclick="saveCodes()"><i class="fa-solid fa-plus"></i> حقن الأكواد بقاعدة البيانات</button>
         </div>
       </div>
 
-      <div class="custom-table-container">
-        <div class="table-toolbar">
+      <div class="custom-table-container" style="margin-top: 25px;">
+        <div class="table-toolbar" style="display: flex; gap: 15px; margin-bottom: 15px;">
           <input type="text" id="search-codes-input" class="pro-input-search" placeholder="🔍 ابحث عن كود معين أو منتج..." style="flex: 1; min-width: 200px;">
           <select id="filter-status-select" class="pro-select-filter" style="min-width: 160px;">
             <option value="all">كل الحالات المتاحة</option>
@@ -305,12 +314,13 @@
               </tr>
             </thead>
             <tbody id="codes-list-container">
-              </tbody>
+            </tbody>
           </table>
         </div>
       </div>
     </section>
 
+    <!-- صفحة الطلبات -->
     <section id="orders-page" class="page">
       <div class="page-head">
         <h2>إدارة فواتير وطلبات العملاء</h2>
@@ -319,6 +329,7 @@
       <div id="ordersList" class="panel table-box"></div>
     </section>
 
+    <!-- صفحة أكواد الخصم -->
     <section id="coupons-page" class="page">
       <div class="page-head">
         <h2>أكواد وقسائم الخصم</h2>
@@ -329,11 +340,12 @@
           <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
           <input id="couponValue" type="number" placeholder="نسبة الخصم %" />
         </div>
-        <button onclick="saveCoupon()"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
+        <button style="margin-top: 15px;" onclick="saveCoupon()"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
       </div>
-      <div id="couponsList" class="cards-grid"></div>
+      <div id="couponsList" class="cards-grid" style="margin-top: 20px;"></div>
     </section>
 
+    <!-- صفحة العملاء -->
     <section id="customers-page" class="page">
       <div class="page-head">
         <h2>قاعدة بيانات العملاء المسجلين</h2>
@@ -342,10 +354,11 @@
       <div id="customersList" class="panel table-box"></div>
     </section>
 
+    <!-- صفحة التقارير -->
     <section id="reports-page" class="page">
       <div class="page-head">
         <h2>التقارير الإحصائية التفصيلية</h2>
-        <p>تحليل بياني متقدم للمبيعات، الأرباح، وتدفق الإيرادات المالي</p>
+        <p>تحليل بياني متقدم للمبيعات والأرباح</p>
       </div>
       <div class="panel">
         <div class="chart-wrapper" style="position: relative; height: 380px; width: 100%;">
@@ -355,80 +368,33 @@
     </section>
   </main>
 
+  <!-- المكتبات الخارجية -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <!-- السكربتات الخاصة بالمعاينة والتقرير التفصيلي -->
   <script>
-    // نظام الـ Image Preview المدمج للتصنيفات
     document.addEventListener("DOMContentLoaded", function() {
-      function setupImagePreview(fileInputId, previewImgId) {
-        const fileInput = document.getElementById(fileInputId);
-        const previewImg = document.getElementById(previewImgId);
-        if (fileInput && previewImg) {
-          fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-              }
-              reader.readAsDataURL(file);
-            } else {
-              previewImg.style.display = 'none';
+      // معاينة صورة التصنيف
+      const catFileInput = document.getElementById('categoryImageFile');
+      const catPreviewImg = document.getElementById('categoryImagePreview');
+      if (catFileInput && catPreviewImg) {
+        catFileInput.addEventListener('change', function() {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              catPreviewImg.src = e.target.result;
+              catPreviewImg.style.display = 'block';
             }
-          });
-        }
-      }
-      setupImagePreview('categoryImageFile', 'categoryImagePreview');
-
-      // ---------------------------------------------------------
-      // الرسوم البيانية التلقائية الافتراضية (Chart.js Configuration)
-      // ---------------------------------------------------------
-      const ctx = document.getElementById('revenueChart');
-      if(ctx) {
-        const ctxGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-        ctxGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-        ctxGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['أبريل', '27 أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'],
-            datasets: [{
-              data: [1200, 2900, 2100, 3800, 3245.60, 4200],
-              borderColor: '#3b82f6',
-              borderWidth: 3,
-              backgroundColor: ctxGradient,
-              fill: true,
-              tension: 0.4,
-              pointBackgroundColor: '#3b82f6',
-              pointHoverBackgroundColor: '#fff',
-              pointRadius: 4,
-              pointHoverRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: '#142032',
-                titleFont: { family: 'Cairo' },
-                bodyFont: { family: 'Cairo' },
-                borderColor: 'rgba(255,255,255,0.08)',
-                borderWidth: 1
-              }
-            },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
-              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } }
-            }
+            reader.readAsDataURL(file);
+          } else {
+            catPreviewImg.style.display = 'none';
           }
         });
       }
 
+      // رسم بياني تفصيلي لصفحة التقارير (Detailed Report Chart)
       const ctxDetailed = document.getElementById('detailedReportChart');
       if(ctxDetailed) {
         new Chart(ctxDetailed, {
@@ -459,19 +425,9 @@
         });
       }
     });
-
-    // دالة التنقل القديمة المحدثة لمنع أي تضارب مع السكربت الخارجي
-    function showPage(pageId) {
-      if(typeof window.initNavigation === 'function') return; 
-      const pages = document.querySelectorAll('.page');
-      const buttons = document.querySelectorAll('.nav-btn');
-      pages.forEach(p => p.classList.remove('active'));
-      buttons.forEach(b => b.classList.remove('active'));
-      const targetPage = document.getElementById(`${pageId}-page`);
-      if(targetPage) targetPage.classList.add('active');
-    }
   </script>
 
+  <!-- الملف البرمجي الأساسي للوحة التحكم -->
   <script src="/js/admin.js?v=200"></script>
 </body>
 </html>
