@@ -2,24 +2,26 @@
    Fox Store Admin - Ultimate Gaming Dark Theme (Fully Responsive & Pro)
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+
 :root {
   /* نظام الألوان الأساسي */
   --bg-main: #060b11;         /* خلفية المتصفح الأساسية */
   --bg-card: #0d1520;         /* خلفية الكروت والأقسام */
   --bg-input: #080d14;        /* خلفية حقول الإدخال */
   --bg-accent: #142032;       /* حقول التركيز والـ Hover */
-  
+
   /* ألوان الهوية والإضاءة النيون */
   --neon-blue: #3b82f6;       /* الأزرق المضيء الأساسي */
   --neon-purple: #9d4edd;     /* البنفسجي */
   --neon-green: #65cc00;      /* الأخضر للأرباح */
   --neon-orange: #ff9f1c;     /* البرتقالي للتنبيهات */
   --neon-pink: #f72585;       /* الوردي */
-  
+
   /* النصوص */
   --text-main: #ffffff;
   --text-muted: #94a3b8;
-  
+
   /* المؤثرات */
   --transition-fast: 0.25s ease;
   --radius-main: 14px;
@@ -39,6 +41,27 @@ body {
   display: flex;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* تخصيص شريط التمرير (Custom Gaming Scrollbar) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-accent);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-blue);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 /* ==========================================================================
@@ -182,7 +205,7 @@ body {
   flex: 1;
   padding: 35px;
   background-color: var(--bg-main);
-  min-width: 0; 
+  min-width: 0;
 }
 
 .topbar {
@@ -283,13 +306,13 @@ body {
    حل مشكلة تداخل الصفحات والتابات
    ========================================================================== */
 .page {
-  display: none !important; 
+  display: none !important;
   width: 100%;
   animation: fadeIn 0.4s ease-in-out;
 }
 
 .page.active {
-  display: block !important; 
+  display: block !important;
 }
 
 @keyframes fadeIn {
@@ -399,7 +422,7 @@ body {
 }
 
 /* ==========================================================================
-   💎 تنظيم وهيكلة فورم إدارة المنتجات الاحترافية
+   تنظيم وهيكلة فورم إدارة المنتجات الاحترافية
    ========================================================================== */
 .form-container {
   display: flex;
@@ -423,7 +446,6 @@ body {
   flex-direction: column;
 }
 
-/* تسميات وعناوين الحقول المتقدمة فوق الإنبوكس */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -460,7 +482,6 @@ body {
   color: var(--text-main);
 }
 
-/* حقول الإدخال والفورم الافتراضية */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -487,7 +508,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* ==========================================================================
-   🚀 تصميم منطقة رفع الصور الحديثة (Custom Drag & Drop Dropzone)
+   تصميم منطقة رفع الصور الحديثة (Custom Drag & Drop Dropzone)
    ========================================================================== */
 .dropzone-area {
   flex: 1;
@@ -511,7 +532,6 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
 }
 
-/* إخفاء الزر التقليدي السيء والافتراضي من المتصفح */
 .dropzone-area input[type="file"] {
   position: absolute;
   top: 0;
@@ -552,7 +572,6 @@ input:focus, textarea:focus, select:focus {
   font-size: 11px;
 }
 
-/* صندوق وطبقة المعاينة الذكية الفورية للصورة داخل صندوق الرفع */
 .image-preview-overlay {
   position: absolute;
   top: 0;
@@ -599,7 +618,6 @@ input:focus, textarea:focus, select:focus {
   transform: scale(1.1);
 }
 
-/* أزرار التحكم السفلية داخل الـ Forms */
 .form-actions {
   display: flex;
   gap: 15px;
@@ -742,12 +760,12 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* ==========================================================================
-   💎 حماية وتجاوب الجداول وحمايتها من النصوص الطويلة جداً
+   حماية وتجاوب الجداول وحمايتها من النصوص الطويلة جداً
    ========================================================================== */
 .table-box {
   width: 100% !important;
   overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch; /* سحب ناعم ومريح للموبايل */
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-card);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -756,10 +774,10 @@ input:focus, textarea:focus, select:focus {
 
 table {
   width: 100%;
-  border-collapse: collapse; 
+  border-collapse: collapse;
   text-align: right;
   margin-top: 10px;
-  min-width: 650px; /* يمنع الجدول من الانضغاط بشكل مشوه ويُجبر الـ Scroll Horizontal */
+  min-width: 650px;
 }
 
 th {
@@ -777,19 +795,18 @@ td {
   font-size: 14px;
   color: var(--text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  white-space: nowrap;      /* منع الكلمات من التداخل والنزول المشوه */
-  text-overflow: ellipsis;  /* إضافة النقاط الثلاثة إذا زاد النص عن العرض */
+  white-space: nowrap;
+  text-overflow: ellipsis;
   overflow: hidden;
-  max-width: 250px;         
+  max-width: 250px;
 }
 
 tr:hover td {
-  background-color: rgba(59, 130, 246, 0.03); 
+  background-color: rgba(59, 130, 246, 0.03);
   color: #fff;
   transition: background-color var(--transition-fast);
 }
 
-/* فئة الحماية الخاصة بنصوص الأكواد الطويلة لمنعها من اختراق الخلايا والكروت */
 .code-text-protect {
   font-family: 'Courier New', Courier, monospace;
   font-weight: 600;
@@ -803,7 +820,7 @@ tr:hover td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  direction: ltr; /* لضمان عرض الرموز والأكواد الرقمية بشكل سليم */
+  direction: ltr;
 }
 
 .product-relation-badge {
@@ -812,7 +829,6 @@ tr:hover td {
   font-size: 13px;
 }
 
-/* 💎 استايل بادج الحالة الاحترافي (متاح / مستخدم) */
 .status-badge {
   padding: 4px 12px;
   border-radius: 6px;
@@ -820,24 +836,25 @@ tr:hover td {
   font-weight: 600;
   display: inline-block;
 }
+
 .status-badge.available {
   background: rgba(101, 204, 0, 0.15);
   color: var(--neon-green);
 }
+
 .status-badge.used {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
 }
 
-/* تخصيص مظهر قوائم الاختيار Dropdown */
 select {
-  appearance: none; 
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
   background-repeat: no-repeat;
-  background-position: left 15px center; 
-  padding-left: 40px; 
+  background-position: left 15px center;
+  padding-left: 40px;
   cursor: pointer;
 }
 
@@ -848,7 +865,7 @@ select option {
 }
 
 /* ==========================================================================
-   ⚙️ تحسين نظام التجاوب الشامل للموبايل (Media Queries)
+   تحسين نظام التجاوب الشامل للموبايل (Media Queries)
    ========================================================================== */
 @media (max-width: 1150px) {
   .dashboard-grid { grid-template-columns: 1fr; }
@@ -862,7 +879,7 @@ select option {
   .sidebar {
     position: fixed;
     top: 0;
-    right: -280px; 
+    right: -280px;
     width: 280px;
     height: 100vh;
     z-index: 999;
@@ -902,7 +919,7 @@ select option {
   }
 
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
   }
 }
 
@@ -917,10 +934,10 @@ select option {
 
 @media (max-width: 680px) {
   .top-actions .welcome {
-    display: none; /* إخفاء الاسم والترحيب لتوفير مساحة للأزرار الملحقة */
+    display: none;
   }
   
   .search-container {
-    display: none; /* إخفاء شريط البحث الطويل من التوب بار بالموبايل حمايةً للشاشة */
+    display: none;
   }
 }
