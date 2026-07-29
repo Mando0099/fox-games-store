@@ -64,21 +64,21 @@
     
     <!-- الشريط العلوي -->
     <header class="topbar">
-      <button class="menu-btn" id="menuBtn"><i class="fa-solid fa-bars"></i></button>
+      <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
 
       <div class="top-actions">
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="بحث عن طلب، منتج، عميل...">
+          <input type="text" id="globalSearchInput" placeholder="بحث عن طلب، منتج، عميل...">
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn" title="التنبيهات">
           <i class="fa-solid fa-bell"></i>
-          <span class="badge">5</span>
+          <span class="badge">0</span>
         </button>
         <button class="lang-btn"><i class="fa-solid fa-earth-americas"></i> العربية</button>
         <div class="welcome">
           <small>مرحباً بك،</small>
-          <strong>محمد أشرف 👋</strong>
+          <strong id="adminDisplayName">محمد أشرف 👋</strong>
         </div>
       </div>
     </header>
@@ -143,7 +143,9 @@
             <h3><i class="fa-solid fa-clock-rotate-left"></i> آخر الطلبات</h3>
             <button class="view-all-btn" onclick="showPage('orders')">عرض الكل</button>
           </div>
-          <div id="latestOrders" class="table-box"></div>
+          <div id="latestOrders" class="table-box">
+            <p class="placeholder-text">جاري جلب الطلبات الأخيرة...</p>
+          </div>
         </div>
 
         <div class="panel chart-panel">
@@ -159,7 +161,9 @@
           <div class="panel-head">
             <h3><i class="fa-solid fa-fire"></i> أحدث المنتجات</h3>
           </div>
-          <div id="topProducts" class="mini-list"></div>
+          <div id="topProducts" class="mini-list">
+            <p class="placeholder-text">جاري القراءة...</p>
+          </div>
         </div>
 
         <div class="panel alerts-panel">
@@ -182,49 +186,49 @@
       </div>
       
       <div class="panel form-panel">
-        <form id="product-form" onsubmit="event.preventDefault();">
+        <form id="product-form" onsubmit="event.preventDefault(); saveProduct();">
           <input id="productId" type="hidden" />
           
           <div class="form-container">
             <div class="form-inputs-side">
               <div class="form-grid">
                 <div class="form-group">
-                  <label for="name">اسم المنتج</label>
+                  <label for="name">اسم المنتج *</label>
                   <input id="name" type="text" placeholder="مثال: 660 PUBG UC" required />
                 </div>
                 <div class="form-group">
-                  <label for="category">التصنيفات</label>
+                  <label for="category">التصنيف *</label>
                   <select id="category" required>
                     <option value="">جاري تحميل التصنيفات المتاحة...</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="game">اسم اللعبة</label>
+                  <label for="game">اسم اللعبة / المنصة *</label>
                   <input id="game" type="text" placeholder="مثال: PUBG Mobile" required />
                 </div>
                 <div class="form-group">
-                  <label for="amount">الكمية المستلمة للشحنة</label>
-                  <input id="amount" type="number" placeholder="مثال: 660" required />
+                  <label for="amount">الكمية المستلمة للشحنة *</label>
+                  <input id="amount" type="number" min="1" placeholder="مثال: 660" required />
                 </div>
                 <div class="form-group">
-                  <label for="price">السعر الافتراضي بالعملة المحلية</label>
-                  <input id="price" type="number" placeholder="0.00 EGP" required />
+                  <label for="price">السعر بالعملة المحلية (EGP) *</label>
+                  <input id="price" type="number" step="0.01" min="0" placeholder="0.00 EGP" required />
                 </div>
               </div>
               
-              <div class="form-group">
+              <div class="form-group" style="margin-top: 15px;">
                 <label for="description">وصف وتفاصيل المنتج الشاملة</label>
                 <textarea id="description" rows="4" placeholder="اكتب شروط الاستخدام أو تفاصيل المنتج هنا..."></textarea>
               </div>
 
-              <div class="form-checkbox-group">
+              <div class="form-checkbox-group" style="margin-top: 15px;">
                 <input id="active" type="checkbox" checked />
                 <label for="active">المنتج مفعل ويظهر للعملاء في المتجر فوراً</label>
               </div>
             </div>
 
             <div class="form-upload-side">
-              <span class="upload-label">صورة غلاف المنتج تفاعلية</span>
+              <span class="upload-label">صورة غلاف المنتج</span>
               <div class="dropzone-area" id="dropzone">
                 <input type="file" id="product-image" accept="image/*" style="display: none;" />
                 <div class="dropzone-content">
@@ -232,7 +236,7 @@
                   <p>اسحب الصورة وأفلتها هنا أو <span>تصفح الملفات</span></p>
                   <small>يدعم صيغ JPG, PNG, WEBP</small>
                 </div>
-                <div class="image-preview-overlay" id="img-preview-container">
+                <div class="image-preview-overlay" id="img-preview-container" style="display: none;">
                   <img id="imagePreview" src="" alt="Product Preview">
                   <button type="button" class="remove-img-btn" id="remove-img" title="حذف الصورة">
                     <i class="fa-solid fa-trash-can"></i>
@@ -242,14 +246,14 @@
             </div>
           </div>
 
-          <div class="form-actions">
-            <button type="button" class="btn-submit" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> حفظ وإضافة المنتج</button>
-            <button type="button" class="btn-clear" id="clear-form"><i class="fa-solid fa-broom"></i> تفريغ الحقول</button>
+          <div class="form-actions" style="margin-top: 20px;">
+            <button type="submit" class="btn-submit" id="saveProductBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ وإضافة المنتج</button>
+            <button type="button" class="btn-clear" id="clear-form" onclick="resetProductForm()"><i class="fa-solid fa-broom"></i> تفريغ الحقول</button>
           </div>
         </form>
       </div>
       
-      <div id="productsList" class="cards-grid"></div>
+      <div id="productsList" class="cards-grid" style="margin-top: 25px;"></div>
     </section>
 
     <!-- صفحة التصنيفات -->
@@ -259,12 +263,25 @@
         <p>إدارة تصنيفات المنتجات والألعاب الأساسية</p>
       </div>
       <div class="panel form-panel">
-        <div class="form-grid">
-          <input id="catName" placeholder="اسم التصنيف" />
-          <input type="file" id="categoryImageFile" accept="image/*" />
-          <img id="categoryImagePreview" style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:none;margin-top:10px;">
-        </div>
-        <button style="margin-top: 15px;" onclick="saveCategory()"><i class="fa-solid fa-folder-plus"></i> حفظ التصنيف الجديد</button>
+        <form id="category-form" onsubmit="event.preventDefault(); saveCategory();">
+          <input type="hidden" id="categoryId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="catName">اسم التصنيف *</label>
+              <input id="catName" type="text" placeholder="مثال: ألعاب الموبايل" required />
+            </div>
+            <div class="form-group">
+              <label for="categoryImageFile">صورة التصنيف</label>
+              <input type="file" id="categoryImageFile" accept="image/*" />
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <img id="categoryImagePreview" style="width:120px; height:120px; object-fit:cover; border-radius:12px; display:none;">
+          </div>
+          <div class="form-actions" style="margin-top: 15px;">
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-folder-plus"></i> حفظ التصنيف</button>
+          </div>
+        </form>
       </div>
       <div id="categoriesList" class="cards-grid" style="margin-top: 20px;"></div>
     </section>
@@ -277,25 +294,27 @@
       </div>
 
       <div class="panel form-panel">
-        <div class="form-grid" style="grid-template-columns: 1fr;">
-          <div class="form-group">
-            <label for="codeProductId">اختر المنتج المستهدف</label>
-            <select id="codeProductId">
-              <option value="">-- اضغط لتحديد المنتج الرقمي --</option>
-            </select>
+        <form id="codes-form" onsubmit="event.preventDefault(); saveCodes();">
+          <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div class="form-group">
+              <label for="codeProductId">اختر المنتج المستهدف *</label>
+              <select id="codeProductId" required>
+                <option value="">-- اضغط لتحديد المنتج الرقمي --</option>
+              </select>
+            </div>
           </div>
-        </div>
-        <div class="form-group" style="margin-top: 15px;">
-          <label for="codesInput">قائمة الأكواد الرقمية (مجمعة)</label>
-          <textarea id="codesInput" rows="6" placeholder="أدخل الأكواد هنا... ضع كل كود مستقل في سطر منفصل تلقائياً."></textarea>
-        </div>
-        <div class="form-actions" style="margin-top: 15px;">
-          <button class="btn-submit" onclick="saveCodes()"><i class="fa-solid fa-plus"></i> حقن الأكواد بقاعدة البيانات</button>
-        </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label for="codesInput">قائمة الأكواد الرقمية (كود في كل سطر) *</label>
+            <textarea id="codesInput" rows="6" placeholder="أدخل الأكواد هنا... ضع كل كود مستقل في سطر منفصل تلقائياً." required></textarea>
+          </div>
+          <div class="form-actions" style="margin-top: 15px;">
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> حقن الأكواد بقاعدة البيانات</button>
+          </div>
+        </form>
       </div>
 
       <div class="custom-table-container" style="margin-top: 25px;">
-        <div class="table-toolbar" style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="table-toolbar" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
           <input type="text" id="search-codes-input" class="pro-input-search" placeholder="🔍 ابحث عن كود معين أو منتج..." style="flex: 1; min-width: 200px;">
           <select id="filter-status-select" class="pro-select-filter" style="min-width: 160px;">
             <option value="all">كل الحالات المتاحة</option>
@@ -315,6 +334,9 @@
               </tr>
             </thead>
             <tbody id="codes-list-container">
+              <tr>
+                <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">جاري تحميل الأكواد...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -327,7 +349,9 @@
         <h2>إدارة فواتير وطلبات العملاء</h2>
         <p>متابعة عمليات الشراء وتسليم الأكواد الذكية</p>
       </div>
-      <div id="ordersList" class="panel table-box"></div>
+      <div id="ordersList" class="panel table-box">
+        <p class="placeholder-text">جاري تحميل سجل الطلبات...</p>
+      </div>
     </section>
 
     <!-- صفحة أكواد الخصم -->
@@ -337,11 +361,21 @@
         <p>إنشاء وتوليد كوبونات التخفيض المالي لعملائك</p>
       </div>
       <div class="panel form-panel">
-        <div class="form-grid">
-          <input id="couponCode" placeholder="كود الخصم مثل FOX10" />
-          <input id="couponValue" type="number" placeholder="نسبة الخصم %" />
-        </div>
-        <button style="margin-top: 15px;" onclick="saveCoupon()"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
+        <form id="coupon-form" onsubmit="event.preventDefault(); saveCoupon();">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="couponCode">كود الخصم *</label>
+              <input id="couponCode" type="text" placeholder="مثال: FOX10" style="text-transform: uppercase;" required />
+            </div>
+            <div class="form-group">
+              <label for="couponValue">نسبة الخصم (%) *</label>
+              <input id="couponValue" type="number" min="1" max="100" placeholder="مثال: 10" required />
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top: 15px;">
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
+          </div>
+        </form>
       </div>
       <div id="couponsList" class="cards-grid" style="margin-top: 20px;"></div>
     </section>
@@ -352,7 +386,9 @@
         <h2>قاعدة بيانات العملاء المسجلين</h2>
         <p>بيانات الهوية والاتصال للمستخدمين المشتركين بالمتجر</p>
       </div>
-      <div id="customersList" class="panel table-box"></div>
+      <div id="customersList" class="panel table-box">
+        <p class="placeholder-text">جاري تحميل قائمة العملاء...</p>
+      </div>
     </section>
 
     <!-- صفحة بوابات الدفع -->
@@ -370,12 +406,12 @@
             <h3><i class="fa-solid fa-mobile-screen-button" style="color:#ef4444;"></i> المحافظ الإلكترونية (Cash)</h3>
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>رقم المحفظة الرئيسي للتحويل</label>
+            <label for="vodafoneCashNumber">رقم المحفظة الرئيسي للتحويل</label>
             <input type="text" id="vodafoneCashNumber" placeholder="01012345678" />
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>تعليمات الدفع للعميل</label>
-            <textarea id="cashInstructions" rows="3" placeholder="مثال: يرجى تحويل المبلغ ثم إرفاق صورة الإيصال أو رقم العملية..."></textarea>
+            <label for="cashInstructions">تعليمات الدفع للعميل</label>
+            <textarea id="cashInstructions" rows="3" placeholder="مثال: يرجى تحويل المبلغ ثم إرفاق صورة الإيصال..."></textarea>
           </div>
           <div class="form-checkbox-group" style="margin-top: 10px;">
             <input type="checkbox" id="cashActive" checked />
@@ -389,11 +425,11 @@
             <h3><i class="fa-solid fa-building-columns" style="color:#8b5cf6;"></i> حساب InstaPay</h3>
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>عنوان الدفع (IPA) أو رقم الهاتف</label>
+            <label for="instapayAddress">عنوان الدفع (IPA) أو رقم الهاتف</label>
             <input type="text" id="instapayAddress" placeholder="username@instapay أو 01012345678" />
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>اسم صاحب الحساب (للتحقق)</label>
+            <label for="instapayName">اسم صاحب الحساب (للتحقق)</label>
             <input type="text" id="instapayName" placeholder="مثال: Mohamed Ashraf" />
           </div>
           <div class="form-checkbox-group" style="margin-top: 10px;">
@@ -408,11 +444,11 @@
             <h3><i class="fa-solid fa-credit-card" style="color:#3b82f6;"></i> بوابة Paymob / فيزا و كارت</h3>
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>API Key</label>
-            <input type="password" id="paymobApiKey" placeholder="مفتاح API الخص بـ Paymob" />
+            <label for="paymobApiKey">API Key</label>
+            <input type="password" id="paymobApiKey" placeholder="مفتاح API الخاص بـ Paymob" />
           </div>
           <div class="form-group" style="margin-top: 10px;">
-            <label>Integration ID (بطاقات البنك)</label>
+            <label for="paymobIntegrationCard">Integration ID (بطاقات البنك)</label>
             <input type="text" id="paymobIntegrationCard" placeholder="مثال: 123456" />
           </div>
           <div class="form-checkbox-group" style="margin-top: 10px;">
@@ -424,7 +460,7 @@
       </div>
 
       <div class="form-actions" style="margin-top: 20px;">
-        <button class="btn-submit" onclick="savePaymentGateways()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة إعدادات الدفع</button>
+        <button type="button" class="btn-submit" onclick="savePaymentGateways()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة إعدادات الدفع</button>
       </div>
     </section>
 
@@ -446,7 +482,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- السكربتات الخاصة بالمعاينة والتقرير التفصيلي -->
+  <!-- السكربتات التفاعلية الداخلية -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       // معاينة صورة التصنيف
@@ -468,7 +504,7 @@
         });
       }
 
-      // رسم بياني تفصيلي لصفحة التقارير (Detailed Report Chart)
+      // رسم بياني تفصيلي لصفحة التقارير
       const ctxDetailed = document.getElementById('detailedReportChart');
       if(ctxDetailed) {
         new Chart(ctxDetailed, {
@@ -500,9 +536,10 @@
       }
     });
 
-    // دالة حفظ إعدادات بوابات الدفع في Firestore
+    // دالة آمنة لحفظ إعدادات بوابات الدفع في Firestore
     async function savePaymentGateways() {
       try {
+        const firestoreDb = window.db || firebase.firestore();
         const paymentData = {
           vodafoneCashNumber: document.getElementById('vodafoneCashNumber').value,
           cashInstructions: document.getElementById('cashInstructions').value,
@@ -516,7 +553,7 @@
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('settings').doc('payments').set(paymentData, { merge: true });
+        await firestoreDb.collection('settings').doc('payments').set(paymentData, { merge: true });
 
         Swal.fire({
           icon: 'success',
