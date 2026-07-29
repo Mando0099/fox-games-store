@@ -3,7 +3,9 @@ const express = require('express');
 const path = require('path');
 const axios = require('axios');
 const admin = require('firebase-admin');
+const crypto = require('crypto');
 
+// Initialize Firebase
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
@@ -18,22 +20,84 @@ const db = admin.firestore();
 const app = express();
 const PORT = process.env.PORT || 9000;
 
-// MyFatoorah settings
-// Render value should be WITHOUT /v2, for example:
-// Live Egypt: https://api-eg.myfatoorah.com
-// Test: https://apitest.myfatoorah.com
-const MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
-const MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
-const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ==========================================
+// 🔐 ENCRYPTION & DECRYPTION HELPERS (AES-256)
+// ==========================================
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'foxgamessecretkey12345678901234'; // Must be 32 bytes/chars
+const ALGORITHM = 'aes-256-cbc';
+
+function encrypt(text) {
+  if (!text) return '';
+  // Ensure key is 32 bytes
+  const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return iv.toString('hex') + ':' + encrypted;
+}
+
+function decrypt(text) {
+  if (!text || !text.includes(':')) return text || '';
+  try {
+    const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
+    const [ivHex, encryptedText] = text.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error('Decryption failed:', err.message);
+    return text;
+  }
+}
+
+// Fallback .env MyFatoorah Settings
+const ENV_MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
+const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 // Resend email settings
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
+// Helper to get current active gateway from DB (or fallback to .env)
+async function getActivePaymentGateway() {
+  try {
+    const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name || 'myfatoorah',
+        token: decrypt(data.token || data.apiKey),
+        apiUrl: (data.apiUrl || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, ''),
+        merchantId: data.merchantId || '',
+        secretKey: decrypt(data.secretKey),
+        webhookSecret: decrypt(data.webhookSecret)
+      };
+    }
+  } catch (err) {
+    console.error('Error fetching active payment gateway from Firestore:', err.message);
+  }
+
+  // Fallback to default .env config
+  return {
+    id: 'env_default',
+    name: 'myfatoorah',
+    token: ENV_MYFATOORAH_TOKEN,
+    apiUrl: ENV_MYFATOORAH_API_URL,
+    merchantId: '',
+    secretKey: '',
+    webhookSecret: ''
+  };
+}
 
 function money(amount) {
   const value = Number(amount || 0);
@@ -56,21 +120,126 @@ function getMyFatoorahError(data) {
   return JSON.stringify(data);
 }
 
-async function myfatoorahPost(endpoint, body) {
-  return axios.post(`${MYFATOORAH_API_URL}/v2/${endpoint}`, body, {
+async function myfatoorahPost(gatewayConfig, endpoint, body) {
+  const token = gatewayConfig.token;
+  const apiUrl = gatewayConfig.apiUrl;
+
+  return axios.post(`${apiUrl}/v2/${endpoint}`, body, {
     headers: {
-      Authorization: `Bearer ${MYFATOORAH_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
     timeout: 30000
   });
 }
 
+// ==========================================
+// 🛠️ ADMIN GATEWAY MANAGEMENT APIs
+// ==========================================
+
+// 1. Get all payment gateways (For Admin Panel)
+app.get('/api/admin/payment-gateways', async (req, res) => {
+  try {
+    const snapshot = await db.collection('payment_gateways').get();
+    const gateways = [];
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      gateways.push({
+        id: doc.id,
+        name: data.name,
+        apiUrl: data.apiUrl,
+        merchantId: data.merchantId || '',
+        isActive: data.isActive || false,
+        // Mask sensitive data for display
+        tokenSet: !!data.token || !!data.apiKey,
+        secretKeySet: !!data.secretKey,
+        updatedAt: data.updatedAt
+      });
+    });
+
+    return res.json({ success: true, gateways });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 2. Add or Update a Payment Gateway (Encrypts keys before saving)
+app.post('/api/admin/payment-gateways', async (req, res) => {
+  try {
+    const { id, name, apiUrl, token, secretKey, merchantId, webhookSecret, isActive } = req.body;
+    const docId = id || (name ? name.toLowerCase() : 'gateway_' + Date.now());
+
+    // If activating this gateway, deactivate all others first
+    if (isActive) {
+      const allGateways = await db.collection('payment_gateways').get();
+      const batch = db.batch();
+      allGateways.forEach(doc => {
+        batch.update(doc.ref, { isActive: false });
+      });
+      await batch.commit();
+    }
+
+    const docRef = db.collection('payment_gateways').doc(docId);
+    const existingDoc = await docRef.get();
+    const existingData = existingDoc.exists ? existingDoc.data() : {};
+
+    const gatewayPayload = {
+      name: name || existingData.name || 'MyFatoorah',
+      apiUrl: apiUrl ? apiUrl.replace(/\/v2\/?$/, '') : (existingData.apiUrl || 'https://api-eg.myfatoorah.com'),
+      merchantId: merchantId ?? existingData.merchantId ?? '',
+      isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    // Only re-encrypt if a new key/token is provided
+    if (token) gatewayPayload.token = encrypt(token);
+    if (secretKey) gatewayPayload.secretKey = encrypt(secretKey);
+    if (webhookSecret) gatewayPayload.webhookSecret = encrypt(webhookSecret);
+
+    await docRef.set(gatewayPayload, { merge: true });
+
+    return res.json({
+      success: true,
+      message: 'تم حفظ وتشفير بيانات بوابة الدفع بنجاح!',
+      gatewayId: docId
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 3. Quick Toggle Gateway Active Status
+app.post('/api/admin/payment-gateways/activate', async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ success: false, message: 'Gateway ID is required.' });
+
+    const allGateways = await db.collection('payment_gateways').get();
+    const batch = db.batch();
+
+    allGateways.forEach(doc => {
+      batch.update(doc.ref, { isActive: doc.id === id });
+    });
+
+    await batch.commit();
+
+    return res.json({ success: true, message: `تم تفعيل البوابة (${id}) وباقي البوابات معطلة الآن.` });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ==========================================
+// 💳 STORE PAYMENT ROUTES
+// ==========================================
+
 app.get('/api/myfatoorah/payment-methods', async (req, res) => {
   try {
+    const gateway = await getActivePaymentGateway();
     const amount = money(req.query.amount || 1);
 
-    const initiateResponse = await myfatoorahPost('InitiatePayment', {
+    const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
       InvoiceAmount: amount,
       CurrencyIso: 'EGP'
     });
@@ -97,8 +266,10 @@ app.get('/api/myfatoorah/payment-methods', async (req, res) => {
 
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   try {
-    if (!MYFATOORAH_TOKEN) {
-      return res.status(500).json({ success: false, message: 'Missing MyFatoorah token in .env file.' });
+    const gateway = await getActivePaymentGateway();
+
+    if (!gateway.token) {
+      return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
     }
 
     const order = req.body || {};
@@ -108,11 +279,11 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    console.log('MYFATOORAH_BASE_URL:', MYFATOORAH_API_URL);
-    console.log('Initiating payment methods:', `${MYFATOORAH_API_URL}/v2/InitiatePayment`);
+    console.log('ACTIVE_GATEWAY_URL:', gateway.apiUrl);
+    console.log('Initiating payment methods:', `${gateway.apiUrl}/v2/InitiatePayment`);
 
-    // Step 1: get a valid PaymentMethodId for this account/currency instead of using 0
-    const initiateResponse = await myfatoorahPost('InitiatePayment', {
+    // Step 1: get a valid PaymentMethodId for this account/currency
+    const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
       InvoiceAmount: amount,
       CurrencyIso: 'EGP'
     });
@@ -134,8 +305,6 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
       });
     }
 
-    // Use an actually supported payment method returned by MyFatoorah.
-    // MyFatoorah only returns methods active for your account/currency.
     const selectedPaymentMethodId = Number(order.paymentMethodId || 0);
     const selectedMethod = selectedPaymentMethodId
       ? paymentMethods.find(m => Number(m.PaymentMethodId) === selectedPaymentMethodId)
@@ -150,8 +319,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     console.log('Available MyFatoorah Methods:', JSON.stringify(paymentMethods, null, 2));
     console.log('Using PaymentMethodId:', paymentMethodId);
-    console.log('Using PaymentMethod:', defaultMethod.PaymentMethodEn || defaultMethod.PaymentMethodAr || '');
-    console.log('Sending request to MyFatoorah URL:', `${MYFATOORAH_API_URL}/v2/ExecutePayment`);
+    console.log('Sending request to URL:', `${gateway.apiUrl}/v2/ExecutePayment`);
 
     const executeBody = {
       PaymentMethodId: paymentMethodId,
@@ -172,7 +340,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     console.log('ExecutePayment body:', JSON.stringify(executeBody, null, 2));
 
-    const executeResponse = await myfatoorahPost('ExecutePayment', executeBody);
+    const executeResponse = await myfatoorahPost(gateway, 'ExecutePayment', executeBody);
 
     console.log('ExecutePayment response:', JSON.stringify(executeResponse.data, null, 2));
 
@@ -187,12 +355,12 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     return res.status(400).json({
       success: false,
-      message: getMyFatoorahError(executeResponse.data) || 'Failed to create MyFatoorah execution link.'
+      message: getMyFatoorahError(executeResponse.data) || 'Failed to create payment execution link.'
     });
   } catch (e) {
-    console.error('=== MYFATOORAH FULL ERROR DETAILS ===');
+    console.error('=== PAYMENT CREATION ERROR DETAILS ===');
     console.error('Status:', e.response?.status);
-    console.error('Data from MyFatoorah:', JSON.stringify(e.response?.data, null, 2));
+    console.error('Data:', JSON.stringify(e.response?.data, null, 2));
     console.error('Message:', e.message);
     console.error('======================================');
 
@@ -207,6 +375,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   console.log('WEBHOOK BODY:', JSON.stringify(req.body, null, 2));
 
   try {
+    const gateway = await getActivePaymentGateway();
     const invoice = req.body?.Data?.Invoice;
     const status = String(invoice?.Status || '').toUpperCase();
 
@@ -221,7 +390,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       return res.status(200).send('Missing invoice id');
     }
 
-    const verification = await myfatoorahPost('GetPaymentStatus', {
+    const verification = await myfatoorahPost(gateway, 'GetPaymentStatus', {
       Key: invoiceId,
       KeyType: 'InvoiceId'
     });
@@ -267,13 +436,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
           continue;
         }
 
-        // Codes are stored in top-level collection: productCodes
-        // Document example:
-        // {
-        //   code: "XXXX-XXXX",
-        //   productId: "PRODUCT_DOC_ID",
-        //   status: "available"
-        // }
         const codesRef = db.collection('productCodes');
         const availableCodeQuery = codesRef
           .where('productId', '==', productId)
@@ -324,7 +486,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
       orderStatus: 'paid',
       paymentStatus: 'paid',
-      paymentProvider: 'myfatoorah',
+      paymentProvider: gateway.name || 'myfatoorah',
       items: cartItems,
       codes: purchasedCodes,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -339,7 +501,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       amount: Number(paymentData.InvoiceValue || paymentData.InvoiceDisplayValue || req.body?.Data?.Amount?.ValueInBaseCurrency || 0),
       currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
       paymentStatus: 'paid',
-      provider: 'myfatoorah',
+      provider: gateway.name || 'myfatoorah',
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 
@@ -405,6 +567,7 @@ async function sendCodesEmail(email, orderId, codes) {
 
   console.log('RESEND RESPONSE:', JSON.stringify(resendResponse.data, null, 2));
 }
+
 app.get('/test-email', async (req, res) => {
   try {
     await sendCodesEmail('namy9585@gmail.com', 'TEST-001', [
@@ -417,7 +580,8 @@ app.get('/test-email', async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
 app.listen(PORT, () => {
   console.log(`Fox Games running on http://localhost:${PORT}`);
-  console.log(`MyFatoorah API URL: ${MYFATOORAH_API_URL}`);
+  console.log(`Fallback MyFatoorah API URL: ${ENV_MYFATOORAH_API_URL}`);
 });
