@@ -95,6 +95,7 @@ async function loadAll() {
   await loadCoupons();
   await loadCustomers();
   await loadStats();
+  await loadPaymentGateways(); // جلب بوابات الدفع وإدارتها
 }
 
 // 🌐 تهيئة مستمعي الأحداث والـ Drag & Drop لمنطقة رفع صور المنتجات
@@ -354,7 +355,6 @@ async function editProduct(id) {
   if ($('description')) $('description').value = p.description || '';
   if ($('active')) $('active').checked = p.active !== false;
 
-  // إظهار غلاف المعاينة إذا كانت للمنتج صورة سابقة مخزنة
   const previewContainer = $('img-preview-container');
   const imagePreview = $('imagePreview');
   if (p.image && imagePreview && previewContainer) {
@@ -835,6 +835,240 @@ async function loadCustomers() {
       </table>
     `;
   }
+}
+
+// ==========================================
+// 💳 إدارة بوابات الدفع (Payment Gateways API)
+// ==========================================
+
+// 1. جلب وعرض بوابات الدفع المسجلة وحالتها الحالية
+async function loadPaymentGateways() {
+  const container = $('paymentGatewaysList') || $('payment-gateways-container');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/payment-gateways');
+    const data = await res.json();
+
+    if (!data.success) {
+      container.innerHTML = `<div style="color: #f43f5e; padding: 15px; text-align: center;">فشل جلب بيانات البوابات: ${data.message}</div>`;
+      return;
+    }
+
+    const gateways = data.gateways || [];
+    if (!gateways.length) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 25px; color: #64748b;">
+          لا توجد بوابات دفع مضافة حالياً. يمكنك إضافة بوابة MyFatoorah أو Paymob أدناه.
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    gateways.forEach(g => {
+      const isLive = Boolean(g.isLive);
+      const isActive = Boolean(g.isActive);
+
+      html += `
+        <div class="panel" style="border: 1px solid ${isActive ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; margin-bottom: 15px; padding: 18px; border-radius: 12px; background: #0f172a; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="margin: 0; color: #fff; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                ${g.name || g.provider}
+                <span style="font-size: 11px; padding: 3px 10px; border-radius: 20px; ${isActive ? 'background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);' : 'background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);'}">
+                  ${isActive ? '● نشط حالياً بالمتجر' : '○ غير مفعل'}
+                </span>
+              </h3>
+              <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">مزود الخدمة: <strong>${(g.provider || 'myfatoorah').toUpperCase()}</strong></span>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <!-- زر التحويل بين Live و Demo -->
+              <button class="btn" onclick="toggleGatewayLive('${g.id}', ${!isLive})" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; ${isLive ? 'background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);' : 'background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);'}">
+                <i class="fa-solid ${isLive ? 'fa-bolt' : 'fa-vial'}"></i> ${isLive ? 'الوضع الحقيقي (Live)' : 'وضع التجربة (Demo)'}
+              </button>
+
+              <!-- زر تفعيل البوابة للمتجر -->
+              ${!isActive ? `
+                <button class="btn" onclick="activateGateway('${g.id}')" style="padding: 6px 14px; font-size: 12px; background: #22c55e; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                  تفعيل للبوابة
+                </button>
+              ` : ''}
+
+              <!-- زر تعديل الإعدادات -->
+              <button class="edit-btn" onclick='fillGatewayForm(${JSON.stringify(g).replace(/'/g, "&apos;")})' style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
+                <i class="fa-solid fa-gear"></i> تعديل
+              </button>
+            </div>
+          </div>
+
+          <!-- تفاصيل المفاتيح المشفرة والروابط -->
+          <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 12px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; color: #94a3b8;">
+            <div>🔐 المفتاح الأساسي (Token): <strong style="color: ${g.tokenSet ? '#22c55e' : '#f43f5e'};">${g.tokenSet ? '🔒 مشفر ومحفوظ' : '❌ غير مضاف'}</strong></div>
+            <div>🛡️ المفتاح السري (Secret Key): <strong style="color: ${g.secretKeySet ? '#22c55e' : '#64748b'};">${g.secretKeySet ? '🔒 مشفر ومحفوظ' : '⚪ اختياري'}</strong></div>
+            <div style="grid-column: span 2;">🌐 الرابط المستخدم حالياً: <code style="color: #60a5fa; direction: ltr; display: inline-block;">${isLive ? (g.liveUrl || 'Live Default') : (g.sandboxUrl || 'https://apitest.myfatoorah.com')}</code></div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Error loading gateways:", err);
+  }
+}
+
+// 2. حفظ أو تحديث بوابة دفع مع إرسال المفاتيح لتشفيرها بالسيرفر
+async function savePaymentGateway() {
+  const id = val('gwId') || val('gwProvider');
+  const name = val('gwName');
+  const provider = val('gwProvider') || 'myfatoorah';
+  const sandboxUrl = val('gwSandboxUrl');
+  const liveUrl = val('gwLiveUrl');
+  const token = val('gwToken');
+  const secretKey = val('gwSecretKey');
+  const webhookSecret = val('gwWebhookSecret');
+  const merchantId = val('gwMerchantId');
+  const isLive = $('gwIsLive') ? $('gwIsLive').checked : false;
+  const isActive = $('gwIsActive') ? $('gwIsActive').checked : false;
+
+  if (!name || !provider) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'بيانات ناقصة',
+      text: 'اسم البوابة ومزود الخدمة حقول مطلوبة لإكمال عملية التكوين!',
+      ...swalConfig
+    });
+    return;
+  }
+
+  try {
+    Swal.fire({
+      title: 'جاري حفظ وتشفير المفاتيح...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); },
+      ...swalConfig
+    });
+
+    const res = await fetch('/api/admin/payment-gateways', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id, name, provider, sandboxUrl, liveUrl, token, secretKey, webhookSecret, merchantId, isLive, isActive
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'تم التحديث بنجاح',
+        text: data.message,
+        timer: 1800,
+        showConfirmButton: false,
+        ...swalConfig
+      });
+      clearPaymentGatewayForm();
+      await loadPaymentGateways();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'خطأ في الحفظ',
+      text: err.message || 'تعذر حفظ إعدادات البوابة، يرجى المحاولة لاحقاً.',
+      ...swalConfig
+    });
+  }
+}
+
+// 3. التحويل اللحظي بين وضع التجربة Sandbox والوضع الحقيقي Live
+async function toggleGatewayLive(id, targetIsLive) {
+  try {
+    const res = await fetch('/api/admin/payment-gateways/toggle-live', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, isLive: targetIsLive })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: data.message,
+        showConfirmButton: false,
+        timer: 2000,
+        background: '#101a26',
+        color: '#fff'
+      });
+      await loadPaymentGateways();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'خطأ', text: err.message, ...swalConfig });
+  }
+}
+
+// 4. تفعيل البوابة المحددة وإلغاء تفعيل الباقين
+async function activateGateway(id) {
+  try {
+    const res = await fetch('/api/admin/payment-gateways/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: data.message,
+        showConfirmButton: false,
+        timer: 2000,
+        background: '#101a26',
+        color: '#fff'
+      });
+      await loadPaymentGateways();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'خطأ', text: err.message, ...swalConfig });
+  }
+}
+
+// 5. تعبئة بيانات البوابة بالفورم عند الضغط على زر التعديل
+function fillGatewayForm(g) {
+  if ($('gwId')) $('gwId').value = g.id || '';
+  if ($('gwName')) $('gwName').value = g.name || '';
+  if ($('gwProvider')) $('gwProvider').value = g.provider || '';
+  if ($('gwSandboxUrl')) $('gwSandboxUrl').value = g.sandboxUrl || '';
+  if ($('gwLiveUrl')) $('gwLiveUrl').value = g.liveUrl || '';
+  if ($('gwMerchantId')) $('gwMerchantId').value = g.merchantId || '';
+  if ($('gwIsLive')) $('gwIsLive').checked = Boolean(g.isLive);
+  if ($('gwIsActive')) $('gwIsActive').checked = Boolean(g.isActive);
+
+  // يترك حقل المفاتيح فارغاً للأمان إلا إذا رغب الأدمن بتحديثها
+  if ($('gwToken')) $('gwToken').value = '';
+  if ($('gwSecretKey')) $('gwSecretKey').value = '';
+  if ($('gwWebhookSecret')) $('gwWebhookSecret').value = '';
+
+  scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 6. تفريغ فورم البوابات
+function clearPaymentGatewayForm() {
+  ['gwId', 'gwName', 'gwProvider', 'gwSandboxUrl', 'gwLiveUrl', 'gwToken', 'gwSecretKey', 'gwWebhookSecret', 'gwMerchantId']
+    .forEach(id => {
+      const el = $(id);
+      if (el) el.value = '';
+    });
+  if ($('gwIsLive')) $('gwIsLive').checked = false;
+  if ($('gwIsActive')) $('gwIsActive').checked = false;
 }
 
 // ⚡ حساب المبيعات الحقيقية والعدادات الشاملة بسرعة فائقة عبر Promise.all
