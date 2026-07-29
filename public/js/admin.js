@@ -196,35 +196,40 @@ function clearProductForm() {
   if (active) active.checked = true;
 }
 
-// حفظ أو تحديث منتج
+// 📸 دالة رفع الصور إلى Cloudinary مع معالجة الأخطاء
+async function uploadImage(file) {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'FOX-GAMES');
+
+    const res = await fetch(
+      'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
+      { method: 'POST', body: formData }
+    );
+
+    if (!res.ok) {
+      throw new Error('فشل رفع الصورة إلى سيرفر الصور');
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error("Upload Error:", error);
+    throw error;
+  }
+}
+
+// 💾 حفظ أو تحديث منتج بشكل آمن ومحمي
 async function saveProduct() {
   const file = $('product-image')?.files[0];
   let imageUrl = $('imagePreview')?.src || '';
-  
-  // إذا كانت الصورة الحالية عبارة عن معاينة محلية Base64 أو تم رفع ملف جديد، نقوم برفعه لكلاوديناري
-  if (file) {
-    Swal.fire({
-      title: 'جاري رفع صورة غلاف المنتج...',
-      allowOutsideClick: false,
-      didOpen: () => { Swal.showLoading(); },
-      ...swalConfig
-    });
-    imageUrl = await uploadImage(file);
-  }
 
-  const data = {
-    name: val('name'),
-    category: val('category'), 
-    game: val('game'),
-    amount: Number(val('amount') || 0),
-    price: Number(val('price') || 0),
-    image: imageUrl.startsWith('data:') ? '' : imageUrl, // تأمين خلو الرابط من بيانات الكاش المحلية
-    description: val('description'),
-    active: $('active').checked,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
+  const name = val('name');
+  const price = Number(val('price') || 0);
+  const category = val('category');
 
-  if (!data.name || !data.price || !data.category) {
+  if (!name || !price || !category) {
     Swal.fire({
       icon: 'warning',
       title: 'حقول ناقصة',
@@ -234,29 +239,60 @@ async function saveProduct() {
     return;
   }
 
-  const id = val('productId');
+  try {
+    if (file) {
+      Swal.fire({
+        title: 'جاري رفع صورة غلاف المنتج...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); },
+        ...swalConfig
+      });
+      imageUrl = await uploadImage(file);
+    }
 
-  if (id) {
-    await db.collection('products').doc(id).set(data, { merge: true });
-  } else {
-    await db.collection('products').add({
-      ...data,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    const data = {
+      name: name,
+      category: category, 
+      game: val('game'),
+      amount: Number(val('amount') || 0),
+      price: price,
+      image: imageUrl.startsWith('data:') ? '' : imageUrl, // تأمين خلو الرابط من بيانات الكاش المحلية
+      description: val('description'),
+      active: $('active') ? $('active').checked : true,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    const id = val('productId');
+
+    if (id) {
+      await db.collection('products').doc(id).set(data, { merge: true });
+    } else {
+      await db.collection('products').add({
+        ...data,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    clearProductForm();
+    await loadProducts();
+    await loadStats();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'تم الحفظ بنجاح',
+      text: 'تمت مزامنة بيانات المنتج وتحديثها في اللوحة فوراً.',
+      timer: 2000,
+      showConfirmButton: false,
+      ...swalConfig
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'خطأ في الحفظ',
+      text: 'تعذر رفع الصورة أو حفظ البيانات، يرجى إعادة المحاولة.',
+      ...swalConfig
     });
   }
-
-  clearProductForm();
-  await loadProducts();
-  await loadStats();
-  
-  Swal.fire({
-    icon: 'success',
-    title: 'تم الحفظ بنجاح',
-    text: 'تمت مزامنة بيانات المنتج وتحديثها في اللوحة فوراً.',
-    timer: 2000,
-    showConfirmButton: false,
-    ...swalConfig
-  });
 }
 
 // جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
@@ -370,22 +406,7 @@ async function deleteProduct(id) {
   });
 }
 
-// رفع الصور إلى Cloudinary
-async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', 'FOX-GAMES');
-
-  const res = await fetch(
-    'https://api.cloudinary.com/v1_1/denwwcqoe/image/upload',
-    { method: 'POST', body: formData }
-  );
-
-  const data = await res.json();
-  return data.secure_url;
-}
-
-// حفظ تصنيف جديد
+// حفظ تصنيف جديد آمن
 async function saveCategory() {
   const name = val('catName');
   const file = document.getElementById('categoryImageFile')?.files?.[0];
@@ -400,37 +421,46 @@ async function saveCategory() {
     return;
   }
 
-  Swal.fire({
-    title: 'جاري رفع البيانات والتصنيف...',
-    allowOutsideClick: false,
-    didOpen: () => { Swal.showLoading(); },
-    ...swalConfig
-  });
+  try {
+    Swal.fire({
+      title: 'جاري رفع البيانات والتصنيف...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); },
+      ...swalConfig
+    });
 
-  const image = file ? await uploadImage(file) : '';
+    const image = file ? await uploadImage(file) : '';
 
-  await db.collection('categories').add({
-    name,
-    image,
-    active: true,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    await db.collection('categories').add({
+      name,
+      image,
+      active: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-  if ($('catName')) $('catName').value = '';
-  const catFile = document.getElementById('categoryImageFile');
-  if (catFile) catFile.value = '';
-  if ($('categoryImagePreview')) $('categoryImagePreview').style.display = 'none';
+    if ($('catName')) $('catName').value = '';
+    const catFile = document.getElementById('categoryImageFile');
+    if (catFile) catFile.value = '';
+    if ($('categoryImagePreview')) $('categoryImagePreview').style.display = 'none';
 
-  await loadCategories();
-  
-  Swal.fire({
-    icon: 'success',
-    title: 'تم إضافة التصنيف',
-    text: 'تم حفظ التصنيف بنجاح فوري وجاري تغذية الفورم.',
-    timer: 1500,
-    showConfirmButton: false,
-    ...swalConfig
-  });
+    await loadCategories();
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'تم إضافة التصنيف',
+      text: 'تم حفظ التصنيف بنجاح فوري وجاري تغذية الفورم.',
+      timer: 1500,
+      showConfirmButton: false,
+      ...swalConfig
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'خطأ في الإضافة',
+      text: 'تعذر رفع الصورة أو حفظ التصنيف، يرجى المحاولة لاحقاً.',
+      ...swalConfig
+    });
+  }
 }
 
 // جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
@@ -807,13 +837,15 @@ async function loadCustomers() {
   }
 }
 
-// حساب المبيعات الحقيقية والعدادات الشاملة وتدفق المخططات البيانية
+// ⚡ حساب المبيعات الحقيقية والعدادات الشاملة بسرعة فائقة عبر Promise.all
 async function loadStats() {
   try {
-    const products = await db.collection('products').get();
-    const orders = await db.collection('orders').get();
-    const users = await db.collection('users').get();
-    const codes = await db.collection('productCodes').where('status', '==', 'available').get();
+    const [products, orders, users, codes] = await Promise.all([
+      db.collection('products').get(),
+      db.collection('orders').get(),
+      db.collection('users').get(),
+      db.collection('productCodes').where('status', '==', 'available').get()
+    ]);
 
     let totalSales = 0;
     let chartDataMap = {};
@@ -902,7 +934,7 @@ function updateRevenueChart(labels, dataValues) {
     }
 }
 
-// تسجيل الخروج بأكشن تأكيدي فخم ومتكامل
+// تسجيل الخروج بأكشن تأكيدي متكامل
 function logout() {
   Swal.fire({
     title: 'تسجيل الخروج؟',
