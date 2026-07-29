@@ -44,6 +44,7 @@
       <button class="nav-btn" onclick="showPage('orders', this)"><i class="fa-solid fa-shopping-cart"></i> الطلبات</button>
       <button class="nav-btn" onclick="showPage('coupons', this)"><i class="fa-solid fa-percent"></i> أكواد الخصم</button>
       <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
+      <button class="nav-btn" onclick="showPage('payments', this)"><i class="fa-solid fa-wallet"></i> بوابات الدفع</button>
       <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
     </nav>
 
@@ -354,6 +355,79 @@
       <div id="customersList" class="panel table-box"></div>
     </section>
 
+    <!-- صفحة بوابات الدفع -->
+    <section id="payments-page" class="page">
+      <div class="page-head">
+        <h2>إدارة طرق وبوابات الدفع</h2>
+        <p>تعديل أرقام المحافظ الكاش، InstaPay، ومفاتيح الربط لشركات الدفع الإلكتروني</p>
+      </div>
+
+      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+        
+        <!-- المحافظ الإلكترونية (فودافون كاش / أورنج / اتصالات) -->
+        <div class="panel form-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-mobile-screen-button" style="color:#ef4444;"></i> المحافظ الإلكترونية (Cash)</h3>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>رقم المحفظة الرئيسي للتحويل</label>
+            <input type="text" id="vodafoneCashNumber" placeholder="01012345678" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>تعليمات الدفع للعميل</label>
+            <textarea id="cashInstructions" rows="3" placeholder="مثال: يرجى تحويل المبلغ ثم إرفاق صورة الإيصال أو رقم العملية..."></textarea>
+          </div>
+          <div class="form-checkbox-group" style="margin-top: 10px;">
+            <input type="checkbox" id="cashActive" checked />
+            <label for="cashActive">تفعيل الدفع كاش للمتجر</label>
+          </div>
+        </div>
+
+        <!-- تطبيق InstaPay -->
+        <div class="panel form-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-building-columns" style="color:#8b5cf6;"></i> حساب InstaPay</h3>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>عنوان الدفع (IPA) أو رقم الهاتف</label>
+            <input type="text" id="instapayAddress" placeholder="username@instapay أو 01012345678" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>اسم صاحب الحساب (للتحقق)</label>
+            <input type="text" id="instapayName" placeholder="مثال: Mohamed Ashraf" />
+          </div>
+          <div class="form-checkbox-group" style="margin-top: 10px;">
+            <input type="checkbox" id="instapayActive" checked />
+            <label for="instapayActive">تفعيل InstaPay للمتجر</label>
+          </div>
+        </div>
+
+        <!-- بوابة Paymob / الكروت والفيزا -->
+        <div class="panel form-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-credit-card" style="color:#3b82f6;"></i> بوابة Paymob / فيزا و كارت</h3>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>API Key</label>
+            <input type="password" id="paymobApiKey" placeholder="مفتاح API الخص بـ Paymob" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Integration ID (بطاقات البنك)</label>
+            <input type="text" id="paymobIntegrationCard" placeholder="مثال: 123456" />
+          </div>
+          <div class="form-checkbox-group" style="margin-top: 10px;">
+            <input type="checkbox" id="paymobActive" />
+            <label for="paymobActive">تفعيل بوابة Paymob التلقائية</label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions" style="margin-top: 20px;">
+        <button class="btn-submit" onclick="savePaymentGateways()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة إعدادات الدفع</button>
+      </div>
+    </section>
+
     <!-- صفحة التقارير -->
     <section id="reports-page" class="page">
       <div class="page-head">
@@ -425,6 +499,41 @@
         });
       }
     });
+
+    // دالة حفظ إعدادات بوابات الدفع في Firestore
+    async function savePaymentGateways() {
+      try {
+        const paymentData = {
+          vodafoneCashNumber: document.getElementById('vodafoneCashNumber').value,
+          cashInstructions: document.getElementById('cashInstructions').value,
+          cashActive: document.getElementById('cashActive').checked,
+          instapayAddress: document.getElementById('instapayAddress').value,
+          instapayName: document.getElementById('instapayName').value,
+          instapayActive: document.getElementById('instapayActive').checked,
+          paymobApiKey: document.getElementById('paymobApiKey').value,
+          paymobIntegrationCard: document.getElementById('paymobIntegrationCard').value,
+          paymobActive: document.getElementById('paymobActive').checked,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('settings').doc('payments').set(paymentData, { merge: true });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'تم الحفظ بنجاح',
+          text: 'تم تحديث إعدادات بوابات الدفع للعملاء في المتجر!',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        console.error("Error saving payment settings: ", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          text: 'حدث خطأ أثناء حفظ الإعدادات: ' + error.message
+        });
+      }
+    }
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
