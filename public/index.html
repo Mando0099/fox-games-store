@@ -27,7 +27,6 @@
       font-family: 'Cairo', sans-serif, system-ui;
     }
 
-    /* دعم اتجاه اللغة الإنجليزية والعربية تلقائياً */
     html[dir="ltr"] body { font-family: 'Inter', sans-serif, system-ui; }
     html[dir="ltr"] .details-description {
       border-right: none !important;
@@ -40,7 +39,6 @@
 
     .blue-text { color: var(--primary-blue) !important; }
 
-    /* شاشة التحميل */
     #splash-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
       background: var(--bg-dark); display: flex; flex-direction: column;
@@ -55,7 +53,6 @@
     @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--primary-blue) } }
     @keyframes loadingBar { 0% { width: 0%; } 100% { width: 100%; } }
 
-    /* البروفايل */
     .user-profile-wrapper { position: relative; display: inline-block; }
     .user-profile-btn {
       background: var(--bg-card); border: 1px solid var(--border-color); color: #fff;
@@ -90,7 +87,6 @@
     .logout-btn-new:hover { background: #ef4444; color: #fff; }
     .foxHidden { display: none !important; }
 
-    /* تفاصيل المنتج الاحترافية */
     #product-details-view {
       display: none; padding: 30px 20px; max-width: 1150px; margin: 0 auto;
     }
@@ -157,9 +153,23 @@
 
     @media(max-width: 900px) { .details-main-grid { grid-template-columns: 1fr; padding: 20px; gap: 20px; } }
 
-    /* السلة الجانبية */
-    .cartDrawer { width: 420px; background: var(--bg-card); border-right: 1px solid var(--border-color); box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+    /* تصميم السلة الجانبية والعناصر الداخلية بدقة */
+    .cartDrawer { width: 420px; background: var(--bg-card); border-right: 1px solid var(--border-color); box-shadow: 10px 0 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
     html[dir="ltr"] .cartDrawer { border-right: none; border-left: 1px solid var(--border-color); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    #cartItems { flex: 1; overflow-y: auto; padding: 15px; }
+    .cart-item-card {
+      display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 10px; margin-bottom: 10px;
+    }
+    .cart-item-img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #000; }
+    .cart-item-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .cart-item-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .cart-item-price { font-size: 13px; font-weight: 800; color: var(--primary-blue); }
+    .cart-item-qty { font-size: 12px; color: var(--text-muted); }
+    .cart-item-del {
+      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444;
+      width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
     .coupon input, .checkoutForm input {
       background: var(--bg-dark) !important; border: 1px solid rgba(255,255,255,0.08) !important;
       color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; width: 100%; box-sizing: border-box;
@@ -167,8 +177,6 @@
     .payment-logos-container { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; }
     .pay-mini-logo { height: 14px; display: block; }
 
-    /* الهواتف */
-    .mobile-bottom-nav { display: none; }
     @media (max-width: 991px) {
       body { padding-bottom: 65px !important; }
       .topbar { flex-wrap: wrap; padding: 10px 12px !important; gap: 10px; }
@@ -190,6 +198,7 @@
       .mobile-nav-item i { font-size: 18px; }
       .mobile-nav-item.active { color: var(--primary-blue); background: rgba(0, 102, 255, 0.05); }
     }
+    .mobile-bottom-nav { display: none; }
   </style>
 </head>
 <body>
@@ -248,7 +257,7 @@
         </div>
       </div>
 
-      <button onclick="toggleCart()" title="السلة" class="cartBtn">
+      <button onclick="toggleCartDrawer()" title="السلة" class="cartBtn">
         <i class="fas fa-shopping-cart"></i> <span data-lang-ar="السلة" data-lang-en="Cart">السلة</span> 
         <b id="cartCountTop" class="cart-badge">0</b>
       </button>
@@ -313,7 +322,7 @@
         <!-- الشروط والأحكام -->
         <div class="terms-box">
           <h4 data-lang-ar="<i class='fas fa-shield-alt'></i> الشروط والأحكام وسياسة الضمان" data-lang-en="<i class='fas fa-shield-alt'></i> Terms, Conditions & Warranty"><i class="fas fa-shield-alt"></i> الشروط والأحكام وسياسة الضمان</h4>
-          <ul id="termsListText">
+          <ul>
             <li data-lang-ar="الكود أو الشحن يتم تسليمه فوراً بعد إتمام عملية الدفع بنجاح." data-lang-en="Codes or top-ups are delivered instantly after successful payment.">الكود أو الشحن يتم تسليمه فوراً بعد إتمام عملية الدفع بنجاح.</li>
             <li data-lang-ar="تأكد من صحة بياناتك البريدية أو رقم الهاتف لضمان وصول الطلب." data-lang-en="Make sure your email or phone number is correct to ensure order delivery.">تأكد من صحة بياناتك البريدية أو رقم الهاتف لضمان وصول الطلب.</li>
             <li data-lang-ar="المنتجات الرقمية لا تُستبدل ولا تُسترجع بعد الاستلام لضمان الأمان." data-lang-en="Digital products cannot be exchanged or refunded after delivery for security.">المنتجات الرقمية لا تُستبدل ولا تُسترجع بعد الاستلام لضمان الأمان.</li>
@@ -334,22 +343,22 @@
   </div>
 
   <aside class="cartDrawer" id="cartDrawer">
-    <div class="cartHead">
-      <h3 data-lang-ar="سلة المشتريات" data-lang-en="Shopping Cart">سلة المشتريات</h3>
-      <button onclick="toggleCart()">×</button>
+    <div class="cartHead" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
+      <h3 style="margin:0; font-size:18px;" data-lang-ar="سلة المشتريات" data-lang-en="Shopping Cart">سلة المشتريات</h3>
+      <button onclick="toggleCartDrawer()" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
     </div>
     <div id="cartItems"></div>
-    <div class="coupon">
+    <div class="coupon" style="padding: 12px 15px; display:flex; gap:8px;">
       <input id="couponInput" placeholder="أدخل كود الخصم..." data-lang-ph-ar="أدخل كود الخصم..." data-lang-ph-en="Enter coupon code...">
-      <button onclick="applyCoupon()" data-lang-ar="تطبيق" data-lang-en="Apply">تطبيق</button>
+      <button onclick="applyCoupon()" style="background:var(--primary-blue); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700;" data-lang-ar="تطبيق" data-lang-en="Apply">تطبيق</button>
     </div>
-    <div class="summary">
-      <p><span data-lang-ar="المجموع الفرعي" data-lang-en="Subtotal">المجموع الفرعي</span><b id="subtotal">0 EGP</b></p>
-      <p><span data-lang-ar="الخصم" data-lang-en="Discount">الخصم</span><b id="discount">0 EGP</b></p>
-      <p class="grand"><span data-lang-ar="الإجمالي النهائي" data-lang-en="Grand Total">الإجمالي النهائي</span><b id="total">0 EGP</b></p>
+    <div class="summary" style="padding: 12px 15px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
+      <p style="margin:0; display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted);"><span data-lang-ar="المجموع الفرعي" data-lang-en="Subtotal">المجموع الفرعي</span><b id="subtotal" style="color:#fff;">0 EGP</b></p>
+      <p style="margin:0; display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted);"><span data-lang-ar="الخصم" data-lang-en="Discount">الخصم</span><b id="discount" style="color:#fff;">0 EGP</b></p>
+      <p class="grand" style="margin:5px 0 0 0; display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:var(--primary-blue);"><span data-lang-ar="الإجمالي النهائي" data-lang-en="Grand Total">الإجمالي النهائي</span><b id="total">0 EGP</b></p>
     </div>
     
-    <div class="checkoutForm">
+    <div class="checkoutForm" style="padding: 15px; display:flex; flex-direction:column; gap:10px;">
       <input id="customerName" placeholder="الاسم الكامل" data-lang-ph-ar="الاسم الكامل" data-lang-ph-en="Full Name" required>
       <input id="customerPhone" placeholder="رقم الهاتف" data-lang-ph-ar="رقم الهاتف" data-lang-ph-en="Phone Number" required>
       <input type="email" id="customerEmail" placeholder="البريد الإلكتروني" data-lang-ph-ar="البريد الإلكتروني" data-lang-ph-en="Email Address" required>
@@ -381,9 +390,11 @@
 
   <script>
     let currentAppLang = localStorage.getItem('tech_gaming_lang') || 'ar';
+    let localCart = []; // سلة المشتريات المباشرة والمضمونة
 
     window.addEventListener('load', () => {
       applyLanguage(currentAppLang);
+      updateLocalCartUI();
       setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if (splash) {
@@ -393,7 +404,6 @@
       }, 2000);
     });
 
-    // دالة التبديل بين اللغات وعكس الاتجاهات
     function toggleAppLanguage() {
       currentAppLang = currentAppLang === 'ar' ? 'en' : 'ar';
       localStorage.setItem('tech_gaming_lang', currentAppLang);
@@ -414,13 +424,11 @@
         if(langBtn) langBtn.innerText = 'English';
       }
 
-      // تفعيل الترجمة التلقائية لكل العناصر التي تحتوي على وسوم اللغة
       document.querySelectorAll('[data-lang-ar]').forEach(el => {
         let text = el.getAttribute(`data-lang-${lang}`);
         if (text) el.innerHTML = text;
       });
 
-      // ترجمة الخانات (Placeholders)
       document.querySelectorAll('[data-lang-ph-ar]').forEach(el => {
         let ph = el.getAttribute(`data-lang-ph-${lang}`);
         if (ph) el.placeholder = ph;
@@ -451,28 +459,87 @@
       const addBtn = document.getElementById('detailAddToCartBtn');
       addBtn.onclick = () => {
         const qty = parseInt(document.getElementById('detailQtyInput').value) || 1;
-        for (let i = 0; i < qty; i++) {
-          if (typeof addToCart === 'function') {
-            addToCart(product.id || product);
-          } else if (typeof cart !== 'undefined' && Array.isArray(cart)) {
-            let existing = cart.find(item => item.id === product.id);
-            if (existing) {
-              existing.quantity = (existing.quantity || 1) + 1;
-            } else {
-              cart.push({...product, quantity: 1});
-            }
-            if (typeof updateCartUI === 'function') updateCartUI();
-          }
-        }
-        if (typeof toggleCart === 'function') {
-          toggleCart();
+        
+        // إضافة المنتج للسلة المباشرة
+        let existing = localCart.find(item => (item.id === product.id || item.name === product.name));
+        if (existing) {
+          existing.quantity += qty;
         } else {
-          let drawer = document.getElementById('cartDrawer');
-          if (drawer) drawer.classList.toggle('open');
+          localCart.push({
+            id: product.id || Date.now(),
+            name: product.name || product.title || 'Digital Product',
+            price: parseFloat(product.price) || 0,
+            image: product.image || product.img || 'https://via.placeholder.com/150',
+            quantity: qty
+          });
         }
+
+        updateLocalCartUI();
+        toggleCartDrawer(true); // فتح السلة تلقائياً لرؤية المنتج المضاف
       };
 
       renderSimilarProducts(product);
+    }
+
+    // تحديث واجهة السلة وحساب الإجماليات
+    function updateLocalCartUI() {
+      const container = document.getElementById('cartItems');
+      const countBadge = document.getElementById('cartCountTop');
+      const subtotalEl = document.getElementById('subtotal');
+      const totalEl = document.getElementById('total');
+      
+      if (!container) return;
+      container.innerHTML = '';
+
+      let totalCount = 0;
+      let subtotal = 0;
+
+      if (localCart.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;" data-lang-ar="سلة المشتريات فارغة" data-lang-en="Your cart is empty">سلة المشتريات فارغة</div>`;
+      } else {
+        localCart.forEach((item, index) => {
+          totalCount += item.quantity;
+          subtotal += item.price * item.quantity;
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'cart-item-card';
+          itemDiv.innerHTML = `
+            <img src="${item.image}" class="cart-item-img" alt="">
+            <div class="cart-item-info">
+              <span class="cart-item-title">${item.name}</span>
+              <span class="cart-item-price">${item.price} EGP</span>
+              <span class="cart-item-qty">${currentAppLang === 'ar' ? 'الكمية: ' : 'Qty: '}${item.quantity}</span>
+            </div>
+            <button class="cart-item-del" onclick="removeLocalCartItem(${index})"><i class="fas fa-trash-alt"></i></button>
+          `;
+          container.appendChild(itemDiv);
+        });
+      }
+
+      if (countBadge) countBadge.innerText = totalCount;
+      if (subtotalEl) subtotalEl.innerText = subtotal + " EGP";
+      if (totalEl) totalEl.innerText = subtotal + " EGP";
+    }
+
+    function removeLocalCartItem(index) {
+      localCart.splice(index, 1);
+      updateLocalCartUI();
+    }
+
+    function toggleCartDrawer(forceOpen = false) {
+      const drawer = document.getElementById('cartDrawer');
+      if (!drawer) return;
+      if (forceOpen) {
+        drawer.classList.add('open');
+        drawer.style.transform = 'translateX(0)';
+      } else {
+        drawer.classList.toggle('open');
+        if (drawer.classList.contains('open')) {
+          drawer.style.transform = 'translateX(0)';
+        } else {
+          drawer.style.transform = currentAppLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
+        }
+      }
     }
 
     function renderSimilarProducts(currentProduct) {
