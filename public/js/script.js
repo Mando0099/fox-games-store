@@ -186,7 +186,7 @@ function updateCart() {
   if ($('cartItems')) {
     $('cartItems').innerHTML = cart.length 
       ? cart.map(item => {
-          const imgUrl = item.img || item.image || 'https://via.placeholder.com/150';
+          const imgUrl = item.img || item.image || 'https://picsum.photos/150';
           
           return `
             <div class="cartItem">
@@ -405,7 +405,13 @@ function save() {
   localStorage.setItem('foxgames_coupon', String(coupon));
 }
 
-function toggleCart() { $('cartDrawer')?.classList.toggle('open'); }
+function toggleCart(event) {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  $('cartDrawer')?.classList.toggle('open');
+}
+
 function toggleMenu() {}
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
