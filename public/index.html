@@ -232,12 +232,12 @@
     <div class="navActions">
       <button onclick="toggleAppLanguage()" class="langBtn" id="langToggleBtn">English</button>
       <button onclick="openAuth()" title="حسابي" class="loginBtn" id="mainLoginBtn" data-lang-ar="تسجيل الدخول" data-lang-en="Login">تسجيل الدخول</button>
-      
+        
       <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
         <button class="user-profile-btn" id="userProfileTrigger">
           <i class="fas fa-user-circle"></i> <span id="topNavUserName" data-lang-ar="حسابي" data-lang-en="My Account">حسابي</span>
         </button>
-        
+          
         <div class="user-profile-dropdown" id="userProfileDropdown">
           <div class="profile-header">
             <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
@@ -341,15 +341,15 @@
     </div>
   </div>
 
-  <aside class="cartDrawer" id="cartDrawer" onclick="event.stopPropagation();">
+  <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
       <h3 style="margin:0; font-size:18px;" data-lang-ar="سلة المشتريات" data-lang-en="Shopping Cart">سلة المشتريات</h3>
-      <button type="button" onclick="toggleCartDrawer();" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">×</button>
+      <button onclick="toggleCartDrawer()" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
     </div>
     <div id="cartItems"></div>
     <div class="coupon" style="padding: 12px 15px; display:flex; gap:8px;">
       <input id="couponInput" placeholder="أدخل كود الخصم..." data-lang-ph-ar="أدخل كود الخصم..." data-lang-ph-en="Enter coupon code...">
-      <button type="button" onclick="applyCoupon()" style="background:var(--primary-blue); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700;" data-lang-ar="تطبيق" data-lang-en="Apply">تطبيق</button>
+      <button onclick="applyCoupon()" style="background:var(--primary-blue); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700;" data-lang-ar="تطبيق" data-lang-en="Apply">تطبيق</button>
     </div>
     <div class="summary" style="padding: 12px 15px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
       <p style="margin:0; display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted);"><span data-lang-ar="المجموع الفرعي" data-lang-en="Subtotal">المجموع الفرعي</span><b id="subtotal" style="color:#fff;">0 EGP</b></p>
@@ -362,7 +362,7 @@
       <input id="customerPhone" placeholder="رقم الهاتف" data-lang-ph-ar="رقم الهاتف" data-lang-ph-en="Phone Number" required>
       <input type="email" id="customerEmail" placeholder="البريد الإلكتروني" data-lang-ph-ar="البريد الإلكتروني" data-lang-ph-en="Email Address" required>
       
-      <button type="button" class="btn-pay-now-pro" onclick="checkoutSecure()">
+      <button class="btn-pay-now-pro" onclick="checkoutSecure()">
         <div class="payment-logos-container">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="pay-mini-logo">
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="pay-mini-logo">
@@ -412,6 +412,7 @@
       if (typeof firebase !== 'undefined' && firebase.auth) {
         firebase.auth().onAuthStateChanged(user => {
           if (user) {
+            // التحقق من وجود وقت سابق أو تعيين وقت جديد لتسجيل الدخول
             let loginTime = localStorage.getItem('tech_login_timestamp');
             let now = Date.now();
             
@@ -421,11 +422,13 @@
             }
 
             let elapsedTime = now - parseInt(loginTime);
-            let oneHour = 60 * 60 * 1000;
+            let oneHour = 60 * 60 * 1000; // ساعة واحدة
 
             if (elapsedTime >= oneHour) {
+              // انقضت أكثر من ساعة، يتم تسجيل الخروج فورا
               triggerAutoLogout();
             } else {
+              // جدولة الخروج بالوقت المتبقي
               let remainingTime = oneHour - elapsedTime;
               if (sessionLogoutTimer) clearTimeout(sessionLogoutTimer);
               sessionLogoutTimer = setTimeout(() => {
@@ -446,7 +449,7 @@
           localStorage.removeItem('tech_login_timestamp');
           Swal.fire({
             icon: 'info',
-            title: currentAppLang === 'ar' ? 'انتهت صلاحية الجلسة' : 'Session Expired',
+            title: currentAppLang === 'ar' ? 'انانتهت صلاحية الجلسة' : 'Session Expired',
             text: currentAppLang === 'ar' ? 'تم تسجيل خروجك تلقائياً بعد مرور ساعة. يرجى تسجيل الدخول مرة أخرى.' : 'You have been automatically logged out after 1 hour. Please login again.',
             confirmButtonColor: '#0066ff'
           }).then(() => {
@@ -530,10 +533,12 @@
       renderSimilarProducts(product);
     }
 
+    // تفعيل الكود بشكل احترافي مع رسائل الخطأ والنجاح
     function applyCoupon() {
       const codeInput = document.getElementById('couponInput');
       const val = codeInput.value.trim().toUpperCase();
 
+      // مثال لكود خصم صحيح (يمكنك جعله أي كود تريده مثل TECH10)
       if (val === 'TECH10' || val === 'DISCOUNT10') {
         discountPercent = 10;
         Swal.fire({
@@ -564,7 +569,185 @@
       const container = document.getElementById('cartItems');
       const countBadge = document.getElementById('cartCountTop');
       const subtotalEl = document.getElementById('subtotal');
+      const discountEl = document.getElementById('discount');
+      const totalEl = document.getElementById('total');
+      
+      if (!container) return;
+      container.innerHTML = '';
+
+      let totalCount = 0;
+      let subtotal = 0;
+
+      if (localCart.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;" data-lang-ar="سلة المشتريات فارغة" data-lang-en="Your cart is empty">سلة المشتريات فارغة</div>`;
+      } else {
+        localCart.forEach((item, index) => {
+          totalCount += item.quantity;
+          subtotal += item.price * item.quantity;
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'cart-item-card';
+          itemDiv.innerHTML = `
+            <img src="${item.image}" class="cart-item-img" alt="">
+            <div class="cart-item-info">
+              <span class="cart-item-title">${item.name}</span>
+              <span class="cart-item-price">${item.price} EGP</span>
+              <span class="cart-item-qty">${currentAppLang === 'ar' ? 'الكمية: ' : 'Qty: '}${item.quantity}</span>
+            </div>
+            <button class="cart-item-del" onclick="removeLocalCartItem(${index})"><i class="fas fa-trash-alt"></i></button>
+          `;
+          container.appendChild(itemDiv);
+        });
+      }
+
+      let discountAmount = (subtotal * discountPercent) / 100;
+      let grandTotal = subtotal - discountAmount;
+
+      if (countBadge) countBadge.innerText = totalCount;
+      if (subtotalEl) subtotalEl.innerText = subtotal + " EGP";
+      if (discountEl) discountEl.innerText = discountAmount + " EGP";
+      if (totalEl) totalEl.innerText = grandTotal + " EGP";
     }
+
+    function removeLocalCartItem(index) {
+      localCart.splice(index, 1);
+      localStorage.setItem('tech_gaming_cart', JSON.stringify(localCart));
+      updateLocalCartUI();
+    }
+
+    function toggleCartDrawer(forceOpen = false) {
+      const drawer = document.getElementById('cartDrawer');
+      if (!drawer) return;
+      if (forceOpen) {
+        drawer.classList.add('open');
+        drawer.style.transform = 'translateX(0)';
+      } else {
+        drawer.classList.toggle('open');
+        if (drawer.classList.contains('open')) {
+          drawer.style.transform = 'translateX(0)';
+        } else {
+          drawer.style.transform = currentAppLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
+        }
+      }
+    }
+
+    // إتمام الدفع مع إجبار تسجيل الحساب وتفريغ السلة فوراً بعد الشراء
+    function checkoutSecure() {
+      // 1. التحقق من تسجيل الدخول أولاً لإجبار العميل يمتلك حساب
+      const currentUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+      if (!currentUser) {
+        Swal.fire({
+          icon: 'warning',
+          title: currentAppLang === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Login Required',
+          text: currentAppLang === 'ar' ? 'عذراً، لا يمكنك إتمام الشراء قبل تسجيل الدخول أو إنشاء حساب بالموقع.' : 'Sorry, you must log in or create an account to proceed with checkout.',
+          confirmButtonText: currentAppLang === 'ar' ? 'تسجيل الدخول' : 'Login',
+          confirmButtonColor: '#0066ff',
+          background: '#0c162d',
+          color: '#fff'
+        }).then((result) => {
+          if (result.isConfirmed && typeof openAuth === 'function') {
+            openAuth();
+          }
+        });
+        return;
+      }
+
+      // 2. التحقق من وجود منتجات في السلة
+      if (localCart.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: currentAppLang === 'ar' ? 'السلة فارغة' : 'Cart is Empty',
+          text: currentAppLang === 'ar' ? 'الرجاء إضافة منتجات إلى السلة قبل إتمام الدفع.' : 'Please add products to your cart before checking out.',
+          confirmButtonColor: '#0066ff',
+          background: '#0c162d',
+          color: '#fff'
+        });
+        return;
+      }
+
+      // 3. التحقق من إدخال الحقول المطلوبة
+      const name = document.getElementById('customerName').value.trim();
+      const phone = document.getElementById('customerPhone').value.trim();
+      const email = document.getElementById('customerEmail').value.trim();
+
+      if (!name || !phone || !email) {
+        Swal.fire({
+          icon: 'warning',
+          title: currentAppLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Data',
+          text: currentAppLang === 'ar' ? 'يرجى ملء جميع بيانات الشحن (الاسم، الهاتف، البريد الإلكتروني).' : 'Please fill in all shipping details.',
+          confirmButtonColor: '#0066ff',
+          background: '#0c162d',
+          color: '#fff'
+        });
+        return;
+      }
+
+      // نجاح عملية الشراء: تفريغ السلة فوراً واختفائها
+      Swal.fire({
+        icon: 'success',
+        title: currentAppLang === 'ar' ? 'تمت عملية الشراء بنجاح!' : 'Order Placed Successfully!',
+        text: currentAppLang === 'ar' ? 'شكراً لثقتك بنا، تم إرسال تفاصيل طلبك وشحنك الفوري.' : 'Thank you for your trust, your order details have been processed.',
+        confirmButtonColor: '#0066ff',
+        background: '#0c162d',
+        color: '#fff'
+      }).then(() => {
+        // تفريغ السلة بالكامل
+        localCart = [];
+        localStorage.removeItem('tech_gaming_cart');
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('customerEmail').value = '';
+        document.getElementById('couponInput').value = '';
+        discountPercent = 0;
+        updateLocalCartUI();
+        toggleCartDrawer(); // إغلاق قائمة السلة
+      });
+    }
+
+    function renderSimilarProducts(currentProduct) {
+      const grid = document.getElementById('similarProductsGrid');
+      if(!grid) return;
+      grid.innerHTML = '';
+      
+      let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (window.allProducts || []);
+      const similar = allProds.filter(p => (p.id !== currentProduct.id)).slice(0, 4);
+      
+      similar.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'similar-card';
+        card.innerHTML = `
+          <img src="${p.image || p.img || 'https://via.placeholder.com/150'}" alt="${p.name || ''}">
+          <h5>${p.name || p.title || ''}</h5>
+          <p>${p.price || 0} EGP</p>
+        `;
+        card.onclick = () => openProductDetails(p);
+        grid.appendChild(card);
+      });
+    }
+
+    function showMainHome() {
+      document.getElementById('product-details-view').style.display = 'none';
+      document.getElementById('home').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    document.addEventListener('click', function(e) {
+      let card = e.target.closest('.productCard, .product-card, [data-product-id]');
+      if (card) {
+        let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (window.allProducts || []);
+        let titleEl = card.querySelector('h3, h4, .title, .product-title');
+        if (titleEl && allProds.length > 0) {
+          let titleText = titleEl.innerText.trim();
+          let found = allProds.find(p => (p.name && p.name.trim() === titleText) || (p.title && p.title.trim() === titleText));
+          if (found) {
+            e.preventDefault();
+            e.stopPropagation();
+            openProductDetails(found);
+            return;
+          }
+        }
+      }
+    }, true);
   </script>
 </body>
 </html>
