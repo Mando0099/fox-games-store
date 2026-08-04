@@ -256,7 +256,7 @@
         </div>
       </div>
 
-      <button onclick="toggleCartDrawer()" title="السلة" class="cartBtn">
+      <button onclick="toggleCart(event)" title="السلة" class="cartBtn">
         <i class="fas fa-shopping-cart"></i> <span data-lang-ar="السلة" data-lang-en="Cart">السلة</span> 
         <b id="cartCountTop" class="cart-badge">0</b>
       </button>
@@ -344,7 +344,7 @@
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
       <h3 style="margin:0; font-size:18px;" data-lang-ar="سلة المشتريات" data-lang-en="Shopping Cart">سلة المشتريات</h3>
-      <button onclick="toggleCartDrawer()" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
+     <button type="button" onclick="toggleCart(event);" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
     </div>
     <div id="cartItems"></div>
     <div class="coupon" style="padding: 12px 15px; display:flex; gap:8px;">
