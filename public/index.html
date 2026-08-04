@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title id="pageTitle">Tech Gaming Market</title>
+  <title>Fox Games Market</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/style.css"/>
   
@@ -11,743 +11,798 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    :root {
-      --primary-blue: #0066ff;
-      --primary-blue-hover: #0052cc;
-      --bg-dark: #070d1a;
-      --bg-card: #0c162d;
-      --border-color: rgba(0, 102, 255, 0.25);
-      --text-main: #ffffff;
-      --text-muted: #94a3b8;
+    /* ================= START USER PROFILE STYLE ================= */
+    .user-profile-wrapper {
+      position: relative;
+      display: inline-block;
     }
-
-    body {
-      background-color: var(--bg-dark) !important;
-      color: var(--text-main) !important;
-      font-family: 'Cairo', sans-serif, system-ui;
-    }
-
-    html[dir="ltr"] body { font-family: 'Inter', sans-serif, system-ui; }
-    html[dir="ltr"] .details-description {
-      border-right: none !important;
-      border-left: 3px solid var(--primary-blue) !important;
-      padding-right: 0 !important;
-      padding-left: 12px !important;
-    }
-    html[dir="ltr"] .back-to-store-btn i { transform: rotate(180deg); }
-    html[dir="ltr"] .back-to-store-btn:hover { transform: translateX(3px) !important; }
-
-    .blue-text { color: var(--primary-blue) !important; }
-
-    #splash-screen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-      background: var(--bg-dark); display: flex; flex-direction: column;
-      align-items: center; justify-content: center; z-index: 99999;
-      transition: opacity 0.6s ease;
-    }
-    .splash-logo-container { display: flex; align-items: center; font-size: 38px; font-weight: 800; color: #fff; letter-spacing: 2px; }
-    .typed-text { overflow: hidden; border-left: 3px solid var(--primary-blue); white-space: nowrap; animation: typing 2.2s steps(12, end), blink-caret 0.75s step-end infinite; }
-    .splash-loader { width: 160px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 20px; overflow: hidden; }
-    .splash-loader-bar { width: 0%; height: 100%; background: var(--primary-blue); animation: loadingBar 3s linear forwards; }
-    @keyframes typing { from { width: 0 } to { width: 100% } }
-    @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--primary-blue) } }
-    @keyframes loadingBar { 0% { width: 0%; } 100% { width: 100%; } }
-
-    .user-profile-wrapper { position: relative; display: inline-block; }
     .user-profile-btn {
-      background: var(--bg-card); border: 1px solid var(--border-color); color: #fff;
-      padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600;
-      display: flex; align-items: center; gap: 8px; transition: 0.2s;
+      background: #0d1722;
+      border: 1px solid rgba(101, 204, 0, 0.4);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
     }
-    .user-profile-btn:hover { background: rgba(0, 102, 255, 0.15); box-shadow: 0 0 12px rgba(0, 102, 255, 0.3); }
+    .user-profile-btn:hover {
+      background: rgba(101, 204, 0, 0.1);
+      box-shadow: 0 0 10px rgba(101, 204, 0, 0.2);
+    }
     .user-profile-dropdown {
-      position: absolute; top: 50px; right: 0; width: 280px;
-      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); padding: 16px; z-index: 1000;
-      opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s ease;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 300px;
+      background: #0d1722;
+      border: 1px solid rgba(101, 204, 0, 0.25);
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      padding: 16px;
+      z-index: 1000;
+      color: #fff;
+      text-align: left;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
     }
-    html[dir="ltr"] .user-profile-dropdown { right: auto; left: 0; }
-    .user-profile-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    .profile-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-    .profile-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--primary-blue); object-fit: cover; }
-    .profile-info { display: flex; flex-direction: column; gap: 2px; }
-    .profile-name { font-size: 14px; font-weight: 700; }
-    .profile-email { font-size: 11px; color: var(--text-muted); word-break: break-all; }
-    .profile-menu-links { margin: 12px 0; display: flex; flex-direction: column; gap: 4px; }
+    .user-profile-dropdown.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #65cc00;
+      object-fit: cover;
+    }
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .profile-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .profile-email {
+      font-size: 12px;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+    .auth-method-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      width: fit-content;
+    }
+    .auth-google { color: #ea4335; font-weight: bold; }
+    .auth-facebook { color: #1877f2; font-weight: bold; }
+    .auth-email { color: #65cc00; font-weight: bold; }
+      
+    .profile-menu-links {
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
     .profile-link {
-      display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #cbd5e1;
-      text-decoration: none; font-size: 13px; font-weight: 500; border-radius: 8px; transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: 0.2s;
     }
-    .profile-link:hover { background: rgba(0, 102, 255, 0.1); color: var(--primary-blue); }
+    .profile-link:hover {
+      background: rgba(101, 204, 0, 0.08);
+      color: #65cc00;
+    }
     .logout-btn-new {
-      width: 100%; height: 36px; background: transparent; border: 1px solid #ef4444; color: #ef4444;
-      border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
+      width: 100%;
+      height: 38px;
+      background: transparent;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.2s;
     }
-    .logout-btn-new:hover { background: #ef4444; color: #fff; }
+    .logout-btn-new:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+    html[dir="rtl"] .user-profile-dropdown {
+      right: auto;
+      left: 0;
+      text-align: right;
+    }
+    html[dir="rtl"] .profile-header {
+      flex-direction: row-reverse;
+    }
     .foxHidden { display: none !important; }
+    /* ================= END USER PROFILE STYLE ================= */
 
-    #product-details-view {
-      display: none; padding: 30px 20px; max-width: 1150px; margin: 0 auto;
+    /* ================= START MODERN CART STYLE ================= */
+    .cartDrawer {
+      width: 420px;
+      background: #090f17;
+      border-left: 1px solid rgba(101, 204, 0, 0.15);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
-    .back-to-store-btn {
-      background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600;
-      margin-bottom: 25px; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s;
+    html[dir="rtl"] .cartDrawer {
+      border-left: none;
+      border-right: 1px solid rgba(101, 204, 0, 0.15);
     }
-    .back-to-store-btn:hover {
-      background: rgba(0, 102, 255, 0.15); border-color: var(--primary-blue);
-      color: var(--primary-blue); transform: translateX(-3px);
+    .cartItem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: 0.3s;
     }
-    .details-main-grid {
-      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px;
-      background: var(--bg-card); border: 1px solid var(--border-color);
-      border-radius: 20px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    .cartItem:hover {
+      border-color: rgba(101, 204, 0, 0.3);
+      background: rgba(101, 204, 0, 0.02);
     }
-    .details-img-box {
-      background: #050a14; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden;
+    .cartItem-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .details-img-box img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 10px; transition: transform 0.3s ease; }
-    .details-img-box img:hover { transform: scale(1.02); }
-    .details-info-box { display: flex; flex-direction: column; justify-content: center; }
-    .details-info-box h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; color: #fff; }
-    .details-price-tag { font-size: 26px; font-weight: 800; color: var(--primary-blue); margin-bottom: 16px; }
-    .details-description {
-      color: var(--text-muted); font-size: 15px; line-height: 1.7; margin-bottom: 24px;
-      border-right: 3px solid var(--primary-blue); padding-right: 12px;
+    .cartItem-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .quantity-selector {
-      display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
-      background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.05); width: fit-content;
+    .cartItem-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
     }
-    .quantity-selector span { font-weight: 600; font-size: 14px; color: var(--text-muted); }
-    .qty-controls { display: flex; align-items: center; background: var(--bg-dark); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; overflow: hidden; }
-    .qty-btn { background: transparent; border: none; color: #fff; padding: 6px 14px; cursor: pointer; font-size: 15px; transition: 0.2s; }
-    .qty-btn:hover { background: var(--primary-blue); }
-    .qty-input { width: 40px; text-align: center; background: transparent; border: none; color: #fff; font-weight: 700; font-size: 15px; outline: none; }
-    
-    .terms-box { background: rgba(0, 102, 255, 0.04); border: 1px solid rgba(0, 102, 255, 0.15); border-radius: 12px; padding: 16px; margin-bottom: 25px; }
-    .terms-box h4 { font-size: 14px; color: var(--primary-blue); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
-    .terms-box ul { margin: 0; padding-right: 18px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
-    html[dir="ltr"] .terms-box ul { padding-right: 0; padding-left: 18px; }
-    .terms-box li { margin-bottom: 4px; }
-
-    .btn-pay-now-pro {
-      width: 100%; background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-hover) 100%);
-      color: #ffffff; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s;
-      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.3);
+    .cartItem-cat {
+      font-size: 11px;
+      color: #94a3b8;
     }
-    .btn-pay-now-pro:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 102, 255, 0.5); }
-
-    .similar-products-section { margin-top: 45px; }
-    .similar-products-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
-    .similar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.25s ease; }
-    .similar-card:hover { transform: translateY(-4px); border-color: var(--primary-blue); box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2); }
-    .similar-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
-    .similar-card h5 { font-size: 14px; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .similar-card p { font-size: 14px; color: var(--primary-blue); font-weight: 800; }
-
-    @media(max-width: 900px) { .details-main-grid { grid-template-columns: 1fr; padding: 20px; gap: 20px; } }
-
-    .cartDrawer { width: 420px; background: var(--bg-card); border-right: 1px solid var(--border-color); box-shadow: 10px 0 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
-    html[dir="ltr"] .cartDrawer { border-right: none; border-left: 1px solid var(--border-color); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-    #cartItems { flex: 1; overflow-y: auto; padding: 15px; }
-    .cart-item-card {
-      display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 10px; margin-bottom: 10px;
+    .cartItem-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: #65cc00;
     }
-    .cart-item-img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #000; }
-    .cart-item-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-    .cart-item-title { font-size: 13px; font-weight: 700; color: #fff; }
-    .cart-item-price { font-size: 13px; font-weight: 800; color: var(--primary-blue); }
-    .cart-item-qty { font-size: 12px; color: var(--text-muted); }
-    .cart-item-del {
-      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444;
-      width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    .cartItem-remove-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .cartItem-remove-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .coupon .checkoutForm {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .coupon input, .checkoutForm input {
-      background: var(--bg-dark) !important; border: 1px solid rgba(255,255,255,0.08) !important;
-      color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; width: 100%; box-sizing: border-box;
+      background: #0d1722 !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      padding: 10px 12px !important;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .payment-logos-container { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; }
-    .pay-mini-logo { height: 14px; display: block; }
+    .coupon input:focus, .checkoutForm input:focus {
+      border-color: #65cc00 !important;
+      outline: none;
+    }
+      
+    .btn-pay-now-pro {
+      width: 100%;
+      background: linear-gradient(135deg, #65cc00 0%, #4da200 100%);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
+    }
+    .btn-pay-now-pro:hover {
+      background: linear-gradient(135deg, #76de0c 0%, #59ba00 100%);
+      box-shadow: 0 6px 20px rgba(101, 204, 0, 0.4);
+      transform: translateY(-1px);
+    }
+    .payment-logos-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .pay-mini-logo {
+      height: 14px;
+      display: block;
+    }
+    /* ================= END MODERN CART STYLE ================= */
+
+    /* ================= START MOBILE RESPONSIVE OVERRIDES ================= */
+    .mobile-bottom-nav { display: none; }
 
     @media (max-width: 991px) {
-      body { padding-bottom: 65px !important; }
-      .topbar { flex-wrap: wrap; padding: 10px 12px !important; gap: 10px; }
-      .mainNav { display: none !important; }
-      .topSearch { order: 3; width: 100% !important; margin: 5px 0 0 0 !important; }
-      .topSearch input { width: 100% !important; }
-      .navActions { margin-right: auto; gap: 6px; }
-      html[dir="ltr"] .navActions { margin-right: 0; margin-left: auto; }
-      .cartDrawer { width: 100% !important; }
+      body {
+        padding-bottom: 65px !important;
+      }
+      .topbar {
+        flex-wrap: wrap;
+        padding: 10px 12px !important;
+        gap: 10px;
+      }
+      .mainNav {
+        display: none !important;
+      }
+      .topSearch {
+        order: 3;
+        width: 100% !important;
+        margin: 5px 0 0 0 !important;
+      }
+      .topSearch input {
+        width: 100% !important;
+      }
+      .navActions {
+        margin-left: auto;
+        gap: 6px;
+      }
+      html[dir="rtl"] .navActions {
+        margin-left: 0;
+        margin-right: auto;
+      }
+      .langBtn, .loginBtn, .user-profile-btn, .cartBtn {
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+      }
+      .cartDrawer {
+        width: 100% !important;
+      }
+      .user-profile-dropdown {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 65px !important;
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        box-sizing: border-box;
+      }
+      .hero-title { font-size: 26px !important; }
+      .hero-subtitle { font-size: 14px !important; }
+      .hero-cta-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-cta-buttons button { width: 100%; }
+      .sectionHead {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+      }
+      .filters {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .filters input, .filters select {
+        flex: 1 1 100%;
+      }
+      .paymentMethods {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .benefits {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+      }
+
       .mobile-bottom-nav {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-        background: var(--bg-card); border-top: 1px solid var(--border-color); z-index: 9999;
-        justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #090f17;
+        border-top: 1px solid rgba(101, 204, 0, 0.2);
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
       }
       .mobile-nav-item {
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        color: var(--text-muted); text-decoration: none; font-size: 11px; gap: 4px; flex: 1; height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 11px;
+        gap: 4px;
+        flex: 1;
+        height: 100%;
+        transition: 0.2s;
       }
       .mobile-nav-item i { font-size: 18px; }
-      .mobile-nav-item.active { color: var(--primary-blue); background: rgba(0, 102, 255, 0.05); }
+      .mobile-nav-item:hover, .mobile-nav-item.active {
+        color: #65cc00;
+        background: rgba(101, 204, 0, 0.05);
+      }
     }
-    .mobile-bottom-nav { display: none; }
+    /* ================= END MOBILE RESPONSIVE OVERRIDES ================= */
   </style>
 </head>
 <body>
-
-  <!-- شاشة التحميل -->
-  <div id="splash-screen">
-    <div class="splash-logo-container">
-      <span class="typed-text">TECH GAMING</span>
-    </div>
-    <div class="splash-loader">
-      <div class="splash-loader-bar"></div>
-    </div>
-  </div>
+  <canvas id="stars"></canvas>
 
   <header class="topbar">
-    <a class="brand" href="/" onclick="showMainHome(); return false;">
-      <span>TECH <b class="blue-text">GAMING</b></span>
+    <a class="brand" href="/">
+      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
+      <span>FOX <b class="green-text">GAMES</b></span>
     </a>
 
-    <nav class="mainNav" id="desktopNavLinks">
-      <a class="nav-link active" href="#home" onclick="showMainHome()" data-lang-ar="الرئيسية" data-lang-en="Home">الرئيسية</a>
-      <a class="nav-link" href="#products" onclick="showMainHome()" data-lang-ar="المتجر" data-lang-en="Store">المتجر</a>
-      <a class="nav-link" href="#trending" onclick="showMainHome()" data-lang-ar="الأقسام" data-lang-en="Categories">الأقسام</a>
-      <a class="nav-link" href="#support" onclick="showMainHome()" data-lang-ar="الدعم الفني" data-lang-en="Support">الدعم الفني</a>
+    <nav class="mainNav">
+      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
     </nav>
 
     <div class="topSearch">
-      <input id="topSearchInput" placeholder="ابحث عن المنتجات..." data-lang-ph-ar="ابحث عن المنتجات..." data-lang-ph-en="Search for products...">
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()" data-i18n-holder="search_placeholder">
       <span class="search-icon-btn"><i class="fas fa-search"></i></span>
     </div>
 
     <div class="navActions">
-      <button onclick="toggleAppLanguage()" class="langBtn" id="langToggleBtn">English</button>
-      <button onclick="openAuth()" title="حسابي" class="loginBtn" id="mainLoginBtn" data-lang-ar="تسجيل الدخول" data-lang-en="Login">تسجيل الدخول</button>
+      <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
+        
+      <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
         
       <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
         <button class="user-profile-btn" id="userProfileTrigger">
-          <i class="fas fa-user-circle"></i> <span id="topNavUserName" data-lang-ar="حسابي" data-lang-en="My Account">حسابي</span>
+          <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
         </button>
           
         <div class="user-profile-dropdown" id="userProfileDropdown">
           <div class="profile-header">
             <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
             <div class="profile-info">
-              <span class="profile-name" id="dropdownUserName">لاعب</span>
+              <span class="profile-name" id="dropdownUserName">Gamer User</span>
               <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
             </div>
           </div>
           <div class="profile-menu-links">
-            <a href="#products" onclick="showMainHome()" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-lang-ar="طلباتي وشحناتي" data-lang-en="My Orders">طلباتي وشحناتي</span></a>
-            <a href="#support" onclick="showMainHome()" class="profile-link"><i class="fas fa-headset"></i> <span data-lang-ar="الدعم الفني" data-lang-en="Support">الدعم الفني</span></a>
+            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
           </div>
           <button class="logout-btn-new" id="profileLogoutBtn">
-            <i class="fas fa-sign-out-alt"></i> <span data-lang-ar="تسجيل الخروج" data-lang-en="Logout">تسجيل الخروج</span>
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
           </button>
         </div>
       </div>
 
-      <button onclick="toggleCart(event)" title="السلة" class="cartBtn">
-        <i class="fas fa-shopping-cart"></i> <span data-lang-ar="السلة" data-lang-en="Cart">السلة</span> 
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">
+        <i class="fas fa-shopping-cart"></i> <span data-i18n="btn_cart">Cart</span> 
         <b id="cartCountTop" class="cart-badge">0</b>
       </button>
     </div>
   </header>
 
-  <!-- الصفحة الرئيسية -->
   <main id="home" class="content">
+      
     <section class="hero-banner-section">
       <div class="hero-banner-card">
         <div class="hero-content">
-          <h1 class="hero-title" data-lang-ar="بطاقات الألعاب وشحن الشدات" data-lang-en="Gaming Cards & Top-ups">بطاقات الألعاب وشحن الشدات</h1>
-          <p class="hero-subtitle" data-lang-ar="شحن فوري، دفع آمن، وأفضل الأسعار في مصر." data-lang-en="Instant top-up, secure payment, and best prices.">شحن فوري، دفع آمن، وأفضل الأسعار في مصر.</p>
+          <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
+            
           <div class="hero-cta-buttons">
-            <button onclick="scrollToId('products')" class="shop-now-btn"><i class="fas fa-shopping-bag"></i> <span data-lang-ar="تسوق الان" data-lang-en="Shop Now">تسوق الان</span></button>
-            <button onclick="scrollToId('trending')" class="browse-cat-btn"><i class="fas fa-th-large"></i> <span data-lang-ar="تصفح الأقسام" data-lang-en="Categories">تصفح الأقسام</span></button>
+            <button onclick="scrollToId('products')" class="shop-now-btn">
+              <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
+            </button>
+            <button onclick="scrollToId('trending')" class="browse-cat-btn">
+              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+            </button>
           </div>
+
+          <div class="hero-features">
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+          </div>
+        </div>
+
+        <div class="banner-game-logos">
+          <span class="game-logo-item">PUBG MOBILE</span>
+          <span class="game-logo-item">VALORANT</span>
+          <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
+          <span class="game-logo-item"><i class="fab fa-playstation"></i> PlayStation</span>
+          <span class="game-logo-item"><i class="fab fa-xbox"></i> XBOX</span>
         </div>
       </div>
     </section>
 
     <section class="section" id="products">
       <div class="sectionHead reveal">
-        <div><h2 data-lang-ar="المنتجات الأكثر طلباً" data-lang-en="Most Popular Products">المنتجات الأكثر طلباً</h2></div>
+        <div>
+          <h2 data-i18n="title_popular">Popular Products</h2>
+        </div>
         <div class="filters">
-          <input id="searchInput" oninput="renderProducts()" placeholder="بحث..." data-lang-ph-ar="بحث..." data-lang-ph-en="Search...">
+          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam..." data-i18n-holder="search_placeholder">
           <select id="categoryFilter" onchange="renderProducts()"></select>
           <select id="sortFilter" onchange="renderProducts()">
-            <option value="popular" data-lang-ar="الأكثر طلباً" data-lang-en="Most Popular">الأكثر طلباً</option>
-            <option value="low" data-lang-ar="السعر: من الأقل للأعلى" data-lang-en="Price: Low to High">السعر: من الأقل للأعلى</option>
-            <option value="high" data-lang-ar="السعر: من الأعلى للأقل" data-lang-en="Price: High to Low">السعر: من الأعلى للأقل</option>
+            <option value="popular" data-i18n="sort_popular">Most Popular</option>
+            <option value="low" data-i18n="sort_low">Price Low</option>
+            <option value="high" data-i18n="sort_high">Price High</option>
           </select>
         </div>
       </div>
       <div class="productGrid" id="productGrid"></div>
     </section>
-  </main>
 
-  <!-- صفحة تفاصيل المنتج -->
-  <div id="product-details-view">
-    <button class="back-to-store-btn" onclick="showMainHome()"><i class="fas fa-arrow-right"></i> <span data-lang-ar="العودة للمتجر" data-lang-en="Back to Store">العودة للمتجر</span></button>
-    
-    <div class="details-main-grid">
-      <div class="details-img-box">
-        <img id="detailImg" src="" alt="Product">
+    <section class="section" id="trending">
+      <div class="sectionHead reveal">
+        <div>
+          <h2 data-i18n="title_categories">Shop by Categories</h2>
+        </div>
+        <button class="view-all-btn" onclick="resetCategoryFilter()" data-i18n="btn_view_all">View All <i class="fas fa-arrow-right"></i></button>
       </div>
-      <div class="details-info-box">
-        <h1 id="detailTitle">اسم المنتج</h1>
-        <div class="details-price-tag" id="detailPrice">0 EGP</div>
-        <p class="details-description" id="detailDesc" data-lang-ar="شحن فوري وآمن وموثوق لجميع الألعاب والبطاقات الرقمية عبر تيك جيمينج." data-lang-en="Instant, secure, and reliable top-up for all games and digital cards via Tech Gaming.">شحن فوري وآمن وموثوق لجميع الألعاب والبطاقات الرقمية عبر تيك جيمينج.</p>
+      <div class="trendGrid" id="categoryGrid"></div>
+    </section>
 
-        <!-- عداد الكمية -->
-        <div class="quantity-selector">
-          <span data-lang-ar="الكمية:" data-lang-en="Quantity:">الكمية:</span>
-          <div class="qty-controls">
-            <button class="qty-btn" onclick="changeQuantity(-1)">-</button>
-            <input type="text" id="detailQtyInput" class="qty-input" value="1" readonly>
-            <button class="qty-btn" onclick="changeQuantity(1)">+</button>
+    <section class="benefits">
+      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
+    </section>
+
+    <section class="section" id="checkout">
+      <div class="checkoutShowcase reveal">
+        <div>
+          <h2 data-i18n="check_title">Secure Payment Methods</h2>
+          <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
+        </div>
+          
+        <div class="paymentMethods">
+          <div class="method-card" title="Visa">
+            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <span>Visa</span>
+          </div>
+          <div class="method-card" title="MasterCard">
+            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 28px;"></i>
+            <span>MasterCard</span>
+          </div>
+          <div class="method-card" title="Vodafone Cash">
+            <i class="fas fa-wallet" style="color: #e60000; font-size: 22px;"></i>
+            <span>Vodafone Cash</span>
+          </div>
+          <div class="method-card" title="Fawry">
+            <i class="fas fa-money-bill-wave" style="color: #ffcc00; font-size: 22px;"></i>
+            <span>Fawry</span>
+          </div>
+          <div class="method-card" title="InstaPay">
+            <i class="fas fa-university" style="color: #00bfa5; font-size: 22px;"></i>
+            <span>InstaPay</span>
           </div>
         </div>
 
-        <!-- الشروط والأحكام -->
-        <div class="terms-box">
-          <h4 data-lang-ar="<i class='fas fa-shield-alt'></i> الشروط والأحكام وسياسة الضمان" data-lang-en="<i class='fas fa-shield-alt'></i> Terms, Conditions & Warranty"><i class="fas fa-shield-alt"></i> الشروط والأحكام وسياسة الضمان</h4>
-          <ul>
-            <li data-lang-ar="الكود أو الشحن يتم تسليمه فوراً بعد إتمام عملية الدفع بنجاح." data-lang-en="Codes or top-ups are delivered instantly after successful payment.">الكود أو الشحن يتم تسليمه فوراً بعد إتمام عملية الدفع بنجاح.</li>
-            <li data-lang-ar="تأكد من صحة بياناتك البريدية أو رقم الهاتف لضمان وصول الطلب." data-lang-en="Make sure your email or phone number is correct to ensure order delivery.">تأكد من صحة بياناتك البريدية أو رقم الهاتف لضمان وصول الطلب.</li>
-            <li data-lang-ar="المنتجات الرقمية لا تُستبدل ولا تُسترجع بعد الاستلام لضمان الأمان." data-lang-en="Digital products cannot be exchanged or refunded after delivery for security.">المنتجات الرقمية لا تُستبدل ولا تُسترجع بعد الاستلام لضمان الأمان.</li>
-          </ul>
-        </div>
-
-        <button class="btn-pay-now-pro" id="detailAddToCartBtn">
-          <i class="fas fa-cart-plus"></i> <span data-lang-ar="إضافة للسلة والدفع الفوري" data-lang-en="Add to Cart & Instant Checkout">إضافة للسلة والدفع الفوري</span>
-        </button>
       </div>
-    </div>
+    </section>
 
-    <!-- منتجات مشابهة -->
-    <div class="similar-products-section">
-      <h3 data-lang-ar="<i class='fas fa-fire'></i> منتجات مشابهة قد تعجبك" data-lang-en="<i class='fas fa-fire'></i> Similar Products You Might Like"><i class="fas fa-fire"></i> منتجات مشابهة قد تعجبك</h3>
-      <div class="similar-grid" id="similarProductsGrid"></div>
-    </div>
-  </div>
+    <section class="section" id="support">
+      <div class="supportBox reveal">
+        <div>
+          <h2 data-i18n="sup_title">Need Help With Your Order?</h2>
+          <p data-i18n="sup_desc">Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
+        </div>
+        <div class="supportActions">
+          <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <aside class="cartDrawer" id="cartDrawer">
-    <div class="cartHead" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
-      <h3 style="margin:0; font-size:18px;" data-lang-ar="سلة المشتريات" data-lang-en="Shopping Cart">سلة المشتريات</h3>
-     <button type="button" onclick="toggleCart(event);" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
+    <div class="cartHead">
+      <h3 data-i18n="cart_title">Your Cart</h3>
+      <button onclick="toggleCart()">×</button>
     </div>
     <div id="cartItems"></div>
-    <div class="coupon" style="padding: 12px 15px; display:flex; gap:8px;">
-      <input id="couponInput" placeholder="أدخل كود الخصم..." data-lang-ph-ar="أدخل كود الخصم..." data-lang-ph-en="Enter coupon code...">
-      <button onclick="applyCoupon()" style="background:var(--primary-blue); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700;" data-lang-ar="تطبيق" data-lang-en="Apply">تطبيق</button>
+    <div class="coupon">
+      <input id="couponInput" placeholder="أدخل كود الخصم هنا...">
+      <button onclick="applyCoupon()" data-i18n="btn_apply">Apply</button>
     </div>
-    <div class="summary" style="padding: 12px 15px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
-      <p style="margin:0; display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted);"><span data-lang-ar="المجموع الفرعي" data-lang-en="Subtotal">المجموع الفرعي</span><b id="subtotal" style="color:#fff;">0 EGP</b></p>
-      <p style="margin:0; display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted);"><span data-lang-ar="الخصم" data-lang-en="Discount">الخصم</span><b id="discount" style="color:#fff;">0 EGP</b></p>
-      <p class="grand" style="margin:5px 0 0 0; display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:var(--primary-blue);"><span data-lang-ar="الإجمالي النهائي" data-lang-en="Grand Total">الإجمالي النهائي</span><b id="total">0 EGP</b></p>
+    <div class="summary">
+      <p><span data-i18n="cart_subtotal">Subtotal</span><b id="subtotal">0 EGP</b></p>
+      <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
+      <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
     </div>
     
-    <div class="checkoutForm" style="padding: 15px; display:flex; flex-direction:column; gap:10px;">
-      <input id="customerName" placeholder="الاسم الكامل" data-lang-ph-ar="الاسم الكامل" data-lang-ph-en="Full Name" required>
-      <input id="customerPhone" placeholder="رقم الهاتف" data-lang-ph-ar="رقم الهاتف" data-lang-ph-en="Phone Number" required>
-      <input type="email" id="customerEmail" placeholder="البريد الإلكتروني" data-lang-ph-ar="البريد الإلكتروني" data-lang-ph-en="Email Address" required>
+    <div class="checkoutForm">
+      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name" required>
+      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
+      <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
       
-      <button class="btn-pay-now-pro" onclick="checkoutSecure()">
+      <button class="btn-pay-now-pro" onclick="checkout()">
         <div class="payment-logos-container">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="pay-mini-logo">
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="pay-mini-logo">
         </div>
-        <span data-lang-ar="إتمام الدفع الآن" data-lang-en="Checkout Now">إتمام الدفع الآن</span>
+        <span data-i18n="btn_pay_now">Pay Now</span>
       </button>
+      
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 4px;">
+        <i class="fa-solid fa-shield-halved" style="color: #65cc00;"></i>
+        <span>Secure Secure 256-bit Connection</span>
+      </div>
     </div>
   </aside>
 
-  <!-- القائمة السفلية للهواتف -->
   <nav class="mobile-bottom-nav">
-    <a href="#home" class="mobile-nav-item active" onclick="showMainHome()"><i class="fas fa-home"></i><span data-lang-ar="الرئيسية" data-lang-en="Home">الرئيسية</span></a>
-    <a href="#products" class="mobile-nav-item" onclick="showMainHome()"><i class="fas fa-gamepad"></i><span data-lang-ar="المتجر" data-lang-en="Store">المتجر</span></a>
-    <a href="#support" class="mobile-nav-item" onclick="showMainHome()"><i class="fas fa-headset"></i><span data-lang-ar="الدعم" data-lang-en="Support">الدعم</span></a>
+    <a href="#home" class="mobile-nav-item active">
+      <i class="fas fa-home"></i>
+      <span data-i18n="nav_home">Home</span>
+    </a>
+    <a href="#products" class="mobile-nav-item">
+      <i class="fas fa-gamepad"></i>
+      <span data-i18n="nav_store">Store</span>
+    </a>
+    <a href="#trending" class="mobile-nav-item">
+      <i class="fas fa-th-large"></i>
+      <span data-i18n="nav_categories">Categories</span>
+    </a>
+    <a href="#support" class="mobile-nav-item">
+      <i class="fas fa-headset"></i>
+      <span data-i18n="nav_support">Support</span>
+    </a>
   </nav>
+
+  <div class="chat" id="chat">
+    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatBody">
+      <p>Hey gamer 👋 How can we help?</p>
+      <small>This is a demo chat widget.</small>
+    </div>
+    <div class="chatInput">
+      <input placeholder="Write message...">
+      <button>Send</button>
+    </div>
+  </div>
+  <button class="chatBubble" onclick="toggleChat()">💬</button>
+
+  <footer>
+    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Fox Games Market</p>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    
   <script src="/firebase-config.js"></script>
+    
   <script src="/js/store-firebase.js"></script>
   <script src="/js/store-account.js"></script>
   <script src="/js/script.js"></script>
 
   <script>
-    let currentAppLang = localStorage.getItem('tech_gaming_lang') || 'ar';
-    let localCart = JSON.parse(localStorage.getItem('tech_gaming_cart')) || [];
-    let discountPercent = 0;
-    let sessionLogoutTimer = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainLoginBtn = document.getElementById('mainLoginBtn');
+      const userProfileWrapper = document.getElementById('userProfileWrapper');
+      const userProfileTrigger = document.getElementById('userProfileTrigger');
+      const userProfileDropdown = document.getElementById('userProfileDropdown');
+        
+      const topNavUserName = document.getElementById('topNavUserName');
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      const profileUserAvatar = document.getElementById('profileUserAvatar');
+      const authMethodBadge = document.getElementById('authMethodBadge');
+      const profileLogoutBtn = document.getElementById('profileLogoutBtn');
 
-    window.addEventListener('load', () => {
-      applyLanguage(currentAppLang);
-      updateLocalCartUI();
-      setupSessionTimeoutWatcher();
-
-      setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-          splash.style.opacity = '0';
-          setTimeout(() => splash.style.display = 'none', 600);
+      function cleanOldProfiles() {
+        if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+          const btnText = mainLoginBtn.innerText.trim().toLowerCase();
+          if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
         }
-      }, 2000);
-    });
+          
+        const actionsContainer = document.querySelector('.navActions');
+        if (actionsContainer) {
+          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
+          textButtons.forEach(btn => {
+            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
+              btn.remove();
+            }
+          });
+        }
+      }
 
-    // مراقبة تسجيل الدخول وجدولة تسجيل الخروج التلقائي بعد ساعة (3600000 مللي ثانية)
-    function setupSessionTimeoutWatcher() {
       if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged(user => {
+        firebase.auth().onAuthStateChanged((user) => {
           if (user) {
-            // التحقق من وجود وقت سابق أو تعيين وقت جديد لتسجيل الدخول
-            let loginTime = localStorage.getItem('tech_login_timestamp');
-            let now = Date.now();
-            
-            if (!loginTime) {
-              loginTime = now;
-              localStorage.setItem('tech_login_timestamp', loginTime);
+            if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
+            if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
+
+            const displayName = user.displayName || "Gamer";
+            const email = user.email || "No Email";
+            const photoURL = user.photoURL || "https://via.placeholder.com/150";
+
+            if (topNavUserName) topNavUserName.innerText = displayName.split(' ')[0]; 
+            if (dropdownUserName) dropdownUserName.innerText = displayName;
+            if (dropdownUserEmail) dropdownUserEmail.innerText = email;
+            if (profileUserAvatar) profileUserAvatar.src = photoURL;
+
+            let providerId = "email";
+            if (user.providerData && user.providerData.length > 0) {
+              providerId = user.providerData[0].providerId;
             }
 
-            let elapsedTime = now - parseInt(loginTime);
-            let oneHour = 60 * 60 * 1000; // ساعة واحدة
-
-            if (elapsedTime >= oneHour) {
-              // انقضت أكثر من ساعة، يتم تسجيل الخروج فورا
-              triggerAutoLogout();
-            } else {
-              // جدولة الخروج بالوقت المتبقي
-              let remainingTime = oneHour - elapsedTime;
-              if (sessionLogoutTimer) clearTimeout(sessionLogoutTimer);
-              sessionLogoutTimer = setTimeout(() => {
-                triggerAutoLogout();
-              }, remainingTime);
+            if (authMethodBadge) {
+              if (providerId === 'google.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-google"><i class="fab fa-google"></i> Google</span>`;
+              } else if (providerId === 'facebook.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-facebook"><i class="fab fa-facebook"></i> Facebook</span>`;
+              } else {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-email"><i class="fas fa-envelope"></i> حسابك</span>`;
+              }
             }
           } else {
-            localStorage.removeItem('tech_login_timestamp');
-            if (sessionLogoutTimer) clearTimeout(sessionLogoutTimer);
+            if (mainLoginBtn) {
+              mainLoginBtn.classList.remove('foxHidden');
+              mainLoginBtn.innerText = "Login";
+            }
+            if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
+          }
+          cleanOldProfiles();
+        });
+      }
+
+      const observer = new MutationObserver(() => {
+        cleanOldProfiles();
+        if (firebase.auth().currentUser) {
+          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
+            userProfileWrapper.classList.remove('foxHidden');
+          }
+        }
+      });
+
+      const navActionsContainer = document.querySelector('.navActions');
+      if (navActionsContainer) {
+        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
+      }
+
+      if (userProfileTrigger && userProfileDropdown) {
+        userProfileTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userProfileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', () => {
+          userProfileDropdown.classList.remove('active');
+        });
+      }
+
+      if (profileLogoutBtn) {
+        profileLogoutBtn.addEventListener('click', () => {
+          if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut().then(() => {
+              window.location.reload();
+            }).catch((error) => {
+              console.error("Logout Error: ", error);
+            });
           }
         });
       }
-    }
+    });
 
-    function triggerAutoLogout() {
-      if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().signOut().then(() => {
-          localStorage.removeItem('tech_login_timestamp');
-          Swal.fire({
-            icon: 'info',
-            title: currentAppLang === 'ar' ? 'انانتهت صلاحية الجلسة' : 'Session Expired',
-            text: currentAppLang === 'ar' ? 'تم تسجيل خروجك تلقائياً بعد مرور ساعة. يرجى تسجيل الدخول مرة أخرى.' : 'You have been automatically logged out after 1 hour. Please login again.',
-            confirmButtonColor: '#0066ff'
-          }).then(() => {
-            if (typeof openAuth === 'function') openAuth();
-          });
-        });
-      }
-    }
-
-    function toggleAppLanguage() {
-      currentAppLang = currentAppLang === 'ar' ? 'en' : 'ar';
-      localStorage.setItem('tech_gaming_lang', currentAppLang);
-      applyLanguage(currentAppLang);
-    }
-
-    function applyLanguage(lang) {
-      const htmlRoot = document.getElementById('htmlRoot');
-      const langBtn = document.getElementById('langToggleBtn');
-
-      if (lang === 'en') {
-        htmlRoot.setAttribute('dir', 'ltr');
-        htmlRoot.setAttribute('lang', 'en');
-        if(langBtn) langBtn.innerText = 'عربي';
-      } else {
-        htmlRoot.setAttribute('dir', 'rtl');
-        htmlRoot.setAttribute('lang', 'ar');
-        if(langBtn) langBtn.innerText = 'English';
-      }
-
-      document.querySelectorAll('[data-lang-ar]').forEach(el => {
-        let text = el.getAttribute(`data-lang-${lang}`);
-        if (text) el.innerHTML = text;
-      });
-
-      document.querySelectorAll('[data-lang-ph-ar]').forEach(el => {
-        let ph = el.getAttribute(`data-lang-ph-${lang}`);
-        if (ph) el.placeholder = ph;
-      });
-    }
-
-    function changeQuantity(amount) {
-      const input = document.getElementById('detailQtyInput');
-      let qty = parseInt(input.value) + amount;
-      if (qty < 1) qty = 1;
-      if (qty > 10) qty = 10;
-      input.value = qty;
-    }
-
-    function openProductDetails(product) {
-      document.getElementById('home').style.display = 'none';
-      document.getElementById('product-details-view').style.display = 'block';
-      window.scrollTo(0, 0);
-
-      document.getElementById('detailImg').src = product.image || product.img || 'https://via.placeholder.com/300';
-      document.getElementById('detailTitle').innerText = product.name || product.title || 'Digital Product';
-      document.getElementById('detailPrice').innerText = (product.price || 0) + " EGP";
-      document.getElementById('detailQtyInput').value = 1;
-
-      const addBtn = document.getElementById('detailAddToCartBtn');
-      addBtn.onclick = () => {
-        const qty = parseInt(document.getElementById('detailQtyInput').value) || 1;
+    // دوال عرض الأقسام وتعبئتها آلياً
+    function populateCategories(products) {
+        const categoryFilter = document.getElementById('categoryFilter');
+        const categoryGrid = document.getElementById('categoryGrid');
         
-        let existing = localCart.find(item => (item.id === product.id || item.name === product.name));
-        if (existing) {
-          existing.quantity += qty;
-        } else {
-          localCart.push({
-            id: product.id || Date.now(),
-            name: product.name || product.title || 'Digital Product',
-            price: parseFloat(product.price) || 0,
-            image: product.image || product.img || 'https://via.placeholder.com/150',
-            quantity: qty
-          });
+        if (!categoryFilter || !categoryGrid) return;
+
+        const categories = [...new Set(products.map(p => p.category))].filter(Boolean);
+
+        let filterHTML = '<option value="">All Categories</option>';
+        categories.forEach(cat => {
+            filterHTML += `<option value="${cat}">${cat}</option>`;
+        });
+        categoryFilter.innerHTML = filterHTML;
+
+        let gridHTML = '';
+        categories.forEach(cat => {
+            const sampleProduct = products.find(p => p.category === cat);
+            const catImg = sampleProduct && sampleProduct.image ? sampleProduct.image : 'https://via.placeholder.com/150';
+            
+            gridHTML += `
+                <div class="trend-card" onclick="filterByCategory('${cat}')" style="cursor: pointer; background: #0d1722; border: 1px solid rgba(101,204,0,0.2); border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s;">
+                    <img src="${catImg}" alt="${cat}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;">
+                    <h3 style="margin-top: 10px; color: #fff; font-size: 15px; font-weight: 700;">${cat}</h3>
+                </div>
+            `;
+        });
+        categoryGrid.innerHTML = gridHTML;
+    }
+
+    function filterByCategory(catName) {
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.value = catName;
+            if (typeof renderProducts === 'function') {
+                renderProducts();
+            }
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
         }
-
-        localStorage.setItem('tech_gaming_cart', JSON.stringify(localCart));
-        updateLocalCartUI();
-        toggleCartDrawer(true);
-      };
-
-      renderSimilarProducts(product);
     }
-
-    // تفعيل الكود بشكل احترافي مع رسائل الخطأ والنجاح
-    function applyCoupon() {
-      const codeInput = document.getElementById('couponInput');
-      const val = codeInput.value.trim().toUpperCase();
-
-      // مثال لكود خصم صحيح (يمكنك جعله أي كود تريده مثل TECH10)
-      if (val === 'TECH10' || val === 'DISCOUNT10') {
-        discountPercent = 10;
-        Swal.fire({
-          icon: 'success',
-          title: currentAppLang === 'ar' ? 'تم تفعيل الخصم بنجاح!' : 'Discount Applied!',
-          text: currentAppLang === 'ar' ? 'تم تطبيق خصم بقيمة 10% على إجمالي السلة.' : 'A 10% discount has been applied to your cart.',
-          timer: 2000,
-          showConfirmButton: false,
-          background: '#0c162d',
-          color: '#fff'
-        });
-        updateLocalCartUI();
-      } else {
-        discountPercent = 0;
-        Swal.fire({
-          icon: 'error',
-          title: currentAppLang === 'ar' ? 'كود الخصم غير صحيح' : 'Invalid Coupon Code',
-          text: currentAppLang === 'ar' ? 'عذراً، كود الخصم الذي أدخلته غير صالح أو منتهي الصلاحية.' : 'Sorry, the coupon code you entered is invalid or expired.',
-          confirmButtonColor: '#0066ff',
-          background: '#0c162d',
-          color: '#fff'
-        });
-        updateLocalCartUI();
-      }
-    }
-
-    function updateLocalCartUI() {
-      const container = document.getElementById('cartItems');
-      const countBadge = document.getElementById('cartCountTop');
-      const subtotalEl = document.getElementById('subtotal');
-      const discountEl = document.getElementById('discount');
-      const totalEl = document.getElementById('total');
-      
-      if (!container) return;
-      container.innerHTML = '';
-
-      let totalCount = 0;
-      let subtotal = 0;
-
-      if (localCart.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;" data-lang-ar="سلة المشتريات فارغة" data-lang-en="Your cart is empty">سلة المشتريات فارغة</div>`;
-      } else {
-        localCart.forEach((item, index) => {
-          totalCount += item.quantity;
-          subtotal += item.price * item.quantity;
-
-          const itemDiv = document.createElement('div');
-          itemDiv.className = 'cart-item-card';
-          itemDiv.innerHTML = `
-            <img src="${item.image}" class="cart-item-img" alt="">
-            <div class="cart-item-info">
-              <span class="cart-item-title">${item.name}</span>
-              <span class="cart-item-price">${item.price} EGP</span>
-              <span class="cart-item-qty">${currentAppLang === 'ar' ? 'الكمية: ' : 'Qty: '}${item.quantity}</span>
-            </div>
-            <button class="cart-item-del" onclick="removeLocalCartItem(${index})"><i class="fas fa-trash-alt"></i></button>
-          `;
-          container.appendChild(itemDiv);
-        });
-      }
-
-      let discountAmount = (subtotal * discountPercent) / 100;
-      let grandTotal = subtotal - discountAmount;
-
-      if (countBadge) countBadge.innerText = totalCount;
-      if (subtotalEl) subtotalEl.innerText = subtotal + " EGP";
-      if (discountEl) discountEl.innerText = discountAmount + " EGP";
-      if (totalEl) totalEl.innerText = grandTotal + " EGP";
-    }
-
-    function removeLocalCartItem(index) {
-      localCart.splice(index, 1);
-      localStorage.setItem('tech_gaming_cart', JSON.stringify(localCart));
-      updateLocalCartUI();
-    }
-
-    function toggleCartDrawer(forceOpen = false) {
-      const drawer = document.getElementById('cartDrawer');
-      if (!drawer) return;
-      if (forceOpen) {
-        drawer.classList.add('open');
-        drawer.style.transform = 'translateX(0)';
-      } else {
-        drawer.classList.toggle('open');
-        if (drawer.classList.contains('open')) {
-          drawer.style.transform = 'translateX(0)';
-        } else {
-          drawer.style.transform = currentAppLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
-        }
-      }
-    }
-
-    // إتمام الدفع مع إجبار تسجيل الحساب وتفريغ السلة فوراً بعد الشراء
-    function checkoutSecure() {
-      // 1. التحقق من تسجيل الدخول أولاً لإجبار العميل يمتلك حساب
-      const currentUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
-      if (!currentUser) {
-        Swal.fire({
-          icon: 'warning',
-          title: currentAppLang === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Login Required',
-          text: currentAppLang === 'ar' ? 'عذراً، لا يمكنك إتمام الشراء قبل تسجيل الدخول أو إنشاء حساب بالموقع.' : 'Sorry, you must log in or create an account to proceed with checkout.',
-          confirmButtonText: currentAppLang === 'ar' ? 'تسجيل الدخول' : 'Login',
-          confirmButtonColor: '#0066ff',
-          background: '#0c162d',
-          color: '#fff'
-        }).then((result) => {
-          if (result.isConfirmed && typeof openAuth === 'function') {
-            openAuth();
-          }
-        });
-        return;
-      }
-
-      // 2. التحقق من وجود منتجات في السلة
-      if (localCart.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: currentAppLang === 'ar' ? 'السلة فارغة' : 'Cart is Empty',
-          text: currentAppLang === 'ar' ? 'الرجاء إضافة منتجات إلى السلة قبل إتمام الدفع.' : 'Please add products to your cart before checking out.',
-          confirmButtonColor: '#0066ff',
-          background: '#0c162d',
-          color: '#fff'
-        });
-        return;
-      }
-
-      // 3. التحقق من إدخال الحقول المطلوبة
-      const name = document.getElementById('customerName').value.trim();
-      const phone = document.getElementById('customerPhone').value.trim();
-      const email = document.getElementById('customerEmail').value.trim();
-
-      if (!name || !phone || !email) {
-        Swal.fire({
-          icon: 'warning',
-          title: currentAppLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Data',
-          text: currentAppLang === 'ar' ? 'يرجى ملء جميع بيانات الشحن (الاسم، الهاتف، البريد الإلكتروني).' : 'Please fill in all shipping details.',
-          confirmButtonColor: '#0066ff',
-          background: '#0c162d',
-          color: '#fff'
-        });
-        return;
-      }
-
-      // نجاح عملية الشراء: تفريغ السلة فوراً واختفائها
-      Swal.fire({
-        icon: 'success',
-        title: currentAppLang === 'ar' ? 'تمت عملية الشراء بنجاح!' : 'Order Placed Successfully!',
-        text: currentAppLang === 'ar' ? 'شكراً لثقتك بنا، تم إرسال تفاصيل طلبك وشحنك الفوري.' : 'Thank you for your trust, your order details have been processed.',
-        confirmButtonColor: '#0066ff',
-        background: '#0c162d',
-        color: '#fff'
-      }).then(() => {
-        // تفريغ السلة بالكامل
-        localCart = [];
-        localStorage.removeItem('tech_gaming_cart');
-        document.getElementById('customerName').value = '';
-        document.getElementById('customerPhone').value = '';
-        document.getElementById('customerEmail').value = '';
-        document.getElementById('couponInput').value = '';
-        discountPercent = 0;
-        updateLocalCartUI();
-        toggleCartDrawer(); // إغلاق قائمة السلة
-      });
-    }
-
-    function renderSimilarProducts(currentProduct) {
-      const grid = document.getElementById('similarProductsGrid');
-      if(!grid) return;
-      grid.innerHTML = '';
-      
-      let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (window.allProducts || []);
-      const similar = allProds.filter(p => (p.id !== currentProduct.id)).slice(0, 4);
-      
-      similar.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'similar-card';
-        card.innerHTML = `
-          <img src="${p.image || p.img || 'https://via.placeholder.com/150'}" alt="${p.name || ''}">
-          <h5>${p.name || p.title || ''}</h5>
-          <p>${p.price || 0} EGP</p>
-        `;
-        card.onclick = () => openProductDetails(p);
-        grid.appendChild(card);
-      });
-    }
-
-    function showMainHome() {
-      document.getElementById('product-details-view').style.display = 'none';
-      document.getElementById('home').style.display = 'block';
-      window.scrollTo(0, 0);
-    }
-
-    document.addEventListener('click', function(e) {
-      let card = e.target.closest('.productCard, .product-card, [data-product-id]');
-      if (card) {
-        let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (window.allProducts || []);
-        let titleEl = card.querySelector('h3, h4, .title, .product-title');
-        if (titleEl && allProds.length > 0) {
-          let titleText = titleEl.innerText.trim();
-          let found = allProds.find(p => (p.name && p.name.trim() === titleText) || (p.title && p.title.trim() === titleText));
-          if (found) {
-            e.preventDefault();
-            e.stopPropagation();
-            openProductDetails(found);
-            return;
-          }
-        }
-      }
-    }, true);
   </script>
 </body>
 </html>
