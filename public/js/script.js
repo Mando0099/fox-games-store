@@ -171,10 +171,11 @@ function addToCart(i) {
   save();
   updateCart();
   
-  // فتح السلة بشكل آمن ومضبوط
+  // فتح السلة عند إضافة منتج
   const drawer = $('cartDrawer');
   if (drawer) {
     drawer.classList.add('open');
+    drawer.style.visibility = 'visible';
     drawer.style.transform = 'translateX(0)';
   }
 }
@@ -408,19 +409,30 @@ function save() {
   localStorage.setItem('foxgames_coupon', String(coupon));
 }
 
-// دالة التحكم في إغلاق وفتح السلة بدقة منعاً لأي تداخل أو ارتداد
-function toggleCart() {
+// ================= دوال التحكم في السلة (محدثة لمنع الارتداد تماماً) =================
+
+// دالة مخصصة لإغلاق السلة بقوة دون أي ارتداد
+function closeCart(event) {
+  if (event) event.stopPropagation();
+  const drawer = $('cartDrawer');
+  if (!drawer) return;
+  drawer.classList.remove('open');
+  drawer.style.transform = currentLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
+}
+
+// دالة التبديل الأساسية (للفتح والإغلاق عند الضغط على أيقونة السلة في النافبار)
+function toggleCart(event) {
+  if (event) event.stopPropagation();
   const drawer = $('cartDrawer');
   if (!drawer) return;
 
-  // التحقق الحاسم من حالة الظهور الحالية
-  const isOpen = drawer.classList.contains('open') || drawer.style.transform === 'translateX(0px)' || drawer.style.transform === 'translateX(0)';
+  const isOpen = drawer.classList.contains('open');
 
   if (isOpen) {
-    drawer.classList.remove('open');
-    drawer.style.transform = currentLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
+    closeCart();
   } else {
     drawer.classList.add('open');
+    drawer.style.visibility = 'visible';
     drawer.style.transform = 'translateX(0)';
   }
 }
