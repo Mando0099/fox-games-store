@@ -170,7 +170,13 @@ function addToCart(i) {
   });
   save();
   updateCart();
-  $('cartDrawer')?.classList.add('open');
+  
+  // فتح السلة بشكل آمن ومضبوط
+  const drawer = $('cartDrawer');
+  if (drawer) {
+    drawer.classList.add('open');
+    drawer.style.transform = 'translateX(0)';
+  }
 }
 
 function removeItem(cartId) {
@@ -205,7 +211,6 @@ function updateCart() {
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  // الحساب يعتمد حصراً على الكوبون المدخل يدوياً
   const discountValue = Math.round(subtotal * coupon / 100);
   
   if ($('subtotal')) $('subtotal').textContent = `${subtotal} EGP`;
@@ -250,7 +255,6 @@ function applyLanguage(lang) {
   }
 }
 
-// دالة فحص وتطبيق الكوبون يدوياً من الـ Firestore
 async function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
   
@@ -299,7 +303,6 @@ async function applyCoupon() {
   }
 }
 
-// دالة الدفع الآلي المباشر عبر بوابة الدفع (بدون حقل Dropdown)
 async function checkout() {
   if (!cart.length) {
     Swal.fire({
@@ -405,7 +408,23 @@ function save() {
   localStorage.setItem('foxgames_coupon', String(coupon));
 }
 
-function toggleCart() { $('cartDrawer')?.classList.toggle('open'); }
+// دالة التحكم في إغلاق وفتح السلة بدقة منعاً لأي تداخل أو ارتداد
+function toggleCart() {
+  const drawer = $('cartDrawer');
+  if (!drawer) return;
+
+  // التحقق الحاسم من حالة الظهور الحالية
+  const isOpen = drawer.classList.contains('open') || drawer.style.transform === 'translateX(0px)' || drawer.style.transform === 'translateX(0)';
+
+  if (isOpen) {
+    drawer.classList.remove('open');
+    drawer.style.transform = currentLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
+  } else {
+    drawer.classList.add('open');
+    drawer.style.transform = 'translateX(0)';
+  }
+}
+
 function toggleMenu() {}
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
