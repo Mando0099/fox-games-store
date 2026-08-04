@@ -163,10 +163,6 @@
       color: var(--text-muted);
       width: fit-content;
     }
-    .auth-google { color: #ea4335; font-weight: bold; }
-    .auth-facebook { color: #1877f2; font-weight: bold; }
-    .auth-email { color: var(--primary-blue); font-weight: bold; }
-      
     .profile-menu-links {
       margin: 12px 0;
       display: flex;
@@ -591,9 +587,7 @@
     <!-- منتجات مشابهة تحته -->
     <div class="similar-products-section">
       <h3>منتجات مشابهة قد تعجبك</h3>
-      <div class="similar-grid" id="similarProductsGrid">
-        <!-- يتم تعبئتها تلقائياً -->
-      </div>
+      <div class="similar-grid" id="similarProductsGrid"></div>
     </div>
   </div>
 
@@ -662,7 +656,7 @@
       const input = document.getElementById('detailQtyInput');
       let qty = parseInt(input.value) + amount;
       if (qty < 1) qty = 1;
-      if (qty > 10) qty = 10; // أقصى كمية مسموحة للطلب الواحد
+      if (qty > 10) qty = 10;
       input.value = qty;
     }
 
@@ -673,23 +667,24 @@
       document.getElementById('product-details-view').style.display = 'block';
       window.scrollTo(0, 0);
 
-      document.getElementById('detailImg').src = product.image || 'https://via.placeholder.com/300';
-      document.getElementById('detailTitle').innerText = product.name;
-      document.getElementById('detailPrice').innerText = product.price + " EGP";
+      document.getElementById('detailImg').src = product.image || product.img || 'https://via.placeholder.com/300';
+      document.getElementById('detailTitle').innerText = product.name || product.title || 'منتج رقمي';
+      document.getElementById('detailPrice').innerText = (product.price || 0) + " EGP";
       document.getElementById('detailDesc').innerText = product.description || "شحن فوري وآمن وموثوق لجميع الألعاب والبطاقات الرقمية عبر تيك جيمينج.";
       document.getElementById('detailQtyInput').value = 1;
 
-      // زر الإضافة للسلة مع الكمية المختارة
+      // زر الإضافة للسلة مع الكمية المختارة والدفع الفوري
       const addBtn = document.getElementById('detailAddToCartBtn');
       addBtn.onclick = () => {
         const qty = parseInt(document.getElementById('detailQtyInput').value) || 1;
         if (typeof addToCart === 'function') {
-          // إضافة المنتج بالكمية المحددة
-          for(let i=0; i<qty; i++) {
+          for(let i = 0; i < qty; i++) {
             addToCart(product.id);
           }
         }
-        toggleCart(); // فتح السلة مباشرة لإتمام الدفع
+        if (typeof toggleCart === 'function') {
+          toggleCart();
+        }
       };
 
       renderSimilarProducts(product);
@@ -698,23 +693,24 @@
     // عرض منتجات مشابهة تحت صفحة التفاصيل
     function renderSimilarProducts(currentProduct) {
       const grid = document.getElementById('similarProductsGrid');
+      if(!grid) return;
       grid.innerHTML = '';
       
-      // جلب المنتجات من النظام لو متاحة
-      if (typeof products !== 'undefined' && Array.isArray(products)) {
-        const similar = products.filter(p => p.id !== currentProduct.id).slice(0, 4);
-        similar.forEach(p => {
-          const card = document.createElement('div');
-          card.className = 'similar-card';
-          card.innerHTML = `
-            <img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}">
-            <h5>${p.name}</h5>
-            <p>${p.price} EGP</p>
-          `;
-          card.onclick = () => openProductDetails(p);
-          grid.appendChild(card);
-        });
-      }
+      let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : [];
+      if(allProds.length === 0 && window.allProducts) allProds = window.allProducts;
+
+      const similar = allProds.filter(p => p.id !== currentProduct.id).slice(0, 4);
+      similar.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'similar-card';
+        card.innerHTML = `
+          <img src="${p.image || p.img || 'https://via.placeholder.com/150'}" alt="${p.name || ''}">
+          <h5>${p.name || p.title || ''}</h5>
+          <p>${p.price || 0} EGP</p>
+        `;
+        card.onclick = () => openProductDetails(p);
+        grid.appendChild(card);
+      });
     }
 
     // العودة للرئيسية
@@ -724,6 +720,30 @@
       window.scrollTo(0, 0);
     }
 
+    // نظام اعتراض الضغطات (Interceptor) لضمان العمل مع أي ملفات JavaScript خارجية
+    document.addEventListener('click', function(e) {
+      // البحث عن أي كارت منتج يتم الضغط عليه في الصفحة الرئيسية
+      let card = e.target.closest('.productCard, .product-card, [data-product-id]');
+      if (card) {
+        // نحاول استخراج بيانات المنتج من مصفوفة المنتجات العامة في المتصفح
+        let allProds = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (window.allProducts || []);
+        
+        // البحث عن اسم المنتج داخل الكارت المعروض حالياً لمطابقته
+        let titleEl = card.querySelector('h3, h4, .title, .product-title');
+        if (titleEl && allProds.length > 0) {
+          let titleText = titleEl.innerText.trim();
+          let found = allProds.find(p => (p.name && p.name.trim() === titleText) || (p.title && p.title.trim() === titleText));
+          if (found) {
+            e.preventDefault();
+            e.stopPropagation();
+            openProductDetails(found);
+            return;
+          }
+        }
+      }
+    }, true);
+
+    // تفعيل حساب المستخدم وبروفايل فايربيز
     document.addEventListener("DOMContentLoaded", () => {
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
