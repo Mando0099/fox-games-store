@@ -420,8 +420,8 @@ function closeCart(event) {
   drawer.style.transform = currentLang === 'ar' ? 'translateX(100%)' : 'translateX(-100%)';
 }
 
-// دالة التبديل الأساسية (للفتح والإغلاق عند الضغط على أيقونة السلة في النافبار)
-function toggleCart(event) {
+// دالة التبديل الأساسية (تم تعديل اسمها لـ toggleCartDrawer لتتطابق مع الـ HTML)
+function toggleCartDrawer(event) {
   if (event) event.stopPropagation();
   const drawer = $('cartDrawer');
   if (!drawer) return;
