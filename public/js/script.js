@@ -9,6 +9,10 @@ if (typeof coupon === 'undefined') {
   localStorage.setItem('foxgames_coupon', '0');
 }
 
+// مصفوفات عامة نخزن فيها الداتا لو اتسحبت من الفايربيز
+window.products = window.products || [];
+window.categories = window.categories || [];
+
 const translations = {
   en: {
     nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
@@ -54,38 +58,58 @@ const translations = {
 
 let currentLang = localStorage.getItem('foxgames_lang') || 'en';
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   applyLanguage(currentLang);
   if (typeof checkAuthState === 'function') checkAuthState();
   
-  setTimeout(() => {
-    renderCategories();
-    renderFilters();
-    renderProducts();
-    updateCart();
-  }, 1000); 
-  
+  // جلب البيانات مباشرة من فايربيز لو مش محملة
+  await loadDataFromFirebase();
+
+  renderCategories();
+  renderFilters();
+  renderProducts();
+  updateCart();
   reveal();
 });
 
 window.addEventListener('scroll', reveal);
 
+// دالة لجلب الأقسام والمنتجات من فايربيز مباشرة لو مش موجودة
+async function loadDataFromFirebase() {
+  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  try {
+    const db = firebase.firestore();
+    
+    // سحب المنتجات
+    if (!products.length) {
+      const prodSnapshot = await db.collection('products').get();
+      products = prodSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+    
+    // سحب التصنيفات
+    if (!categories.length) {
+      const catSnapshot = await db.collection('categories').get();
+      categories = catSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+  } catch (e) {
+    console.error("Error loading data from Firebase:", e);
+  }
+}
+
 function renderMiniSlider() {}
 
-// عرض التصنيفات (مع إظهار تنبيه لو العنصر مش موجود أو الداتا فارغة)
+// عرض التصنيفات الحقيقية
 function renderCategories() {
   const grid = $('categoryGrid');
-  if (!grid) {
-    console.warn("Element with ID 'categoryGrid' not found in HTML.");
-    return;
-  }
-  if (typeof categories === 'undefined' || !categories.length) {
-    grid.innerHTML = `<p style="color:#94a3b8; text-align:center; padding: 20px; grid-column: 1/-1;">No categories loaded from database yet.</p>`;
+  if (!grid) return;
+  
+  if (!categories.length) {
+    grid.innerHTML = `<p style="color:#94a3b8; text-align:center; padding: 20px; grid-column: 1/-1;">No categories available.</p>`;
     return;
   }
   
   grid.innerHTML = categories.map(cat => {
-    const catImg = cat.bg || cat.image || '';
+    const catImg = cat.bg || cat.image || 'https://picsum.photos/300/200';
     return `
     <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="position: relative; overflow: hidden; aspect-ratio: 3 / 2;">
       <img src="${catImg}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
@@ -95,23 +119,21 @@ function renderCategories() {
 }
 
 function renderFilters() {
-  if (!$('categoryFilter')) return;
-  if (typeof products === 'undefined' || !products.length) return;
+  const f = $('categoryFilter');
+  if (!f) return;
+  if (!products.length) return;
   
   const list = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
-  $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
+  f.innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
 
 // عرض المنتجات
 function renderProducts() {
   const grid = $('productGrid');
-  if (!grid) {
-    console.warn("Element with ID 'productGrid' not found in HTML.");
-    return;
-  }
+  if (!grid) return;
   
-  if (typeof products === 'undefined' || !products.length) {
-    grid.innerHTML = `<p style="color:#94a3b8; grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products from Firebase...</p>`;
+  if (!products.length) {
+    grid.innerHTML = `<p style="color:var(--muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products from Firebase...</p>`;
     return;
   }
 
@@ -120,27 +142,27 @@ function renderProducts() {
   const sort = $('sortFilter')?.value;
 
   let list = products.filter(p => 
-    `${p.name} ${p.category} ${p.desc}`.toLowerCase().includes(search) && 
+    `${p.name || ''} ${p.category || ''} ${p.desc || ''}`.toLowerCase().includes(search) && 
     (filter === 'All' || p.category === filter)
   );
 
-  if (sort === 'low') list.sort((a, b) => a.price - b.price);
-  if (sort === 'high') list.sort((a, b) => b.price - a.price);
+  if (sort === 'low') list.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+  if (sort === 'high') list.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
   if (sort === 'popular') list.sort((a, b) => (b.popular || 0) - (a.popular || 0));
 
   grid.innerHTML = list.map(p => {
     const i = products.indexOf(p);
-    const imgUrl = p.img || p.image || '';
+    const imgUrl = p.img || p.image || 'https://picsum.photos/300/200';
     
     return `<article class="productCard reveal">
       <div class="productCover" style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-image: none !important;">
-        <img src="${imgUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+        <img src="${imgUrl}" alt="${p.name || 'Product'}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
       </div>
       <div class="productInfo">
-        <h3>${p.name}</h3>
+        <h3>${p.name || ''}</h3>
         <p>${p.desc || ''}</p>
         <div class="priceRow">
-          <div class="price">${p.price}.00 EGP</div>
+          <div class="price">${p.price || 0}.00 EGP</div>
           <span class="rating">★ ${p.rating || '4.9'}</span>
         </div>
         <button class="add" onclick="addToCart(${i})">Buy Now</button>
@@ -165,11 +187,11 @@ function resetCategoryFilter() {
 }
 
 function addToCart(i) {
-  if (typeof products === 'undefined' || !products[i]) return;
+  if (!products[i]) return;
   cart.push({ 
     ...products[i], 
     cartId: Date.now() + Math.random(),
-    id: products[i].id || products[i].docId || i
+    id: products[i].id || i
   });
   save();
   updateCart();
@@ -190,14 +212,13 @@ function updateCart() {
     $('cartItems').innerHTML = cart.length 
       ? cart.map(item => {
           const imgUrl = item.img || item.image || 'https://picsum.photos/150';
-          
           return `
             <div class="cartItem">
-              <img src="${imgUrl}" class="cartItem-img" alt="${item.name}">
+              <img src="${imgUrl}" class="cartItem-img" alt="${item.name || ''}">
               <div class="cartItem-details">
-                <span class="cartItem-name">${item.name}</span>
+                <span class="cartItem-name">${item.name || ''}</span>
                 <span class="cartItem-cat">${item.category || ''}</span>
-                <span class="cartItem-price">${item.price} EGP</span>
+                <span class="cartItem-price">${item.price || 0} EGP</span>
               </div>
               <button class="cartItem-remove-btn" onclick="removeItem(${item.cartId})" title="Remove">
                 <i class="fas fa-trash-alt"></i>
