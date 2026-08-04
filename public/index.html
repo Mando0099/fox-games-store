@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fox Games Market</title>
+  <title>Tech Gaming Market</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/style.css"/>
   
@@ -11,14 +11,84 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* ================= START USER PROFILE STYLE ================= */
+    /* ================= START TECH GAMING BLUE THEME ================= */
+    :root {
+      --primary-blue: #0066ff;
+      --primary-blue-hover: #0052cc;
+      --bg-dark: #070d1a;
+      --bg-card: #0d1b32;
+      --border-color: rgba(0, 102, 255, 0.2);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-dark) !important;
+      color: var(--text-main) !important;
+    }
+
+    .blue-text { color: var(--primary-blue) !important; }
+
+    /* شاشة التحميل (Splash Screen) */
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease;
+    }
+    .splash-logo {
+      font-size: 38px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+      overflow: hidden;
+      border-right: 3px solid var(--primary-blue);
+      white-space: nowrap;
+      animation: typing 2s steps(12, end), blink-caret 0.75s step-end infinite;
+    }
+    .splash-loader {
+      width: 150px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .splash-loader-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--primary-blue);
+      animation: loadingBar 3s linear forwards;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary-blue) }
+    }
+    @keyframes loadingBar {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    /* البروفايل */
     .user-profile-wrapper {
       position: relative;
       display: inline-block;
     }
     .user-profile-btn {
-      background: #0d1722;
-      border: 1px solid rgba(101, 204, 0, 0.4);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       color: #fff;
       padding: 8px 16px;
       border-radius: 8px;
@@ -30,16 +100,16 @@
       transition: 0.2s;
     }
     .user-profile-btn:hover {
-      background: rgba(101, 204, 0, 0.1);
-      box-shadow: 0 0 10px rgba(101, 204, 0, 0.2);
+      background: rgba(0, 102, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
     }
     .user-profile-dropdown {
       position: absolute;
       top: 50px;
       right: 0;
       width: 300px;
-      background: #0d1722;
-      border: 1px solid rgba(101, 204, 0, 0.25);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
       padding: 16px;
@@ -67,7 +137,7 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      border: 2px solid #65cc00;
+      border: 2px solid var(--primary-blue);
       object-fit: cover;
     }
     .profile-info {
@@ -81,7 +151,7 @@
     }
     .profile-email {
       font-size: 12px;
-      color: #94a3b8;
+      color: var(--text-muted);
       word-break: break-all;
     }
     .auth-method-badge {
@@ -93,12 +163,12 @@
       padding: 4px 10px;
       border-radius: 20px;
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--text-muted);
       width: fit-content;
     }
     .auth-google { color: #ea4335; font-weight: bold; }
     .auth-facebook { color: #1877f2; font-weight: bold; }
-    .auth-email { color: #65cc00; font-weight: bold; }
+    .auth-email { color: var(--primary-blue); font-weight: bold; }
       
     .profile-menu-links {
       margin: 12px 0;
@@ -119,8 +189,8 @@
       transition: 0.2s;
     }
     .profile-link:hover {
-      background: rgba(101, 204, 0, 0.08);
-      color: #65cc00;
+      background: rgba(0, 102, 255, 0.08);
+      color: var(--primary-blue);
     }
     .logout-btn-new {
       width: 100%;
@@ -151,18 +221,77 @@
       flex-direction: row-reverse;
     }
     .foxHidden { display: none !important; }
-    /* ================= END USER PROFILE STYLE ================= */
 
-    /* ================= START MODERN CART STYLE ================= */
+    /* تفاصيل المنتج (Product Details Page View) */
+    #product-details-view {
+      display: none;
+      padding: 40px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .details-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .details-img-box img {
+      width: 100%;
+      max-height: 350px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .details-content-box h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .details-price {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-blue);
+      margin-bottom: 15px;
+    }
+    .details-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    .back-to-store-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .back-to-store-btn:hover { background: rgba(0, 102, 255, 0.1); border-color: var(--primary-blue); }
+
+    @media(max-width: 768px) {
+      .details-container { grid-template-columns: 1fr; gap: 20px; padding: 15px; }
+    }
+
+    /* السلة */
     .cartDrawer {
       width: 420px;
-      background: #090f17;
-      border-left: 1px solid rgba(101, 204, 0, 0.15);
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
       box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
     html[dir="rtl"] .cartDrawer {
       border-left: none;
-      border-right: 1px solid rgba(101, 204, 0, 0.15);
+      border-right: 1px solid var(--border-color);
     }
     .cartItem {
       display: flex;
@@ -176,8 +305,8 @@
       transition: 0.3s;
     }
     .cartItem:hover {
-      border-color: rgba(101, 204, 0, 0.3);
-      background: rgba(101, 204, 0, 0.02);
+      border-color: var(--border-color);
+      background: rgba(0, 102, 255, 0.02);
     }
     .cartItem-img {
       width: 70px;
@@ -199,12 +328,12 @@
     }
     .cartItem-cat {
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .cartItem-price {
       font-size: 14px;
       font-weight: 800;
-      color: #65cc00;
+      color: var(--primary-blue);
     }
     .cartItem-remove-btn {
       background: rgba(239, 68, 68, 0.1);
@@ -230,7 +359,7 @@
       gap: 12px;
     }
     .coupon input, .checkoutForm input {
-      background: #0d1722 !important;
+      background: var(--bg-dark) !important;
       border: 1px solid rgba(255,255,255,0.08) !important;
       color: #fff !important;
       border-radius: 8px !important;
@@ -239,14 +368,14 @@
       box-sizing: border-box;
     }
     .coupon input:focus, .checkoutForm input:focus {
-      border-color: #65cc00 !important;
+      border-color: var(--primary-blue) !important;
       outline: none;
     }
     
-    /* ستايل زر إتمام الشراء المطور والاحترافي المدمج بشعارات الفيزا والماستركارد */
+    /* زر إتمام الشراء الأزرق الاحترافي */
     .btn-pay-now-pro {
       width: 100%;
-      background: linear-gradient(135deg, #65cc00 0%, #4da200 100%);
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-hover) 100%);
       color: #ffffff;
       border: none;
       padding: 14px;
@@ -259,11 +388,11 @@
       justify-content: center;
       gap: 12px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
+      box-shadow: 0 4px 15px rgba(0, 102, 255, 0.25);
     }
     .btn-pay-now-pro:hover {
-      background: linear-gradient(135deg, #76de0c 0%, #59ba00 100%);
-      box-shadow: 0 6px 20px rgba(101, 204, 0, 0.4);
+      background: linear-gradient(135deg, #1a75ff 0%, #0040b3 100%);
+      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
       transform: translateY(-1px);
     }
     .payment-logos-container {
@@ -278,14 +407,13 @@
       height: 14px;
       display: block;
     }
-    /* ================= END MODERN CART STYLE ================= */
 
-    /* ================= START MOBILE RESPONSIVE OVERRIDES ================= */
+    /* التجاوب مع الهواتف */
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 991px) {
       body {
-        padding-bottom: 65px !important; /* مساحة للقائمة السفلية في الهاتف */
+        padding-bottom: 65px !important;
       }
       .topbar {
         flex-wrap: wrap;
@@ -293,7 +421,7 @@
         gap: 10px;
       }
       .mainNav {
-        display: none !important; /* إخفاء القائمة العلوية في الموبايل واستبدالها بالسفلية */
+        display: none !important;
       }
       .topSearch {
         order: 3;
@@ -316,7 +444,7 @@
         font-size: 13px !important;
       }
       .cartDrawer {
-        width: 100% !important; /* العربة تملأ الهاتف بالكامل */
+        width: 100% !important;
       }
       .user-profile-dropdown {
         position: fixed !important;
@@ -327,36 +455,6 @@
         width: 90% !important;
         box-sizing: border-box;
       }
-      .hero-title { font-size: 26px !important; }
-      .hero-subtitle { font-size: 14px !important; }
-      .hero-cta-buttons {
-        flex-direction: column;
-        width: 100%;
-      }
-      .hero-cta-buttons button { width: 100%; }
-      .sectionHead {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 12px;
-      }
-      .filters {
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .filters input, .filters select {
-        flex: 1 1 100%;
-      }
-      .paymentMethods {
-        grid-template-columns: repeat(2, 1fr) !important;
-      }
-      .benefits {
-        grid-template-columns: 1fr !important;
-        gap: 15px !important;
-      }
-
-      /* شريط التنقل السفلي للهواتف */
       .mobile-bottom-nav {
         display: flex;
         position: fixed;
@@ -364,8 +462,8 @@
         left: 0;
         right: 0;
         height: 60px;
-        background: #090f17;
-        border-top: 1px solid rgba(101, 204, 0, 0.2);
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-color);
         z-index: 9999;
         justify-content: space-around;
         align-items: center;
@@ -376,7 +474,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: #94a3b8;
+        color: var(--text-muted);
         text-decoration: none;
         font-size: 11px;
         gap: 4px;
@@ -386,27 +484,35 @@
       }
       .mobile-nav-item i { font-size: 18px; }
       .mobile-nav-item:hover, .mobile-nav-item.active {
-        color: #65cc00;
-        background: rgba(101, 204, 0, 0.05);
+        color: var(--primary-blue);
+        background: rgba(0, 102, 255, 0.05);
       }
     }
-    /* ================= END MOBILE RESPONSIVE OVERRIDES ================= */
+    /* ================= END TECH GAMING BLUE THEME ================= */
   </style>
 </head>
 <body>
+
+  <!-- شاشة التحميل (Splash Screen) لمدة 3 ثواني -->
+  <div id="splash-screen">
+    <div class="splash-logo">TECH GAMING</div>
+    <div class="splash-loader">
+      <div class="splash-loader-bar"></div>
+    </div>
+  </div>
+
   <canvas id="stars"></canvas>
 
   <header class="topbar">
-    <a class="brand" href="/">
-      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
-      <span>FOX <b class="green-text">GAMES</b></span>
+    <a class="brand" href="/" onclick="showMainHome(); return false;">
+      <span>TECH <b class="blue-text">GAMING</b></span>
     </a>
 
     <nav class="mainNav">
-      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
-      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
-      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
-      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
+      <a class="nav-link active" href="#home" onclick="showMainHome()" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" onclick="showMainHome()" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" onclick="showMainHome()" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" onclick="showMainHome()" data-i18n="nav_support">Support</a>
     </nav>
 
     <div class="topSearch">
@@ -434,8 +540,8 @@
             </div>
           </div>
           <div class="profile-menu-links">
-            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
-            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
+            <a href="#products" onclick="showMainHome()" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" onclick="showMainHome()" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
           </div>
           <button class="logout-btn-new" id="profileLogoutBtn">
             <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
@@ -450,6 +556,7 @@
     </div>
   </header>
 
+  <!-- الصفحة الرئيسية -->
   <main id="home" class="content">
       
     <section class="hero-banner-section">
@@ -468,9 +575,9 @@
           </div>
 
           <div class="hero-features">
-            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
-            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
-            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+            <span class="feature-item"><i class="fas fa-bolt blue-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt blue-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset blue-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
           </div>
         </div>
 
@@ -513,10 +620,10 @@
     </section>
 
     <section class="benefits">
-      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
-      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
-      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
-      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
+      <div><i class="fas fa-bolt blue-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt blue-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset blue-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up blue-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
     </section>
 
     <section class="section" id="checkout">
@@ -528,7 +635,7 @@
           
         <div class="paymentMethods">
           <div class="method-card" title="Visa">
-            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <i class="fab fa-cc-visa" style="color: #0066ff; font-size: 28px;"></i>
             <span>Visa</span>
           </div>
           <div class="method-card" title="MasterCard">
@@ -548,7 +655,6 @@
             <span>InstaPay</span>
           </div>
         </div>
-
       </div>
     </section>
 
@@ -565,6 +671,25 @@
       </div>
     </section>
   </main>
+
+  <!-- صفحة تفاصيل المنتج المخفية والتي تفتح عند الضغط على أي منتج -->
+  <div id="product-details-view">
+    <button class="back-to-store-btn" onclick="showMainHome()"><i class="fas fa-arrow-left"></i> العودة للمتجر</button>
+    <div class="details-container">
+      <div class="details-img-box">
+        <img id="detailImg" src="" alt="Product">
+      </div>
+      <div class="details-content-box">
+        <h1 id="detailTitle">اسم المنتج</h1>
+        <div class="details-price" id="detailPrice">0 EGP</div>
+        <p class="details-desc" id="detailDesc">تفاصيل المنتج ووصفه الكامل هنا لتعريف اللاعبين بكل مميزات الشحن والكود.</p>
+        
+        <button class="btn-pay-now-pro" id="detailAddToCartBtn" style="margin-bottom: 12px;">
+          <i class="fas fa-cart-plus"></i> إضافة للسلة والدفع
+        </button>
+      </div>
+    </div>
+  </div>
 
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead">
@@ -596,34 +721,34 @@
       </button>
       
       <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 4px;">
-        <i class="fa-solid fa-shield-halved" style="color: #65cc00;"></i>
-        <span>Secure Secure 256-bit Connection</span>
+        <i class="fa-solid fa-shield-halved" style="color: var(--primary-blue);"></i>
+        <span>Secure 256-bit Connection</span>
       </div>
     </div>
   </aside>
 
-  <!-- القائمة السفلية الخاصة بالهواتف -->
+  <!-- القائمة السفلية للهواتف -->
   <nav class="mobile-bottom-nav">
-    <a href="#home" class="mobile-nav-item active">
+    <a href="#home" class="mobile-nav-item active" onclick="showMainHome()">
       <i class="fas fa-home"></i>
       <span data-i18n="nav_home">Home</span>
     </a>
-    <a href="#products" class="mobile-nav-item">
+    <a href="#products" class="mobile-nav-item" onclick="showMainHome()">
       <i class="fas fa-gamepad"></i>
       <span data-i18n="nav_store">Store</span>
     </a>
-    <a href="#trending" class="mobile-nav-item">
+    <a href="#trending" class="mobile-nav-item" onclick="showMainHome()">
       <i class="fas fa-th-large"></i>
       <span data-i18n="nav_categories">Categories</span>
     </a>
-    <a href="#support" class="mobile-nav-item">
+    <a href="#support" class="mobile-nav-item" onclick="showMainHome()">
       <i class="fas fa-headset"></i>
       <span data-i18n="nav_support">Support</span>
     </a>
   </nav>
 
   <div class="chat" id="chat">
-    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatTop">Tech Gaming Support <button onclick="toggleChat()">×</button></div>
     <div class="chatBody">
       <p>Hey gamer 👋 How can we help?</p>
       <small>This is a demo chat widget.</small>
@@ -636,8 +761,8 @@
   <button class="chatBubble" onclick="toggleChat()">💬</button>
 
   <footer>
-    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
-    <p>© 2026 Fox Games Market</p>
+    <div><b>Tech Gaming</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Tech Gaming Market</p>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -651,6 +776,45 @@
   <script src="/js/script.js"></script>
 
   <script>
+    // إخفاء شاشة التحميل بعد 3 ثواني
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.style.display = 'none', 500);
+        }
+      }, 3000);
+    });
+
+    // دالة عرض تفاصيل المنتج عند الضغط عليه
+    function openProductDetails(product) {
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('product-details-view').style.display = 'block';
+      window.scrollTo(0, 0);
+
+      document.getElementById('detailImg').src = product.image || 'https://via.placeholder.com/300';
+      document.getElementById('detailTitle').innerText = product.name;
+      document.getElementById('detailPrice').innerText = product.price + " EGP";
+      document.getElementById('detailDesc').innerText = product.description || "شحن فوري وآمن وموثوق لجميع الألعاب والبطاقات الرقمية.";
+
+      // زر الإضافة للسلة من صفحة التفاصيل
+      const addBtn = document.getElementById('detailAddToCartBtn');
+      addBtn.onclick = () => {
+        if (typeof addToCart === 'function') {
+          addToCart(product.id);
+        }
+        toggleCart(); // فتح السلة مباشرة لإتمام الدفع
+      };
+    }
+
+    // العودة للصفحة الرئيسية
+    function showMainHome() {
+      document.getElementById('product-details-view').style.display = 'none';
+      document.getElementById('home').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
@@ -670,16 +834,6 @@
           if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
             mainLoginBtn.classList.add('foxHidden');
           }
-        }
-          
-        const actionsContainer = document.querySelector('.navActions');
-        if (actionsContainer) {
-          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
-          textButtons.forEach(btn => {
-            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
-              btn.remove();
-            }
-          });
         }
       }
 
@@ -723,23 +877,6 @@
         });
       }
 
-      const observer = new MutationObserver(() => {
-        cleanOldProfiles();
-        if (firebase.auth().currentUser) {
-          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
-            mainLoginBtn.classList.add('foxHidden');
-          }
-          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
-            userProfileWrapper.classList.remove('foxHidden');
-          }
-        }
-      });
-
-      const navActionsContainer = document.querySelector('.navActions');
-      if (navActionsContainer) {
-        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
-      }
-
       if (userProfileTrigger && userProfileDropdown) {
         userProfileTrigger.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -755,8 +892,6 @@
           if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut().then(() => {
               window.location.reload();
-            }).catch((error) => {
-              console.error("Logout Error: ", error);
             });
           }
         });
