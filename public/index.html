@@ -3,675 +3,806 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fox Games Market - Tech Gaming</title>
+  <title>Fox Games Market</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    :root {
-      --primary: #65cc00;
-      --primary-glow: rgba(101, 204, 0, 0.3);
-      --bg-dark: #070b12;
-      --card-bg: #0d1722;
-      --border-color: rgba(101, 204, 0, 0.2);
-      --text-main: #ffffff;
-      --text-muted: #94a3b8;
+    /* ================= START USER PROFILE STYLE ================= */
+    .user-profile-wrapper {
+      position: relative;
+      display: inline-block;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; position: relative; }
-    
-    /* ================= SPLASH SCREEN TECH GAMING (5s) ================= */
-    #splashScreen {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: #04070d;
+    .user-profile-btn {
+      background: #0d1722;
+      border: 1px solid rgba(101, 204, 0, 0.4);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+    .user-profile-btn:hover {
+      background: rgba(101, 204, 0, 0.1);
+      box-shadow: 0 0 10px rgba(101, 204, 0, 0.2);
+    }
+    .user-profile-dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 300px;
+      background: #0d1722;
+      border: 1px solid rgba(101, 204, 0, 0.25);
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      padding: 16px;
+      z-index: 1000;
+      color: #fff;
+      text-align: left;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+    .user-profile-dropdown.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #65cc00;
+      object-fit: cover;
+    }
+    .profile-info {
       display: flex;
       flex-direction: column;
+      gap: 2px;
+    }
+    .profile-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .profile-email {
+      font-size: 12px;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+    .auth-method-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      width: fit-content;
+    }
+    .auth-google { color: #ea4335; font-weight: bold; }
+    .auth-facebook { color: #1877f2; font-weight: bold; }
+    .auth-email { color: #65cc00; font-weight: bold; }
+      
+    .profile-menu-links {
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+    .profile-link:hover {
+      background: rgba(101, 204, 0, 0.08);
+      color: #65cc00;
+    }
+    .logout-btn-new {
+      width: 100%;
+      height: 38px;
+      background: transparent;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 99999;
-      transition: opacity 0.8s ease, visibility 0.8s ease;
+      gap: 6px;
+      transition: 0.2s;
     }
-    .splash-content {
-      text-align: center;
-    }
-    .splash-logo-text {
-      font-size: 42px;
-      font-weight: 900;
-      letter-spacing: 4px;
+    .logout-btn-new:hover {
+      background: #ef4444;
       color: #fff;
-      text-transform: uppercase;
-      animation: techGlow 2s infinite alternate;
     }
-    .splash-logo-text span { color: var(--primary); }
-    .splash-loader-bar {
-      width: 220px;
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      margin: 20px auto 0;
-      overflow: hidden;
-      position: relative;
+    html[dir="rtl"] .user-profile-dropdown {
+      right: auto;
+      left: 0;
+      text-align: right;
     }
-    .splash-loader-progress {
-      position: absolute;
-      top: 0; left: 0; height: 100%; width: 0%;
-      background: var(--primary);
-      box-shadow: 0 0 15px var(--primary);
-      animation: loadProgress 5s linear forwards;
+    html[dir="rtl"] .profile-header {
+      flex-direction: row-reverse;
     }
-    @keyframes techGlow {
-      0% { text-shadow: 0 0 10px rgba(101,204,0,0.2); }
-      100% { text-shadow: 0 0 25px rgba(101,204,0,0.8), 0 z 40px rgba(101,204,0,0.4); }
-    }
-    @keyframes loadProgress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-
-    /* ================= MAIN LAYOUT & UI ================= */
-    canvas#stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    
-    header.topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 15px 5%; background: rgba(13, 23, 34, 0.95);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px);
-    }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; font-size: 20px; font-weight: 800; }
-    .brand img { height: 38px; }
-    .green-text { color: var(--primary); }
-
-    .mainNav { display: flex; gap: 25px; }
-    .nav-link { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; }
-    .nav-link:hover, .nav-link.active { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
-
-    .topSearch {
-      position: relative; width: 280px;
-    }
-    .topSearch input {
-      width: 100%; background: #070b12; border: 1px solid var(--border-color);
-      padding: 8px 35px 8px 15px; border-radius: 8px; color: #fff; font-size: 13px; outline: none;
-    }
-    .search-icon-btn { position: absolute; right: 12px; top: 50% opravdu; transform: translateY(-50%); color: var(--text-muted); }
-
-    .navActions { display: flex; align-items: center; gap: 12px; }
-    .langBtn, .loginBtn, .cartBtn, .user-profile-btn {
-      background: var(--card-bg); border: 1px solid var(--border-color); color: #fff;
-      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
-      display: flex; align-items: center; gap: 6px; transition: 0.2s;
-    }
-    .langBtn:hover, .loginBtn:hover, .cartBtn:hover, .user-profile-btn:hover {
-      background: var(--primary-glow); border-color: var(--primary);
-    }
-    .cart-badge { background: var(--primary); color: #000; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: 800; }
     .foxHidden { display: none !important; }
+    /* ================= END USER PROFILE STYLE ================= */
 
-    /* ================= HERO SECTION ================= */
-    .hero-banner-section { padding: 40px 5%; }
-    .hero-banner-card {
-      background: linear-gradient(135deg, #0d1722 0%, #04070d 100%);
-      border: 1px solid var(--border-color); border-radius: 20px; padding: 50px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 20px;
-    }
-    .hero-title { font-size: 38px; font-weight: 850; color: #fff; }
-    .hero-subtitle { color: var(--text-muted); font-size: 16px; margin-bottom: 10px; }
-    .hero-cta-buttons { display: flex; gap: 15px; }
-    .shop-now-btn, .browse-cat-btn {
-      padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; font-size: 14px;
-    }
-    .shop-now-btn { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); }
-    .browse-cat-btn { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-color); }
-
-    /* ================= SECTIONS & PRODUCTS (HIDDEN BY DEFAULT) ================= */
-    .section { padding: 40px 5%; }
-    .sectionHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .sectionHead h2 { font-size: 24px; font-weight: 700; }
-
-    /* Products Hidden Prompt State */
-    .products-placeholder-msg {
-      text-align: center; padding: 60px 20px; background: var(--card-bg);
-      border: 1px dashed var(--border-color); border-radius: 16px; color: var(--text-muted);
-    }
-    .products-placeholder-msg i { font-size: 40px; color: var(--primary); margin-bottom: 15px; display: block; }
-
-    .productGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-    
-    /* Animation for Product Reveal */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .product-card-animated {
-      animation: fadeInUp 0.5s ease forwards;
-    }
-
-    .productCard {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px;
-      overflow: hidden; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column;
-    }
-    .productCard:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 25px rgba(101,204,0,0.15); }
-    .productImg { width: 100%; height: 150px; object-fit: cover; }
-    .productBody { padding: 15px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-    .productTitle { font-size: 15px; font-weight: 700; color: #fff; }
-    .productPrice { font-size: 16px; font-weight: 800; color: var(--primary); margin-top: auto; }
-
-    /* Categories Grid */
-    .trendGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-    .trend-card {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
-      padding: 15px; text-align: center; cursor: pointer; transition: 0.3s;
-    }
-    .trend-card:hover { border-color: var(--primary); background: rgba(101,204,0,0.03); transform: scale(1.03); }
-    .trend-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-
-    /* ================= PRODUCT DETAILS MODAL ================= */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none;
-      align-items: center; justify-content: center; z-index: 2000;
-    }
-    .modal-overlay.active { display: flex; }
-    .product-modal-card {
-      background: #0d1722; border: 1px solid var(--border-color); width: 90%; max-width: 550px;
-      border-radius: 16px; padding: 25px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-    }
-    .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
-    .modal-body-flex { display: flex; gap: 20px; margin-top: 15px; }
-    .modal-img { width: 180px; height: 180px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color); }
-    .modal-details { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-    .stock-badge { background: rgba(101,204,0,0.1); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; width: fit-content; font-weight: 600; }
-    
-    .qty-selector { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
-    .qty-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .qty-input { width: 50px; text-align: center; background: #070b12; border: 1px solid var(--border-color); color: #fff; padding: 6px; border-radius: 6px; }
-
-    .btn-add-cart-modal {
-      background: var(--primary); color: #000; border: none; padding: 12px; border-radius: 8px;
-      font-weight: 700; cursor: pointer; width: 100%; font-size: 14px; box-shadow: 0 0 15px var(--primary-glow);
-    }
-
-    /* ================= CART DRAWER ================= */
+    /* ================= START MODERN CART STYLE ================= */
     .cartDrawer {
-      position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: #090f17;
-      border-left: 1px solid var(--border-color); z-index: 3000; transition: right 0.3s ease;
-      display: flex; flex-direction: column; padding: 20px; box-shadow: -15px 0 40px rgba(0,0,0,0.8);
+      width: 420px;
+      background: #090f17;
+      border-left: 1px solid rgba(101, 204, 0, 0.15);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
-    .cartDrawer.active { right: 0; }
-    .cartHead { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-    #cartItems { flex: 1; overflow-y: auto; margin: 15px 0; display: flex; flex-direction: column; gap: 10px; }
-    .cartItem { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-    .cartItem img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-    .cartItem-info { flex: 1; font-size: 13px; }
-    .cartItem-remove { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+    html[dir="rtl"] .cartDrawer {
+      border-left: none;
+      border-right: 1px solid rgba(101, 204, 0, 0.15);
+    }
+    .cartItem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: 0.3s;
+    }
+    .cartItem:hover {
+      border-color: rgba(101, 204, 0, 0.3);
+      background: rgba(101, 204, 0, 0.02);
+    }
+    .cartItem-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .cartItem-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cartItem-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cartItem-cat {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .cartItem-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: #65cc00;
+    }
+    .cartItem-remove-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .cartItem-remove-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .coupon .checkoutForm {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .coupon input, .checkoutForm input {
+      background: #0d1722 !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      padding: 10px 12px !important;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .coupon input:focus, .checkoutForm input:focus {
+      border-color: #65cc00 !important;
+      outline: none;
+    }
+      
+    .btn-pay-now-pro {
+      width: 100%;
+      background: linear-gradient(135deg, #65cc00 0%, #4da200 100%);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(101, 204, 0, 0.25);
+    }
+    .btn-pay-now-pro:hover {
+      background: linear-gradient(135deg, #76de0c 0%, #59ba00 100%);
+      box-shadow: 0 6px 20px rgba(101, 204, 0, 0.4);
+      transform: translateY(-1px);
+    }
+    .payment-logos-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .pay-mini-logo {
+      height: 14px;
+      display: block;
+    }
+    /* ================= END MODERN CART STYLE ================= */
 
-    .checkout-form-box { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
-    .checkout-form-box input { background: #070b12; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; color: #fff; font-size: 13px; }
-    .btn-checkout-pay { background: linear-gradient(135deg, #65cc00, #4da200); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    /* ================= START MOBILE RESPONSIVE OVERRIDES ================= */
+    .mobile-bottom-nav { display: none; }
 
-    /* ================= FOOTER & SECURE PAYMENTS ================= */
-    footer {
-      background: #04070d; border-top: 1px solid var(--border-color); padding: 40px 5%; text-align: center; display: flex; flex-direction: column; gap: 20px; align-items: center;
-    }
-    .secure-payments-footer {
-      display: flex; gap: 20px; align-items: center; justify-content: center; margin-top: 10px;
-    }
-    .payment-badge-pill {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;
-    }
-    .payment-badge-pill i { font-size: 20px; }
+    @media (max-width: 991px) {
+      body {
+        padding-bottom: 65px !important;
+      }
+      .topbar {
+        flex-wrap: wrap;
+        padding: 10px 12px !important;
+        gap: 10px;
+      }
+      .mainNav {
+        display: none !important;
+      }
+      .topSearch {
+        order: 3;
+        width: 100% !important;
+        margin: 5px 0 0 0 !important;
+      }
+      .topSearch input {
+        width: 100% !important;
+      }
+      .navActions {
+        margin-left: auto;
+        gap: 6px;
+      }
+      html[dir="rtl"] .navActions {
+        margin-left: 0;
+        margin-right: auto;
+      }
+      .langBtn, .loginBtn, .user-profile-btn, .cartBtn {
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+      }
+      .cartDrawer {
+        width: 100% !important;
+      }
+      .user-profile-dropdown {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 65px !important;
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        box-sizing: border-box;
+      }
+      .hero-title { font-size: 26px !important; }
+      .hero-subtitle { font-size: 14px !important; }
+      .hero-cta-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-cta-buttons button { width: 100%; }
+      .sectionHead {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+      }
+      .filters {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .filters input, .filters select {
+        flex: 1 1 100%;
+      }
+      .paymentMethods {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .benefits {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+      }
 
-    /* ================= REVIEWS SECTION ================= */
-    .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-    .review-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-    .review-stars { color: #facc15; font-size: 14px; }
-    .review-author { font-size: 14px; font-weight: 700; color: #fff; display: flex; justify-content: space-between; }
-    .verified-tag { font-size: 11px; background: rgba(101,204,0,0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; }
-    .review-text { font-size: 13px; color: var(--text-muted); }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .mainNav { display: none; }
-      .hero-title { font-size: 26px; }
-      .modal-body-flex { flex-direction: column; align-items: center; text-align: center; }
-      .secure-payments-footer { flex-wrap: wrap; }
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #090f17;
+        border-top: 1px solid rgba(101, 204, 0, 0.2);
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+      }
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 11px;
+        gap: 4px;
+        flex: 1;
+        height: 100%;
+        transition: 0.2s;
+      }
+      .mobile-nav-item i { font-size: 18px; }
+      .mobile-nav-item:hover, .mobile-nav-item.active {
+        color: #65cc00;
+        background: rgba(101, 204, 0, 0.05);
+      }
     }
+    /* ================= END MOBILE RESPONSIVE OVERRIDES ================= */
   </style>
 </head>
 <body>
-
-  <!-- SPLASH SCREEN TECH GAMING (Exact 5 Seconds Animation) -->
-  <div id="splashScreen">
-    <div class="splash-content">
-      <div class="splash-logo-text">TECH <span>GAMING</span></div>
-      <div class="splash-loader-bar">
-        <div class="splash-loader-progress"></div>
-      </div>
-    </div>
-  </div>
-
   <canvas id="stars"></canvas>
 
   <header class="topbar">
-    <a class="brand" href="#">
-      <img src="/assets/FOX-LOGO.png" alt="Fox Games" onerror="this.src='https://via.placeholder.com/40'">
+    <a class="brand" href="/">
+      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
       <span>FOX <b class="green-text">GAMES</b></span>
     </a>
 
     <nav class="mainNav">
-      <a class="nav-link active" href="#home">Home</a>
-      <a class="nav-link" href="#products">Store</a>
-      <a class="nav-link" href="#trending">Categories</a>
-      <a class="nav-link" href="#reviews">Reviews</a>
-      <a class="nav-link" href="#support">Support</a>
+      <a class="nav-link active" href="#home" data-i18n="nav_home">Home</a>
+      <a class="nav-link" href="#products" data-i18n="nav_store">Store</a>
+      <a class="nav-link" href="#trending" data-i18n="nav_categories">Categories</a>
+      <a class="nav-link" href="#support" data-i18n="nav_support">Support</a>
     </nav>
 
     <div class="topSearch">
-      <input id="topSearchInput" placeholder="Search games & cards..." oninput="searchProducts()">
+      <input id="topSearchInput" placeholder="Search for products..." onfocus="focusSearch()" data-i18n-holder="search_placeholder">
       <span class="search-icon-btn"><i class="fas fa-search"></i></span>
     </div>
 
     <div class="navActions">
-      <button class="loginBtn" id="authBtn" onclick="handleAuthAction()">Login</button>
-      <button class="cartBtn" onclick="toggleCart()">
-        <i class="fas fa-shopping-cart"></i> Cart <b id="cartCount" class="cart-badge">0</b>
+      <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
+        
+      <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
+        
+      <div class="user-profile-wrapper foxHidden" id="userProfileWrapper">
+        <button class="user-profile-btn" id="userProfileTrigger">
+          <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
+        </button>
+          
+        <div class="user-profile-dropdown" id="userProfileDropdown">
+          <div class="profile-header">
+            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
+            <div class="profile-info">
+              <span class="profile-name" id="dropdownUserName">Gamer User</span>
+              <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
+            </div>
+          </div>
+          <div class="profile-menu-links">
+            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
+          </div>
+          <button class="logout-btn-new" id="profileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+          </button>
+        </div>
+      </div>
+
+      <button onclick="toggleCart()" title="Cart" class="cartBtn">
+        <i class="fas fa-shopping-cart"></i> <span data-i18n="btn_cart">Cart</span> 
+        <b id="cartCountTop" class="cart-badge">0</b>
       </button>
     </div>
   </header>
 
-  <main id="home">
+  <main id="home" class="content">
+      
     <section class="hero-banner-section">
       <div class="hero-banner-card">
-        <h1 class="hero-title">Next-Gen Game Cards & Top-Ups</h1>
-        <p class="hero-subtitle">Instant digital code delivery with 100% secure checkout.</p>
-        <div class="hero-cta-buttons">
-          <button class="shop-now-btn" onclick="scrollToSection('trending')"><i class="fas fa-th-large"></i> Choose Category</button>
+        <div class="hero-content">
+          <h1 class="hero-title" data-i18n="hero_title">Game Cards & Top-Ups</h1>
+          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Secure payments. Best prices.</p>
+            
+          <div class="hero-cta-buttons">
+            <button onclick="scrollToId('products')" class="shop-now-btn">
+              <i class="fas fa-shopping-bag"></i> <span data-i18n="btn_shop_now">Shop Now</span>
+            </button>
+            <button onclick="scrollToId('trending')" class="browse-cat-btn">
+              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+            </button>
+          </div>
+
+          <div class="hero-features">
+            <span class="feature-item"><i class="fas fa-bolt green-text"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
+            <span class="feature-item"><i class="fas fa-shield-alt green-text"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
+            <span class="feature-item"><i class="fas fa-headset green-text"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+          </div>
+        </div>
+
+        <div class="banner-game-logos">
+          <span class="game-logo-item">PUBG MOBILE</span>
+          <span class="game-logo-item">VALORANT</span>
+          <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
+          <span class="game-logo-item"><i class="fab fa-playstation"></i> PlayStation</span>
+          <span class="game-logo-item"><i class="fab fa-xbox"></i> XBOX</span>
         </div>
       </div>
     </section>
 
-    <!-- CATEGORIES SECTION -->
-    <section class="section" id="trending">
-      <div class="sectionHead">
-        <h2>Browse Categories</h2>
-      </div>
-      <div class="trendGrid" id="categoryGrid">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- PRODUCTS SECTION (Hidden by default until category selected) -->
     <section class="section" id="products">
-      <div class="sectionHead">
-        <h2 id="activeCategoryTitle">Products</h2>
-      </div>
-      <div id="productsContainer">
-        <div class="products-placeholder-msg">
-          <i class="fas fa-gamepad"></i>
-          <h3>Please select a category from above to view available products.</h3>
-          <p>Click on any category card to load its exclusive game items.</p>
+      <div class="sectionHead reveal">
+        <div>
+          <h2 data-i18n="title_popular">Popular Products</h2>
         </div>
+        <div class="filters">
+          <input id="searchInput" oninput="renderProducts()" placeholder="Search PUBG, Valorant, Steam..." data-i18n-holder="search_placeholder">
+          <select id="categoryFilter" onchange="renderProducts()"></select>
+          <select id="sortFilter" onchange="renderProducts()">
+            <option value="popular" data-i18n="sort_popular">Most Popular</option>
+            <option value="low" data-i18n="sort_low">Price Low</option>
+            <option value="high" data-i18n="sort_high">Price High</option>
+          </select>
+        </div>
+      </div>
+      <div class="productGrid" id="productGrid"></div>
+    </section>
+
+    <section class="section" id="trending">
+      <div class="sectionHead reveal">
+        <div>
+          <h2 data-i18n="title_categories">Shop by Categories</h2>
+        </div>
+        <button class="view-all-btn" onclick="resetCategoryFilter()" data-i18n="btn_view_all">View All <i class="fas fa-arrow-right"></i></button>
+      </div>
+      <div class="trendGrid" id="categoryGrid"></div>
+    </section>
+
+    <section class="benefits">
+      <div><i class="fas fa-bolt green-text benefit-icon"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
+      <div><i class="fas fa-shield-alt green-text benefit-icon"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
+      <div><i class="fas fa-headset green-text benefit-icon"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
+      <div><i class="fas fa-thumbs-up green-text benefit-icon"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
+    </section>
+
+    <section class="section" id="checkout">
+      <div class="checkoutShowcase reveal">
+        <div>
+          <h2 data-i18n="check_title">Secure Payment Methods</h2>
+          <p data-i18n="check_desc">Choose your product, add it to cart, and complete the order using your preferred payment method.</p>
+        </div>
+          
+        <div class="paymentMethods">
+          <div class="method-card" title="Visa">
+            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <span>Visa</span>
+          </div>
+          <div class="method-card" title="MasterCard">
+            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 28px;"></i>
+            <span>MasterCard</span>
+          </div>
+          <div class="method-card" title="Vodafone Cash">
+            <i class="fas fa-wallet" style="color: #e60000; font-size: 22px;"></i>
+            <span>Vodafone Cash</span>
+          </div>
+          <div class="method-card" title="Fawry">
+            <i class="fas fa-money-bill-wave" style="color: #ffcc00; font-size: 22px;"></i>
+            <span>Fawry</span>
+          </div>
+          <div class="method-card" title="InstaPay">
+            <i class="fas fa-university" style="color: #00bfa5; font-size: 22px;"></i>
+            <span>InstaPay</span>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <!-- CUSTOMER REVIEWS SECTION -->
-    <section class="section" id="reviews">
-      <div class="sectionHead">
-        <h2>Verified Gamer Reviews</h2>
-      </div>
-      <div class="reviews-grid">
-        <div class="review-card">
-          <div class="review-author"><span>Ahmed M.</span> <span class="verified-tag"><i class="fas fa-check-circle"></i> Verified Buyer</span></div>
-          <div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-          <p class="review-text">"Fastest delivery ever! Got my PUBG UC code instantly after payment. Highly recommended."</p>
+    <section class="section" id="support">
+      <div class="supportBox reveal">
+        <div>
+          <h2 data-i18n="sup_title">Need Help With Your Order?</h2>
+          <p data-i18n="sup_desc">Payment failed, code delayed, top-up issue, account problem — contact support instantly.</p>
         </div>
-        <div class="review-card">
-          <div class="review-author"><span>Mahmoud K.</span> <span class="verified-tag"><i class="fas fa-check-circle"></i> Verified Buyer</span></div>
-          <div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-          <p class="review-text">"Seamless checkout and great support. Bought Steam wallet cards without any hassle."</p>
-        </div>
-        <div class="review-card">
-          <div class="review-author"><span>Youssef H.</span> <span class="verified-tag"><i class="fas fa-check-circle"></i> Verified Buyer</span></div>
-          <div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-          <p class="review-text">"The best pricing in the market. Secure and reliable 100%!"</p>
+        <div class="supportActions">
+          <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- PRODUCT DETAIL MODAL -->
-  <div class="modal-overlay" id="productModal">
-    <div class="product-modal-card">
-      <button class="modal-close" onclick="closeProductModal()">×</button>
-      <div id="modalContent"></div>
-    </div>
-  </div>
-
-  <!-- CART DRAWER -->
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead">
-      <h3>Your Cart</h3>
-      <button onclick="toggleCart()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">×</button>
+      <h3 data-i18n="cart_title">Your Cart</h3>
+      <button onclick="toggleCart()">×</button>
     </div>
     <div id="cartItems"></div>
-    <div class="checkout-form-box">
-      <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px;">
-        <span>Total:</span> <span id="cartTotalPrice" class="green-text">0 EGP</span>
+    <div class="coupon">
+      <input id="couponInput" placeholder="أدخل كود الخصم هنا...">
+      <button onclick="applyCoupon()" data-i18n="btn_apply">Apply</button>
+    </div>
+    <div class="summary">
+      <p><span data-i18n="cart_subtotal">Subtotal</span><b id="subtotal">0 EGP</b></p>
+      <p><span data-i18n="cart_discount">Discount</span><b id="discount">0 EGP</b></p>
+      <p class="grand"><span data-i18n="cart_total">Total</span><b id="total">0 EGP</b></p>
+    </div>
+    
+    <div class="checkoutForm">
+      <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name" required>
+      <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
+      <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
+      
+      <button class="btn-pay-now-pro" onclick="checkout()">
+        <div class="payment-logos-container">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="pay-mini-logo">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="pay-mini-logo">
+        </div>
+        <span data-i18n="btn_pay_now">Pay Now</span>
+      </button>
+      
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 11px; margin-top: 4px;">
+        <i class="fa-solid fa-shield-halved" style="color: #65cc00;"></i>
+        <span>Secure Secure 256-bit Connection</span>
       </div>
-      <button class="btn-checkout-pay" onclick="checkoutOrder()">Pay & Complete Order</button>
     </div>
   </aside>
 
-  <!-- FOOTER WITH SECURE PAYMENTS -->
-  <footer>
-    <div>
-      <b style="font-size: 18px;">Fox Games Market</b>
-      <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">Premium digital gaming marketplace & top-up hub.</p>
-    </div>
-    
-    <div class="secure-payments-footer">
-      <div class="payment-badge-pill" style="color: #1a73e8;"><i class="fab fa-cc-visa"></i> VISA</div>
-      <div class="payment-badge-pill" style="color: #ea4335;"><i class="fab fa-cc-mastercard"></i> MASTERCARD</div>
-      <div class="payment-badge-pill" style="color: #ffffff;"><i class="fab fa-apple"></i> APPLE PAY</div>
-    </div>
+  <nav class="mobile-bottom-nav">
+    <a href="#home" class="mobile-nav-item active">
+      <i class="fas fa-home"></i>
+      <span data-i18n="nav_home">Home</span>
+    </a>
+    <a href="#products" class="mobile-nav-item">
+      <i class="fas fa-gamepad"></i>
+      <span data-i18n="nav_store">Store</span>
+    </a>
+    <a href="#trending" class="mobile-nav-item">
+      <i class="fas fa-th-large"></i>
+      <span data-i18n="nav_categories">Categories</span>
+    </a>
+    <a href="#support" class="mobile-nav-item">
+      <i class="fas fa-headset"></i>
+      <span data-i18n="nav_support">Support</span>
+    </a>
+  </nav>
 
-    <p style="color: var(--text-muted); font-size: 12px; margin-top: 15px;">© 2026 Fox Games Market. All rights reserved.</p>
+  <div class="chat" id="chat">
+    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatBody">
+      <p>Hey gamer 👋 How can we help?</p>
+      <small>This is a demo chat widget.</small>
+    </div>
+    <div class="chatInput">
+      <input placeholder="Write message...">
+      <button>Send</button>
+    </div>
+  </div>
+  <button class="chatBubble" onclick="toggleChat()">💬</button>
+
+  <footer>
+    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Fox Games Market</p>
   </footer>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    
+  <script src="/firebase-config.js"></script>
+    
+  <script src="/js/store-firebase.js"></script>
+  <script src="/js/store-account.js"></script>
+  <script src="/js/script.js"></script>
+
   <script>
-    // --- 5 SECONDS TECH GAMING SPLASH SCREEN ---
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        splash.style.opacity = '0';
-        setTimeout(() => splash.style.display = 'none', 800);
-      }, 5000);
-    });
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainLoginBtn = document.getElementById('mainLoginBtn');
+      const userProfileWrapper = document.getElementById('userProfileWrapper');
+      const userProfileTrigger = document.getElementById('userProfileTrigger');
+      const userProfileDropdown = document.getElementById('userProfileDropdown');
+        
+      const topNavUserName = document.getElementById('topNavUserName');
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      const profileUserAvatar = document.getElementById('profileUserAvatar');
+      const authMethodBadge = document.getElementById('authMethodBadge');
+      const profileLogoutBtn = document.getElementById('profileLogoutBtn');
 
-    // --- MOCK PRODUCTS & CATEGORIES DATA ---
-    const storeData = [
-      { id: 1, name: "PUBG Mobile 660 UC", category: "PUBG Mobile", price: 350, stock: 45, image: "https://via.placeholder.com/200?text=PUBG+660+UC", desc: "Official PUBG Mobile 660 UC digital pin delivered instantly." },
-      { id: 2, name: "PUBG Mobile 1800 UC", category: "PUBG Mobile", price: 900, stock: 20, image: "https://via.placeholder.com/200?text=PUBG+1800+UC", desc: "Top up your royale pass with 1800 UC code." },
-      { id: 3, name: "Valorant 1000 Points", category: "Valorant", price: 380, stock: 30, image: "https://via.placeholder.com/200?text=Valorant+Points", desc: "Riot Valorant 1000 VP prepaid card code." },
-      { id: 4, name: "Valorant 2400 Points", category: "Valorant", price: 850, stock: 15, image: "https://via.placeholder.com/200?text=Valorant+2400+VP", desc: "Unlock weapon skins with Valorant 2400 VP." },
-      { id: 5, name: "Steam Wallet $20", category: "Steam", price: 650, stock: 50, image: "https://via.placeholder.com/200?text=Steam+20", desc: "Add funds directly to your Steam account wallet." },
-      { id: 6, name: "PlayStation Store $50", category: "PlayStation", price: 1600, stock: 10, image: "https://via.placeholder.com/200?text=PSN+50", desc: "US Region PSN digital gift card code." }
-    ];
-
-    let cart = [];
-    let currentUser = localStorage.getItem('fox_logged_user') || null;
-    let loginTimestamp = localStorage.getItem('fox_login_time') || null;
-
-    // --- SESSION TIMEOUT CHECK (1 Hour = 3600000ms) ---
-    function checkSessionTimeout() {
-      if (currentUser && loginTimestamp) {
-        const now = Date.now();
-        if (now - parseInt(loginTimestamp) > 3600000) {
-          // Session expired after 1 hour
-          logoutUser();
-          Swal.fire('Session Expired', 'Your 1-hour session has expired. Please log in again.', 'info');
+      function cleanOldProfiles() {
+        if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+          const btnText = mainLoginBtn.innerText.trim().toLowerCase();
+          if (btnText.includes('profile') || btnText.includes('البروفايل') || btnText.includes('حسابي')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+        }
+          
+        const actionsContainer = document.querySelector('.navActions');
+        if (actionsContainer) {
+          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
+          textButtons.forEach(btn => {
+            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
+              btn.remove();
+            }
+          });
         }
       }
-    }
-    setInterval(checkSessionTimeout, 10000);
 
-    function logoutUser() {
-      localStorage.removeItem('fox_logged_user');
-      localStorage.removeItem('fox_login_time');
-      currentUser = null;
-      loginTimestamp = null;
-      updateAuthUI();
-    }
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
+            if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
 
-    function updateAuthUI() {
-      const authBtn = document.getElementById('authBtn');
-      if (currentUser) {
-        authBtn.innerText = "Logout";
-        authBtn.onclick = () => { logoutUser(); Swal.fire('Logged Out', 'You have been logged out.', 'success'); };
-      } else {
-        authBtn.innerText = "Login";
-        authBtn.onclick = handleAuthAction;
+            const displayName = user.displayName || "Gamer";
+            const email = user.email || "No Email";
+            const photoURL = user.photoURL || "https://via.placeholder.com/150";
+
+            if (topNavUserName) topNavUserName.innerText = displayName.split(' ')[0]; 
+            if (dropdownUserName) dropdownUserName.innerText = displayName;
+            if (dropdownUserEmail) dropdownUserEmail.innerText = email;
+            if (profileUserAvatar) profileUserAvatar.src = photoURL;
+
+            let providerId = "email";
+            if (user.providerData && user.providerData.length > 0) {
+              providerId = user.providerData[0].providerId;
+            }
+
+            if (authMethodBadge) {
+              if (providerId === 'google.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-google"><i class="fab fa-google"></i> Google</span>`;
+              } else if (providerId === 'facebook.com') {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-facebook"><i class="fab fa-facebook"></i> Facebook</span>`;
+              } else {
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-email"><i class="fas fa-envelope"></i> حسابك</span>`;
+              }
+            }
+          } else {
+            if (mainLoginBtn) {
+              mainLoginBtn.classList.remove('foxHidden');
+              mainLoginBtn.innerText = "Login";
+            }
+            if (userProfileWrapper) userProfileWrapper.classList.add('foxHidden');
+          }
+          cleanOldProfiles();
+        });
       }
-    }
 
-    function handleAuthAction() {
-      Swal.fire({
-        title: 'Gamer Authentication Required',
-        html: '<input id="swalEmail" class="swal2-input" placeholder="Enter your email">',
-        confirmButtonText: 'Login / Register',
-        confirmButtonColor: '#65cc00',
-        background: '#0d1722',
-        color: '#fff'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const email = document.getElementById('swalEmail').value;
-          if (email) {
-            currentUser = email;
-            loginTimestamp = Date.now();
-            localStorage.setItem('fox_logged_user', currentUser);
-            localStorage.setItem('fox_login_time', loginTimestamp);
-            updateAuthUI();
-            Swal.fire('Welcome!', 'Successfully logged in. Session valid for 1 hour.', 'success');
+      const observer = new MutationObserver(() => {
+        cleanOldProfiles();
+        if (firebase.auth().currentUser) {
+          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
+            userProfileWrapper.classList.remove('foxHidden');
           }
         }
       });
-    }
 
-    // --- INITIALIZE CATEGORIES ---
-    function initCategories() {
-      const categories = [...new Set(storeData.map(p => p.category))];
-      const grid = document.getElementById('categoryGrid');
-      grid.innerHTML = categories.map(cat => {
-        const sample = storeData.find(p => p.category === cat);
-        return `
-          <div class="trend-card" onclick="selectCategory('${cat}')">
-            <img src="${sample.image}" alt="${cat}">
-            <h3 style="color:#fff; font-size:15px;">${cat}</h3>
-          </div>
-        `;
-      }).join('');
-    }
+      const navActionsContainer = document.querySelector('.navActions');
+      if (navActionsContainer) {
+        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
+      }
 
-    // --- RENDER PRODUCTS UPON CATEGORY CLICK WITH ANIMATION ---
-    function selectCategory(categoryName) {
-      document.getElementById('activeCategoryTitle').innerText = categoryName + " Products";
-      const container = document.getElementById('productsContainer');
-      
-      const filtered = storeData.filter(p => p.category === categoryName);
-      
-      container.innerHTML = `
-        <div class="productGrid">
-          ${filtered.map(p => `
-            <div class="productCard product-card-animated" onclick="openProductModal(${p.id})">
-              <img src="${p.image}" class="productImg" alt="${p.name}">
-              <div class="productBody">
-                <span style="font-size:11px; color:var(--text-muted);">${p.category}</span>
-                <h4 class="productTitle">${p.name}</h4>
-                <div class="productPrice">${p.price} EGP</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-
-      scrollToSection('products');
-    }
-
-    // --- PRODUCT DETAIL MODAL WITH QUANTITY SELECTOR ---
-    function openProductModal(productId) {
-      const product = storeData.find(p => p.id === productId);
-      if (!product) return;
-
-      const modalContent = document.getElementById('modalContent');
-      modalContent.innerHTML = `
-        <div class="modal-body-flex">
-          <img src="${product.image}" class="modal-img" alt="${product.name}">
-          <div class="modal-details">
-            <span class="stock-badge"><i class="fas fa-boxes"></i> In Stock: ${product.stock} units</span>
-            <h3 style="color:#fff; font-size:18px;">${product.name}</h3>
-            <p style="color:var(--text-muted); font-size:13px;">${product.desc}</p>
-            <div style="font-size:20px; font-weight:800; color:var(--primary);">${product.price} EGP</div>
-            
-            <div class="qty-selector">
-              <span style="font-size:13px; color:var(--text-muted);">Quantity:</span>
-              <button class="qty-btn" onclick="adjustQty(-1)">-</button>
-              <input type="text" id="modalQty" class="qty-input" value="1" readonly>
-              <button class="qty-btn" onclick="adjustQty(1, ${product.stock})">+</button>
-            </div>
-
-            <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
-              <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
-          </div>
-        </div>
-      `;
-      document.getElementById('productModal').classList.add('active');
-    }
-
-    function closeProductModal() {
-      document.getElementById('productModal').classList.remove('active');
-    }
-
-    function adjustQty(amount, maxStock) {
-      const input = document.getElementById('modalQty');
-      let current = parseInt(input.value) + amount;
-      if (current < 1) current = 1;
-      if (maxStock && current > maxStock) current = maxStock;
-      input.value = current;
-    }
-
-    // --- CART LOGIC & FORCED AUTH CHECK ---
-    function addToCart(productId) {
-      // FORCE AUTH CHECK
-      if (!currentUser) {
-        closeProductModal();
-        Swal.fire({
-          title: 'Login Required',
-          text: 'You must log in to your account before purchasing or adding items to the cart.',
-          icon: 'warning',
-          confirmButtonColor: '#65cc00',
-          background: '#0d1722',
-          color: '#fff'
-        }).then(() => {
-          handleAuthAction();
+      if (userProfileTrigger && userProfileDropdown) {
+        userProfileTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userProfileDropdown.classList.toggle('active');
         });
-        return;
-      }
-
-      const product = storeData.find(p => p.id === productId);
-      const qty = parseInt(document.getElementById('modalQty').value);
-
-      const existingItem = cart.find(item => item.id === productId);
-      if (existingItem) {
-        existingItem.qty += qty;
-      } else {
-        cart.push({ ...product, qty });
-      }
-
-      closeProductModal();
-      updateCartUI();
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'Added to cart successfully',
-        showConfirmButton: false,
-        timer: 1500,
-        background: '#0d1722',
-        color: '#fff'
-      });
-    }
-
-    function updateCartUI() {
-      const cartItemsContainer = document.getElementById('cartItems');
-      const cartCount = document.getElementById('cartCount');
-      const cartTotalPrice = document.getElementById('cartTotalPrice');
-
-      cartCount.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
-
-      if (cart.length === 0) {
-        cartItemsContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:40px;">Your cart is empty.</p>`;
-        cartTotalPrice.innerText = "0 EGP";
-        return;
-      }
-
-      let total = 0;
-      cartItemsContainer.innerHTML = cart.map(item => {
-        total += item.price * item.qty;
-        return `
-          <div class="cartItem">
-            <img src="${item.image}" alt="${item.name}">
-            <div class="cartItem-info">
-              <b>${item.name}</b>
-              <div>${item.price} EGP × ${item.qty}</div>
-            </div>
-            <button class="cartItem-remove" onclick="removeFromCart(${item.id})"><i class="fas fa-trash"></i></button>
-          </div>
-        `;
-      }).join('');
-
-      cartTotalPrice.innerText = total + " EGP";
-    }
-
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      updateCartUI();
-    }
-
-    function toggleCart() {
-      document.getElementById('cartDrawer').classList.toggle('active');
-    }
-
-    // --- CHECKOUT & CART CLEARANCE ---
-    function checkoutOrder() {
-      if (!currentUser) {
-        Swal.fire('Login Required', 'Please log in to complete your checkout.', 'warning');
-        handleAuthAction();
-        return;
-      }
-
-      if (cart.length === 0) {
-        Swal.fire('Cart Empty', 'Add items to your cart before proceeding to payment.', 'info');
-        return;
-      }
-
-      Swal.fire({
-        title: 'Processing Payment...',
-        text: 'Securely connecting to payment gateway.',
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => Swal.showLoading(),
-        background: '#0d1722',
-        color: '#fff'
-      }).then(() => {
-        // Clear Cart completely after successful payment as requested
-        cart = [];
-        updateCartUI();
-        toggleCart();
-
-        Swal.fire({
-          title: 'Order Completed Successfully! 🎉',
-          text: 'Your digital codes have been delivered to your email.',
-          icon: 'success',
-          confirmButtonColor: '#65cc00',
-          background: '#0d1722',
-          color: '#fff'
+        document.addEventListener('click', () => {
+          userProfileDropdown.classList.remove('active');
         });
-      });
-    }
+      }
 
-    function scrollToSection(id) {
-      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Initialize app state on load
-    document.addEventListener('DOMContentLoaded', () => {
-      initCategories();
-      updateAuthUI();
-      checkSessionTimeout();
+      if (profileLogoutBtn) {
+        profileLogoutBtn.addEventListener('click', () => {
+          if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut().then(() => {
+              window.location.reload();
+            }).catch((error) => {
+              console.error("Logout Error: ", error);
+            });
+          }
+        });
+      }
     });
+
+    // دوال الأقسام وتعبئتها آلياً لمعالجة العرض وإصلاح الفلترة
+    function populateCategories(products) {
+        const categoryFilter = document.getElementById('categoryFilter');
+        const categoryGrid = document.getElementById('categoryGrid');
+        
+        if (!categoryFilter || !categoryGrid) return;
+
+        const categories = [...new Set(products.map(p => p.category))].filter(Boolean);
+
+        let filterHTML = '<option value="">All Categories</option>';
+        categories.forEach(cat => {
+            filterHTML += `<option value="${cat}">${cat}</option>`;
+        });
+        categoryFilter.innerHTML = filterHTML;
+
+        let gridHTML = '';
+        categories.forEach(cat => {
+            const sampleProduct = products.find(p => p.category === cat);
+            const catImg = sampleProduct && sampleProduct.image ? sampleProduct.image : 'https://via.placeholder.com/150';
+            
+            gridHTML += `
+                <div class="trend-card" onclick="filterByCategory('${cat}')" style="cursor: pointer; background: #0d1722; border: 1px solid rgba(101,204,0,0.2); border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s;">
+                    <img src="${catImg}" alt="${cat}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;">
+                    <h3 style="margin-top: 10px; color: #fff; font-size: 15px; font-weight: 700;">${cat}</h3>
+                </div>
+            `;
+        });
+        categoryGrid.innerHTML = gridHTML;
+    }
+
+    function filterByCategory(catName) {
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.value = catName;
+            if (typeof renderProducts === 'function') {
+                renderProducts();
+            }
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
   </script>
 </body>
 </html>
