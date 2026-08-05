@@ -365,7 +365,7 @@ async function checkout() {
   });
 
   try {
-    const res = await fetch('https://fox-games-store-1.onrender.com/api/myfatoorah/create-payment', {
+    const res = await fetch('https://tech-gaming.store/api/myfatoorah/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
