@@ -111,9 +111,9 @@ function renderCategories() {
   grid.innerHTML = categories.map(cat => {
     const catImg = cat.bg || cat.image || 'https://picsum.photos/300/200';
     return `
-    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="position: relative; overflow: hidden; aspect-ratio: 3 / 2;">
-      <img src="${catImg}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
-      <div style="position: relative; z-index: 2;"><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
+    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')">
+      <img src="${catImg}" alt="${cat.name}">
+      <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
     </div>`;
   }).join('');
 }
@@ -155,8 +155,8 @@ function renderProducts() {
     const imgUrl = p.img || p.image || 'https://picsum.photos/300/200';
     
     return `<article class="productCard reveal">
-      <div class="productCover" style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-image: none !important;">
-        <img src="${imgUrl}" alt="${p.name || 'Product'}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+      <div class="productCover">
+        <img src="${imgUrl}" alt="${p.name || 'Product'}">
       </div>
       <div class="productInfo">
         <h3>${p.name || ''}</h3>
