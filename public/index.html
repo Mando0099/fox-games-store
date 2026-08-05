@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fox Games Market</title>
+  <title>Tech Gaming Market</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/style.css"/>
   
@@ -11,6 +11,49 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
+    /* ================= START LOADER STYLE ================= */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #090f17;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader-spinner {
+      border: 5px solid rgba(101, 204, 0, 0.2);
+      border-top: 5px solid #65cc00;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    .loader-text {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .loader-text span {
+      color: #65cc00;
+    }
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
+    /* ================= END LOADER STYLE ================= */
+
     /* ================= START USER PROFILE STYLE ================= */
     .user-profile-wrapper {
       position: relative;
@@ -392,12 +435,19 @@
   </style>
 </head>
 <body>
+  
+  <!-- Loading Screen -->
+  <div id="loader" class="loader-container">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">TECH <span>GAMING</span></div>
+  </div>
+
   <canvas id="stars"></canvas>
 
   <header class="topbar">
     <a class="brand" href="/">
-      <img src="/assets/FOX-LOGO.png" alt="Fox Games">
-      <span>FOX <b class="green-text">GAMES</b></span>
+      <img src="/assets/TECH-LOGO.png" alt="Tech Gaming">
+      <span>TECH <b class="green-text">GAMING</b></span>
     </a>
 
     <nav class="mainNav">
@@ -585,7 +635,8 @@
       <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
       <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
       
-      <button class="btn-pay-now-pro" onclick="checkout()">
+      <!-- Modified Checkout Button -->
+      <button class="btn-pay-now-pro" onclick="requireLoginToCheckout()">
         <div class="payment-logos-container">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="pay-mini-logo">
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="pay-mini-logo">
@@ -620,7 +671,7 @@
   </nav>
 
   <div class="chat" id="chat">
-    <div class="chatTop">Fox Games Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatTop">Tech Gaming Support <button onclick="toggleChat()">×</button></div>
     <div class="chatBody">
       <p>Hey gamer 👋 How can we help?</p>
       <small>This is a demo chat widget.</small>
@@ -633,8 +684,8 @@
   <button class="chatBubble" onclick="toggleChat()">💬</button>
 
   <footer>
-    <div><b>Fox Games</b><p>Premium digital gaming marketplace.</p></div>
-    <p>© 2026 Fox Games Market</p>
+    <div><b>Tech Gaming</b><p>Premium digital gaming marketplace.</p></div>
+    <p>© 2026 Tech Gaming Market</p>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -648,6 +699,50 @@
   <script src="/js/script.js"></script>
 
   <script>
+    // Logic for Loader
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('loader');
+      if (loader) {
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          setTimeout(() => loader.remove(), 500);
+        }, 800);
+      }
+    });
+
+    // Check login logic before checkout
+    function requireLoginToCheckout() {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'تسجيل الدخول مطلوب',
+            text: 'يجب عليك تسجيل الدخول أولاً لإتمام عملية الشراء.',
+            confirmButtonText: 'تسجيل الدخول',
+            confirmButtonColor: '#65cc00',
+            background: '#0d1722',
+            color: '#fff',
+            iconColor: '#ef4444'
+          }).then((result) => {
+            if (result.isConfirmed && typeof openAuth === 'function') {
+              openAuth(); // فتح نافذة تسجيل الدخول في حال الموافقة
+            }
+          });
+          return;
+        }
+        // User logged in, proceed to checkout
+        if (typeof checkout === 'function') {
+          checkout();
+        }
+      } else {
+         // Fallback if firebase is not loaded properly
+         if (typeof checkout === 'function') {
+           checkout();
+         }
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
@@ -722,7 +817,7 @@
 
       const observer = new MutationObserver(() => {
         cleanOldProfiles();
-        if (firebase.auth().currentUser) {
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
           if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
             mainLoginBtn.classList.add('foxHidden');
           }
