@@ -4,7 +4,6 @@ const path = require('path');
 const axios = require('axios');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
-const cors = require('cors'); // تم إضافة مكتبة الـ CORS لحل مشكلة الاتصال من المتصفح
 
 // Initialize Firebase
 if (!admin.apps.length) {
@@ -20,15 +19,6 @@ const db = admin.firestore();
 
 const app = express();
 const PORT = process.env.PORT || 9000;
-
-// ==========================================
-// 🛡️ CORS CONFIGURATION (حل مشكلة الحظر)
-// ==========================================
-app.use(cors({
-  origin: '*', // السماح بالاتصال من أي دومين (يمكنك تخصيصه لاحقاً إلى 'https://tech-gaming.store')
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -86,6 +76,7 @@ async function getActivePaymentGateway() {
       const isLive = Boolean(data.isLive);
       const provider = (data.provider || data.name || 'myfatoorah').toLowerCase();
 
+      // روابط التخلف الافتراضية للـ Demo والـ Live حسب كل بوابة
       let defaultSandbox = 'https://apitest.myfatoorah.com';
       let defaultLive = 'https://api-eg.myfatoorah.com';
 
@@ -99,6 +90,8 @@ async function getActivePaymentGateway() {
 
       const sandboxUrl = data.sandboxUrl || defaultSandbox;
       const liveUrl = data.liveUrl || defaultLive;
+
+      // اختيار رابط الـ API تلقائياً بناءً على وضع isLive
       const targetApiUrl = (isLive ? liveUrl : sandboxUrl).replace(/\/v2\/?$/, '');
 
       return {
@@ -176,6 +169,7 @@ async function myfatoorahPost(gatewayConfig, endpoint, body) {
 // 🛠️ ADMIN GATEWAY MANAGEMENT APIs
 // ==========================================
 
+// 1. Get all payment gateways (For Admin Panel)
 app.get('/api/admin/payment-gateways', async (req, res) => {
   try {
     const snapshot = await db.collection('payment_gateways').get();
@@ -206,6 +200,7 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
   }
 });
 
+// 2. Add or Update a Payment Gateway (Encrypts keys before saving)
 app.post('/api/admin/payment-gateways', async (req, res) => {
   try {
     const { 
@@ -216,6 +211,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     
     const docId = id || (provider ? provider.toLowerCase() : (name ? name.toLowerCase() : 'gateway_' + Date.now()));
 
+    // If activating this gateway, deactivate all others first
     if (isActive) {
       const allGateways = await db.collection('payment_gateways').get();
       const batch = db.batch();
@@ -243,6 +239,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
+    // Only re-encrypt if a new key/token is provided
     if (inputToken) gatewayPayload.token = encrypt(inputToken);
     if (secretKey) gatewayPayload.secretKey = encrypt(secretKey);
     if (webhookSecret) gatewayPayload.webhookSecret = encrypt(webhookSecret);
@@ -259,6 +256,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
   }
 });
 
+// 3. Quick Toggle Gateway Active Status
 app.post('/api/admin/payment-gateways/activate', async (req, res) => {
   try {
     const { id } = req.body;
@@ -279,6 +277,7 @@ app.post('/api/admin/payment-gateways/activate', async (req, res) => {
   }
 });
 
+// 4. Quick Toggle Live / Demo Mode
 app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
   try {
     const { id, isLive } = req.body;
@@ -348,6 +347,7 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     console.log(`[MODE: ${gateway.isLive ? 'LIVE' : 'DEMO'}] ACTIVE_GATEWAY_URL:`, gateway.apiUrl);
 
+    // Step 1: get a valid PaymentMethodId
     const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
       InvoiceAmount: amount,
       CurrencyIso: 'EGP'
