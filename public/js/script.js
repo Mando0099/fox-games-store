@@ -1,18 +1,18 @@
 // ================= FOX GAMES LIVE DATABASE LINK =================
+// الاعتماد بالكامل على مصفوفات الفايربيز والبانل بدون كود تجريبي
 const $ = id => document.getElementById(id);
 
+// هنا بنضمن إن لو الفايربيز اتأخر في التحميل، المتجر ما يضربش ويفضل مستني الداتا
 if (typeof cart === 'undefined') {
   var cart = JSON.parse(localStorage.getItem('foxgames_cart')) || [];
 }
+// إلغاء أي خصم تلقائي مسبق - الكوبون يبدأ دائماً من الصفر
 if (typeof coupon === 'undefined') {
   var coupon = 0; 
   localStorage.setItem('foxgames_coupon', '0');
 }
 
-// مصفوفات عامة نخزن فيها الداتا لو اتسحبت من الفايربيز
-window.products = window.products || [];
-window.categories = window.categories || [];
-
+// مصفوفة الترجمة الحقيقية المتوافقة مع أوسمة الـ HTML والتعديلات الجديدة
 const translations = {
   en: {
     nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
@@ -58,82 +58,57 @@ const translations = {
 
 let currentLang = localStorage.getItem('foxgames_lang') || 'en';
 
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
+  // تطبيق اللغة المحفوظة فور تحميل المتجر
   applyLanguage(currentLang);
+
+  // تشغيل الفانكشنز الأساسية المرتبطة بالفايربيز والـ Auth في مشروعك
   if (typeof checkAuthState === 'function') checkAuthState();
   
-  // جلب البيانات مباشرة من فايربيز لو مش محملة
-  await loadDataFromFirebase();
-
-  renderCategories();
-  renderFilters();
-  renderProducts();
-  updateCart();
+  // انتظر ثواني للتأكد من سحب الداتا بالكامل من البانل ثم اعرضها
+  setTimeout(() => {
+    renderCategories();
+    renderFilters();
+    renderProducts();
+    updateCart();
+  }, 1000); 
+  
   reveal();
 });
 
 window.addEventListener('scroll', reveal);
 
-// دالة لجلب الأقسام والمنتجات من فايربيز مباشرة لو مش موجودة
-async function loadDataFromFirebase() {
-  if (typeof firebase === 'undefined' || !firebase.firestore) return;
-  try {
-    const db = firebase.firestore();
-    
-    // سحب المنتجات
-    if (!products.length) {
-      const prodSnapshot = await db.collection('products').get();
-      products = prodSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    }
-    
-    // سحب التصنيفات
-    if (!categories.length) {
-      const catSnapshot = await db.collection('categories').get();
-      categories = catSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    }
-  } catch (e) {
-    console.error("Error loading data from Firebase:", e);
-  }
-}
-
 function renderMiniSlider() {}
 
 // عرض التصنيفات الحقيقية
 function renderCategories() {
-  const grid = $('categoryGrid');
-  if (!grid) return;
+  if (!$('categoryGrid')) return;
+  if (typeof categories === 'undefined' || !categories.length) return;
   
-  if (!categories.length) {
-    grid.innerHTML = `<p style="color:#94a3b8; text-align:center; padding: 20px; grid-column: 1/-1;">No categories available.</p>`;
-    return;
-  }
-  
-  grid.innerHTML = categories.map(cat => {
-    const catImg = cat.bg || cat.image || 'https://picsum.photos/300/200';
+  $('categoryGrid').innerHTML = categories.map(cat => {
+    const catImg = cat.bg || cat.image || '';
     return `
-    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')">
-      <img src="${catImg}" alt="${cat.name}">
-      <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
+    <div class="trendCard reveal" onclick="selectCategory('${cat.name}')" style="position: relative; overflow: hidden; aspect-ratio: 3 / 2;">
+      <img src="${catImg}" alt="${cat.name}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
+      <div style="position: relative; z-index: 2;"><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
     </div>`;
   }).join('');
 }
 
+// إنشاء قائمة الفلاتر تلقائياً من الألعاب المرفوعة على الفايربيز
 function renderFilters() {
-  const f = $('categoryFilter');
-  if (!f) return;
-  if (!products.length) return;
+  if (!$('categoryFilter')) return;
+  if (typeof products === 'undefined' || !products.length) return;
   
   const list = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
-  f.innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
+  $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
 }
 
 // عرض المنتجات
 function renderProducts() {
-  const grid = $('productGrid');
-  if (!grid) return;
-  
-  if (!products.length) {
-    grid.innerHTML = `<p style="color:var(--muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products from Firebase...</p>`;
+  if (!$('productGrid')) return;
+  if (typeof products === 'undefined' || !products.length) {
+    $('productGrid').innerHTML = `<p style="color:var(--muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products from Firebase...</p>`;
     return;
   }
 
@@ -142,27 +117,27 @@ function renderProducts() {
   const sort = $('sortFilter')?.value;
 
   let list = products.filter(p => 
-    `${p.name || ''} ${p.category || ''} ${p.desc || ''}`.toLowerCase().includes(search) && 
+    `${p.name} ${p.category} ${p.desc}`.toLowerCase().includes(search) && 
     (filter === 'All' || p.category === filter)
   );
 
-  if (sort === 'low') list.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
-  if (sort === 'high') list.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+  if (sort === 'low') list.sort((a, b) => a.price - b.price);
+  if (sort === 'high') list.sort((a, b) => b.price - a.price);
   if (sort === 'popular') list.sort((a, b) => (b.popular || 0) - (a.popular || 0));
 
-  grid.innerHTML = list.map(p => {
+  $('productGrid').innerHTML = list.map(p => {
     const i = products.indexOf(p);
-    const imgUrl = p.img || p.image || 'https://picsum.photos/300/200';
+    const imgUrl = p.img || p.image || '';
     
     return `<article class="productCard reveal">
-      <div class="productCover">
-        <img src="${imgUrl}" alt="${p.name || 'Product'}">
+      <div class="productCover" style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-image: none !important;">
+        <img src="${imgUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
       </div>
       <div class="productInfo">
-        <h3>${p.name || ''}</h3>
+        <h3>${p.name}</h3>
         <p>${p.desc || ''}</p>
         <div class="priceRow">
-          <div class="price">${p.price || 0}.00 EGP</div>
+          <div class="price">${p.price}.00 EGP</div>
           <span class="rating">★ ${p.rating || '4.9'}</span>
         </div>
         <button class="add" onclick="addToCart(${i})">Buy Now</button>
@@ -187,11 +162,11 @@ function resetCategoryFilter() {
 }
 
 function addToCart(i) {
-  if (!products[i]) return;
+  if (typeof products === 'undefined' || !products[i]) return;
   cart.push({ 
     ...products[i], 
     cartId: Date.now() + Math.random(),
-    id: products[i].id || i
+    id: products[i].id || products[i].docId || i
   });
   save();
   updateCart();
@@ -211,14 +186,15 @@ function updateCart() {
   if ($('cartItems')) {
     $('cartItems').innerHTML = cart.length 
       ? cart.map(item => {
-          const imgUrl = item.img || item.image || 'https://picsum.photos/150';
+          const imgUrl = item.img || item.image || 'https://via.placeholder.com/150';
+          
           return `
             <div class="cartItem">
-              <img src="${imgUrl}" class="cartItem-img" alt="${item.name || ''}">
+              <img src="${imgUrl}" class="cartItem-img" alt="${item.name}">
               <div class="cartItem-details">
-                <span class="cartItem-name">${item.name || ''}</span>
+                <span class="cartItem-name">${item.name}</span>
                 <span class="cartItem-cat">${item.category || ''}</span>
-                <span class="cartItem-price">${item.price || 0} EGP</span>
+                <span class="cartItem-price">${item.price} EGP</span>
               </div>
               <button class="cartItem-remove-btn" onclick="removeItem(${item.cartId})" title="Remove">
                 <i class="fas fa-trash-alt"></i>
@@ -229,6 +205,7 @@ function updateCart() {
   }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
+  // الحساب يعتمد حصراً على الكوبون المدخل يدوياً
   const discountValue = Math.round(subtotal * coupon / 100);
   
   if ($('subtotal')) $('subtotal').textContent = `${subtotal} EGP`;
@@ -273,33 +250,119 @@ function applyLanguage(lang) {
   }
 }
 
+// دالة فحص وتطبيق الكوبون يدوياً من الـ Firestore
 async function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
-  if (!code) return;
-  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  
+  if (!code) {
+    Swal.fire({
+      icon: 'warning',
+      text: currentLang === 'ar' ? 'يرجى إدخال كود الخصم أولاً!' : 'Please enter a coupon code first!',
+      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  if (typeof firebase === 'undefined' || !firebase.firestore) {
+    console.error("Firebase Firestore is not loaded.");
+    return;
+  }
 
   try {
     const couponDoc = await firebase.firestore().collection('coupons').doc(code).get();
+
     if (couponDoc.exists) {
-      coupon = parseFloat(couponDoc.data().value || 0); 
+      const couponData = couponDoc.data();
+      coupon = parseFloat(couponData.value || 0); 
       save();
       updateCart();
+
+      Swal.fire({
+        icon: 'success',
+        title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!',
+        text: currentLang === 'ar' ? `تم تفعيل خصم بقيمة ${coupon}% بنجاح 🎉` : `Successfully applied ${coupon}% discount 🎉`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon',
+        text: currentLang === 'ar' ? 'قسيمة الخصم هذه غير موجودة أو انتهت صلاحيتها.' : 'This coupon code does not exist or has expired.',
+        confirmButtonText: currentLang === 'ar' ? 'محاولة أخرى' : 'Try Again',
+        confirmButtonColor: '#ef4444'
+      });
     }
   } catch (error) {
-    console.error("Error fetching coupon:", error);
+    console.error("Error fetching coupon from Firebase:", error);
   }
 }
 
+// دالة الدفع الآلي المباشر عبر بوابة الدفع (بدون حقل Dropdown)
 async function checkout() {
-  if (!cart.length) return;
+  if (!cart.length) {
+    Swal.fire({
+      icon: 'warning',
+      text: currentLang === 'ar' ? 'سلة المشتريات فارغة تماماً.' : 'Your cart is empty.',
+      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
   const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
   const email = ($('customerEmail')?.value || '').trim();
 
-  if (!name || !phone || !email) return;
+  if (!name || !phone || !email) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
+      text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء بنجاح.' : 'Please fill out all fields (Name, Phone, and Email) to complete your order.',
+      confirmButtonText: currentLang === 'ar' ? 'تعديل البيانات' : 'Edit Info',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'البريد الإلكتروني غير صحيح' : 'Invalid Email Address',
+      text: currentLang === 'ar' ? 'يرجى كتابة بريد إلكتروني حقيقي وصحيح لاستلام الأكواد الرقمية عليه!' : 'Please enter a valid email address to receive your digital codes!',
+      confirmButtonText: currentLang === 'ar' ? 'تصحيح' : 'Fix',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
+
+  if (isNaN(phone) || phone.length < 11) {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'رقم الهاتف غير دقيق' : 'Invalid Phone Number',
+      text: currentLang === 'ar' ? 'برجاء كتابة رقم هاتف خلوي صحيح مكون من أرقام فقط.' : 'Please enter a valid phone number consisting of numbers only.',
+      confirmButtonText: currentLang === 'ar' ? 'تصحيح' : 'Fix',
+      confirmButtonColor: '#65cc00'
+    });
+    return;
+  }
 
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const total = subtotal - Math.round(subtotal * coupon / 100);
+  const discountValue = Math.round(subtotal * coupon / 100);
+  const total = subtotal - discountValue;
+
+  if (total <= 0) {
+    Swal.fire({ icon: 'error', text: currentLang === 'ar' ? 'قيمة الطلب غير صحيحة.' : 'Invalid order amount.' });
+    return;
+  }
+
+  Swal.fire({
+    title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
 
   try {
     const res = await fetch('https://fox-games-store-1.onrender.com/api/myfatoorah/create-payment', {
@@ -308,13 +371,32 @@ async function checkout() {
       body: JSON.stringify({
         customer: { name, phone, email },
         total,
-        items: cart.map(item => ({ id: item.id, name: item.name, category: item.category || '', price: Number(item.price || 0) }))
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category || '',
+          price: Number(item.price || 0)
+        }))
       })
     });
+
     const data = await res.json();
-    if (data.paymentUrl) window.location.href = data.paymentUrl;
+
+    if (!res.ok || !data.paymentUrl) {
+      throw new Error(data.message || 'Payment link was not created.');
+    }
+
+    window.location.href = data.paymentUrl;
+
   } catch (e) {
-    console.error('Checkout error:', e);
+    console.error('MyFatoorah checkout error:', e);
+    Swal.fire({
+      icon: 'error',
+      title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
+      text: e.message,
+      confirmButtonText: currentLang === 'ar' ? 'إغلاق' : 'Close',
+      confirmButtonColor: '#ef4444'
+    });
   }
 }
 
@@ -323,18 +405,14 @@ function save() {
   localStorage.setItem('foxgames_coupon', String(coupon));
 }
 
-function toggleCart(event) {
-  if (event && typeof event.stopPropagation === 'function') {
-    event.stopPropagation();
-  }
-  $('cartDrawer')?.classList.toggle('open');
-}
-
+function toggleCart() { $('cartDrawer')?.classList.toggle('open'); }
 function toggleMenu() {}
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
+
 function openAuth() { window.location.href = 'login.html'; }
 function closeAuth() { window.location.href = 'index.html'; }
+
 function toggleChat() { $('chat')?.classList.toggle('open'); }
 function reveal() { document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')); }
 function stars() {}
