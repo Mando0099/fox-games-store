@@ -1,15 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg: #050b14;        /* درجة اللون الغامق جداً */
+  --bg: #050b14;        /* درجة اللون الغامق جداً المطابقة للصورة */
   --panel: #08101e;     /* لون البانل والـ Header */
   --card: #0d1722;      /* لون كروت الألعاب والتصنيفات */
   --text: #ffffff;
   --muted: #94a3b8;     /* لون النصوص الفرعية الرمادية */
-  --accent: #38bdf8;    /* تم التحديث إلى الأزرق السماوي الاحترافي لـ TECH GAMING */
-  --accent-glow: rgba(56, 189, 248, 0.3);
-  --line: rgba(30, 58, 99, 0.4); 
-  --line2: rgba(56, 189, 248, 0.4);
+  --accent: #65cc00;    /* النيون الأخضر اللامع المكتوب بـ Fox Games */
+  --line: rgba(30, 58, 99, 0.4); /* خطوط تقسيم ناعمة مائلة للأزرق الداكن */
+  --line2: rgba(101, 204, 0, 0.4);
 }
 
 * {
@@ -28,49 +27,6 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-}
-
-/* ================= SPLASH SCREEN (شاشة التحميل المتفق عليها) ================= */
-#splash-screen {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-#splash-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.splash-logo-text {
-  font-size: 36px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 2px;
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 3px solid var(--accent);
-  animation: typing 2.5s steps(30, end), blink-caret 0.75s step-end infinite;
-}
-
-.splash-logo-text span {
-  color: var(--accent);
-}
-
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
-
-@keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: var(--accent); }
 }
 
 /* ربط الـ Canvas الخاص بالخلفية */
@@ -148,7 +104,7 @@ body {
 .mainNav a.active {
   color: #000000 !important;
   background: var(--accent);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  box-shadow: 0 4px 12px rgba(101, 204, 0, 0.3);
 }
 
 .mainNav a:hover:not(.active) {
@@ -416,7 +372,7 @@ body {
   width: 260px;
 }
 
-/* ================= PRODUCTS ================= */
+/* ================= PRODUCTS (ENGINEERED FOR MOBILE) ================= */
 
 .productGrid {
   display: grid;
@@ -437,7 +393,7 @@ body {
 .productCard:hover {
   transform: translateY(-6px);
   border-color: var(--line2);
-  box-shadow: 0 10px 25px var(--accent-glow);
+  box-shadow: 0 10px 25px rgba(101, 204, 0, 0.15);
 }
 
 .productCover {
@@ -445,6 +401,7 @@ body {
   aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
+  background-image: none !important;
 }
 
 .productCover img {
@@ -596,7 +553,6 @@ body {
 .benefit-icon {
   font-size: 24px;
   margin-top: 3px;
-  color: var(--accent);
 }
 
 .benefits b {
@@ -668,7 +624,7 @@ body {
   background: rgba(255, 255, 255, 0.07);
   border-color: var(--accent);
   transform: translateY(-3px);
-  box-shadow: 0 6px 18px var(--accent-glow);
+  box-shadow: 0 6px 18px rgba(101, 204, 0, 0.2);
 }
 
 .method-card span {
@@ -676,6 +632,13 @@ body {
   font-weight: 600;
   color: #ffffff;
   white-space: nowrap;
+}
+
+.method-card i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .supportActions {
@@ -708,6 +671,11 @@ body {
   background: #0d192d;
   color: white;
   border: 1px solid var(--line);
+}
+
+.supportActions .whatsapp-support-btn:hover,
+.supportActions button:hover {
+  transform: translateY(-2px);
 }
 
 /* ================= CART DRAWER ================= */
@@ -816,41 +784,113 @@ body {
   transition: transform 0.2s, opacity 0.2s;
 }
 
-/* ================= MOBILE BOTTOM NAVIGATION (شريط التنقل السفلي للهواتف) ================= */
-.mobile-bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 65px;
-  background: var(--panel);
-  border-top: 1px solid var(--line);
-  z-index: 2500;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0 10px;
+.primary.full.pay-now-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
-.mobile-nav-item {
+.payment-logos {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.pay-logo {
+  height: 14px;
+  object-fit: contain;
+  display: block;
+}
+
+.whatsapp.full {
+  background: #22c55e;
+  color: black;
+  border: 0;
+  padding: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ================= CHAT ================= */
+
+.chat {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 340px;
+  max-width: 92vw;
+  background: #0d1722;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 1800;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.chat.open {
+  display: block;
+}
+
+.chatTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #08101e;
+  padding: 16px;
+  font-weight: 700;
+}
+
+.chatTop button {
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.chatBody {
+  padding: 20px;
+  min-height: 200px;
+}
+
+.chatInput {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.chatInput button {
+  background: var(--accent);
+  color: black;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chatBubble {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--accent);
+  color: black;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 1700;
+  display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 11px;
-  font-weight: 600;
-  gap: 4px;
-  transition: color 0.3s;
-}
-
-.mobile-nav-item i {
-  font-size: 18px;
-}
-
-.mobile-nav-item.active, .mobile-nav-item:hover {
-  color: var(--accent);
+  box-shadow: 0 4px 15px rgba(101, 204, 0, 0.3);
 }
 
 /* ================= FOOTER ================= */
@@ -869,7 +909,12 @@ footer b {
   color: white;
 }
 
-/* ================= RTL SUPPORT ================= */
+.reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ================= دعم الاتجاه العربي (RTL Support) ================= */
 html[dir="rtl"] body {
   text-align: right;
 }
@@ -896,12 +941,19 @@ html[dir="rtl"] .cartDrawer.open {
   right: auto;
 }
 
+html[dir="rtl"] .chat, 
+html[dir="rtl"] .chatBubble {
+  right: auto;
+  left: 24px;
+}
+
 /* ================= RESPONSIVE ================= */
 
 @media(max-width:1280px) {
   .content { padding: 0 24px; }
   .topbar { padding: 0 24px; gap: 16px; }
   .mainNav { margin-left: 20px; gap: 8px; }
+  html[dir="rtl"] .mainNav { margin-right: 20px; }
   .productGrid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
   .trendGrid { grid-template-columns: repeat(3, 1fr); }
 }
@@ -913,13 +965,10 @@ html[dir="rtl"] .cartDrawer.open {
   .benefits { grid-template-columns: repeat(2, 1fr); gap: 20px; }
 }
 
+/* التعديل الجذري للهواتف (أقل من 768px) */
 @media(max-width:768px) {
   body {
-    padding-bottom: 75px !important; /* مساحة للقائمة السفلية */
-  }
-
-  .mobile-bottom-nav {
-    display: flex; /* إظهار الشريط السفلي في الموبايل */
+    padding-bottom: 70px !important; /* مساحة للـ Bottom Navigation */
   }
 
   .content { padding: 0 14px; }
@@ -943,10 +992,22 @@ html[dir="rtl"] .cartDrawer.open {
     margin-left: auto;
     gap: 8px;
   }
+  html[dir="rtl"] .navActions {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .langBtn, .navActions button.loginBtn, .cartBtn {
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    height: 38px !important;
+  }
 
   .hero-banner-card {
     padding: 30px 20px;
     min-height: 280px;
+    background: linear-gradient(180deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.75) 100%),
+                url('/assets/hero-gaming-banner.jpg') center center/cover no-repeat;
   }
   .hero-title { font-size: 26px; }
   .hero-subtitle { font-size: 13px; margin-bottom: 20px; }
@@ -954,12 +1015,16 @@ html[dir="rtl"] .cartDrawer.open {
   .shop-now-btn, .browse-cat-btn { width: 100%; justify-content: center; padding: 12px; }
   .banner-game-logos, .hero-features { display: none; }
 
+  /* هندسة كروت المنتجات لتناسب الجوال تماماً */
   .productGrid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
+  .productCard {
+    border-radius: 12px;
+  }
   .productCover {
-    aspect-ratio: 1 / 1; 
+    aspect-ratio: 1 / 1; /* جعل الصورة مربعة لتوفير مساحة عمودية مريحة للعرض */
   }
   .productInfo {
     padding: 10px !important;
@@ -968,13 +1033,40 @@ html[dir="rtl"] .cartDrawer.open {
     font-size: 13px !important;
     min-height: 36px !important;
   }
+  .productInfo p {
+    font-size: 11px !important;
+  }
+  .priceRow {
+    margin: 8px 0 6px !important;
+  }
+  .price {
+    font-size: 14px !important;
+  }
+  .rating {
+    font-size: 11px !important;
+  }
+  .add {
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
 
   .trendGrid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px;
   }
-  
+  .trendCard {
+    aspect-ratio: 1 / 1;
+  }
+
   .benefits { grid-template-columns: 1fr; gap: 16px; }
+
+  .sectionHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .filters { width: 100%; flex-direction: column; gap: 8px; }
+  .filters input, .filters select { width: 100%; }
 
   .checkoutShowcase, .supportBox {
     flex-direction: column;
