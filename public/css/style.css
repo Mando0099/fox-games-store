@@ -593,6 +593,7 @@ body {
   border-radius: 16px; padding: 25px; width: 90%; max-width: 800px;
   position: relative; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
   transform: translateY(20px); transition: 0.4s ease;
+  max-height: 90vh; overflow-y: auto;
 }
 
 .modal-overlay.active .modal-content { transform: translateY(0); }
@@ -627,7 +628,61 @@ body {
   color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
 }
 
-/* ================= CHECKOUT / SUPPORT ================= */
+/* ================= PRODUCT REVIEWS SECTION ================= */
+.product-reviews-section { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
+.product-reviews-section h3 { font-size: 16px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.reviews-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px; }
+.reviews-list::-webkit-scrollbar { width: 5px; }
+.reviews-list::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 10px; }
+.review-item { background: rgba(255, 255, 255, 0.02); padding: 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
+.review-user { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.verified-badge { color: #65cc00; font-size: 11px; }
+.review-body { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+.add-review-box { display: flex; flex-direction: column; gap: 10px; background: #090f17; padding: 12px; border-radius: 8px; border: 1px dashed var(--line2); }
+.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 50px; font-family: inherit; font-size: 13px; }
+.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 12px; transition: 0.3s; }
+.btn-submit-review:hover { background: #00d4ff; box-shadow: 0 0 10px var(--cyan-dim); }
+
+/* ================= BENEFITS SECTION ================= */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  padding: 40px 0;
+  border-top: 1px solid var(--line);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.benefit-icon {
+  font-size: 28px;
+  margin-top: 4px;
+}
+
+.benefit-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.benefit-text b {
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.benefit-text span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ================= CHECKOUT / PAYMENT METHODS ================= */
 .checkoutShowcase,
 .supportBox {
   border: 1px solid var(--line);
@@ -657,41 +712,43 @@ body {
 .paymentMethods {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
   align-items: center;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .method-card {
-  background: rgba(255, 255, 255, 0.03); 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  width: 155px;
-  height: 52px;
+  gap: 12px;
+  min-width: 170px;
+  height: 60px;
   transition: all 0.3s ease;
   cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .method-card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 243, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--neon-cyan);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 243, 255, 0.25);
 }
 
 .method-card span {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: #ffffff;
-  white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
+/* ================= SUPPORT ACTIONS ================= */
 .supportActions {
   display: flex;
   gap: 12px;
@@ -1011,9 +1068,13 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .sectionHead { flex-direction: column; align-items: flex-start; gap: 12px; }
   .filters { width: 100%; flex-direction: column; gap: 8px; }
   .filters input, .filters select { width: 100%; }
+  
+  /* Responsive updates for Benefits & Checkout */
+  .benefits { grid-template-columns: 1fr !important; gap: 20px !important; }
   .checkoutShowcase, .supportBox { flex-direction: column; text-align: center; padding: 20px 16px; }
-  .paymentMethods { grid-template-columns: repeat(2, 1fr); display: grid; width: 100%; }
-  .method-card { width: 100%; }
+  .paymentMethods { display: flex; width: 100%; flex-direction: column; gap: 12px; }
+  .method-card { width: 100%; height: 50px; }
+  
   .supportActions { width: 100%; flex-direction: column; }
   .supportActions button, .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
   .cartDrawer { width: 100% !important; max-width: 100vw !important; }
