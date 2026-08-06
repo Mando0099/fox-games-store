@@ -19,7 +19,7 @@
       }
     });
 
-    // 2. جلب المنتجات الحقيقية
+    // 2. جلب المنتجات الحقيقية من الفايربيز
     const snap = await db.collection('products').get();
 
     products = snap.docs.map(d => {
@@ -33,15 +33,15 @@
         desc: p.description || `${p.amount || ''} digital top-up`,
         price: Number(p.price || 0),
         stock: realStock, 
-        bg: p.bg || p.image || p.img || '/assets/bg-pubg.svg',
-        img: p.image || p.img || '/assets/item-uc.svg',
+        bg: p.bg || p.image || p.img || '',
+        img: p.image || p.img || '',
         popular: 10,
         reviews: p.reviews || [],
         verifiedBuyers: p.verifiedBuyers || []
       };
     });
 
-    // 3. جلب الأقسام الحقيقية بانتظار تام (Await) لضمان تحميلها على الموبايل
+    // 3. جلب الأقسام حصرياً من الفايربيز (مجموعات categories أو Categories)
     let catSnap = await db.collection('categories').get();
     if (catSnap.empty) {
         catSnap = await db.collection('Categories').get();
@@ -51,27 +51,32 @@
       categories = catSnap.docs.map(d => {
         const c = d.data();
         return {
-          name: c.name || c.title || 'Category',
+          name: c.name || c.title || '',
           desc: c.description || c.desc || '',
-          bg: c.image || c.img || c.bg || '/assets/bg-pubg.svg'
+          bg: c.image || c.img || c.bg || ''
         };
-      });
+      }).filter(c => c.name);
     } else {
-      // لو مفيش كولكشن مستقل للأقسام، بنجيبها من تصنيفات المنتجات الفعلية المسجلة
+      // لو مفيش كولكشن أقسام منفصل، نستخرج الأقسام الحقيقية من المنتجات الموجودة فعلياً في المتجر
       const uniqueCats = [...new Set(products.map(p => p.category).filter(Boolean))];
       categories = uniqueCats.map(c => ({
         name: c,
-        desc: `${c} Accounts & Services`,
-        bg: '/assets/bg-pubg.svg'
+        desc: '',
+        bg: ''
       }));
     }
 
     window.categories = categories;
 
-    // التنفيذ الإجباري بعد اكتمال جلب الداتا تماماً وبكل قوة على الموبايل
+    // تنفيذ العرض فوراً بعد جلب البيانات الحقيقية وبكل دقة
     if (typeof renderCategories === 'function') renderCategories();
     if (typeof renderFilters === 'function') renderFilters();
     if (typeof renderProducts === 'function') renderProducts();
+
+    // تحديث إضافي بعد ثانية للتأكد من استقرار DOM على الموبايل
+    setTimeout(() => {
+      if (typeof renderCategories === 'function') renderCategories();
+    }, 1000);
 
   } catch (e) {
     console.warn('Firestore load error:', e.message);
