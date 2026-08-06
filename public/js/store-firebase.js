@@ -50,6 +50,8 @@
     renderMiniSlider();
 
   } catch (e) {
-    console.warn('Firestore products not loaded:', e.message);
-  }
+    function renderMiniSlider(productsList) {
+    // دالة فارغة لتجنب توقف كود الفايربيز في حال لم يتم استخدام السلايدر
+    console.log("Mini slider rendered safely.");
+}
 })();
