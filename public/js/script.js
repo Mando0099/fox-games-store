@@ -506,24 +506,31 @@ function clearCartAfterPurchase() {
     updateCart();
 }
 
-// --- دالة فحص تسجيل الدخول قبل إتمام الشراء وإغلاق السلة ---
+// --- دالة فحص تسجيل الدخول قبل إتمام الشراء مع إغلاق السلة فوراً على الموبايل ---
 function processSecureCheckout() {
     const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
     
+    // إغلاق السلة فوراً قبل إظهار أي تنبيه
+    const drawer = document.getElementById('cartDrawer');
+    if (drawer) {
+        drawer.classList.remove('open');
+    }
+    
     if (!currentUser) {
-        $('cartDrawer')?.classList.remove('open'); // إغلاق السلة فوراً
-        Swal.fire({
-            icon: 'warning',
-            title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
-            text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
-            confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
-            background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-            customClass: { container: 'high-z-index-alert' }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if(typeof openAuth === 'function') openAuth();
-            }
-        });
+        setTimeout(() => {
+            Swal.fire({
+                icon: 'warning',
+                title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
+                text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
+                confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
+                background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+                customClass: { container: 'high-z-index-alert' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if(typeof openAuth === 'function') openAuth();
+                }
+            });
+        }, 150);
         return;
     }
 
@@ -533,8 +540,12 @@ function processSecureCheckout() {
 }
 
 async function checkout() {
+  const drawer = document.getElementById('cartDrawer');
+  if (drawer) {
+      drawer.classList.remove('open');
+  }
+
   if (!cart.length) {
-    $('cartDrawer')?.classList.remove('open');
     Swal.fire({
       icon: 'warning',
       text: currentLang === 'ar' ? 'سلة المشتريات فارغة.' : 'Your cart is empty.',
@@ -550,20 +561,21 @@ async function checkout() {
   const email = ($('customerEmail')?.value || '').trim();
 
   if (!name || !phone || !email) {
-    $('cartDrawer')?.classList.remove('open'); // إغلاق السلة لكي يظهر التنبيه واضحاً
-    Swal.fire({
-      icon: 'warning',
-      title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
-      text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء.' : 'Please fill in all fields (Name, Phone, Email).',
-      confirmButtonText: currentLang === 'ar' ? 'إدخال البيانات' : 'Enter Info',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-      customClass: { container: 'high-z-index-alert' }
-    }).then(() => {
-      $('cartDrawer')?.classList.add('open'); // إعادة فتح السلة بعد قراءة التنبيه
-      if(!name) $('customerName')?.focus();
-      else if(!phone) $('customerPhone')?.focus();
-      else if(!email) $('customerEmail')?.focus();
-    });
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'warning',
+        title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
+        text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء.' : 'Please fill in all fields (Name, Phone, Email).',
+        confirmButtonText: currentLang === 'ar' ? 'إدخال البيانات' : 'Enter Info',
+        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+        customClass: { container: 'high-z-index-alert' }
+      }).then(() => {
+        if (drawer) drawer.classList.add('open');
+        if(!name) $('customerName')?.focus();
+        else if(!phone) $('customerPhone')?.focus();
+        else if(!email) $('customerEmail')?.focus();
+      });
+    }, 150);
     return;
   }
 
@@ -572,8 +584,6 @@ async function checkout() {
   const total = subtotal - discountValue;
 
   if (total <= 0) return;
-
-  $('cartDrawer')?.classList.remove('open');
 
   Swal.fire({
     title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
