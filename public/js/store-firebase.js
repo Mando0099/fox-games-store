@@ -4,7 +4,6 @@
 
     const db = firebase.firestore();
 
-    // تأكد من تعريف المصفوفات عالمياً لتجنب أي أخطاء على الموبايل
     window.categories = window.categories || [];
     window.products = window.products || [];
 
@@ -20,7 +19,7 @@
       }
     });
 
-    // 2. جلب المنتجات
+    // 2. جلب المنتجات (وهي الأساس اللي شغالة وزي الفل)
     const snap = await db.collection('products').get();
 
     products = snap.docs.map(d => {
@@ -42,50 +41,39 @@
       };
     });
 
-    // 3. جلب الأقسام من فايبربيز أو توليدها تلقائياً لضمان عدم اختفائها أبداً
-    let catSnap = await db.collection('categories').get();
-    if (catSnap.empty) {
-        catSnap = await db.collection('Categories').get();
+    // 3. الحل الفعلي الإجباري: بناء الأقسام مباشرة ودون انتظار من تصنيفات المنتجات الحقيقية
+    const uniqueCategories = [...new Set(products.map(p => p.category || 'Gaming'))];
+    
+    window.categories = uniqueCategories.map(catName => ({
+      name: catName,
+      desc: `Explore our ${catName} accounts & services`,
+      bg: '/assets/bg-pubg.svg'
+    }));
+
+    // لو المنتجات نفسها لسه مجتش لأي سبب، نضع أقسام افتراضية أساسية عشان تظهر فوراً
+    if (!window.categories.length) {
+      window.categories = [
+        { name: 'Gaming', desc: 'Digital Gaming Accounts', bg: '/assets/bg-pubg.svg' },
+        { name: 'Accounts', desc: 'Premium Digital Accounts', bg: '/assets/bg-pubg.svg' }
+      ];
     }
 
-    if (!catSnap.empty) {
-      categories = catSnap.docs.map(d => {
-        const c = d.data();
-        return {
-          name: c.name || c.title || 'Category',
-          desc: c.description || c.desc || '',
-          bg: c.image || c.img || c.bg || '/assets/bg-pubg.svg'
-        };
-      });
-    }
-
-    // الحل الإحتياطي الفوري: لو الأقسام ما زالت فارغة، يتم إنشاؤها تلقائياً من تصنيفات المنتجات
-    if (!categories || categories.length === 0) {
-      categories = [...new Set(products.map(p => p.category || 'Gaming'))]
-        .map(c => ({
-          name: c,
-          desc: c,
-          bg: '/assets/bg-pubg.svg'
-        }));
-    }
-
-    // تنفيذ الدوال وتأكيد رسم الأقسام على الشاشة فوراً
+    // تنفيذ الرسم الفوري المؤكد
     if (typeof renderCategories === 'function') renderCategories();
     if (typeof renderFilters === 'function') renderFilters();
     if (typeof renderProducts === 'function') renderProducts();
     
-    // إعادة رسم الأقسام مرة أخرى بعد تأخير بسيط لضمان ظهورها تماماً على الموبايل
+    // تأكيد إضافي بالرسم بعد التحميل بثوانٍ
     setTimeout(() => {
         if (typeof renderCategories === 'function') renderCategories();
-    }, 400);
-
-    if (typeof renderMiniSlider === 'function') {
-        renderMiniSlider();
-    } else {
-        window.renderMiniSlider = function() {};
-    }
+    }, 300);
 
   } catch (e) {
-    console.warn('Firestore products not loaded:', e.message);
+    console.warn('Firestore load error:', e.message);
+    // حتى لو حصل خطأ فادح في الاتصال، نضع أقسام افتراضية تظهر للمستخدم
+    window.categories = [
+      { name: 'Gaming', desc: 'Digital Gaming Accounts', bg: '/assets/bg-pubg.svg' }
+    ];
+    if (typeof renderCategories === 'function') renderCategories();
   }
 })();
