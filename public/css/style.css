@@ -6,9 +6,9 @@
   --card: #0d1722;
   --text: #ffffff;
   --muted: #94a3b8;
-  --accent: #00f3ff;    /* النيون الأزرق اللامع لـ TECH GAMING */
+  --accent: #00f3ff;
   --line: rgba(30, 58, 99, 0.4);
-  --line2: rgba(0, 243, 255, 0.4); /* خطوط تقسيم نيون */
+  --line2: rgba(0, 243, 255, 0.4);
   --cyan-dim: rgba(0, 243, 255, 0.2);
 }
 
@@ -30,7 +30,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ================= LOADING SCREEN & ANIMATIONS (3 ثوانٍ متناسقة مع الموبايل) ================= */
+/* ================= LOADING SCREEN ================= */
 #loader-wrapper {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -464,18 +464,11 @@ body {
   color: #fff;
 }
 
-/* ================= PRODUCTS (HIDDEN BY DEFAULT & ANIMATED) ================= */
+/* ================= PRODUCTS (إظهار المنتجات دائماً على PC و Mobile بدون إخفاء) ================= */
 #products {
-  display: none;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-#products.show-products {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  display: block !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .productGrid {
@@ -645,21 +638,6 @@ body {
   color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
 }
 
-/* ================= PRODUCT REVIEWS SECTION ================= */
-.product-reviews-section { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
-.product-reviews-section h3 { font-size: 16px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-.reviews-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px; }
-.reviews-list::-webkit-scrollbar { width: 5px; }
-.reviews-list::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 10px; }
-.review-item { background: rgba(255, 255, 255, 0.02); padding: 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
-.review-user { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-.verified-badge { color: #65cc00; font-size: 11px; }
-.review-body { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
-.add-review-box { display: flex; flex-direction: column; gap: 10px; background: #090f17; padding: 12px; border-radius: 8px; border: 1px dashed var(--line2); }
-.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 50px; font-family: inherit; font-size: 13px; }
-.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 12px; transition: 0.3s; }
-.btn-submit-review:hover { background: #00d4ff; box-shadow: 0 0 10px var(--cyan-dim); }
-
 /* ================= BENEFITS SECTION ================= */
 .benefits {
   display: grid;
@@ -753,7 +731,7 @@ body {
 
 .method-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--neon-cyan);
+  border-color: var(--accent);
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 243, 255, 0.25);
 }
@@ -915,84 +893,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* ================= CHAT ================= */
-.chat {
-  position: fixed;
-  right: 24px;
-  bottom: 96px;
-  width: 340px;
-  max-width: 92vw;
-  background: #0d1722;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-  z-index: 1800;
-  display: none;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.chat.open {
-  display: block;
-}
-
-.chatTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #08101e;
-  padding: 16px;
-  font-weight: 700;
-}
-
-.chatTop button {
-  background: transparent;
-  border: 0;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.chatBody {
-  padding: 20px;
-  min-height: 200px;
-}
-
-.chatInput {
-  display: flex;
-  gap: 8px;
-  padding: 14px;
-  border-top: 1px solid var(--line);
-}
-
-.chatInput button {
-  background: var(--accent);
-  color: black;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.chatBubble {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  border: 0;
-  background: var(--accent);
-  color: black;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 1700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
-}
-
 /* ================= FOOTER ================= */
 footer {
   padding: 40px 4%;
@@ -1031,18 +931,12 @@ footer b {
   transform: none !important;
 }
 
-/* ================= إصلاح ظهور التنبيهات فوق السلة على الموبايل ================= */
-.swal2-container.high-z-index-alert {
-  z-index: 999999999 !important;
-}
-
 /* ================= RTL Support ================= */
 html[dir="rtl"] body { text-align: right; }
 html[dir="rtl"] .mainNav { margin-left: 0; margin-right: 40px; }
 html[dir="rtl"] .topSearch { margin-left: 0; margin-right: auto; }
 html[dir="rtl"] .cartDrawer { right: auto; left: -440px; border-left: none; border-right: 1px solid var(--line); }
 html[dir="rtl"] .cartDrawer.open { left: 0; right: auto; }
-html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:1280px) {
@@ -1086,9 +980,8 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .rating { font-size: 11px !important; }
   .add { padding: 8px !important; font-size: 12px !important; }
   
-  /* تعديل قسري لإظهار الأقسام (Categories) بوضوح تام وبشكل شبكي على الموبايل */
-  #trending { display: block !important; visibility: visible !important; opacity: 1 !important; }
-  .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; }
+  #trending { display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
+  .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
   .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; visibility: visible !important; opacity: 1 !important; }
   
   .sectionHead { flex-direction: column; align-items: flex-start; gap: 12px; }
