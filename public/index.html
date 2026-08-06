@@ -40,13 +40,6 @@
     .brand span { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; }
     .brand .cyan-text { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
 
-    /* Hidden Products by Default */
-    #products {
-      display: none; opacity: 0; transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    #products.show-products { display: block; opacity: 1; transform: translateY(0); }
-
     /* Neon Button Override */
     .btn-pay-now-pro {
       background: linear-gradient(135deg, #00b4cc 0%, #00f3ff 100%) !important;
@@ -61,6 +54,123 @@
     .footer-payments { display: flex; gap: 15px; justify-content: center; margin-top: 15px; }
     .footer-payments i { font-size: 30px; color: #94a3b8; transition: 0.3s; }
     .footer-payments i:hover { color: var(--neon-cyan); }
+
+    /* ================= DYNAMIC HERO SLIDER STYLES (البانر المتحرك الاحترافي) ================= */
+    .hero-banner-section {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    .hero-slider-container {
+      display: flex;
+      width: 100%;
+      transition: transform 0.5s ease-in-out;
+    }
+    .hero-slide {
+      min-width: 100%;
+      box-sizing: border-box;
+      position: relative;
+      min-height: 400px;
+      border-radius: 16px;
+      border: 1px solid rgba(30, 58, 99, 0.4);
+      padding: 60px;
+      background-size: cover;
+      background-position: center right;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s ease-in-out;
+      box-shadow: 0 20px 55px rgba(0,0,0,.5);
+    }
+    .hero-slide.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 1;
+    }
+    .hero-content {
+      max-width: 650px;
+    }
+    .hero-title {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .hero-subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    .browse-cat-btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+      transition: transform 0.2s, background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--neon-cyan);
+      color: #000;
+    }
+    .browse-cat-btn:hover {
+      transform: translateY(-2px);
+      background: #00d4ff;
+      box-shadow: 0 0 15px var(--cyan-dim);
+    }
+    .slider-controls {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      z-index: 10;
+    }
+    .slider-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .dot.active {
+      background: var(--neon-cyan);
+      width: 25px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px var(--neon-cyan);
+    }
+    .slider-arrow {
+      background: rgba(13, 23, 34, 0.8);
+      border: 1px solid rgba(30, 58, 99, 0.4);
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .slider-arrow:hover {
+      background: var(--neon-cyan);
+      color: #000;
+      border-color: var(--neon-cyan);
+    }
 
     /* Product Modal Styles */
     .modal-overlay {
@@ -156,16 +266,18 @@
       .langBtn, .loginBtn, .user-profile-btn, .cartBtn { padding: 6px 10px !important; font-size: 13px !important; }
       .cartDrawer { width: 100% !important; }
       .user-profile-dropdown { position: fixed !important; top: auto !important; bottom: 65px !important; left: 5% !important; right: 5% !important; width: 90% !important; box-sizing: border-box; }
-      .hero-title { font-size: 26px !important; }
-      .hero-subtitle { font-size: 14px !important; }
+      
+      .hero-slide { min-height: 280px !important; padding: 30px 20px !important; text-align: center; }
+      .hero-title { font-size: 24px !important; }
+      .hero-subtitle { font-size: 13px !important; }
       .hero-cta-buttons { flex-direction: column; width: 100%; }
-      .hero-cta-buttons button { width: 100%; }
+      .browse-cat-btn { width: 100%; justify-content: center; }
+
       .sectionHead { flex-direction: column; align-items: flex-start !important; gap: 12px; }
       .filters { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
       .filters input, .filters select { flex: 1 1 100%; }
       .paymentMethods { grid-template-columns: repeat(2, 1fr) !important; }
       
-      /* تعديل إظهار الأقسام بوضوح على الموبايل */
       .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
       .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; }
 
@@ -240,30 +352,60 @@
 
   <main id="home" class="content">
       
+    <!-- البانر المتحرك الاحترافي الجديد (Hero Slider) -->
     <section class="hero-banner-section">
-      <div class="hero-banner-card">
-        <div class="hero-content">
-          <h1 class="hero-title" data-i18n="hero_title">Digital Accounts & Top-Ups</h1>
-          <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Premium digital services. Best prices.</p>
-          
-          <div class="hero-cta-buttons">
-            <button onclick="scrollToId('trending')" class="browse-cat-btn" style="background: var(--neon-cyan); color: #000; border: none;">
-              <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+      <div class="hero-slider-container" id="heroSlider">
+        
+        <!-- الشريحة الأولى: الترحيب والخدمات الرقمية -->
+        <div class="hero-slide active" style="background-image: linear-gradient(90deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.7) 50%, rgba(5, 11, 20, 0.2) 100%), url('/assets/hero-gaming-banner.jpg');">
+          <div class="hero-content">
+            <h1 class="hero-title" data-i18n="hero_title">Digital Accounts & Top-Ups</h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Premium digital services. Best prices.</p>
+            <div class="hero-cta-buttons">
+              <button onclick="scrollToId('trending')" class="browse-cat-btn">
+                <i class="fas fa-th-large"></i> <span data-i18n="btn_browse_cat">Browse Categories</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- الشريحة الثانية: المنتجات والأسعار التنافسية -->
+        <div class="hero-slide" style="background: linear-gradient(135deg, #0d1722 0%, #050b14 100%);">
+          <div class="hero-content" style="max-width: 100%;">
+            <span style="color: var(--neon-cyan); font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-fire"></i> منتجات شائعة ورائجة</span>
+            <h1 class="hero-title" style="font-size: 36px; margin: 10px 0;">أقوى حسابات الألعاب وشحن الرصيد</h1>
+            <p class="hero-subtitle">تسليم فوري ومضمون 100% لمختلف منصات الألعاب والخدمات الرقمية بأفضل سعر في السوق.</p>
+            <button onclick="scrollToId('products')" class="browse-cat-btn">
+              <i class="fas fa-shopping-bag"></i> تسوق المتجر الآن
             </button>
           </div>
+        </div>
 
-          <div class="hero-features">
-            <span class="feature-item"><i class="fas fa-bolt" style="color:var(--neon-cyan);"></i> <span data-i18n="feat_delivery">Instant Delivery</span></span>
-            <span class="feature-item"><i class="fas fa-shield-alt" style="color:var(--neon-cyan);"></i> <span data-i18n="feat_secure">Secure Payments</span></span>
-            <span class="feature-item"><i class="fas fa-headset" style="color:var(--neon-cyan);"></i> <span data-i18n="feat_support">24/7 Support</span></span>
+        <!-- الشريحة الثالثة: طرق الدفع الآمن والموثوق -->
+        <div class="hero-slide" style="background: linear-gradient(135deg, #08101e 0%, #0d1722 100%);">
+          <div class="hero-content" style="max-width: 100%;">
+            <span style="color: #22c55e; font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-shield-alt"></i> حماية تامة وعمليات مشفرة</span>
+            <h1 class="hero-title" style="font-size: 36px; margin: 10px 0;">طرق دفع آمنة ومتعددة</h1>
+            <p class="hero-subtitle">ادفع بكل أمان وسهولة باستخدام بطاقات الفيزا، ماستركارد، وخدمات الدفع المعتمدة.</p>
+            <div style="display: flex; gap: 20px; font-size: 32px; color: #fff; margin-top: 15px;">
+              <i class="fab fa-apple-pay" title="Apple Pay"></i>
+              <i class="fab fa-cc-visa" style="color: #1a73e8;" title="Visa"></i>
+              <i class="fab fa-cc-mastercard" style="color: #ea4335;" title="MasterCard"></i>
+            </div>
           </div>
         </div>
 
-        <div class="banner-game-logos">
-          <span class="game-logo-item">ACCOUNTS</span>
-          <span class="game-logo-item">SERVICES</span>
-          <span class="game-logo-item"><i class="fab fa-steam"></i> STEAM</span>
+      </div>
+
+      <!-- أسهم التنقل ونقاط التقليب -->
+      <div class="slider-controls">
+        <button class="slider-arrow prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+        <div class="slider-dots" id="sliderDots">
+          <span class="dot active" onclick="currentSlide(0)"></span>
+          <span class="dot" onclick="currentSlide(1)"></span>
+          <span class="dot" onclick="currentSlide(2)"></span>
         </div>
+        <button class="slider-arrow next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
       </div>
     </section>
 
@@ -361,7 +503,6 @@
         </div>
         <div class="supportActions">
           <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
         </div>
       </div>
     </section>
@@ -469,19 +610,6 @@
     </a>
   </nav>
 
-  <div class="chat" id="chat">
-    <div class="chatTop">TECH GAMING Support <button onclick="toggleChat()">×</button></div>
-    <div class="chatBody">
-      <p>Hey gamer 👋 How can we help?</p>
-      <small>This is a demo chat widget.</small>
-    </div>
-    <div class="chatInput">
-      <input placeholder="Write message...">
-      <button>Send</button>
-    </div>
-  </div>
-  <button class="chatBubble" onclick="toggleChat()">💬</button>
-
   <footer>
     <div><b>TECH GAMING</b><p>Premium digital selling platform.</p></div>
     <div class="footer-payments">
@@ -503,7 +631,55 @@
   <script src="/js/script.js"></script>
 
   <script>
+    /* ================= كود تشغيل البانر المتحرك (Hero Slider Script) ================= */
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.dot');
+    let slideInterval;
+
+    function showSlide(index) {
+      if (slides.length === 0) return;
+      if (index >= slides.length) currentSlideIndex = 0;
+      if (index < 0) currentSlideIndex = slides.length - 1;
+
+      slides.forEach(slide => slide.classList.remove('active'));
+      dots.forEach(dot => dot.classList.remove('active'));
+
+      slides[currentSlideIndex].classList.add('active');
+      if(dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
+    }
+
+    function moveSlide(n) {
+      currentSlideIndex += n;
+      showSlide(currentSlideIndex);
+      resetTimer();
+    }
+
+    function currentSlide(n) {
+      currentSlideIndex = n;
+      showSlide(currentSlideIndex);
+      resetTimer();
+    }
+
+    function startSlider() {
+      if (slides.length === 0) return;
+      slideInterval = setInterval(() => {
+        currentSlideIndex++;
+        showSlide(currentSlideIndex);
+      }, 4000);
+    }
+
+    function resetTimer() {
+      clearInterval(slideInterval);
+      startSlider();
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
+      if (slides.length > 0) {
+        showSlide(currentSlideIndex);
+        startSlider();
+      }
+
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
       const userProfileTrigger = document.getElementById('userProfileTrigger');
@@ -573,23 +749,6 @@
           }
           cleanOldProfiles();
         });
-      }
-
-      const observer = new MutationObserver(() => {
-        cleanOldProfiles();
-        if (firebase.auth().currentUser) {
-          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
-            mainLoginBtn.classList.add('foxHidden');
-          }
-          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
-            userProfileWrapper.classList.remove('foxHidden');
-          }
-        }
-      });
-
-      const navActionsContainer = document.querySelector('.navActions');
-      if (navActionsContainer) {
-        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
       }
 
       if (userProfileTrigger && userProfileDropdown) {
