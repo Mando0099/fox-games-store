@@ -1,674 +1,1090 @@
-// ================= TECH GAMING LIVE DATABASE LINK =================
-// الاعتماد بالكامل على مصفوفات الفايربيز والبانل
-const $ = id => document.getElementById(id);
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-// هنا بنضمن إن لو الفايربيز اتأخر في التحميل، المتجر ما يضربش ويفضل مستني الداتا
-if (typeof cart === 'undefined') {
-  var cart = JSON.parse(localStorage.getItem('techgaming_cart')) || [];
+:root {
+  --bg: #050b14;
+  --panel: #08101e;
+  --card: #0d1722;
+  --text: #ffffff;
+  --muted: #94a3b8;
+  --accent: #00f3ff;    /* النيون الأزرق اللامع لـ TECH GAMING */
+  --line: rgba(30, 58, 99, 0.4);
+  --line2: rgba(0, 243, 255, 0.4); /* خطوط تقسيم نيون */
+  --cyan-dim: rgba(0, 243, 255, 0.2);
 }
-// إلغاء أي خصم تلقائي مسبق - الكوبون يبدأ دائماً من الصفر
-if (typeof coupon === 'undefined') {
-  var coupon = 0; 
-  localStorage.setItem('techgaming_coupon', '0');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-// مصفوفة الترجمة المتوافقة مع هوية TECH GAMING (لبيع الحسابات والخدمات الرقمية)
-const translations = {
-  en: {
-    nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
-    search_placeholder: "Search for accounts, codes...", btn_login: "Login", btn_cart: "Cart",
-    hero_title: "Digital Accounts & Top-Ups", hero_subtitle: "Instant delivery. Premium digital services. Best prices.",
-    btn_shop_now: "Shop Now", btn_browse_cat: "Browse Categories",
-    feat_delivery: "Instant Delivery", feat_secure: "Secure Payments", feat_support: "24/7 Support",
-    title_popular: "Products", sort_popular: "Most Popular", sort_low: "Price Low", sort_high: "Price High",
-    title_categories: "Shop by Categories", btn_view_all: "View All",
-    b_feat1_title: "Instant Delivery", b_feat1_desc: "Get your digital product instantly after payment",
-    b_feat2_title: "Secure Payments", b_feat2_desc: "100% secure encrypted payment methods",
-    b_feat3_title: "24/7 Support", b_feat3_desc: "We are here to help you anytime",
-    b_feat4_title: "Best Prices", b_feat4_desc: "Competitive prices on all accounts and services",
-    check_title: "Secure Payment Methods", check_desc: "Choose your product, add it to cart, and complete the order securely.",
-    sup_title: "Need Help With Your Order?", sup_desc: "Payment failed, code delayed, or account issue — contact support instantly.",
-    btn_live_chat: "Live Chat", cart_title: "Your Cart", btn_apply: "Apply",
-    cart_subtotal: "Subtotal", cart_discount: "Discount", cart_total: "Total",
-    holder_name: "Full Name", holder_phone: "Phone Number", holder_email: "Email Address",
-    btn_pay_now: "Secure Checkout", secure_checkout_notice: "Secure checkout connected through the backend.",
-    lang_btn: "العربية"
-  },
-  ar: {
-    nav_home: "الرئيسية", nav_store: "المتجر", nav_categories: "الأقسام", nav_support: "الدعم الفني",
-    search_placeholder: "ابحث عن الحسابات والخدمات...", btn_login: "تسجيل الدخول", btn_cart: "السلة",
-    hero_title: "الحسابات الرقمية وشحن الرصيد", hero_subtitle: "تسليم فوري. خدمات رقمية مميزة. أفضل الأسعار.",
-    btn_shop_now: "تسوق الآن", btn_browse_cat: "تصفح الأقسام",
-    feat_delivery: "تسليم فوري", feat_secure: "دفع آمن", feat_support: "دعم 24/7",
-    title_popular: "المنتجات", sort_popular: "الأكثر شعبية", sort_low: "السعر من الأقل", sort_high: "السعر من الأعلى",
-    title_categories: "تسوق حسب الأقسام", btn_view_all: "عرض الكل",
-    b_feat1_title: "تسليم فوري وسريع", b_feat1_desc: "احصل على حسابك أو الكود مباشرة فور الدفع",
-    b_feat2_title: "دفع آمن 100%", b_feat2_desc: "نوفر لك خيارات دفع محلية وعالمية مشفرة",
-    b_feat3_title: "دعم فني متواصل", b_feat3_desc: "فريق الدعم الفني معك دائماً لحل أي استفسار",
-    b_feat4_title: "أفضل الأسعار", b_feat4_desc: "عروض حصرية وأسعار لا تقبل المنافسة",
-    check_title: "طرق دفع آمنة وموثوقة", check_desc: "اختر منتجك المفضّل، أضفه إلى سلة المشتريات، وأكمل الدفع بأمان.",
-    sup_title: "هل تحتاج مساعدة في طلبك؟", sup_desc: "تأخر الكود، مشكلة في الحساب، فشل الدفع — تواصل مع الدعم فوراً.",
-    btn_live_chat: "المحادثة المباشرة", cart_title: "سلة المشتريات", btn_apply: "تطبيق",
-    cart_subtotal: "المجموع الفرعي", cart_discount: "الخصم", cart_total: "الإجمالي الكلي",
-    holder_name: "الاسم بالكامل", holder_phone: "رقم الهاتف المحمول", holder_email: "البريد الإلكتروني",
-    btn_pay_now: "دفع آمن", secure_checkout_notice: "بوابة دفع آمنة تماماً ومتصلة بالسيرفر.",
-    lang_btn: "English"
-  }
-};
+html {
+  scroll-behavior: smooth;
+}
 
-let currentLang = localStorage.getItem('techgaming_lang') || 'en';
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-window.addEventListener('load', () => {
-  applyLanguage(currentLang);
+/* ================= LOADING SCREEN & ANIMATIONS ================= */
+#loader-wrapper {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  animation: hideLoader 0.5s ease 5s forwards;
+}
 
-  if (typeof checkAuthState === 'function') checkAuthState();
+.loader-logo {
+  font-family: 'Arial', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 3px;
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+.loader-logo .neon-text {
+  color: var(--accent);
+  text-shadow: 0 0 15px var(--accent), 0 0 30px var(--accent);
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 20px var(--accent); }
+}
+
+@keyframes hideLoader {
+  100% { opacity: 0; visibility: hidden; }
+}
+
+/* ================= BACKGROUND ================= */
+#stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.content {
+  max-width: 1440px;
+  margin: auto;
+  padding: 0 40px;
+}
+
+/* ================= HEADER (TOPBAR) ================= */
+.topbar {
+  height: 76px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.brand b, .cyan-text {
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.mainNav {
+  display: flex;
+  gap: 12px;
+  margin-left: 40px;
+}
+
+.mainNav a {
+  position: relative;
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-bottom: none !important;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mainNav a.active {
+  color: #000000 !important;
+  background: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 243, 255, 0.3);
+}
+
+.mainNav a:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.topSearch {
+  margin-left: auto;
+  width: 350px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d192d;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  position: relative;
+}
+
+.topSearch input {
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: white;
+  width: 100%;
+  font-size: 14px;
+}
+
+.topSearch input::placeholder {
+  color: #64748b;
+}
+
+.search-icon-btn {
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.navActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.langBtn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  height: 42px;
+  transition: all 0.3s ease;
+}
+
+.langBtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.navActions button.loginBtn {
+  height: 42px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  color: white;
+  border-radius: 8px;
+  padding: 0 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.navActions button.loginBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cartBtn {
+  background: var(--accent) !important;
+  color: #000000 !important;
+  border: 0 !important;
+  height: 42px;
+  border-radius: 8px;
+  padding: 0 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-badge {
+  background: white !important;
+  color: black !important;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+/* ================= HERO BANNER ================= */
+.hero {
+  padding: 30px 0;
+}
+
+.hero-banner-section {
+  width: 100%;
+}
+
+.hero-banner-card {
+  position: relative;
+  min-height: 400px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 60px;
+  background: linear-gradient(90deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.7) 50%, rgba(5, 11, 20, 0.2) 100%),
+              url('/assets/hero-gaming-banner.jpg') center right/cover no-repeat;
+  box-shadow: 0 20px 55px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-title {
+  font-size: 46px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+  max-width: 600px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+.hero-cta-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.shop-now-btn, .browse-cat-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 15px;
+  transition: transform 0.2s, background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-now-btn {
+  background: var(--accent);
+  color: #000000;
+}
+
+.browse-cat-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  border: 1px solid var(--line);
+}
+
+.shop-now-btn:hover, .browse-cat-btn:hover {
+  transform: translateY(-2px);
+}
+
+.hero-features {
+  display: flex;
+  gap: 30px;
+}
+
+.feature-item {
+  color: #cbd5e1;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.banner-game-logos {
+  position: absolute;
+  bottom: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  opacity: 0.5;
+}
+
+.game-logo-item {
+  font-size: 15px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 1px;
+}
+
+/* ================= SECTIONS & FILTERS ================= */
+.section {
+  padding: 30px 0;
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.sectionHead h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.view-all-btn {
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+}
+
+.filters input,
+.filters select,
+.coupon input,
+.checkoutForm input,
+.chatInput input {
+  background: #0d192d;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: white;
+  padding: 11px 14px;
+  outline: none;
+  font-size: 14px;
+}
+
+.filters input {
+  width: 260px;
+}
+
+/* ================= CATEGORIES ================= */
+.trendGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.trendCard {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.trendCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.trendCard:hover img {
+  transform: scale(1.05);
+}
+
+.trendCard:hover {
+  border-color: var(--line2);
+  transform: translateY(-2px);
+}
+
+.trendCard:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 11, 20, 0.1), rgba(5, 11, 20, 0.95));
+  z-index: 1;
+}
+
+.trendCard div {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+}
+
+.trendCard h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ================= PRODUCTS (HIDDEN BY DEFAULT & ANIMATED) ================= */
+#products {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#products.show-products {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+}
+
+.productCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.productCard:hover {
+  transform: translateY(-6px);
+  border-color: var(--line2);
+  box-shadow: 0 10px 25px rgba(0, 243, 255, 0.15);
+}
+
+.productCover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  background-image: none !important;
+}
+
+.productCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productCover img {
+  transform: scale(1.04);
+}
+
+.productInfo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.productInfo h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  min-height: 42px;
+}
+
+.productInfo p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 14px 0 6px;
+}
+
+.price {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.rating {
+  color: #ffd54a;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.add {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.add:hover {
+  background: var(--accent);
+  color: black;
+  border-color: var(--accent);
+}
+
+/* ================= PRODUCT DETAILS MODAL ================= */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(9, 15, 23, 0.9);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 100000;
+  opacity: 0; visibility: hidden; transition: 0.3s ease;
+}
+
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-content {
+  background: var(--card); border: 1px solid var(--cyan-dim);
+  border-radius: 16px; padding: 25px; width: 90%; max-width: 800px;
+  position: relative; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+  transform: translateY(20px); transition: 0.4s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+
+.modal-overlay.active .modal-content { transform: translateY(0); }
+
+.close-modal {
+  position: absolute; top: 15px; right: 20px;
+  background: transparent; border: none; color: #fff;
+  font-size: 28px; cursor: pointer; transition: 0.2s;
+}
+
+.close-modal:hover { color: var(--accent); }
+
+.modal-layout { display: flex; gap: 25px; flex-wrap: wrap; }
+.modal-image { flex: 1; min-width: 250px; }
+.modal-image img { width: 100%; border-radius: 12px; object-fit: cover; }
+.modal-details { flex: 1.5; min-width: 300px; color: #fff; }
+.modal-price { color: var(--accent); font-size: 24px; margin: 10px 0; font-weight: 800; }
+.modal-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+.stock-info { color: var(--accent); font-size: 14px; margin-bottom: 15px; }
+
+.quantity-selector {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
+}
+
+.quantity-selector button {
+  background: #1f2937; color: #fff; border: 1px solid #374151;
+  width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-size: 18px;
+}
+
+.quantity-selector input {
+  width: 50px; height: 35px; text-align: center; background: #090f17;
+  color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
+}
+
+/* ================= PRODUCT REVIEWS SECTION ================= */
+.product-reviews-section { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
+.product-reviews-section h3 { font-size: 16px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.reviews-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px; }
+.reviews-list::-webkit-scrollbar { width: 5px; }
+.reviews-list::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 10px; }
+.review-item { background: rgba(255, 255, 255, 0.02); padding: 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
+.review-user { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.verified-badge { color: #65cc00; font-size: 11px; }
+.review-body { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+.add-review-box { display: flex; flex-direction: column; gap: 10px; background: #090f17; padding: 12px; border-radius: 8px; border: 1px dashed var(--line2); }
+.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 50px; font-family: inherit; font-size: 13px; }
+.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 12px; transition: 0.3s; }
+.btn-submit-review:hover { background: #00d4ff; box-shadow: 0 0 10px var(--cyan-dim); }
+
+/* ================= BENEFITS SECTION ================= */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  padding: 40px 0;
+  border-top: 1px solid var(--line);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.benefit-icon {
+  font-size: 28px;
+  margin-top: 4px;
+}
+
+.benefit-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.benefit-text b {
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.benefit-text span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ================= CHECKOUT / PAYMENT METHODS ================= */
+.checkoutShowcase,
+.supportBox {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.checkoutShowcase h2,
+.supportBox h2 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.checkoutShowcase p,
+.supportBox p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.paymentMethods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.method-card {
+  background: rgba(255, 255, 255, 0.04); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 170px;
+  height: 60px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.method-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--neon-cyan);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 243, 255, 0.25);
+}
+
+.method-card span {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+/* ================= SUPPORT ACTIONS ================= */
+.supportActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.supportActions .whatsapp-support-btn,
+.supportActions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s;
+}
+
+.supportActions .whatsapp-support-btn {
+  background: #22c55e;
+  color: #000;
+}
+
+.supportActions button {
+  background: #0d192d;
+  color: white;
+  border: 1px solid var(--line);
+}
+
+.supportActions .whatsapp-support-btn:hover,
+.supportActions button:hover {
+  transform: translateY(-2px);
+}
+
+/* ================= CART DRAWER ================= */
+.cartDrawer {
+  position: fixed;
+  top: 0;
+  right: -440px;
+  width: 420px;
+  max-width: 100vw;
+  height: 100vh;
+  background: #080f1a;
+  border-left: 1px solid var(--line);
+  z-index: 1000;
+  padding: 24px;
+  overflow: auto;
+  transition: right 0.3s ease, left 0.3s ease;
+}
+
+.cartDrawer.open {
+  right: 0;
+}
+
+.cartHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cartHead h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cartHead button {
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.cartItem {
+  border: 1px solid var(--line);
+  background: #0d1722;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.coupon {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.coupon button {
+  background: var(--accent);
+  color: black;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.summary p {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  margin: 12px 0;
+  font-size: 15px;
+}
+
+.summary .grand {
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.checkoutForm {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.full {
+  width: 100%;
+}
+
+.btn-pay-now-pro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #00b4cc 0%, #00f3ff 100%);
+  color: #000000;
+  border: 0;
+  padding: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--cyan-dim);
+  transition: all 0.3s ease;
+}
+
+.btn-pay-now-pro:hover {
+  background: linear-gradient(135deg, #00d4ff 0%, #33f5ff 100%);
+  box-shadow: 0 6px 20px rgba(0, 243, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ================= CHAT ================= */
+.chat {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 340px;
+  max-width: 92vw;
+  background: #0d1722;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 1800;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.chat.open {
+  display: block;
+}
+
+.chatTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #08101e;
+  padding: 16px;
+  font-weight: 700;
+}
+
+.chatTop button {
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.chatBody {
+  padding: 20px;
+  min-height: 200px;
+}
+
+.chatInput {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.chatInput button {
+  background: var(--accent);
+  color: black;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chatBubble {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--accent);
+  color: black;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 1700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
+}
+
+/* ================= FOOTER ================= */
+footer {
+  padding: 40px 4%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+footer b {
+  color: white;
+}
+
+.footer-payments {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.footer-payments i {
+  font-size: 30px;
+  color: #94a3b8;
+  transition: 0.3s;
+}
+
+.footer-payments i:hover { color: var(--accent); }
+
+.reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ================= إصلاح ظهور التنبيهات فوق السلة على الموبايل ================= */
+.swal2-container.high-z-index-alert {
+  z-index: 999999999 !important;
+}
+
+/* ================= RTL Support ================= */
+html[dir="rtl"] body { text-align: right; }
+html[dir="rtl"] .mainNav { margin-left: 0; margin-right: 40px; }
+html[dir="rtl"] .topSearch { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .cartDrawer { right: auto; left: -440px; border-left: none; border-right: 1px solid var(--line); }
+html[dir="rtl"] .cartDrawer.open { left: 0; right: auto; }
+html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:1280px) {
+  .content { padding: 0 24px; }
+  .topbar { padding: 0 24px; gap: 16px; }
+  .mainNav { margin-left: 20px; gap: 8px; }
+  html[dir="rtl"] .mainNav { margin-right: 20px; }
+  .productGrid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .trendGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media(max-width:1024px) {
+  .mainNav { display: none !important; }
+  .topSearch { width: 280px; }
+  .productGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media(max-width:768px) {
+  body { padding-bottom: 70px !important; }
+  .content { padding: 0 14px; }
+  .topbar { height: auto; flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
+  .brand { font-size: 20px; }
+  .topSearch { order: 3; width: 100% !important; margin: 4px 0 0 0 !important; }
+  .navActions { margin-left: auto; gap: 8px; }
+  html[dir="rtl"] .navActions { margin-left: 0; margin-right: auto; }
+  .langBtn, .navActions button.loginBtn, .cartBtn { padding: 0 12px !important; font-size: 13px !important; height: 38px !important; }
+  .hero-banner-card { padding: 30px 20px; min-height: 280px; background: linear-gradient(180deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.75) 100%), url('/assets/hero-gaming-banner.jpg') center center/cover no-repeat; }
+  .hero-title { font-size: 26px; }
+  .hero-subtitle { font-size: 13px; margin-bottom: 20px; }
+  .hero-cta-buttons { flex-direction: column; gap: 10px; width: 100%; margin-bottom: 0; }
+  .shop-now-btn, .browse-cat-btn { width: 100%; justify-content: center; padding: 12px; }
+  .banner-game-logos, .hero-features { display: none; }
+  .productGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .productCard { border-radius: 12px; }
+  .productCover { aspect-ratio: 1 / 1; }
+  .productInfo { padding: 10px !important; }
+  .productInfo h3 { font-size: 13px !important; min-height: 36px !important; }
+  .productInfo p { font-size: 11px !important; }
+  .priceRow { margin: 8px 0 6px !important; }
+  .price { font-size: 14px !important; }
+  .rating { font-size: 11px !important; }
+  .add { padding: 8px !important; font-size: 12px !important; }
+  .trendGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+  .trendCard { aspect-ratio: 1 / 1; }
+  .sectionHead { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .filters { width: 100%; flex-direction: column; gap: 8px; }
+  .filters input, .filters select { width: 100%; }
   
-  setTimeout(() => {
-    renderCategories();
-    renderFilters();
-    renderProducts();
-    updateCart();
-  }, 1000); 
+  .cartDrawer { width: 100% !important; max-width: 100vw !important; height: calc(100vh - 60px) !important; }
   
-  reveal();
-});
-
-window.addEventListener('scroll', reveal);
-
-// --- 1. إدارة الجلسة (Session Timeout - 60 Minutes) ---
-function setSessionTimer() {
-    localStorage.setItem('techgaming_login_time', new Date().getTime());
-}
-
-function checkSession() {
-    const loginTime = localStorage.getItem('techgaming_login_time');
-    if (loginTime) {
-        const currentTime = new Date().getTime();
-        const oneHour = 60 * 60 * 1000; // 60 دقيقة بالملي ثانية
-        
-        if (currentTime - loginTime > oneHour) {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                firebase.auth().signOut().then(() => {
-                    localStorage.removeItem('techgaming_login_time');
-                    Swal.fire({
-                        icon: 'info',
-                        title: currentLang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
-                        text: currentLang === 'ar' ? 'مرت ساعة على تسجيل دخولك، يرجى تسجيل الدخول مرة أخرى.' : 'Your session has expired. Please log in again.',
-                        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-                        customClass: { container: 'high-z-index-alert' }
-                    }).then(() => window.location.reload());
-                });
-            }
-        }
-    }
-}
-setInterval(checkSession, 60000); // فحص كل دقيقة
-
-
-// عرض التصنيفات
-function renderCategories() {
-  if (!$('categoryGrid')) return;
-  if (typeof categories === 'undefined' || !categories.length) return;
+  .benefits { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .checkoutShowcase, .supportBox { flex-direction: column; text-align: center; padding: 20px 16px; }
+  .paymentMethods { display: flex; width: 100%; flex-direction: column; gap: 12px; }
+  .method-card { width: 100%; height: 50px; }
   
-  $('categoryGrid').innerHTML = categories.map(cat => {
-    const catImg = cat.bg || cat.image || '';
-    return `
-    <div class="trendCard reveal" onclick="filterByCategory('${cat.name}')">
-      <img src="${catImg}" alt="${cat.name}">
-      <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
-    </div>`;
-  }).join('');
+  .supportActions { width: 100%; flex-direction: column; }
+  .supportActions button, .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
 }
 
-function renderFilters() {
-  if (!$('categoryFilter')) return;
-  if (typeof products === 'undefined' || !products.length) return;
-  
-  const list = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
-  $('categoryFilter').innerHTML = list.map(x => `<option value="${x}">${x === 'All' ? (currentLang === 'ar' ? 'الكل' : 'All') : x}</option>`).join('');
+@media(max-width:360px) {
+  .productGrid { grid-template-columns: 1fr !important; }
 }
-
-// عرض المنتجات مع ربط زر الشراء بالنافذة المنبثقة
-function renderProducts() {
-  if (!$('productGrid')) return;
-  if (typeof products === 'undefined' || !products.length) {
-    $('productGrid').innerHTML = `<p style="color:var(--muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading products...</p>`;
-    return;
-  }
-
-  const search = ($('searchInput')?.value || '').toLowerCase();
-  const filter = $('categoryFilter')?.value || 'All';
-  const sort = $('sortFilter')?.value;
-
-  let list = products.filter(p => 
-    `${p.name} ${p.category} ${p.desc}`.toLowerCase().includes(search) && 
-    (filter === 'All' || p.category === filter)
-  );
-
-  if (sort === 'low') list.sort((a, b) => a.price - b.price);
-  if (sort === 'high') list.sort((a, b) => b.price - a.price);
-  if (sort === 'popular') list.sort((a, b) => (b.popular || 0) - (a.popular || 0));
-
-  $('productGrid').innerHTML = list.map(p => {
-    const originalIndex = products.indexOf(p);
-    const imgUrl = p.img || p.image || '';
-    const btnText = currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details';
-    
-    return `<article class="productCard reveal">
-      <div class="productCover">
-        <img src="${imgUrl}" alt="${p.name}">
-      </div>
-      <div class="productInfo">
-        <h3>${p.name}</h3>
-        <p>${p.desc || ''}</p>
-        <div class="priceRow">
-          <div class="price">${p.price}.00 EGP</div>
-          <span class="rating">★ ${p.rating || '5.0'}</span>
-        </div>
-        <button class="add" onclick="openProductModal(${originalIndex})">${btnText}</button>
-      </div>
-    </article>`;
-  }).join('');
-  reveal();
-}
-
-// --- 2. إدارة النافذة المنبثقة لتفاصيل المنتج (Product Modal) ---
-let currentSelectedProduct = null;
-let currentProductStock = 0;
-
-function openProductModal(index) {
-    const p = products[index];
-    if(!p) return;
-    currentSelectedProduct = p;
-    
-    currentProductStock = p.stock || 100; 
-
-    $('modalProductName').innerText = p.name;
-    $('modalProductPrice').innerText = p.price + ' EGP';
-    $('modalProductImg').src = p.img || p.image || '';
-    $('modalProductCategory').innerText = p.category;
-    $('modalProductDesc').innerText = p.desc || (currentLang === 'ar' ? 'لا يوجد وصف متاح.' : 'No description available.');
-    $('modalProductStock').innerText = currentProductStock;
-    $('modalQty').value = 1;
-
-    renderProductReviews(p);
-    checkIfUserCanReview(p);
-
-    $('productModal').classList.add('active');
-}
-
-function closeProductModal() {
-    $('productModal').classList.remove('active');
-}
-
-// عرض التعليقات الموجودة للمنتج
-function renderProductReviews(product) {
-    const reviewsList = $('reviewsList');
-    if(!reviewsList) return;
-    const reviews = product.reviews || [];
-
-    if (reviews.length === 0) {
-        reviewsList.innerHTML = `<p style="color:#94a3b8; font-size:12px; text-align:center;">لا توجد تعليقات حتى الآن. كن أول من يقيّم المنتج بعد الشراء!</p>`;
-        return;
-    }
-
-    reviewsList.innerHTML = reviews.map(rev => `
-        <div class="review-item">
-            <div class="review-user">
-                <i class="fas fa-user-circle"></i> ${rev.userName} 
-                <i class="fas fa-check-circle verified-badge" title="مشتري موثوق"></i>
-            </div>
-            <div class="review-body">${rev.text}</div>
-        </div>
-    `).join('');
-}
-
-// فحص أمان للمشتري: هل يحق له التعليق؟
-function checkIfUserCanReview(product) {
-    const addReviewBox = $('addReviewBox');
-    if(!addReviewBox) return;
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    const verifiedBuyers = product.verifiedBuyers || [];
-
-    if (currentUser && verifiedBuyers.includes(currentUser.uid)) {
-        addReviewBox.classList.remove('foxHidden');
-    } else {
-        addReviewBox.classList.add('foxHidden');
-    }
-}
-
-// دالة إرسال التعليق لقاعدة البيانات
-async function submitReview() {
-    const text = $('reviewText')?.value.trim();
-    if (!text) return;
-
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser || !currentSelectedProduct) return;
-
-    const newReview = {
-        userId: currentUser.uid,
-        userName: currentUser.displayName || 'Gamer',
-        text: text,
-        date: new Date().toISOString()
-    };
-
-    try {
-        const db = firebase.firestore();
-        const productRef = db.collection('products').doc(String(currentSelectedProduct.id || currentSelectedProduct.docId));
-        
-        await productRef.update({
-            reviews: firebase.firestore.FieldValue.arrayUnion(newReview)
-        });
-
-        if(!currentSelectedProduct.reviews) currentSelectedProduct.reviews = [];
-        currentSelectedProduct.reviews.push(newReview);
-        
-        $('reviewText').value = '';
-        renderProductReviews(currentSelectedProduct);
-        
-        Swal.fire({
-            icon: 'success',
-            title: 'شكراً لك!',
-            text: 'تمت إضافة تقييمك بنجاح كمشتري موثوق.',
-            background: '#090f17', color: '#fff', timer: 2000, showConfirmButton: false,
-            customClass: { container: 'high-z-index-alert' }
-        });
-
-    } catch (error) {
-        console.error("خطأ في رفع التقييم:", error);
-    }
-}
-
-function increaseQty() {
-    let input = $('modalQty');
-    if (parseInt(input.value) < currentProductStock) {
-        input.value = parseInt(input.value) + 1;
-    } else {
-        Swal.fire({
-            icon: 'warning',
-            title: currentLang === 'ar' ? 'تنبيه' : 'Attention',
-            text: currentLang === 'ar' ? 'الكمية المطلوبة تتخطى المخزون المتاح!' : 'Requested quantity exceeds available stock!',
-            background: '#090f17', color: '#fff',
-            customClass: { container: 'high-z-index-alert' }
-        });
-    }
-}
-
-function decreaseQty() {
-    let input = $('modalQty');
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-    }
-}
-
-function addToCartFromModal() {
-    if(!currentSelectedProduct) return;
-    
-    let qty = parseInt($('modalQty').value);
-    
-    for(let i = 0; i < qty; i++) {
-        cart.push({ 
-            ...currentSelectedProduct, 
-            cartId: Date.now() + Math.random(),
-            id: currentSelectedProduct.id || currentSelectedProduct.docId || Date.now()
-        });
-    }
-    
-    save();
-    updateCart();
-    closeProductModal();
-    
-    Swal.fire({
-        icon: 'success',
-        title: currentLang === 'ar' ? 'تمت الإضافة' : 'Added',
-        text: currentLang === 'ar' ? 'تم إضافة المنتج للسلة بنجاح' : 'Product added to cart successfully',
-        timer: 1500,
-        showConfirmButton: false,
-        background: '#090f17', color: '#fff',
-        customClass: { container: 'high-z-index-alert' }
-    });
-    
-    $('cartDrawer')?.classList.add('open');
-}
-
-function removeItem(cartId) {
-  cart = cart.filter(x => x.cartId !== cartId);
-  save();
-  updateCart();
-}
-
-function updateCart() {
-  if ($('cartCount')) $('cartCount').textContent = cart.length;
-  if ($('cartCountTop')) $('cartCountTop').textContent = cart.length;
-  
-  if ($('cartItems')) {
-    $('cartItems').innerHTML = cart.length 
-      ? cart.map(item => {
-          const imgUrl = item.img || item.image || 'https://via.placeholder.com/150';
-          return `
-            <div class="cartItem">
-              <img src="${imgUrl}" class="cartItem-img" alt="${item.name}">
-              <div class="cartItem-details">
-                <span class="cartItem-name">${item.name}</span>
-                <span class="cartItem-cat">${item.category || ''}</span>
-                <span class="cartItem-price">${item.price} EGP</span>
-              </div>
-              <button class="cartItem-remove-btn" onclick="removeItem(${item.cartId})" title="Remove">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </div>`;
-        }).join('')
-      : `<p style="color:#94a3b8; text-align:center; padding:30px; font-size:13px;">${currentLang === 'ar' ? 'سلة المشتريات فارغة حالياً.' : 'Your cart is empty.'}</p>`;
-  }
-
-  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const discountValue = Math.round(subtotal * coupon / 100);
-  
-  if ($('subtotal')) $('subtotal').textContent = `${subtotal} EGP`;
-  if ($('discount')) $('discount').textContent = `${discountValue} EGP`;
-  if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
-}
-
-function toggleLanguage() {
-  currentLang = currentLang === 'en' ? 'ar' : 'en';
-  localStorage.setItem('techgaming_lang', currentLang);
-  applyLanguage(currentLang);
-  updateCart();
-}
-
-function applyLanguage(lang) {
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.lang = lang;
-
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (translations[lang][key]) {
-      const icon = el.querySelector('i');
-      if (icon) {
-        el.innerHTML = '';
-        el.appendChild(icon);
-        el.appendChild(document.createTextNode(' ' + translations[lang][key]));
-      } else {
-        el.textContent = translations[lang][key];
-      }
-    }
-  });
-
-  document.querySelectorAll('[data-i18n-holder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-holder');
-    if (translations[lang][key]) {
-      el.placeholder = translations[lang][key];
-    }
-  });
-
-  if ($('langToggleBtn')) {
-    $('langToggleBtn').textContent = translations[lang]['lang_btn'];
-  }
-}
-
-async function applyCoupon() {
-  const code = ($('couponInput')?.value || '').trim().toUpperCase();
-  
-  if (!code) {
-    Swal.fire({
-      icon: 'warning',
-      text: currentLang === 'ar' ? 'يرجى إدخال كود الخصم أولاً!' : 'Please enter a coupon code first!',
-      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-      customClass: { container: 'high-z-index-alert' }
-    });
-    return;
-  }
-
-  if (typeof firebase === 'undefined' || !firebase.firestore) return;
-
-  try {
-    const couponDoc = await firebase.firestore().collection('coupons').doc(code).get();
-
-    if (couponDoc.exists) {
-      const couponData = couponDoc.data();
-      coupon = parseFloat(couponData.value || 0); 
-      save();
-      updateCart();
-
-      Swal.fire({
-        icon: 'success',
-        title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!',
-        text: currentLang === 'ar' ? `تم تفعيل خصم بقيمة ${coupon}% بنجاح 🎉` : `Successfully applied ${coupon}% discount 🎉`,
-        timer: 2000, showConfirmButton: false,
-        background: '#090f17', color: '#fff',
-        customClass: { container: 'high-z-index-alert' }
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon',
-        text: currentLang === 'ar' ? 'قسيمة الخصم غير موجودة أو منتهية.' : 'This coupon does not exist or expired.',
-        confirmButtonText: currentLang === 'ar' ? 'محاولة أخرى' : 'Try Again',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
-        customClass: { container: 'high-z-index-alert' }
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching coupon:", error);
-  }
-}
-
-// ================= دوال Firebase الإضافية (تحديث المخزون وتوثيق المشترين) =================
-
-async function updateProductStockAfterPurchase(purchasedItems) {
-    if (typeof firebase === 'undefined' || !firebase.firestore) return;
-    const db = firebase.firestore();
-    const batch = db.batch();
-
-    try {
-        purchasedItems.forEach(item => {
-            if (item.id) {
-                const productRef = db.collection('products').doc(String(item.id));
-                batch.update(productRef, {
-                    stock: firebase.firestore.FieldValue.increment(-1)
-                });
-            }
-        });
-        await batch.commit();
-        console.log("تم تحديث المخزون بنجاح.");
-    } catch (error) {
-        console.error("حدث خطأ أثناء تحديث المخزون:", error);
-    }
-}
-
-async function registerVerifiedBuyer(purchasedItems, userId) {
-    if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
-    const db = firebase.firestore();
-    const batch = db.batch();
-
-    try {
-        purchasedItems.forEach(item => {
-            if (item.id) {
-                const productRef = db.collection('products').doc(String(item.id));
-                batch.update(productRef, {
-                    verifiedBuyers: firebase.firestore.FieldValue.arrayUnion(userId)
-                });
-            }
-        });
-        await batch.commit();
-        console.log("تم توثيق المشتري بنجاح.");
-    } catch (error) {
-        console.error("حدث خطأ في توثيق المشتري:", error);
-    }
-}
-
-// ================= نهاية دوال Firebase الإضافية =================
-
-function clearCartAfterPurchase() {
-    cart = [];
-    save();
-    updateCart();
-}
-
-// --- دالة فحص تسجيل الدخول قبل إتمام الشراء مع إغلاق السلة فوراً وعدم حجب التنبيه ---
-function processSecureCheckout() {
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-    
-    const drawer = document.getElementById('cartDrawer');
-    if (drawer) {
-        drawer.classList.remove('open');
-        drawer.style.display = 'none'; // إخفاء كامل مؤقت للسلة لضمان وصول لمس الموبايل للتنبيه
-    }
-    
-    if (!currentUser) {
-        setTimeout(() => {
-            Swal.fire({
-                icon: 'warning',
-                title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
-                text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
-                confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
-                background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-                allowOutsideClick: false,
-                customClass: { container: 'high-z-index-alert' }
-            }).then((result) => {
-                if (drawer) drawer.style.display = 'block';
-                if (result.isConfirmed) {
-                    if(typeof openAuth === 'function') openAuth();
-                }
-            });
-        }, 150);
-        return;
-    }
-
-    if(typeof checkout === 'function') {
-        checkout();
-    }
-}
-
-async function checkout() {
-  const drawer = document.getElementById('cartDrawer');
-  if (drawer) {
-      drawer.classList.remove('open');
-      drawer.style.display = 'none';
-  }
-
-  if (!cart.length) {
-    if (drawer) drawer.style.display = 'block';
-    Swal.fire({
-      icon: 'warning',
-      text: currentLang === 'ar' ? 'سلة المشتريات فارغة.' : 'Your cart is empty.',
-      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-      customClass: { container: 'high-z-index-alert' }
-    });
-    return;
-  }
-
-  const name = ($('customerName')?.value || '').trim();
-  const phone = ($('customerPhone')?.value || '').trim();
-  const email = ($('customerEmail')?.value || '').trim();
-
-  if (!name || !phone || !email) {
-    setTimeout(() => {
-      Swal.fire({
-        icon: 'warning',
-        title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
-        text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء.' : 'Please fill in all fields (Name, Phone, Email).',
-        confirmButtonText: currentLang === 'ar' ? 'إدخال البيانات' : 'Enter Info',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-        customClass: { container: 'high-z-index-alert' }
-      }).then(() => {
-        if (drawer) {
-            drawer.style.display = 'block';
-            drawer.classList.add('open');
-        }
-        if(!name) $('customerName')?.focus();
-        else if(!phone) $('customerPhone')?.focus();
-        else if(!email) $('customerEmail')?.focus();
-      });
-    }, 150);
-    return;
-  }
-
-  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const discountValue = Math.round(subtotal * coupon / 100);
-  const total = subtotal - discountValue;
-
-  if (total <= 0) {
-      if (drawer) drawer.style.display = 'block';
-      return;
-  }
-
-  Swal.fire({
-    title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
-    allowOutsideClick: false,
-    background: '#090f17', color: '#fff',
-    customClass: { container: 'high-z-index-alert' },
-    didOpen: () => { Swal.showLoading(); }
-  });
-
-  try {
-    const res = await fetch('https://tech-gaming.store/api/myfatoorah/create-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customer: { name, phone, email },
-        total,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category || '',
-          price: Number(item.price || 0)
-        }))
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.paymentUrl) {
-      throw new Error(data.message || 'Payment link was not created.');
-    }
-
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    
-    await updateProductStockAfterPurchase(cart);
-    
-    if (currentUser) {
-        await registerVerifiedBuyer(cart, currentUser.uid);
-    }
-    
-    clearCartAfterPurchase();
-    window.location.href = data.paymentUrl;
-
-  } catch (e) {
-    console.error('Checkout error:', e);
-    if (drawer) drawer.style.display = 'block';
-    Swal.fire({
-      icon: 'error',
-      title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
-      text: e.message,
-      confirmButtonText: currentLang === 'ar' ? 'إغلاق' : 'Close',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
-      customClass: { container: 'high-z-index-alert' }
-    });
-  }
-}
-
-function save() {
-  localStorage.setItem('techgaming_cart', JSON.stringify(cart));
-  localStorage.setItem('techgaming_coupon', String(coupon));
-}
-
-function toggleCart() { 
-    const drawer = $('cartDrawer');
-    if (drawer) {
-        if (drawer.style.display === 'none') {
-            drawer.style.display = 'block';
-        }
-        drawer.classList.toggle('open');
-    }
-}
-
-function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
-function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
-
-function openAuth() { window.location.href = 'login.html'; }
-function closeAuth() { window.location.href = 'index.html'; }
-function toggleChat() { $('chat')?.classList.toggle('open'); }
-function reveal() { document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')); }
