@@ -1050,14 +1050,14 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .topbar { padding: 0 24px; gap: 16px; }
   .mainNav { margin-left: 20px; gap: 8px; }
   html[dir="rtl"] .mainNav { margin-right: 20px; }
-  .productGrid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .productGrid { grid-template-columns: repeat(4, 1fr) !important; gap: 16px; }
   .trendGrid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media(max-width:1024px) {
   .mainNav { display: none !important; }
   .topSearch { width: 280px; }
-  .productGrid { grid-template-columns: repeat(3, 1fr); }
+  .productGrid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
 @media(max-width:768px) {
@@ -1086,7 +1086,6 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .rating { font-size: 11px !important; }
   .add { padding: 8px !important; font-size: 12px !important; }
   
-  /* تعديلات قسرية أكيدة لإظهار قسم الأقسام وشبكته بوضوح تام على الموبايل */
   #trending { display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
   .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
   .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; visibility: visible !important; opacity: 1 !important; }
@@ -1103,7 +1102,7 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .method-card { width: 100%; height: 50px; }
   
   .supportActions { width: 100%; flex-direction: column; }
-  .supportActions button, .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
+  .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
 }
 
 @media(max-width:360px) {
