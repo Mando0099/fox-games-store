@@ -506,14 +506,14 @@ function clearCartAfterPurchase() {
     updateCart();
 }
 
-// --- دالة فحص تسجيل الدخول قبل إتمام الشراء مع إغلاق السلة فوراً على الموبايل ---
+// --- دالة فحص تسجيل الدخول مع إخفاء السلة مؤقتاً لضمان ظهور التنبيه على الموبايل ---
 function processSecureCheckout() {
     const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
     
-    // إغلاق السلة فوراً قبل إظهار أي تنبيه
     const drawer = document.getElementById('cartDrawer');
     if (drawer) {
         drawer.classList.remove('open');
+        drawer.style.display = 'none'; // إخفاء السلة لمنع حجب التنبيه على الجوال
     }
     
     if (!currentUser) {
@@ -524,13 +524,15 @@ function processSecureCheckout() {
                 text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
                 confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
                 background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+                allowOutsideClick: false,
                 customClass: { container: 'high-z-index-alert' }
             }).then((result) => {
+                if (drawer) drawer.style.display = 'block';
                 if (result.isConfirmed) {
                     if(typeof openAuth === 'function') openAuth();
                 }
             });
-        }, 150);
+        }, 200);
         return;
     }
 
@@ -543,9 +545,11 @@ async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
       drawer.classList.remove('open');
+      drawer.style.display = 'none';
   }
 
   if (!cart.length) {
+    if (drawer) drawer.style.display = 'block';
     Swal.fire({
       icon: 'warning',
       text: currentLang === 'ar' ? 'سلة المشتريات فارغة.' : 'Your cart is empty.',
@@ -570,12 +574,15 @@ async function checkout() {
         background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
         customClass: { container: 'high-z-index-alert' }
       }).then(() => {
-        if (drawer) drawer.classList.add('open');
+        if (drawer) {
+            drawer.style.display = 'block';
+            drawer.classList.add('open');
+        }
         if(!name) $('customerName')?.focus();
         else if(!phone) $('customerPhone')?.focus();
         else if(!email) $('customerEmail')?.focus();
       });
-    }, 150);
+    }, 200);
     return;
   }
 
@@ -583,7 +590,10 @@ async function checkout() {
   const discountValue = Math.round(subtotal * coupon / 100);
   const total = subtotal - discountValue;
 
-  if (total <= 0) return;
+  if (total <= 0) {
+      if (drawer) drawer.style.display = 'block';
+      return;
+  }
 
   Swal.fire({
     title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
@@ -628,6 +638,7 @@ async function checkout() {
 
   } catch (e) {
     console.error('Checkout error:', e);
+    if (drawer) drawer.style.display = 'block';
     Swal.fire({
       icon: 'error',
       title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
@@ -644,7 +655,16 @@ function save() {
   localStorage.setItem('techgaming_coupon', String(coupon));
 }
 
-function toggleCart() { $('cartDrawer')?.classList.toggle('open'); }
+function toggleCart() { 
+    const drawer = $('cartDrawer');
+    if (drawer) {
+        if (drawer.style.display === 'none') {
+            drawer.style.display = 'block';
+        }
+        drawer.classList.toggle('open');
+    }
+}
+
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
 
