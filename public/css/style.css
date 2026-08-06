@@ -1086,9 +1086,10 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .rating { font-size: 11px !important; }
   .add { padding: 8px !important; font-size: 12px !important; }
   
-  /* تعديل إظهار الأقسام (Categories) بوضوح وبشكل شبكي على الموبايل */
-  .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; }
+  /* تعديل قسري لإظهار الأقسام (Categories) بوضوح تام وبشكل شبكي على الموبايل */
+  #trending { display: block !important; visibility: visible !important; opacity: 1 !important; }
+  .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; }
+  .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; visibility: visible !important; opacity: 1 !important; }
   
   .sectionHead { flex-direction: column; align-items: flex-start; gap: 12px; }
   .filters { width: 100%; flex-direction: column; gap: 8px; }
