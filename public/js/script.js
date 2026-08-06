@@ -368,7 +368,55 @@ async function applyCoupon() {
   }
 }
 
-// دالة تفريغ السلة التي يتم نداءها قبل التحويل للدفع
+// ================= دوال Firebase الإضافية (تحديث المخزون وتوثيق المشترين) =================
+
+// 1. خصم الكمية من المخزون
+async function updateProductStockAfterPurchase(purchasedItems) {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    const db = firebase.firestore();
+    const batch = db.batch();
+
+    try {
+        purchasedItems.forEach(item => {
+            if (item.id) {
+                const productRef = db.collection('products').doc(String(item.id));
+                batch.update(productRef, {
+                    stock: firebase.firestore.FieldValue.increment(-1)
+                });
+            }
+        });
+        await batch.commit();
+        console.log("تم تحديث المخزون بنجاح.");
+    } catch (error) {
+        console.error("حدث خطأ أثناء تحديث المخزون:", error);
+    }
+}
+
+// 2. توثيق المشتري لإتاحة التعليقات الحقيقية فقط
+async function registerVerifiedBuyer(purchasedItems, userId) {
+    if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
+    const db = firebase.firestore();
+    const batch = db.batch();
+
+    try {
+        purchasedItems.forEach(item => {
+            if (item.id) {
+                const productRef = db.collection('products').doc(String(item.id));
+                batch.update(productRef, {
+                    verifiedBuyers: firebase.firestore.FieldValue.arrayUnion(userId)
+                });
+            }
+        });
+        await batch.commit();
+        console.log("تم توثيق المشتري بنجاح.");
+    } catch (error) {
+        console.error("حدث خطأ في توثيق المشتري:", error);
+    }
+}
+
+// ================= نهاية دوال Firebase الإضافية =================
+
+// دالة تفريغ السلة
 function clearCartAfterPurchase() {
     cart = [];
     save();
@@ -436,10 +484,23 @@ async function checkout() {
       throw new Error(data.message || 'Payment link was not created.');
     }
 
-    // تفريغ السلة قبل انتقال العميل لرابط الدفع
+    // --- العمليات التي تحدث فور نجاح إنشاء طلب الدفع --- //
+    
+    // 1. استخراج الـ User ID الخاص بالمشتري المسجل الدخول حالياً
+    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+    
+    // 2. تحديث المخزون (خصم الكمية من قاعدة البيانات)
+    await updateProductStockAfterPurchase(cart);
+    
+    // 3. توثيق عملية الشراء للعميل (إذا كان مسجلاً للدخول) للسماح له بالتعليق لاحقاً
+    if (currentUser) {
+        await registerVerifiedBuyer(cart, currentUser.uid);
+    }
+    
+    // 4. تفريغ السلة بالكامل بعد كل الخطوات السابقة
     clearCartAfterPurchase();
 
-    // توجيه العميل لصفحة الدفع
+    // 5. توجيه العميل لصفحة الدفع بأمان
     window.location.href = data.paymentUrl;
 
   } catch (e) {
