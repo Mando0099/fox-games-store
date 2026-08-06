@@ -4,7 +4,6 @@
 
     const db = firebase.firestore();
 
-    // تأكد من تعريف المصفوفات عالمياً لتجنب أي أخطاء على الموبايل
     window.categories = window.categories || [];
     window.products = window.products || [];
 
@@ -20,7 +19,7 @@
       }
     });
 
-    // 2. جلب المنتجات
+    // 2. جلب المنتجات الحقيقية
     const snap = await db.collection('products').get();
 
     products = snap.docs.map(d => {
@@ -42,7 +41,7 @@
       };
     });
 
-    // 3. جلب الأقسام من فايبربيز أو توليدها تلقائياً لضمان عدم اختفائها أبداً
+    // 3. جلب الأقسام من فايبربيز حصرياً (مجموعتي categories أو Categories)
     let catSnap = await db.collection('categories').get();
     if (catSnap.empty) {
         catSnap = await db.collection('Categories').get();
@@ -57,35 +56,24 @@
           bg: c.image || c.img || c.bg || '/assets/bg-pubg.svg'
         };
       });
+    } else {
+      // إذا لم تكن هناك وثائق أقسام مجهزة في القاعدة، نبنيها حصرياً من الأقسام الحقيقية للمنتجات المضافة
+      const uniqueCats = [...new Set(products.map(p => p.category).filter(Boolean))];
+      categories = uniqueCats.map(c => ({
+        name: c,
+        desc: `${c} Accounts & Services`,
+        bg: '/assets/bg-pubg.svg'
+      }));
     }
 
-    // الحل الإحتياطي الفوري: لو الأقسام ما زالت فارغة، يتم إنشاؤها تلقائياً من تصنيفات المنتجات
-    if (!categories || categories.length === 0) {
-      categories = [...new Set(products.map(p => p.category || 'Gaming'))]
-        .map(c => ({
-          name: c,
-          desc: c,
-          bg: '/assets/bg-pubg.svg'
-        }));
-    }
+    window.categories = categories;
 
-    // تنفيذ الدوال وتأكيد رسم الأقسام على الشاشة فوراً
+    // تنفيذ العرض الفوري
     if (typeof renderCategories === 'function') renderCategories();
     if (typeof renderFilters === 'function') renderFilters();
     if (typeof renderProducts === 'function') renderProducts();
-    
-    // إعادة رسم الأقسام مرة أخرى بعد تأخير بسيط لضمان ظهورها تماماً على الموبايل
-    setTimeout(() => {
-        if (typeof renderCategories === 'function') renderCategories();
-    }, 400);
-
-    if (typeof renderMiniSlider === 'function') {
-        renderMiniSlider();
-    } else {
-        window.renderMiniSlider = function() {};
-    }
 
   } catch (e) {
-    console.warn('Firestore products not loaded:', e.message);
+    console.warn('Firestore load error:', e.message);
   }
 })();
