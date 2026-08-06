@@ -165,7 +165,17 @@ function renderProducts() {
   $('productGrid').innerHTML = list.map(p => {
     const originalIndex = products.indexOf(p);
     const imgUrl = p.img || p.image || '';
-    const btnText = currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details';
+    const stockCount = Number(p.stock || 0);
+    
+    // التحقق لو الكمية خلصت لتحويل الزرار إلى "نفذت الكمية"
+    const isOutOfStock = stockCount <= 0;
+    const btnText = isOutOfStock 
+      ? (currentLang === 'ar' ? 'نفذت الكمية' : 'Out of Stock') 
+      : (currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details');
+    
+    const btnClass = isOutOfStock ? 'add out-of-stock-btn' : 'add';
+    const btnAction = isOutOfStock ? 'disabled' : `onclick="openProductModal(${originalIndex})"`;
+    const stockStyle = isOutOfStock ? 'color: #ef4444;' : 'color: var(--accent);';
     
     return `<article class="productCard reveal">
       <div class="productCover">
@@ -176,9 +186,9 @@ function renderProducts() {
         <p>${p.desc || ''}</p>
         <div class="priceRow">
           <div class="price">${p.price}.00 EGP</div>
-          <span class="rating">★ ${p.rating || '5.0'}</span>
+          <span class="rating" style="${stockStyle}">📦 ${stockCount}</span>
         </div>
-        <button class="add" onclick="openProductModal(${originalIndex})">${btnText}</button>
+        <button class="${btnClass}" ${btnAction}>${btnText}</button>
       </div>
     </article>`;
   }).join('');
