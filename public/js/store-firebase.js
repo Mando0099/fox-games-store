@@ -16,9 +16,13 @@
         category: p.category || p.game || 'Gaming',
         desc: p.description || `${p.amount || ''} digital top-up`,
         price: Number(p.price || 0),
+        // تم إضافة جلب المخزون من كافة الاحتمالات الممكنة لقاعدة البيانات
+        stock: Number(p.stock !== undefined ? p.stock : (p.quantity !== undefined ? p.quantity : (p.qty !== undefined ? p.qty : 100))),
         bg: p.bg || p.image || p.img || '/assets/bg-pubg.svg',
         img: p.image || p.img || '/assets/item-uc.svg',
-        popular: 10
+        popular: 10,
+        reviews: p.reviews || [],
+        verifiedBuyers: p.verifiedBuyers || []
       };
     });
 
@@ -47,7 +51,13 @@
     renderCategories();
     renderFilters();
     renderProducts();
-    renderMiniSlider();
+    
+    // التأكد من استدعاء دالة السلايدر بأمان تام حتى لو لم تكن معرفة
+    if (typeof renderMiniSlider === 'function') {
+        renderMiniSlider();
+    } else {
+        window.renderMiniSlider = function() { /* Safe fallback */ };
+    }
 
   } catch (e) {
     console.warn('Firestore products not loaded:', e.message);
