@@ -4,6 +4,10 @@
 
     const db = firebase.firestore();
 
+    // تأكد من تعريف المصفوفات عالمياً لتجنب أي أخطاء على الموبايل
+    window.categories = window.categories || [];
+    window.products = window.products || [];
+
     // 1. حساب المخزون الحقيقي من الأكواد المتاحة
     const codesSnap = await db.collection('productCodes').where('status', '==', 'available').get();
     const stockCountMap = {};
@@ -65,15 +69,15 @@
         }));
     }
 
-    // تنفيذ الدوال وتأكيد رسم الأقسام على الشاشة
-    renderCategories();
-    renderFilters();
-    renderProducts();
+    // تنفيذ الدوال وتأكيد رسم الأقسام على الشاشة فوراً
+    if (typeof renderCategories === 'function') renderCategories();
+    if (typeof renderFilters === 'function') renderFilters();
+    if (typeof renderProducts === 'function') renderProducts();
     
-    // إعادة رسم الأقسام مرة أخرى بعد تأخير بسيط لضمان ظهورها على الموبايل
+    // إعادة رسم الأقسام مرة أخرى بعد تأخير بسيط لضمان ظهورها تماماً على الموبايل
     setTimeout(() => {
-        renderCategories();
-    }, 500);
+        if (typeof renderCategories === 'function') renderCategories();
+    }, 400);
 
     if (typeof renderMiniSlider === 'function') {
         renderMiniSlider();
