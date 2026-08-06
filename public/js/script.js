@@ -97,21 +97,22 @@ function checkSession() {
 }
 setInterval(checkSession, 60000);
 
+// تصحيح دالة عرض الأقسام الحقيقية برمجياً وبدون بيانات وهمية
 function renderCategories() {
   const grid = $('categoryGrid');
   if (!grid) return;
 
-  if (typeof categories === 'undefined' || !categories.length) {
-    if (typeof products !== 'undefined' && products.length > 0) {
-      window.categories = [...new Set(products.map(p => p.category || 'Gaming'))].map(c => ({
-        name: c,
-        desc: c === 'Gaming' ? 'Digital Gaming Accounts' : c,
-        bg: '/assets/bg-pubg.svg'
-      }));
-    } else {
-      return;
-    }
+  // إذا لم يتم جلب الأقسام بعد، يتم استخراجها فوراً من المنتجات المتاحة في قاعدة البيانات
+  if ((typeof categories === 'undefined' || !categories.length) && typeof products !== 'undefined' && products.length > 0) {
+    const uniqueCats = [...new Set(products.map(p => p.category).filter(Boolean))];
+    window.categories = uniqueCats.map(c => ({
+      name: c,
+      desc: `${c} Accounts & Services`,
+      bg: '/assets/bg-pubg.svg'
+    }));
   }
+
+  if (typeof categories === 'undefined' || !categories.length) return;
   
   grid.innerHTML = categories.map(cat => {
     const catImg = cat.bg || cat.image || '/assets/bg-pubg.svg';
