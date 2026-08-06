@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TECH GAMING Store</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="/css/style.css?v=2026"/>
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -165,9 +165,10 @@
       .filters input, .filters select { flex: 1 1 100%; }
       .paymentMethods { grid-template-columns: repeat(2, 1fr) !important; }
       
-      /* تعديل إظهار الأقسام بوضوح على الموبايل */
-      .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-      .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; }
+      /* تعديل إجباري لإظهار الأقسام بوضوح تام على الموبايل */
+      #trending { display: block !important; visibility: visible !important; opacity: 1 !important; }
+      .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; }
+      .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; visibility: visible !important; opacity: 1 !important; background: #0d1722; border: 1px solid rgba(0,243,255,0.3); border-radius: 12px; }
 
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #090f17; border-top: 1px solid rgba(0, 243, 255, 0.2); z-index: 9999; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
       .mobile-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; text-decoration: none; font-size: 11px; gap: 4px; flex: 1; height: 100%; transition: 0.2s; }
@@ -275,7 +276,17 @@
         </div>
         <button class="view-all-btn" onclick="resetCategoryFilter()" data-i18n="btn_view_all">View All <i class="fas fa-arrow-right"></i></button>
       </div>
-      <div class="trendGrid" id="categoryGrid"></div>
+      <div class="trendGrid" id="categoryGrid">
+        <!-- احتياطي فوري يظهر حتى لو الفايربيز معطل أو متأخر -->
+        <div class="trendCard" onclick="filterByCategory('Gaming')">
+          <img src="/assets/bg-pubg.svg" alt="Gaming">
+          <div><h3>Gaming</h3><p>Digital Gaming Accounts</p></div>
+        </div>
+        <div class="trendCard" onclick="filterByCategory('Accounts')">
+          <img src="/assets/bg-pubg.svg" alt="Accounts">
+          <div><h3>Accounts</h3><p>Premium Digital Accounts</p></div>
+        </div>
+      </div>
     </section>
 
     <!-- المنتجات مخفية افتراضياً -->
@@ -498,9 +509,9 @@
     
   <script src="/firebase-config.js"></script>
     
-  <script src="/js/store-firebase.js"></script>
-  <script src="/js/store-account.js"></script>
-  <script src="/js/script.js"></script>
+  <script src="/js/store-firebase.js?v=2026"></script>
+  <script src="/js/store-account.js?v=2026"></script>
+  <script src="/js/script.js?v=2026"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
