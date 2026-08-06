@@ -58,15 +58,40 @@ window.addEventListener('load', () => {
   applyLanguage(currentLang);
   if (typeof checkAuthState === 'function') checkAuthState();
   
-  setTimeout(() => {
+  waitForDataAndRender();
+  reveal();
+});
+
+function waitForDataAndRender(attempt = 0) {
+  const maxAttempts = 20;      // يعني حد أقصى 10 ثواني انتظار (20 × 500ms)
+  const dataIsReady = typeof products !== 'undefined' && products.length > 0;
+
+  if (dataIsReady) {
     renderCategories();
     renderFilters();
     renderProducts();
     updateCart();
-  }, 1000); 
-  
-  reveal();
-});
+    return;
+  }
+
+  if (attempt >= maxAttempts) {
+    // البيانات فشلت تحمل خالص - وريله رسالة واضحة بدل ما يفضل فاضي
+    const grid = $('categoryGrid');
+    if (grid) {
+      grid.innerHTML = `<p style="color:var(--muted); grid-column:1/-1; text-align:center; padding:20px;">
+        ${currentLang === 'ar' ? 'تعذر تحميل الأقسام، جرّب تحديث الصفحة.' : 'Could not load categories. Please refresh.'}
+      </p>`;
+    }
+    if ($('productGrid')) {
+      $('productGrid').innerHTML = `<p style="color:var(--muted); grid-column:1/-1; text-align:center; padding:40px 0;">
+        ${currentLang === 'ar' ? 'تعذر تحميل المنتجات، جرّب تحديث الصفحة.' : 'Could not load products. Please refresh.'}
+      </p>`;
+    }
+    return;
+  }
+
+  setTimeout(() => waitForDataAndRender(attempt + 1), 500);
+}
 
 window.addEventListener('scroll', reveal);
 
