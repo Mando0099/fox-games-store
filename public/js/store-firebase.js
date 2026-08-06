@@ -41,7 +41,7 @@
       };
     });
 
-    // 3. جلب الأقسام من فايبربيز حصرياً (مجموعتي categories أو Categories)
+    // 3. جلب الأقسام الحقيقية بانتظار تام (Await) لضمان تحميلها على الموبايل
     let catSnap = await db.collection('categories').get();
     if (catSnap.empty) {
         catSnap = await db.collection('Categories').get();
@@ -57,7 +57,7 @@
         };
       });
     } else {
-      // إذا لم تكن هناك وثائق أقسام مجهزة في القاعدة، نبنيها حصرياً من الأقسام الحقيقية للمنتجات المضافة
+      // لو مفيش كولكشن مستقل للأقسام، بنجيبها من تصنيفات المنتجات الفعلية المسجلة
       const uniqueCats = [...new Set(products.map(p => p.category).filter(Boolean))];
       categories = uniqueCats.map(c => ({
         name: c,
@@ -68,7 +68,7 @@
 
     window.categories = categories;
 
-    // تنفيذ العرض الفوري
+    // التنفيذ الإجباري بعد اكتمال جلب الداتا تماماً وبكل قوة على الموبايل
     if (typeof renderCategories === 'function') renderCategories();
     if (typeof renderFilters === 'function') renderFilters();
     if (typeof renderProducts === 'function') renderProducts();
