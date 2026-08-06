@@ -98,17 +98,31 @@ function checkSession() {
 setInterval(checkSession, 60000);
 
 function renderCategories() {
-  if (!$('categoryGrid')) return;
-  if (typeof categories === 'undefined' || !categories.length) return;
+  const grid = $('categoryGrid');
+  if (!grid) return;
+
+  if (typeof categories === 'undefined' || !categories.length) {
+    if (typeof products !== 'undefined' && products.length > 0) {
+      window.categories = [...new Set(products.map(p => p.category || 'Gaming'))].map(c => ({
+        name: c,
+        desc: c === 'Gaming' ? 'Digital Gaming Accounts' : c,
+        bg: '/assets/bg-pubg.svg'
+      }));
+    } else {
+      return;
+    }
+  }
   
-  $('categoryGrid').innerHTML = categories.map(cat => {
-    const catImg = cat.bg || cat.image || '';
+  grid.innerHTML = categories.map(cat => {
+    const catImg = cat.bg || cat.image || '/assets/bg-pubg.svg';
     return `
     <div class="trendCard reveal" onclick="filterByCategory('${cat.name}')">
       <img src="${catImg}" alt="${cat.name}">
       <div><h3>${cat.name}</h3><p>${cat.desc || ''}</p></div>
     </div>`;
   }).join('');
+  
+  reveal();
 }
 
 // دالة الفلترة مع أنيميشن سلس عند اختيار التصنيف
@@ -132,6 +146,15 @@ function filterByCategory(categoryName) {
             productGrid.style.transform = 'translateY(0)';
         }, 150);
     }
+}
+
+function resetCategoryFilter() {
+    const categoryFilterSelect = $('categoryFilter');
+    if (categoryFilterSelect) {
+        categoryFilterSelect.value = 'All';
+    }
+    renderProducts();
+    scrollToId('products');
 }
 
 function renderFilters() {
@@ -203,7 +226,6 @@ function openProductModal(index) {
     if(!p) return;
     currentSelectedProduct = p;
     
-    // سحب المخزون الحقيقي من الداتا بيز أو جعله 0 إن لم يحدد
     currentProductStock = (p.stock !== undefined) ? Number(p.stock) : 0; 
 
     $('modalProductName').innerText = p.name;
@@ -224,7 +246,6 @@ function closeProductModal() {
     $('productModal').classList.remove('active');
 }
 
-// عرض التعليقات الحقيقية للمنتج
 function renderProductReviews(product) {
     const reviewsList = $('reviewsList');
     if(!reviewsList) return;
@@ -246,7 +267,6 @@ function renderProductReviews(product) {
     `).join('');
 }
 
-// فحص أمان للمشتري الحقيقي
 function checkIfUserCanReview(product) {
     const addReviewBox = $('addReviewBox');
     if(!addReviewBox) return;
