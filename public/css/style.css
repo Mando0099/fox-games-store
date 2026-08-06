@@ -1016,7 +1016,7 @@ footer b {
 
 /* ================= إصلاح ظهور التنبيهات فوق السلة على الموبايل ================= */
 .swal2-container.high-z-index-alert {
-  z-index: 9999999 !important;
+  z-index: 99999999 !important;
 }
 
 /* ================= RTL Support ================= */
