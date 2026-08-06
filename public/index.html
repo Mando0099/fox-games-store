@@ -73,6 +73,7 @@
       background: #121212; border: 1px solid var(--cyan-dim); border-radius: 16px; padding: 25px;
       width: 90%; max-width: 800px; position: relative; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
       transform: translateY(20px); transition: 0.4s ease;
+      max-height: 90vh; overflow-y: auto;
     }
     .modal-overlay.active .modal-content { transform: translateY(0); }
     .close-modal {
@@ -98,24 +99,24 @@
     }
     /* ================= END NEW TECH GAMING STYLES ================= */
 
-    /* ================= START USER PROFILE STYLE (YOUR ORIGINAL CODE) ================= */
+    /* ================= START USER PROFILE STYLE ================= */
     .user-profile-wrapper { position: relative; display: inline-block; }
-    .user-profile-btn { background: #0d1722; border: 1px solid rgba(101, 204, 0, 0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-    .user-profile-btn:hover { background: rgba(101, 204, 0, 0.1); box-shadow: 0 0 10px rgba(101, 204, 0, 0.2); }
-    .user-profile-dropdown { position: absolute; top: 50px; right: 0; width: 300px; background: #0d1722; border: 1px solid rgba(101, 204, 0, 0.25); border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); padding: 16px; z-index: 1000; color: #fff; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s ease; }
+    .user-profile-btn { background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .user-profile-btn:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+    .user-profile-dropdown { position: absolute; top: 50px; right: 0; width: 300px; background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); padding: 16px; z-index: 1000; color: #fff; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s ease; }
     .user-profile-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .profile-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-    .profile-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #65cc00; object-fit: cover; }
+    .profile-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--neon-cyan); object-fit: cover; }
     .profile-info { display: flex; flex-direction: column; gap: 2px; }
     .profile-name { font-size: 15px; font-weight: 700; }
     .profile-email { font-size: 12px; color: #94a3b8; word-break: break-all; }
     .auth-method-badge { display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.04); padding: 4px 10px; border-radius: 20px; font-size: 11px; color: #94a3b8; width: fit-content; }
     .auth-google { color: #ea4335; font-weight: bold; }
     .auth-facebook { color: #1877f2; font-weight: bold; }
-    .auth-email { color: #65cc00; font-weight: bold; }
+    .auth-email { color: var(--neon-cyan); font-weight: bold; }
     .profile-menu-links { margin: 12px 0; display: flex; flex-direction: column; gap: 2px; }
     .profile-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 500; border-radius: 6px; transition: 0.2s; }
-    .profile-link:hover { background: rgba(101, 204, 0, 0.08); color: #65cc00; }
+    .profile-link:hover { background: rgba(0, 243, 255, 0.08); color: var(--neon-cyan); }
     .logout-btn-new { width: 100%; height: 38px; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
     .logout-btn-new:hover { background: #ef4444; color: #fff; }
     html[dir="rtl"] .user-profile-dropdown { right: auto; left: 0; text-align: right; }
@@ -124,20 +125,20 @@
     /* ================= END USER PROFILE STYLE ================= */
 
     /* ================= START MODERN CART STYLE ================= */
-    .cartDrawer { width: 420px; background: #090f17; border-left: 1px solid rgba(101, 204, 0, 0.15); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-    html[dir="rtl"] .cartDrawer { border-left: none; border-right: 1px solid rgba(101, 204, 0, 0.15); }
+    .cartDrawer { width: 420px; background: #090f17; border-left: 1px solid rgba(0, 243, 255, 0.15); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    html[dir="rtl"] .cartDrawer { border-left: none; border-right: 1px solid rgba(0, 243, 255, 0.15); }
     .cartItem { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: 0.3s; }
-    .cartItem:hover { border-color: rgba(101, 204, 0, 0.3); background: rgba(101, 204, 0, 0.02); }
+    .cartItem:hover { border-color: rgba(0, 243, 255, 0.3); background: rgba(0, 243, 255, 0.02); }
     .cartItem-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.1); }
     .cartItem-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
     .cartItem-name { font-size: 14px; font-weight: 700; color: #fff; }
     .cartItem-cat { font-size: 11px; color: #94a3b8; }
-    .cartItem-price { font-size: 14px; font-weight: 800; color: #65cc00; }
+    .cartItem-price { font-size: 14px; font-weight: 800; color: var(--neon-cyan); }
     .cartItem-remove-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .cartItem-remove-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
     .coupon .checkoutForm { display: flex; flex-direction: column; gap: 12px; }
     .coupon input, .checkoutForm input { background: #0d1722 !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; width: 100%; box-sizing: border-box; }
-    .coupon input:focus, .checkoutForm input:focus { border-color: #65cc00 !important; outline: none; }
+    .coupon input:focus, .checkoutForm input:focus { border-color: var(--neon-cyan) !important; outline: none; }
     .payment-logos-container { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; }
     .pay-mini-logo { height: 14px; display: block; }
     /* ================= END MODERN CART STYLE ================= */
@@ -163,11 +164,10 @@
       .filters { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
       .filters input, .filters select { flex: 1 1 100%; }
       .paymentMethods { grid-template-columns: repeat(2, 1fr) !important; }
-      .benefits { grid-template-columns: 1fr !important; gap: 15px !important; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #090f17; border-top: 1px solid rgba(101, 204, 0, 0.2); z-index: 9999; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #090f17; border-top: 1px solid rgba(0, 243, 255, 0.2); z-index: 9999; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
       .mobile-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; text-decoration: none; font-size: 11px; gap: 4px; flex: 1; height: 100%; transition: 0.2s; }
       .mobile-nav-item i { font-size: 18px; }
-      .mobile-nav-item:hover, .mobile-nav-item.active { color: #65cc00; background: rgba(101, 204, 0, 0.05); }
+      .mobile-nav-item:hover, .mobile-nav-item.active { color: var(--neon-cyan); background: rgba(0, 243, 255, 0.05); }
     }
   </style>
 </head>
@@ -181,7 +181,7 @@
 
   <header class="topbar">
     <a class="brand" href="/">
-      <img src="/assets/FOX-LOGO.png" alt="Logo" style="display:none;"> <!-- تم إخفاء اللوجو القديم للاحتفاظ بالكود -->
+      <img src="/assets/FOX-LOGO.png" alt="Logo" style="display:none;">
       <span>TECH <b class="cyan-text">GAMING</b></span>
     </a>
 
@@ -262,7 +262,7 @@
       </div>
     </section>
 
-    <!-- تم رفع الأقسام لتكون قبل المنتجات -->
+    <!-- الأقسام -->
     <section class="section" id="trending">
       <div class="sectionHead reveal">
         <div>
@@ -292,13 +292,39 @@
       <div class="productGrid" id="productGrid"></div>
     </section>
 
+    <!-- القسم الأول: المميزات بتنسيق منظم -->
     <section class="benefits">
-      <div><i class="fas fa-bolt benefit-icon" style="color:var(--neon-cyan);"></i> <div><b data-i18n="b_feat1_title">Instant Delivery</b><span data-i18n="b_feat1_desc">Get your products instantly after payment</span></div></div>
-      <div><i class="fas fa-shield-alt benefit-icon" style="color:var(--neon-cyan);"></i> <div><b data-i18n="b_feat2_title">Secure Payments</b><span data-i18n="b_feat2_desc">100% secure payment methods</span></div></div>
-      <div><i class="fas fa-headset benefit-icon" style="color:var(--neon-cyan);"></i> <div><b data-i18n="b_feat3_title">24/7 Support</b><span data-i18n="b_feat3_desc">We are here to help you anytime</span></div></div>
-      <div><i class="fas fa-thumbs-up benefit-icon" style="color:var(--neon-cyan);"></i> <div><b data-i18n="b_feat4_title">Best Prices</b><span data-i18n="b_feat4_desc">Competitive prices on all products</span></div></div>
+      <div class="benefit-item">
+        <i class="fas fa-bolt benefit-icon" style="color:var(--neon-cyan);"></i>
+        <div class="benefit-text">
+          <b data-i18n="b_feat1_title">Instant Delivery</b>
+          <span data-i18n="b_feat1_desc">Get your digital product instantly after payment</span>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-shield-alt benefit-icon" style="color:var(--neon-cyan);"></i>
+        <div class="benefit-text">
+          <b data-i18n="b_feat2_title">Secure Payments</b>
+          <span data-i18n="b_feat2_desc">100% secure encrypted payment methods</span>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-headset benefit-icon" style="color:var(--neon-cyan);"></i>
+        <div class="benefit-text">
+          <b data-i18n="b_feat3_title">24/7 Support</b>
+          <span data-i18n="b_feat3_desc">We are here to help you anytime</span>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <i class="fas fa-thumbs-up benefit-icon" style="color:var(--neon-cyan);"></i>
+        <div class="benefit-text">
+          <b data-i18n="b_feat4_title">Best Prices</b>
+          <span data-i18n="b_feat4_desc">Competitive prices on all accounts and services</span>
+        </div>
+      </div>
     </section>
 
+    <!-- القسم الثاني: طرق الدفع الاحترافية -->
     <section class="section" id="checkout">
       <div class="checkoutShowcase reveal">
         <div>
@@ -307,20 +333,16 @@
         </div>
         <div class="paymentMethods">
           <div class="method-card" title="Apple Pay">
-            <i class="fab fa-apple-pay" style="color: #fff; font-size: 32px;"></i>
+            <i class="fab fa-apple-pay" style="color: #fff; font-size: 36px;"></i>
             <span>Apple Pay</span>
           </div>
           <div class="method-card" title="Visa">
-            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 28px;"></i>
+            <i class="fab fa-cc-visa" style="color: #1a73e8; font-size: 32px;"></i>
             <span>Visa</span>
           </div>
           <div class="method-card" title="MasterCard">
-            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 28px;"></i>
+            <i class="fab fa-cc-mastercard" style="color: #ea4335; font-size: 32px;"></i>
             <span>MasterCard</span>
-          </div>
-          <div class="method-card" title="Vodafone Cash">
-            <i class="fas fa-wallet" style="color: #e60000; font-size: 22px;"></i>
-            <span>Vodafone Cash</span>
           </div>
         </div>
       </div>
@@ -340,6 +362,7 @@
     </section>
   </main>
 
+  <!-- سلة المشتريات -->
   <aside class="cartDrawer" id="cartDrawer">
     <div class="cartHead">
       <h3 data-i18n="cart_title">Your Cart</h3>
@@ -361,7 +384,6 @@
       <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
       <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
       
-      <!-- زر الدفع المحدث للتحقق من تسجيل الدخول -->
       <button class="btn-pay-now-pro" onclick="processSecureCheckout()">
         <i class="fas fa-lock"></i>
         <span data-i18n="btn_pay_now">Secure Checkout</span>
@@ -374,7 +396,7 @@
     </div>
   </aside>
 
-  <!-- نافذة تفاصيل المنتج -->
+  <!-- النافذة المنبثقة لتفاصيل المنتج مع قسم التعليقات -->
   <div id="productModal" class="modal-overlay">
     <div class="modal-content">
       <button class="close-modal" onclick="closeProductModal()">×</button>
@@ -402,6 +424,22 @@
           <button class="btn-pay-now-pro" onclick="addToCartFromModal()">
             <i class="fas fa-cart-plus"></i> أضف إلى السلة
           </button>
+
+          <!-- القسم الجديد: تعليقات المشترين -->
+          <div class="product-reviews-section">
+            <h3>آراء المشترين <i class="fas fa-star" style="color:#ffd54a;"></i></h3>
+            <div id="reviewsList" class="reviews-list">
+                <!-- سيتم عرض التعليقات هنا برمجياً -->
+            </div>
+            
+            <!-- صندوق كتابة التعليق (مخفي افتراضياً ولن يظهر إلا للمشتري الحقيقي) -->
+            <div id="addReviewBox" class="add-review-box foxHidden">
+                <textarea id="reviewText" placeholder="اكتب تقييمك للمنتج هنا... (متاح للمشترين فقط)"></textarea>
+                <button onclick="submitReview()" class="btn-submit-review">إرسال التقييم</button>
+            </div>
+          </div>
+          <!-- نهاية قسم التعليقات -->
+
         </div>
       </div>
     </div>
@@ -572,31 +610,24 @@
       }
     });
 
-    // دالة الفلترة وإظهار المنتجات بالتأثير الحركي
     function filterByCategory(catName) {
         const categoryFilter = document.getElementById('categoryFilter');
         const productsSection = document.getElementById('products');
         
         if (categoryFilter) {
             categoryFilter.value = catName;
-            
-            // إظهار قسم المنتجات مع الأنيميشن
             productsSection.classList.add('show-products');
-            
             if (typeof renderProducts === 'function') {
-                renderProducts(); // دالتك الأصلية لعرض المنتجات
+                renderProducts();
             }
-            
             setTimeout(() => {
                 productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
         }
     }
 
-    // دالة الدفع الآمن (إجبار العميل على تسجيل الدخول)
     function processSecureCheckout() {
         const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-        
         if (!currentUser) {
             Swal.fire({
                 icon: 'warning',
