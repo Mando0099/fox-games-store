@@ -393,8 +393,7 @@ body {
 .filters input,
 .filters select,
 .coupon input,
-.checkoutForm input,
-.chatInput input {
+.checkoutForm input {
   background: #0d192d;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -464,11 +463,12 @@ body {
   color: #fff;
 }
 
-/* ================= PRODUCTS (إظهار المنتجات دائماً على PC و Mobile بدون إخفاء) ================= */
+/* ================= PRODUCTS (تم التعديل لتظهر دائماً على PC و Mobile بدون إخفاء) ================= */
 #products {
   display: block !important;
   opacity: 1 !important;
   transform: none !important;
+  visibility: visible !important;
 }
 
 .productGrid {
@@ -750,8 +750,7 @@ body {
   flex-wrap: wrap;
 }
 
-.supportActions .whatsapp-support-btn,
-.supportActions button {
+.supportActions .whatsapp-support-btn {
   border: 0;
   border-radius: 8px;
   padding: 13px 24px;
@@ -763,21 +762,11 @@ body {
   align-items: center;
   gap: 8px;
   transition: transform 0.2s;
-}
-
-.supportActions .whatsapp-support-btn {
   background: #22c55e;
   color: #000;
 }
 
-.supportActions button {
-  background: #0d192d;
-  color: white;
-  border: 1px solid var(--line);
-}
-
-.supportActions .whatsapp-support-btn:hover,
-.supportActions button:hover {
+.supportActions .whatsapp-support-btn:hover {
   transform: translateY(-2px);
 }
 
@@ -996,7 +985,7 @@ html[dir="rtl"] .cartDrawer.open { left: 0; right: auto; }
   .method-card { width: 100%; height: 50px; }
   
   .supportActions { width: 100%; flex-direction: column; }
-  .supportActions button, .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
+  .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
 }
 
 @media(max-width:360px) {
