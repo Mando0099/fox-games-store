@@ -1014,6 +1014,11 @@ footer b {
   transform: none !important;
 }
 
+/* ================= إصلاح ظهور التنبيهات فوق السلة على الموبايل ================= */
+.swal2-container.high-z-index-alert {
+  z-index: 9999999 !important;
+}
+
 /* ================= RTL Support ================= */
 html[dir="rtl"] body { text-align: right; }
 html[dir="rtl"] .mainNav { margin-left: 0; margin-right: 40px; }
@@ -1069,7 +1074,9 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .filters { width: 100%; flex-direction: column; gap: 8px; }
   .filters input, .filters select { width: 100%; }
   
-  /* Responsive updates for Benefits & Checkout */
+  /* تحسين السلة على الموبايل لتترك مساحة وتظهر فوقها التنبيهات */
+  .cartDrawer { width: 100% !important; max-width: 100vw !important; height: calc(100vh - 60px) !important; }
+  
   .benefits { grid-template-columns: 1fr !important; gap: 20px !important; }
   .checkoutShowcase, .supportBox { flex-direction: column; text-align: center; padding: 20px 16px; }
   .paymentMethods { display: flex; width: 100%; flex-direction: column; gap: 12px; }
@@ -1077,7 +1084,6 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   
   .supportActions { width: 100%; flex-direction: column; }
   .supportActions button, .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
-  .cartDrawer { width: 100% !important; max-width: 100vw !important; }
 }
 
 @media(max-width:360px) {
