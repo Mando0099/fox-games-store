@@ -55,7 +55,7 @@
     .footer-payments i { font-size: 30px; color: #94a3b8; transition: 0.3s; }
     .footer-payments i:hover { color: var(--neon-cyan); }
 
-    /* ================= DYNAMIC HERO SLIDER STYLES (البانر المتحرك الاحترافي) ================= */
+    /* ================= DYNAMIC HERO SLIDER STYLES (بانر بخلفيات صور احترافية) ================= */
     .hero-banner-section {
       position: relative;
       width: 100%;
@@ -72,16 +72,25 @@
       min-width: 100%;
       box-sizing: border-box;
       position: relative;
-      min-height: 400px;
+      min-height: 420px;
       border-radius: 16px;
       border: 1px solid rgba(30, 58, 99, 0.4);
       padding: 60px;
       background-size: cover;
-      background-position: center right;
+      background-position: center center;
       display: none;
       opacity: 0;
       transition: opacity 0.6s ease-in-out;
-      box-shadow: 0 20px 55px rgba(0,0,0,.5);
+      box-shadow: 0 20px 55px rgba(0,0,0,.6);
+    }
+    /* طبقة تغميق فوق الصورة لتوضيح الكتابة */
+    .hero-slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.75) 60%, rgba(5, 11, 20, 0.4) 100%);
+      z-index: 1;
+      border-radius: 16px;
     }
     .hero-slide.active {
       display: flex;
@@ -90,6 +99,8 @@
       opacity: 1;
     }
     .hero-content {
+      position: relative;
+      z-index: 2;
       max-width: 650px;
     }
     .hero-title {
@@ -98,10 +109,11 @@
       letter-spacing: -1px;
       margin-bottom: 12px;
       color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
     .hero-subtitle {
       font-size: 16px;
-      color: #94a3b8;
+      color: #cbd5e1;
       margin-bottom: 25px;
       line-height: 1.6;
     }
@@ -154,7 +166,7 @@
       box-shadow: 0 0 10px var(--neon-cyan);
     }
     .slider-arrow {
-      background: rgba(13, 23, 34, 0.8);
+      background: rgba(13, 23, 34, 0.85);
       border: 1px solid rgba(30, 58, 99, 0.4);
       color: #fff;
       width: 34px;
@@ -165,6 +177,7 @@
       justify-content: center;
       cursor: pointer;
       transition: 0.3s;
+      z-index: 5;
     }
     .slider-arrow:hover {
       background: var(--neon-cyan);
@@ -352,12 +365,12 @@
 
   <main id="home" class="content">
       
-    <!-- البانر المتحرك الاحترافي الجديد (Hero Slider) -->
+    <!-- البانر المتحرك الاحترافي الجديد مع صور الخلفيات لكل شريحة -->
     <section class="hero-banner-section">
       <div class="hero-slider-container" id="heroSlider">
         
-        <!-- الشريحة الأولى: الترحيب والخدمات الرقمية -->
-        <div class="hero-slide active" style="background-image: linear-gradient(90deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.7) 50%, rgba(5, 11, 20, 0.2) 100%), url('/assets/hero-gaming-banner.jpg');">
+        <!-- الشريحة الأولى: خلفية ألعاب ومنصات رقمية -->
+        <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop');">
           <div class="hero-content">
             <h1 class="hero-title" data-i18n="hero_title">Digital Accounts & Top-Ups</h1>
             <p class="hero-subtitle" data-i18n="hero_subtitle">Instant delivery. Premium digital services. Best prices.</p>
@@ -369,8 +382,8 @@
           </div>
         </div>
 
-        <!-- الشريحة الثانية: المنتجات والأسعار التنافسية -->
-        <div class="hero-slide" style="background: linear-gradient(135deg, #0d1722 0%, #050b14 100%);">
+        <!-- الشريحة الثانية: خلفية تعبر عن الحسابات والعروض -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop');">
           <div class="hero-content" style="max-width: 100%;">
             <span style="color: var(--neon-cyan); font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-fire"></i> منتجات شائعة ورائجة</span>
             <h1 class="hero-title" style="font-size: 36px; margin: 10px 0;">أقوى حسابات الألعاب وشحن الرصيد</h1>
@@ -381,8 +394,8 @@
           </div>
         </div>
 
-        <!-- الشريحة الثالثة: طرق الدفع الآمن والموثوق -->
-        <div class="hero-slide" style="background: linear-gradient(135deg, #08101e 0%, #0d1722 100%);">
+        <!-- الشريحة الثالثة: خلفية تعبر عن الأمان والدفع الإلكتروني -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1200&auto=format&fit=crop');">
           <div class="hero-content" style="max-width: 100%;">
             <span style="color: #22c55e; font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-shield-alt"></i> حماية تامة وعمليات مشفرة</span>
             <h1 class="hero-title" style="font-size: 36px; margin: 10px 0;">طرق دفع آمنة ومتعددة</h1>
