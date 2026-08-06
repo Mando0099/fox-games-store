@@ -99,31 +99,30 @@
     }
     /* ================= END NEW TECH GAMING STYLES ================= */
 
-    /* ================= START WEB PROFILE MODAL STYLES ================= */
+    /* ================= START USER PROFILE STYLE ================= */
     .user-profile-wrapper { position: relative; display: inline-block; }
     .user-profile-btn { background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
     .user-profile-btn:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-    
-    .web-profile-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 11, 20, 0.85); display: flex; justify-content: center; align-items: center; z-index: 999999; opacity: 0; visibility: hidden; transition: 0.3s ease; backdrop-filter: blur(5px); }
-    .web-profile-modal.active { opacity: 1; visibility: visible; }
-    .web-profile-box { background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.4); border-radius: 16px; width: 90%; max-width: 650px; max-height: 85vh; overflow-y: auto; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); color: #fff; position: relative; transform: translateY(20px); transition: 0.3s; }
-    .web-profile-modal.active .web-profile-box { transform: translateY(0); }
-    .profile-close-x { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer; }
-    .profile-close-x:hover { color: var(--neon-cyan); }
-    .web-profile-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-    .web-profile-avatar { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--neon-cyan); object-fit: cover; }
-    .web-profile-info h3 { font-size: 20px; margin-bottom: 4px; color: #fff; }
-    .web-profile-info p { font-size: 13px; color: #94a3b8; word-break: break-all; }
-    
-    .profile-orders-container h4 { font-size: 16px; color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-    .profile-order-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .profile-order-details { display: flex; flex-direction: column; gap: 4px; }
-    .profile-order-name { font-weight: 700; font-size: 14px; color: #fff; }
-    .profile-order-date { font-size: 11px; color: #94a3b8; }
-    .profile-order-key { background: #090f17; border: 1px dashed rgba(0,243,255,0.4); padding: 6px 10px; border-radius: 6px; font-family: monospace; color: var(--neon-cyan); font-size: 12px; margin-top: 4px; display: inline-block; }
-    .profile-logout-btn { width: 100%; margin-top: 20px; background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .profile-logout-btn:hover { background: #ef4444; color: #fff; }
-    /* ================= END WEB PROFILE MODAL STYLES ================= */
+    .user-profile-dropdown { position: absolute; top: 50px; right: 0; width: 300px; background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); padding: 16px; z-index: 1000; color: #fff; text-align: left; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s ease; }
+    .user-profile-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .profile-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .profile-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--neon-cyan); object-fit: cover; }
+    .profile-info { display: flex; flex-direction: column; gap: 2px; }
+    .profile-name { font-size: 15px; font-weight: 700; }
+    .profile-email { font-size: 12px; color: #94a3b8; word-break: break-all; }
+    .auth-method-badge { display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.04); padding: 4px 10px; border-radius: 20px; font-size: 11px; color: #94a3b8; width: fit-content; }
+    .auth-google { color: #ea4335; font-weight: bold; }
+    .auth-facebook { color: #1877f2; font-weight: bold; }
+    .auth-email { color: var(--neon-cyan); font-weight: bold; }
+    .profile-menu-links { margin: 12px 0; display: flex; flex-direction: column; gap: 2px; }
+    .profile-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 500; border-radius: 6px; transition: 0.2s; }
+    .profile-link:hover { background: rgba(0, 243, 255, 0.08); color: var(--neon-cyan); }
+    .logout-btn-new { width: 100%; height: 38px; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+    .logout-btn-new:hover { background: #ef4444; color: #fff; }
+    html[dir="rtl"] .user-profile-dropdown { right: auto; left: 0; text-align: right; }
+    html[dir="rtl"] .profile-header { flex-direction: row-reverse; }
+    .foxHidden { display: none !important; }
+    /* ================= END USER PROFILE STYLE ================= */
 
     /* ================= START MODERN CART STYLE ================= */
     .cartDrawer { width: 420px; background: #090f17; border-left: 1px solid rgba(0, 243, 255, 0.15); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
@@ -156,6 +155,7 @@
       html[dir="rtl"] .navActions { margin-left: 0; margin-right: auto; }
       .langBtn, .loginBtn, .user-profile-btn, .cartBtn { padding: 6px 10px !important; font-size: 13px !important; }
       .cartDrawer { width: 100% !important; }
+      .user-profile-dropdown { position: fixed !important; top: auto !important; bottom: 65px !important; left: 5% !important; right: 5% !important; width: 90% !important; box-sizing: border-box; }
       .hero-title { font-size: 26px !important; }
       .hero-subtitle { font-size: 14px !important; }
       .hero-cta-buttons { flex-direction: column; width: 100%; }
@@ -211,6 +211,24 @@
         <button class="user-profile-btn" id="userProfileTrigger">
           <i class="fas fa-user-circle"></i> <span id="topNavUserName">Gamer</span>
         </button>
+        
+        <div class="user-profile-dropdown" id="userProfileDropdown">
+          <div class="profile-header">
+            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profileUserAvatar" alt="Avatar">
+            <div class="profile-info">
+              <span class="profile-name" id="dropdownUserName">Gamer User</span>
+              <span class="profile-email" id="dropdownUserEmail">user@example.com</span>
+              <div class="auth-method-badge" id="authMethodBadge"></div>
+            </div>
+          </div>
+          <div class="profile-menu-links">
+            <a href="#products" class="profile-link"><i class="fas fa-shopping-bag"></i> <span data-i18n="nav_store">طلباتي وشحناتي</span></a>
+            <a href="#support" class="profile-link"><i class="fas fa-headset"></i> <span data-i18n="nav_support">الدعم الفني</span></a>
+          </div>
+          <button class="logout-btn-new" id="profileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+          </button>
+        </div>
       </div>
 
       <button onclick="toggleCart()" title="Cart" class="cartBtn">
@@ -219,33 +237,6 @@
       </button>
     </div>
   </header>
-
-  <!-- نافذة بروفايل الويب المتكاملة للمشتري والمعلومات -->
-  <div class="web-profile-modal" id="webProfileModal">
-    <div class="web-profile-box">
-      <button class="profile-close-x" onclick="closeWebProfile()">&times;</button>
-      
-      <div class="web-profile-header">
-        <img src="https://via.placeholder.com/150" class="web-profile-avatar" id="modalUserAvatar" alt="Avatar">
-        <div class="web-profile-info">
-          <h3 id="modalProfileName">اسم المستخدم</h3>
-          <p id="modalProfileEmail">user@example.com</p>
-          <div id="modalAuthBadge" style="margin-top: 6px;"></div>
-        </div>
-      </div>
-
-      <div class="profile-orders-container">
-        <h4><i class="fas fa-shopping-bag"></i> المنتجات والأكواد التي اشتريتها</h4>
-        <div id="modalCustomerOrdersList">
-          <p style="color: #94a3b8; font-size: 13px; text-align: center; padding: 20px;">جارِ جلب مشترياتك من السيرفر...</p>
-        </div>
-      </div>
-
-      <button class="profile-logout-btn" id="modalLogoutBtn">
-        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-      </button>
-    </div>
-  </div>
 
   <main id="home" class="content">
       
@@ -370,6 +361,7 @@
         </div>
         <div class="supportActions">
           <a href="https://wa.me/201010502795" target="_blank" class="whatsapp-support-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <button onclick="toggleChat()" data-i18n="btn_live_chat">Live Chat</button>
         </div>
       </div>
     </section>
@@ -477,6 +469,19 @@
     </a>
   </nav>
 
+  <div class="chat" id="chat">
+    <div class="chatTop">TECH GAMING Support <button onclick="toggleChat()">×</button></div>
+    <div class="chatBody">
+      <p>Hey gamer 👋 How can we help?</p>
+      <small>This is a demo chat widget.</small>
+    </div>
+    <div class="chatInput">
+      <input placeholder="Write message...">
+      <button>Send</button>
+    </div>
+  </div>
+  <button class="chatBubble" onclick="toggleChat()">💬</button>
+
   <footer>
     <div><b>TECH GAMING</b><p>Premium digital selling platform.</p></div>
     <div class="footer-payments">
@@ -502,16 +507,14 @@
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
       const userProfileTrigger = document.getElementById('userProfileTrigger');
-      
+      const userProfileDropdown = document.getElementById('userProfileDropdown');
+        
       const topNavUserName = document.getElementById('topNavUserName');
-      
-      const webProfileModal = document.getElementById('webProfileModal');
-      const modalProfileName = document.getElementById('modalProfileName');
-      const modalProfileEmail = document.getElementById('modalProfileEmail');
-      const modalUserAvatar = document.getElementById('modalUserAvatar');
-      const modalAuthBadge = document.getElementById('modalAuthBadge');
-      const modalLogoutBtn = document.getElementById('modalLogoutBtn');
-      const modalCustomerOrdersList = document.getElementById('modalCustomerOrdersList');
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      const profileUserAvatar = document.getElementById('profileUserAvatar');
+      const authMethodBadge = document.getElementById('authMethodBadge');
+      const profileLogoutBtn = document.getElementById('profileLogoutBtn');
 
       function cleanOldProfiles() {
         if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
@@ -520,10 +523,20 @@
             mainLoginBtn.classList.add('foxHidden');
           }
         }
+          
+        const actionsContainer = document.querySelector('.navActions');
+        if (actionsContainer) {
+          const textButtons = actionsContainer.querySelectorAll('button:not(.langBtn):not(.cartBtn):not(.loginBtn):not(.user-profile-btn)');
+          textButtons.forEach(btn => {
+            if (btn.innerText.includes('Profile') || btn.id === 'userProfileBtn') {
+              btn.remove();
+            }
+          });
+        }
       }
 
       if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged(async (user) => {
+        firebase.auth().onAuthStateChanged((user) => {
           if (user) {
             if (mainLoginBtn) mainLoginBtn.classList.add('foxHidden');
             if (userProfileWrapper) userProfileWrapper.classList.remove('foxHidden');
@@ -532,59 +545,25 @@
             const email = user.email || "No Email";
             const photoURL = user.photoURL || "https://via.placeholder.com/150";
 
-            if (topNavUserName) topNavUserName.innerText = displayName; 
-            if (modalProfileName) modalProfileName.innerText = displayName;
-            if (modalProfileEmail) modalProfileEmail.innerText = email;
-            if (modalUserAvatar) modalUserAvatar.src = photoURL;
+            if (topNavUserName) topNavUserName.innerText = displayName.split(' ')[0]; 
+            if (dropdownUserName) dropdownUserName.innerText = displayName;
+            if (dropdownUserEmail) dropdownUserEmail.innerText = email;
+            if (profileUserAvatar) profileUserAvatar.src = photoURL;
 
             let providerId = "email";
             if (user.providerData && user.providerData.length > 0) {
               providerId = user.providerData[0].providerId;
             }
 
-            if (modalAuthBadge) {
+            if (authMethodBadge) {
               if (providerId === 'google.com') {
-                modalAuthBadge.innerHTML = `<span style="font-size:12px; color:#94a3b8;">تسجيل عبر:</span> <span style="color:#ea4335; font-weight:bold;"><i class="fab fa-google"></i> Google</span>`;
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-google"><i class="fab fa-google"></i> Google</span>`;
               } else if (providerId === 'facebook.com') {
-                modalAuthBadge.innerHTML = `<span style="font-size:12px; color:#94a3b8;">تسجيل عبر:</span> <span style="color:#1877f2; font-weight:bold;"><i class="fab fa-facebook"></i> Facebook</span>`;
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-facebook"><i class="fab fa-facebook"></i> Facebook</span>`;
               } else {
-                modalAuthBadge.innerHTML = `<span style="font-size:12px; color:#94a3b8;">تسجيل عبر:</span> <span style="color:var(--neon-cyan); font-weight:bold;"><i class="fas fa-envelope"></i> حسابك الشخصي</span>`;
+                authMethodBadge.innerHTML = `<span>تسجيل عبر:</span> <span class="auth-email"><i class="fas fa-envelope"></i> حسابك</span>`;
               }
             }
-
-            try {
-              const db = firebase.firestore();
-              const ordersSnap = await db.collection('orders').where('userId', '==', user.uid).get();
-
-              if (ordersSnap.empty) {
-                modalCustomerOrdersList.innerHTML = `<p style="color: #94a3b8; font-size: 13px; text-align: center; padding: 20px;">لم تقم بشراء أي منتجات حتى الآن.</p>`;
-              } else {
-                let htmlOrders = '';
-                ordersSnap.docs.forEach(doc => {
-                  const order = doc.data();
-                  const dateStr = order.createdAt ? new Date(order.createdAt.toDate()).toLocaleDateString() : 'وقت حديث';
-                  const items = order.items || [];
-                  
-                  items.forEach(item => {
-                    htmlOrders += `
-                      <div class="profile-order-item">
-                        <div class="profile-order-details">
-                          <span class="profile-order-name">${item.name || 'Digital Product'}</span>
-                          <span class="profile-order-date">تاريخ الطلب: ${dateStr} | السعر: ${item.price || 0} EGP</span>
-                          ${item.deliveredKey ? `<div class="profile-order-key"><i class="fas fa-key"></i> الكود أو الحساب: ${item.deliveredKey}</div>` : ''}
-                        </div>
-                        <span style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">مكتمل</span>
-                      </div>
-                    `;
-                  });
-                });
-                modalCustomerOrdersList.innerHTML = htmlOrders;
-              }
-            } catch (err) {
-              console.error("Error fetching user orders:", err);
-              modalCustomerOrdersList.innerHTML = `<p style="color: #ef4444; font-size: 13px; text-align: center;">تعذر جلب المشتريات حالياً.</p>`;
-            }
-
           } else {
             if (mainLoginBtn) {
               mainLoginBtn.classList.remove('foxHidden');
@@ -596,25 +575,35 @@
         });
       }
 
-      if (userProfileTrigger && webProfileModal) {
-        userProfileTrigger.addEventListener('click', (e) => {
-          e.stopPropagation();
-          webProfileModal.classList.add('active');
-        });
-      }
-
-      window.closeWebProfile = function() {
-        if (webProfileModal) webProfileModal.classList.remove('active');
-      }
-
-      window.addEventListener('click', (e) => {
-        if (e.target === webProfileModal) {
-          closeWebProfile();
+      const observer = new MutationObserver(() => {
+        cleanOldProfiles();
+        if (firebase.auth().currentUser) {
+          if (mainLoginBtn && !mainLoginBtn.classList.contains('foxHidden')) {
+            mainLoginBtn.classList.add('foxHidden');
+          }
+          if (userProfileWrapper && userProfileWrapper.classList.contains('foxHidden')) {
+            userProfileWrapper.classList.remove('foxHidden');
+          }
         }
       });
 
-      if (modalLogoutBtn) {
-        modalLogoutBtn.addEventListener('click', () => {
+      const navActionsContainer = document.querySelector('.navActions');
+      if (navActionsContainer) {
+        observer.observe(navActionsContainer, { childList: true, subtree: true, characterData: true, attributes: true });
+      }
+
+      if (userProfileTrigger && userProfileDropdown) {
+        userProfileTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userProfileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', () => {
+          userProfileDropdown.classList.remove('active');
+        });
+      }
+
+      if (profileLogoutBtn) {
+        profileLogoutBtn.addEventListener('click', () => {
           if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut().then(() => {
               window.location.reload();
