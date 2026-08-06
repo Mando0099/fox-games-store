@@ -94,7 +94,8 @@ function checkSession() {
                         icon: 'info',
                         title: currentLang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
                         text: currentLang === 'ar' ? 'مرت ساعة على تسجيل دخولك، يرجى تسجيل الدخول مرة أخرى.' : 'Your session has expired. Please log in again.',
-                        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
+                        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+                        customClass: { container: 'high-z-index-alert' }
                     }).then(() => window.location.reload());
                 });
             }
@@ -180,7 +181,6 @@ function openProductModal(index) {
     if(!p) return;
     currentSelectedProduct = p;
     
-    // إذا لم يكن هناك تخزين محدد في الداتا بيز نعتبره 100 افتراضياً
     currentProductStock = p.stock || 100; 
 
     $('modalProductName').innerText = p.name;
@@ -191,11 +191,92 @@ function openProductModal(index) {
     $('modalProductStock').innerText = currentProductStock;
     $('modalQty').value = 1;
 
+    renderProductReviews(p);
+    checkIfUserCanReview(p);
+
     $('productModal').classList.add('active');
 }
 
 function closeProductModal() {
     $('productModal').classList.remove('active');
+}
+
+// عرض التعليقات الموجودة للمنتج
+function renderProductReviews(product) {
+    const reviewsList = $('reviewsList');
+    if(!reviewsList) return;
+    const reviews = product.reviews || [];
+
+    if (reviews.length === 0) {
+        reviewsList.innerHTML = `<p style="color:#94a3b8; font-size:12px; text-align:center;">لا توجد تعليقات حتى الآن. كن أول من يقيّم المنتج بعد الشراء!</p>`;
+        return;
+    }
+
+    reviewsList.innerHTML = reviews.map(rev => `
+        <div class="review-item">
+            <div class="review-user">
+                <i class="fas fa-user-circle"></i> ${rev.userName} 
+                <i class="fas fa-check-circle verified-badge" title="مشتري موثوق"></i>
+            </div>
+            <div class="review-body">${rev.text}</div>
+        </div>
+    `).join('');
+}
+
+// فحص أمان للمشتري: هل يحق له التعليق؟
+function checkIfUserCanReview(product) {
+    const addReviewBox = $('addReviewBox');
+    if(!addReviewBox) return;
+    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+    const verifiedBuyers = product.verifiedBuyers || [];
+
+    if (currentUser && verifiedBuyers.includes(currentUser.uid)) {
+        addReviewBox.classList.remove('foxHidden');
+    } else {
+        addReviewBox.classList.add('foxHidden');
+    }
+}
+
+// دالة إرسال التعليق لقاعدة البيانات
+async function submitReview() {
+    const text = $('reviewText')?.value.trim();
+    if (!text) return;
+
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser || !currentSelectedProduct) return;
+
+    const newReview = {
+        userId: currentUser.uid,
+        userName: currentUser.displayName || 'Gamer',
+        text: text,
+        date: new Date().toISOString()
+    };
+
+    try {
+        const db = firebase.firestore();
+        const productRef = db.collection('products').doc(String(currentSelectedProduct.id || currentSelectedProduct.docId));
+        
+        await productRef.update({
+            reviews: firebase.firestore.FieldValue.arrayUnion(newReview)
+        });
+
+        if(!currentSelectedProduct.reviews) currentSelectedProduct.reviews = [];
+        currentSelectedProduct.reviews.push(newReview);
+        
+        $('reviewText').value = '';
+        renderProductReviews(currentSelectedProduct);
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'شكراً لك!',
+            text: 'تمت إضافة تقييمك بنجاح كمشتري موثوق.',
+            background: '#090f17', color: '#fff', timer: 2000, showConfirmButton: false,
+            customClass: { container: 'high-z-index-alert' }
+        });
+
+    } catch (error) {
+        console.error("خطأ في رفع التقييم:", error);
+    }
 }
 
 function increaseQty() {
@@ -207,7 +288,8 @@ function increaseQty() {
             icon: 'warning',
             title: currentLang === 'ar' ? 'تنبيه' : 'Attention',
             text: currentLang === 'ar' ? 'الكمية المطلوبة تتخطى المخزون المتاح!' : 'Requested quantity exceeds available stock!',
-            background: '#090f17', color: '#fff'
+            background: '#090f17', color: '#fff',
+            customClass: { container: 'high-z-index-alert' }
         });
     }
 }
@@ -242,7 +324,8 @@ function addToCartFromModal() {
         text: currentLang === 'ar' ? 'تم إضافة المنتج للسلة بنجاح' : 'Product added to cart successfully',
         timer: 1500,
         showConfirmButton: false,
-        background: '#090f17', color: '#fff'
+        background: '#090f17', color: '#fff',
+        customClass: { container: 'high-z-index-alert' }
     });
     
     $('cartDrawer')?.classList.add('open');
@@ -331,7 +414,8 @@ async function applyCoupon() {
       icon: 'warning',
       text: currentLang === 'ar' ? 'يرجى إدخال كود الخصم أولاً!' : 'Please enter a coupon code first!',
       confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
+      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+      customClass: { container: 'high-z-index-alert' }
     });
     return;
   }
@@ -352,7 +436,8 @@ async function applyCoupon() {
         title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!',
         text: currentLang === 'ar' ? `تم تفعيل خصم بقيمة ${coupon}% بنجاح 🎉` : `Successfully applied ${coupon}% discount 🎉`,
         timer: 2000, showConfirmButton: false,
-        background: '#090f17', color: '#fff'
+        background: '#090f17', color: '#fff',
+        customClass: { container: 'high-z-index-alert' }
       });
     } else {
       Swal.fire({
@@ -360,7 +445,8 @@ async function applyCoupon() {
         title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon',
         text: currentLang === 'ar' ? 'قسيمة الخصم غير موجودة أو منتهية.' : 'This coupon does not exist or expired.',
         confirmButtonText: currentLang === 'ar' ? 'محاولة أخرى' : 'Try Again',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444'
+        background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
+        customClass: { container: 'high-z-index-alert' }
       });
     }
   } catch (error) {
@@ -370,7 +456,6 @@ async function applyCoupon() {
 
 // ================= دوال Firebase الإضافية (تحديث المخزون وتوثيق المشترين) =================
 
-// 1. خصم الكمية من المخزون
 async function updateProductStockAfterPurchase(purchasedItems) {
     if (typeof firebase === 'undefined' || !firebase.firestore) return;
     const db = firebase.firestore();
@@ -392,7 +477,6 @@ async function updateProductStockAfterPurchase(purchasedItems) {
     }
 }
 
-// 2. توثيق المشتري لإتاحة التعليقات الحقيقية فقط
 async function registerVerifiedBuyer(purchasedItems, userId) {
     if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
     const db = firebase.firestore();
@@ -416,20 +500,47 @@ async function registerVerifiedBuyer(purchasedItems, userId) {
 
 // ================= نهاية دوال Firebase الإضافية =================
 
-// دالة تفريغ السلة
 function clearCartAfterPurchase() {
     cart = [];
     save();
     updateCart();
 }
 
+// --- دالة فحص تسجيل الدخول قبل إتمام الشراء وإغلاق السلة ---
+function processSecureCheckout() {
+    const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+    
+    if (!currentUser) {
+        $('cartDrawer')?.classList.remove('open'); // إغلاق السلة فوراً
+        Swal.fire({
+            icon: 'warning',
+            title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
+            text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
+            confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
+            background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+            customClass: { container: 'high-z-index-alert' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof openAuth === 'function') openAuth();
+            }
+        });
+        return;
+    }
+
+    if(typeof checkout === 'function') {
+        checkout();
+    }
+}
+
 async function checkout() {
   if (!cart.length) {
+    $('cartDrawer')?.classList.remove('open');
     Swal.fire({
       icon: 'warning',
       text: currentLang === 'ar' ? 'سلة المشتريات فارغة.' : 'Your cart is empty.',
       confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
+      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+      customClass: { container: 'high-z-index-alert' }
     });
     return;
   }
@@ -439,12 +550,19 @@ async function checkout() {
   const email = ($('customerEmail')?.value || '').trim();
 
   if (!name || !phone || !email) {
+    $('cartDrawer')?.classList.remove('open'); // إغلاق السلة لكي يظهر التنبيه واضحاً
     Swal.fire({
       icon: 'warning',
       title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
-      text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول لإتمام عملية الشراء.' : 'Please fill out all fields.',
-      confirmButtonText: currentLang === 'ar' ? 'تعديل البيانات' : 'Edit Info',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
+      text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء.' : 'Please fill in all fields (Name, Phone, Email).',
+      confirmButtonText: currentLang === 'ar' ? 'إدخال البيانات' : 'Enter Info',
+      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+      customClass: { container: 'high-z-index-alert' }
+    }).then(() => {
+      $('cartDrawer')?.classList.add('open'); // إعادة فتح السلة بعد قراءة التنبيه
+      if(!name) $('customerName')?.focus();
+      else if(!phone) $('customerPhone')?.focus();
+      else if(!email) $('customerEmail')?.focus();
     });
     return;
   }
@@ -455,10 +573,13 @@ async function checkout() {
 
   if (total <= 0) return;
 
+  $('cartDrawer')?.classList.remove('open');
+
   Swal.fire({
     title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
     allowOutsideClick: false,
     background: '#090f17', color: '#fff',
+    customClass: { container: 'high-z-index-alert' },
     didOpen: () => { Swal.showLoading(); }
   });
 
@@ -484,23 +605,15 @@ async function checkout() {
       throw new Error(data.message || 'Payment link was not created.');
     }
 
-    // --- العمليات التي تحدث فور نجاح إنشاء طلب الدفع --- //
-    
-    // 1. استخراج الـ User ID الخاص بالمشتري المسجل الدخول حالياً
     const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
     
-    // 2. تحديث المخزون (خصم الكمية من قاعدة البيانات)
     await updateProductStockAfterPurchase(cart);
     
-    // 3. توثيق عملية الشراء للعميل (إذا كان مسجلاً للدخول) للسماح له بالتعليق لاحقاً
     if (currentUser) {
         await registerVerifiedBuyer(cart, currentUser.uid);
     }
     
-    // 4. تفريغ السلة بالكامل بعد كل الخطوات السابقة
     clearCartAfterPurchase();
-
-    // 5. توجيه العميل لصفحة الدفع بأمان
     window.location.href = data.paymentUrl;
 
   } catch (e) {
@@ -510,7 +623,8 @@ async function checkout() {
       title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
       text: e.message,
       confirmButtonText: currentLang === 'ar' ? 'إغلاق' : 'Close',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444'
+      background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
+      customClass: { container: 'high-z-index-alert' }
     });
   }
 }
