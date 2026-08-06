@@ -252,51 +252,73 @@ body {
   font-weight: 700;
 }
 
-/* ================= HERO BANNER ================= */
+/* ================= DYNAMIC HERO SLIDER STYLES (البانر المتحرك الاحترافي) ================= */
 .hero {
   padding: 30px 0;
 }
 
 .hero-banner-section {
+  position: relative;
   width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 20px;
 }
 
-.hero-banner-card {
+.hero-slider-container {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+.hero-slide {
+  min-width: 100%;
+  box-sizing: border-box;
   position: relative;
   min-height: 400px;
   border-radius: 16px;
   border: 1px solid var(--line);
   padding: 60px;
-  background: linear-gradient(90deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.7) 50%, rgba(5, 11, 20, 0.2) 100%),
-              url('/assets/hero-gaming-banner.jpg') center right/cover no-repeat;
+  background-size: cover;
+  background-position: center right;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
   box-shadow: 0 20px 55px rgba(0,0,0,.5);
+}
+
+.hero-slide.active {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow: hidden;
+  opacity: 1;
+}
+
+.hero-content {
+  max-width: 650px;
 }
 
 .hero-title {
-  font-size: 46px;
+  font-size: 42px;
   font-weight: 800;
   letter-spacing: -1px;
   margin-bottom: 12px;
-  max-width: 600px;
+  color: #fff;
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: 16px;
   color: var(--muted);
-  margin-bottom: 32px;
+  margin-bottom: 25px;
+  line-height: 1.6;
 }
 
 .hero-cta-buttons {
   display: flex;
   gap: 16px;
-  margin-bottom: 40px;
 }
 
-.shop-now-btn, .browse-cat-btn {
+.browse-cat-btn {
   border: 0;
   border-radius: 8px;
   padding: 14px 28px;
@@ -307,51 +329,68 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.shop-now-btn {
   background: var(--accent);
-  color: #000000;
+  color: #000;
 }
 
-.browse-cat-btn {
-  background: rgba(255, 255, 255, 0.03);
-  color: white;
-  border: 1px solid var(--line);
-}
-
-.shop-now-btn:hover, .browse-cat-btn:hover {
+.browse-cat-btn:hover {
   transform: translateY(-2px);
+  background: #00d4ff;
+  box-shadow: 0 0 15px var(--cyan-dim);
 }
 
-.hero-features {
+/* أسهم التنقل ونقاط التقليب (Dots) للبانر */
+.slider-controls {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  right: 0;
   display: flex;
-  gap: 30px;
-}
-
-.feature-item {
-  color: #cbd5e1;
-  font-size: 14px;
-  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 15px;
+  z-index: 10;
+}
+
+.slider-dots {
+  display: flex;
   gap: 8px;
 }
 
-.banner-game-logos {
-  position: absolute;
-  bottom: 30px;
-  right: 40px;
-  display: flex;
-  align-items: center;
-  gap: 25px;
-  opacity: 0.5;
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.game-logo-item {
-  font-size: 15px;
-  font-weight: 800;
-  color: white;
-  letter-spacing: 1px;
+.dot.active {
+  background: var(--accent);
+  width: 25px;
+  border-radius: 6px;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.slider-arrow {
+  background: rgba(13, 23, 34, 0.8);
+  border: 1px solid var(--line);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.slider-arrow:hover {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
 }
 
 /* ================= SECTIONS & FILTERS ================= */
@@ -464,24 +503,20 @@ body {
   color: #fff;
 }
 
-/* ================= PRODUCTS (HIDDEN BY DEFAULT & ANIMATED) ================= */
+/* ================= PRODUCTS ================= */
 #products {
-  display: none;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-#products.show-products {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  display: block !important;
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
 }
 
 .productGrid {
-  display: grid;
+  display: grid !important;
   grid-template-columns: repeat(6, 1fr);
   gap: 20px;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .productCard {
@@ -579,19 +614,12 @@ body {
   border-color: var(--accent);
 }
 
-/* تنسيق زر نفذت الكمية (Out of Stock) */
 .productCard .add.out-of-stock-btn {
   background: rgba(239, 68, 68, 0.1) !important;
   color: #ef4444 !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
   cursor: not-allowed !important;
   opacity: 0.75;
-}
-
-.productCard .add.out-of-stock-btn:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  background: rgba(239, 68, 68, 0.15) !important;
 }
 
 /* ================= PRODUCT DETAILS MODAL ================= */
@@ -644,21 +672,6 @@ body {
   width: 50px; height: 35px; text-align: center; background: #090f17;
   color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
 }
-
-/* ================= PRODUCT REVIEWS SECTION ================= */
-.product-reviews-section { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
-.product-reviews-section h3 { font-size: 16px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-.reviews-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px; }
-.reviews-list::-webkit-scrollbar { width: 5px; }
-.reviews-list::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 10px; }
-.review-item { background: rgba(255, 255, 255, 0.02); padding: 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
-.review-user { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-.verified-badge { color: #65cc00; font-size: 11px; }
-.review-body { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
-.add-review-box { display: flex; flex-direction: column; gap: 10px; background: #090f17; padding: 12px; border-radius: 8px; border: 1px dashed var(--line2); }
-.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 50px; font-family: inherit; font-size: 13px; }
-.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 12px; transition: 0.3s; }
-.btn-submit-review:hover { background: #00d4ff; box-shadow: 0 0 10px var(--cyan-dim); }
 
 /* ================= BENEFITS SECTION ================= */
 .benefits {
@@ -753,7 +766,7 @@ body {
 
 .method-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--neon-cyan);
+  border-color: var(--accent);
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 243, 255, 0.25);
 }
@@ -772,8 +785,7 @@ body {
   flex-wrap: wrap;
 }
 
-.supportActions .whatsapp-support-btn,
-.supportActions button {
+.supportActions .whatsapp-support-btn {
   border: 0;
   border-radius: 8px;
   padding: 13px 24px;
@@ -785,21 +797,11 @@ body {
   align-items: center;
   gap: 8px;
   transition: transform 0.2s;
-}
-
-.supportActions .whatsapp-support-btn {
   background: #22c55e;
   color: #000;
 }
 
-.supportActions button {
-  background: #0d192d;
-  color: white;
-  border: 1px solid var(--line);
-}
-
-.supportActions .whatsapp-support-btn:hover,
-.supportActions button:hover {
+.supportActions .whatsapp-support-btn:hover {
   transform: translateY(-2px);
 }
 
@@ -915,84 +917,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* ================= CHAT ================= */
-.chat {
-  position: fixed;
-  right: 24px;
-  bottom: 96px;
-  width: 340px;
-  max-width: 92vw;
-  background: #0d1722;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-  z-index: 1800;
-  display: none;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.chat.open {
-  display: block;
-}
-
-.chatTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #08101e;
-  padding: 16px;
-  font-weight: 700;
-}
-
-.chatTop button {
-  background: transparent;
-  border: 0;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.chatBody {
-  padding: 20px;
-  min-height: 200px;
-}
-
-.chatInput {
-  display: flex;
-  gap: 8px;
-  padding: 14px;
-  border-top: 1px solid var(--line);
-}
-
-.chatInput button {
-  background: var(--accent);
-  color: black;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.chatBubble {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  border: 0;
-  background: var(--accent);
-  color: black;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 1700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
-}
-
 /* ================= FOOTER ================= */
 footer {
   padding: 40px 4%;
@@ -1031,18 +955,12 @@ footer b {
   transform: none !important;
 }
 
-/* ================= إصلاح ظهور التنبيهات فوق السلة على الموبايل ================= */
-.swal2-container.high-z-index-alert {
-  z-index: 999999999 !important;
-}
-
 /* ================= RTL Support ================= */
 html[dir="rtl"] body { text-align: right; }
 html[dir="rtl"] .mainNav { margin-left: 0; margin-right: 40px; }
 html[dir="rtl"] .topSearch { margin-left: 0; margin-right: auto; }
 html[dir="rtl"] .cartDrawer { right: auto; left: -440px; border-left: none; border-right: 1px solid var(--line); }
 html[dir="rtl"] .cartDrawer.open { left: 0; right: auto; }
-html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:1280px) {
@@ -1069,12 +987,13 @@ html[dir="rtl"] .chat, html[dir="rtl"] .chatBubble { right: auto; left: 24px; }
   .navActions { margin-left: auto; gap: 8px; }
   html[dir="rtl"] .navActions { margin-left: 0; margin-right: auto; }
   .langBtn, .navActions button.loginBtn, .cartBtn { padding: 0 12px !important; font-size: 13px !important; height: 38px !important; }
-  .hero-banner-card { padding: 30px 20px; min-height: 280px; background: linear-gradient(180deg, rgba(5, 11, 20, 0.95) 0%, rgba(5, 11, 20, 0.75) 100%), url('/assets/hero-gaming-banner.jpg') center center/cover no-repeat; }
-  .hero-title { font-size: 26px; }
-  .hero-subtitle { font-size: 13px; margin-bottom: 20px; }
-  .hero-cta-buttons { flex-direction: column; gap: 10px; width: 100%; margin-bottom: 0; }
-  .shop-now-btn, .browse-cat-btn { width: 100%; justify-content: center; padding: 12px; }
-  .banner-game-logos, .hero-features { display: none; }
+  
+  .hero-slide { min-height: 280px; padding: 30px 20px; text-align: center; }
+  .hero-title { font-size: 24px !important; }
+  .hero-subtitle { font-size: 13px; margin-bottom: 15px; }
+  .hero-cta-buttons { flex-direction: column; width: 100%; }
+  .browse-cat-btn { width: 100%; justify-content: center; }
+
   .productGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
   .productCard { border-radius: 12px; }
   .productCover { aspect-ratio: 1 / 1; }
