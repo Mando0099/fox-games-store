@@ -408,7 +408,7 @@ body {
   width: 260px;
 }
 
-/* ================= CATEGORIES (مع أنيميشن سلس عند الضغط) ================= */
+/* ================= CATEGORIES ================= */
 .trendGrid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -423,24 +423,23 @@ body {
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.3s, transform 0.3s;
 }
 
 .trendCard img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.3s ease;
 }
 
 .trendCard:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .trendCard:hover {
   border-color: var(--line2);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 243, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .trendCard:before {
@@ -465,7 +464,7 @@ body {
   color: #fff;
 }
 
-/* ================= PRODUCTS (مع أنيميشن الانتقال) ================= */
+/* ================= PRODUCTS (HIDDEN BY DEFAULT & ANIMATED) ================= */
 #products {
   display: none;
   opacity: 0;
@@ -483,7 +482,6 @@ body {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 20px;
-  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .productCard {
@@ -581,7 +579,22 @@ body {
   border-color: var(--accent);
 }
 
-/* ================= PRODUCT DETAILS MODAL & REVIEWS ================= */
+/* تنسيق زر نفذت الكمية (Out of Stock) */
+.productCard .add.out-of-stock-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  cursor: not-allowed !important;
+  opacity: 0.75;
+}
+
+.productCard .add.out-of-stock-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* ================= PRODUCT DETAILS MODAL ================= */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(9, 15, 23, 0.9);
@@ -616,7 +629,7 @@ body {
 .modal-details { flex: 1.5; min-width: 300px; color: #fff; }
 .modal-price { color: var(--accent); font-size: 24px; margin: 10px 0; font-weight: 800; }
 .modal-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
-.stock-info { color: var(--accent); font-size: 14px; margin-bottom: 15px; font-weight: 700; }
+.stock-info { color: var(--accent); font-size: 14px; margin-bottom: 15px; }
 
 .quantity-selector {
   display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
@@ -632,19 +645,19 @@ body {
   color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
 }
 
-/* آراء العملاء الحقيقية (الموثوقة) */
-.product-reviews-section { margin-top: 25px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
-.product-reviews-section h3 { font-size: 15px; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.reviews-list { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-right: 4px; }
-.reviews-list::-webkit-scrollbar { width: 4px; }
+/* ================= PRODUCT REVIEWS SECTION ================= */
+.product-reviews-section { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
+.product-reviews-section h3 { font-size: 16px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.reviews-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px; }
+.reviews-list::-webkit-scrollbar { width: 5px; }
 .reviews-list::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 10px; }
-.review-item { background: rgba(255, 255, 255, 0.02); padding: 10px 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
-.review-user { font-weight: bold; color: var(--accent); font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-.verified-badge { color: #22c55e; font-size: 11px; display: flex; align-items: center; gap: 3px; font-weight: 600; }
-.review-body { color: #cbd5e1; font-size: 12px; line-height: 1.4; }
-.add-review-box { display: flex; flex-direction: column; gap: 8px; background: #090f17; padding: 10px; border-radius: 8px; border: 1px dashed var(--line2); }
-.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 45px; font-family: inherit; font-size: 12px; }
-.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 11px; transition: 0.3s; }
+.review-item { background: rgba(255, 255, 255, 0.02); padding: 12px; border-radius: 8px; border-right: 3px solid var(--accent); }
+.review-user { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.verified-badge { color: #65cc00; font-size: 11px; }
+.review-body { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+.add-review-box { display: flex; flex-direction: column; gap: 10px; background: #090f17; padding: 12px; border-radius: 8px; border: 1px dashed var(--line2); }
+.add-review-box textarea { width: 100%; background: transparent; border: none; color: #fff; outline: none; resize: vertical; min-height: 50px; font-family: inherit; font-size: 13px; }
+.btn-submit-review { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; align-self: flex-end; font-size: 12px; transition: 0.3s; }
 .btn-submit-review:hover { background: #00d4ff; box-shadow: 0 0 10px var(--cyan-dim); }
 
 /* ================= BENEFITS SECTION ================= */
