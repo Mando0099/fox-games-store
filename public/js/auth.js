@@ -45,50 +45,31 @@ async function saveUser(user, extra = {}){
   const phoneOnly = extra.phone || '';
   const fullPhone = phoneOnly ? `${countryCode}${phoneOnly}` : '';
 
-  try {
-    await db.collection('users').doc(user.uid).set({
-      uid: user.uid,
-      name: extra.name || user.displayName || '',
-      email: user.email || extra.email || '',
-      countryCode,
-      phone: phoneOnly,
-      fullPhone,
-      role: 'user',
-      active: true,
-      emailVerified: !!user.emailVerified,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, {merge:true});
-  } catch(err) {
-    console.error("Error saving user to Firestore:", err);
-  }
+  await db.collection('users').doc(user.uid).set({
+    uid: user.uid,
+    name: extra.name || user.displayName || '',
+    email: user.email || extra.email || '',
+    countryCode,
+    phone: phoneOnly,
+    fullPhone,
+    role: 'user',
+    active: true,
+    emailVerified: !!user.emailVerified,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true});
 }
 
-// تعديل دالة التحويل بعد تسجيل الدخول لتصبح آمنة 100% ولا تعلق أبداً
+// الطريقة الأصلية والمضمونة للتحويل بعد تسجيل الدخول
 async function goAfterLogin(user){
-  if(!user) return;
-  
-  // حفظ بيانات المستخدم أولاً
   await saveUser(user);
+  const adminSnap = await db.collection('admins')
+    .where('email', '==', user.email || '')
+    .where('active', '==', true)
+    .limit(1)
+    .get();
 
-  try {
-    // محاولة التحقق إذا كان أدمن
-    const adminSnap = await db.collection('admins')
-      .where('email', '==', user.email || '')
-      .where('active', '==', true)
-      .limit(1)
-      .get();
-
-    if (!adminSnap.empty) {
-      location.href = '/admin.html';
-      return;
-    }
-  } catch (e) {
-    console.log("Not an admin or error checking admin, redirecting to home.", e);
-  }
-
-  // التوجيه الافتراضي لصفحة المتجر الرئيسية لو مش أدمن
-  location.href = '/';
+  location.href = adminSnap.empty ? '/' : '/admin.html';
 }
 
 async function loginEmail(){
@@ -132,31 +113,40 @@ async function createAccount(){
     if(password !== confirmPassword) return show('كلمتا المرور غير متطابقتين.');
 
     const r = await firebase.auth().createUserWithEmailAndPassword(email, password);
-    await r.user.updateProfile({displayName:name});
+    await r.user.updateProfile({displayName: name});
     await saveUser(r.user, {name, email, countryCode, phone});
     await r.user.sendEmailVerification();
 
     show('تم إنشاء الحساب بنجاح! تم إرسال رسالة تفعيل إلى بريدك الإلكتروني.', true);
-    setTimeout(() => location.href = '/login.html', 3500);
+    setTimeout(() => location.href = '/login.html', 3000);
   }catch(e){ 
     handleAuthError(e); 
   }
 }
 
+// العودة للطريقة الأصلية المضمونة (Popup) لجوجل
 async function loginGoogle(){
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
-    await firebase.auth().signInWithRedirect(provider);
-  }catch(e){ handleAuthError(e); }
+    const r = await firebase.auth().signInWithPopup(provider);
+    await goAfterLogin(r.user);
+  }catch(e){ 
+    handleAuthError(e); 
+  }
 }
 
+// العودة للطريقة الأصلية المضمونة (Popup) لـ فيسبوك
 async function loginFacebook(){
   try{
     const provider = new firebase.auth.FacebookAuthProvider();
-    await firebase.auth().signInWithRedirect(provider);
-  }catch(e){ handleAuthError(e); }
+    const r = await firebase.auth().signInWithPopup(provider);
+    await goAfterLogin(r.user);
+  }catch(e){ 
+    handleAuthError(e); 
+  }
 }
 
+// دالة ترجمة الأخطاء لعرضها في النافذة المنبثقة
 function handleAuthError(error) {
   let message = 'حدث خطأ ما، يرجى المحاولة مرة أخرى.';
 
@@ -188,14 +178,3 @@ function handleAuthError(error) {
 
   show(message, false);
 }
-
-window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const result = await firebase.auth().getRedirectResult();
-    if (result && result.user) {
-      await goAfterLogin(result.user);
-    }
-  } catch (e) {
-    handleAuthError(e);
-  }
-});
