@@ -11,7 +11,6 @@ function show(text, isSuccess = false){
   
   if(msgEl && modal) {
     msgEl.textContent = text;
-    
     if(isSuccess) {
       iconEl.textContent = '✅';
       modal.querySelector('div > div').style.borderColor = '#00f3ff';
@@ -19,10 +18,8 @@ function show(text, isSuccess = false){
       iconEl.textContent = '⚠️';
       modal.querySelector('div > div').style.borderColor = '#f59e0b';
     }
-    
     modal.style.display = 'flex';
   } else {
-    // كاحتياط لو الـ Modal مش موجود في الصفحة
     alert(text);
   }
 }
@@ -48,30 +45,50 @@ async function saveUser(user, extra = {}){
   const phoneOnly = extra.phone || '';
   const fullPhone = phoneOnly ? `${countryCode}${phoneOnly}` : '';
 
-  await db.collection('users').doc(user.uid).set({
-    uid:user.uid,
-    name:extra.name || user.displayName || '',
-    email:user.email || extra.email || '',
-    countryCode,
-    phone:phoneOnly,
-    fullPhone,
-    role:'user',
-    active:true,
-    emailVerified:!!user.emailVerified,
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  }, {merge:true});
+  try {
+    await db.collection('users').doc(user.uid).set({
+      uid: user.uid,
+      name: extra.name || user.displayName || '',
+      email: user.email || extra.email || '',
+      countryCode,
+      phone: phoneOnly,
+      fullPhone,
+      role: 'user',
+      active: true,
+      emailVerified: !!user.emailVerified,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+  } catch(err) {
+    console.error("Error saving user to Firestore:", err);
+  }
 }
 
+// تعديل دالة التحويل بعد تسجيل الدخول لتصبح آمنة 100% ولا تعلق أبداً
 async function goAfterLogin(user){
+  if(!user) return;
+  
+  // حفظ بيانات المستخدم أولاً
   await saveUser(user);
-  const adminSnap = await db.collection('admins')
-    .where('email','==',user.email || '')
-    .where('active','==',true)
-    .limit(1)
-    .get();
 
-  location.href = adminSnap.empty ? '/' : '/admin.html';
+  try {
+    // محاولة التحقق إذا كان أدمن
+    const adminSnap = await db.collection('admins')
+      .where('email', '==', user.email || '')
+      .where('active', '==', true)
+      .limit(1)
+      .get();
+
+    if (!adminSnap.empty) {
+      location.href = '/admin.html';
+      return;
+    }
+  } catch (e) {
+    console.log("Not an admin or error checking admin, redirecting to home.", e);
+  }
+
+  // التوجيه الافتراضي لصفحة المتجر الرئيسية لو مش أدمن
+  location.href = '/';
 }
 
 async function loginEmail(){
@@ -116,7 +133,7 @@ async function createAccount(){
 
     const r = await firebase.auth().createUserWithEmailAndPassword(email, password);
     await r.user.updateProfile({displayName:name});
-    await saveUser(r.user, {name,email,countryCode,phone});
+    await saveUser(r.user, {name, email, countryCode, phone});
     await r.user.sendEmailVerification();
 
     show('تم إنشاء الحساب بنجاح! تم إرسال رسالة تفعيل إلى بريدك الإلكتروني.', true);
@@ -140,7 +157,6 @@ async function loginFacebook(){
   }catch(e){ handleAuthError(e); }
 }
 
-// دالة لمعالجة وترجمة جميع رسائل أخطاء فايربيز للعربية وتنبيه المستخدم بالنافذة المنبثقة
 function handleAuthError(error) {
   let message = 'حدث خطأ ما، يرجى المحاولة مرة أخرى.';
 
@@ -173,7 +189,6 @@ function handleAuthError(error) {
   show(message, false);
 }
 
-// معالجة النتيجة عند العودة من إعادة التوجيه (Redirect)
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const result = await firebase.auth().getRedirectResult();
