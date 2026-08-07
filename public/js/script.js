@@ -13,7 +13,7 @@ const translations = {
   en: {
     nav_home: "Home", nav_store: "Store", nav_categories: "Categories", nav_support: "Support",
     search_placeholder: "Search for accounts, codes...", btn_login: "Login", btn_cart: "Cart",
-    hero_title: "Digital Accounts & Top-Ups", hero_subtitle: "Instant delivery. Premium digital services. Best prices.",
+    hero_title: "Code Gaming", hero_subtitle: "Instant delivery. Premium digital services. Best prices.",
     btn_shop_now: "Shop Now", btn_browse_cat: "Browse Categories",
     feat_delivery: "Instant Delivery", feat_secure: "Secure Payments", feat_support: "24/7 Support",
     title_popular: "Products", sort_popular: "Most Popular", sort_low: "Price Low", sort_high: "Price High",
@@ -32,8 +32,8 @@ const translations = {
   },
   ar: {
     nav_home: "الرئيسية", nav_store: "المتجر", nav_categories: "الأقسام", nav_support: "الدعم الفني",
-    search_placeholder: "ابحث عن الحسابات والخدمات...", btn_login: "تسجيل الدخول", btn_cart: "السلة",
-    hero_title: "الحسابات الرقمية وشحن الرصيد", hero_subtitle: "تسليم فوري. خدمات رقمية مميزة. أفضل الأسعار.",
+    search_placeholder: "بحث", btn_login: "تسجيل الدخول", btn_cart: "السلة",
+    hero_title: "اكواد العاب الهاكات", hero_subtitle: "تسليم فوري. خدمات رقمية مميزة. أفضل الأسعار.",
     btn_shop_now: "تسوق الآن", btn_browse_cat: "تصفح الأقسام",
     feat_delivery: "تسليم فوري", feat_secure: "دفع آمن", feat_support: "دعم 24/7",
     title_popular: "المنتجات", sort_popular: "الأكثر شعبية", sort_low: "السعر من الأقل", sort_high: "السعر من الأعلى",
