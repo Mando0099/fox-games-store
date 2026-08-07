@@ -10,13 +10,20 @@
   <link rel="stylesheet" href="./css/fox-auth.css"/>
 </head>
 <body class="foxAuthPage">
-  <main class="foxAuthStage">
-    <div class="foxPurpleSlice"></div>
 
+  <!-- خلفية الجيمنج المتحركة وشعارات TECH GAMING المضيئة -->
+  <div class="gaming-bg-elements">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="floating-logo-bg">TECH GAMING</div>
+    <div class="floating-logo-bg logo-2">TECH GAMING</div>
+    <div class="floating-logo-bg logo-3">TECH GAMING</div>
+  </div>
+
+  <main class="foxAuthStage">
     <section class="foxCard">
-      <div class="foxLogoRow">
-        <div class="foxLogoMark"><i class="fa-solid fa-gamepad"></i></div>
-        <div class="foxLogoText">TECH <span>GAMING</span></div>
+      <div class="foxLogoRow" style="justify-content: center; margin-bottom: 25px;">
+        <div class="foxLogoText" style="font-size: 28px; letter-spacing: 2px;">TECH <span>GAMING</span></div>
       </div>
 
       <h1>إنشاء حساب جديد</h1>
@@ -57,10 +64,6 @@
       <a class="foxSmallBack" href="/">العودة إلى المتجر</a>
       <div class="foxMsg" id="msg"></div>
     </section>
-
-    <div class="foxMascotWrap">
-      <img src="/assets/fox-auth-mascot.png" alt="Tech Gaming mascot">
-    </div>
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
