@@ -47,10 +47,30 @@ firebase.auth().onAuthStateChanged(async user => {
     return;
   }
 
-  // جلب بيانات الحساب الإضافية (مثل رقم الهاتف الموثق) من الفايربيز
-  const doc = await accountDb.collection('users').doc(user.uid).get();
-  const data = doc.exists ? doc.data() : {};
-  
-  // تشغيل الدالة لتغذية التصميم الجديد بالبيانات الصحيحة
-  showStoreUser(data, user);
+  try {
+    // محاولة جلب بيانات الحساب الإضافية من مجموعة users
+    const userRef = accountDb.collection('users').doc(user.uid);
+    let doc = await userRef.get();
+    
+    let data = {};
+    if (doc.exists) {
+      data = doc.data();
+    } else {
+      // إذا كان المستخدم يسجل لأول مرة عبر Google ولم يتم إنشاء مستند له بعد، نقوم بإنشائه تلقائياً
+      data = {
+        name: user.displayName || 'Gamer',
+        email: user.email || '',
+        phone: user.phoneNumber || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await userRef.set(data, { merge: true });
+    }
+    
+    // تشغيل الدالة لتغذية التصميم الجديد بالبيانات الصحيحة
+    showStoreUser(data, user);
+  } catch (error) {
+    console.error("خطأ في جلب بيانات المستخدم من قاعدة البيانات:", error);
+    // حتى لو حدث خطأ في قاعدة البيانات، نظهر بيانات الـ Auth الأساسية للمستخدم لكي لا يتعطل تسجيل الدخول
+    showStoreUser({}, user);
+  }
 });
