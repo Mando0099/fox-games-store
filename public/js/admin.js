@@ -52,9 +52,8 @@ function val(id) {
     return ($(id)?.value || '').trim();
 }
 
-// 🔐 الحماية الأمنية والتحقق الصارم من صلاحيات الأدمن (منع الثغرات تماماً)
+// 🔐 التحقق الأمني الصارم ومنع أي مستخدم عادي أو رابط خارجي من الدخول
 firebase.auth().onAuthStateChanged(async (user) => {
-  // 1. لو المستخدم غير مسجل دخول أصلاً، طرده فوراً لصفحة تسجيل الدخول
   if (!user) {
     window.location.replace('/login.html');
     return;
@@ -65,31 +64,29 @@ firebase.auth().onAuthStateChanged(async (user) => {
   if ($('adminEmail')) $('adminEmail').textContent = user.email;
 
   try {
-    // 2. التحقق من جدول الأدمنز في قاعدة البيانات
     const adminCheck = await db.collection('admins')
       .where('email', '==', user.email)
       .where('active', '==', true)
       .limit(1)
       .get();
 
-    // 3. لو الحساب ليس أدمن، منع دخوله وطرده فوراً للمتجر الرئيسي
     if (adminCheck.empty) {
       await Swal.fire({
         icon: 'error',
         title: 'وصول مرفوض',
-        text: 'عذراً، هذا الحساب ليس لديه صلاحيات أدمن للوصول إلى لوحة التحكم!',
+        text: 'هذا الحساب ليس لديه صلاحيات أدمن للوصول إلى لوحة التحكم!',
         ...swalConfig
       });
       window.location.replace('/');
       return;
     }
 
-    // 4. لو أدمن موثق، ابدأ في تهيئة اللوحة وتحميل البيانات بشكل آمن
+    // تهيئة مستمعي الأحداث والـ Drag & Drop فور تأكيد الصلاحيات بأمان تام
     initEventListeners();
     await loadAll();
 
   } catch (error) {
-    console.error("خطأ في التحقق الأمني:", error);
+    console.error("خطأ في التحقق من صلاحيات الأدمن:", error);
     window.location.replace('/');
   }
 });
@@ -265,7 +262,7 @@ async function saveProduct() {
       game: val('game'),
       amount: Number(val('amount') || 0),
       price: price,
-      image: imageUrl.startsWith('data:') ? '' : imageUrl,
+      image: imageUrl.startsWith('data:') ? '' : imageUrl, // تأمين خلو الرابط من بيانات الكاش المحلية
       description: val('description'),
       active: $('active') ? $('active').checked : true,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -891,8 +888,11 @@ async function loadPaymentGateways() {
           </div>
         </div>
       `;
-  });
-  container.innerHTML = html;
+    });
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Error loading gateways:", err);
+  }
 }
 
 // ⚡ حساب المبيعات الحقيقية والعدادات الشاملة
