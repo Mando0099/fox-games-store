@@ -84,7 +84,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
   // تهيئة مستمعي الأحداث والـ Drag & Drop فور تأكيد الصلاحيات
   initEventListeners();
   await loadAll();
-});
+})
 
 // تحميل كافة البيانات والعدادات فور الدخول للوحة
 async function loadAll() {
