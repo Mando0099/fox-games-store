@@ -4,13 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | TECH GAMING</title>
-  <!-- خط Cairo الفخم -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="./css/fox-auth.css"/>
-
+  
   <style>
-    /* ================= TECH GAMING AUTH STYLING & RESPONSIVE ================= */
     :root {
       --neon-cyan: #00f3ff;
       --bg-main: #050b14;
@@ -18,338 +15,112 @@
       --border-glow: rgba(0, 243, 255, 0.25);
     }
 
-    * {
-      font-family: 'Cairo', sans-serif !important;
-      box-sizing: border-box;
-    }
-
-    body.foxAuthPage {
+    body {
       background-color: var(--bg-main) !important;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif !important;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0;
-      padding: 15px;
-      overflow-x: hidden;
-      direction: rtl;
     }
 
-    .foxAuthStage {
+    .auth-container {
       width: 100%;
-      max-width: 1000px;
-      display: flex;
+      max-width: 450px;
       background: var(--bg-card);
-      border-radius: 20px;
+      padding: 40px;
+      border-radius: 24px;
       border: 1px solid var(--border-glow);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 243, 255, 0.1);
-      overflow: hidden;
-      position: relative;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 243, 255, 0.1);
+      text-align: center;
+      margin: 20px;
     }
 
-    .foxCard {
-      flex: 1;
-      padding: 35px 30px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      z-index: 2;
-    }
-
-    /* أنيميشن وشعار TECH GAMING الفخم */
-    .foxLogoRow {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-
-    .foxLogoMark {
-      font-size: 28px;
+    /* أنيميشن لوجو TECH GAMING */
+    .brand-area { margin-bottom: 30px; }
+    .brand-icon {
+      font-size: 50px;
       color: var(--neon-cyan);
+      margin-bottom: 10px;
       animation: logoSpinGlow 4s linear infinite;
     }
-
-    .foxLogoText {
-      font-size: 22px;
+    .brand-name {
+      font-size: 28px;
       font-weight: 900;
       color: #fff;
-      letter-spacing: 1px;
     }
-
-    .foxLogoText span {
+    .brand-name span {
       color: var(--neon-cyan);
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 35px var(--neon-cyan);
-      animation: neonPulseAuth 1.5s ease-in-out infinite alternate;
+      text-shadow: 0 0 15px var(--neon-cyan);
+      animation: neonPulse 1.5s infinite alternate;
     }
 
-    @keyframes neonPulseAuth {
-      0% { opacity: 0.8; text-shadow: 0 0 8px var(--neon-cyan), 0 0 15px var(--neon-cyan); }
-      100% { opacity: 1; text-shadow: 0 0 20px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 50px var(--neon-cyan); transform: scale(1.02); }
+    @keyframes neonPulse {
+      from { text-shadow: 0 0 10px var(--neon-cyan); }
+      to { text-shadow: 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
     }
-
     @keyframes logoSpinGlow {
       0%, 100% { filter: drop-shadow(0 0 5px var(--neon-cyan)); transform: rotate(0deg); }
       50% { filter: drop-shadow(0 0 15px var(--neon-cyan)); transform: rotate(5deg) scale(1.05); }
     }
 
-    .foxCard h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 5px;
-    }
-
-    .foxSub {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-bottom: 20px;
-    }
-
-    .foxField {
-      position: relative;
-      margin-bottom: 15px;
-      background: #0d1722;
-      border: 1px solid rgba(30, 58, 99, 0.6);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      padding: 0 15px;
-      transition: all 0.25s ease;
-    }
-
-    .foxField:focus-within {
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 12px rgba(0, 243, 255, 0.2);
-    }
-
-    .foxField svg {
-      width: 20px;
-      height: 20px;
-      color: #94a3b8;
-      flex-shrink: 0;
-    }
-
-    .foxField input {
+    input {
       width: 100%;
-      background: transparent;
-      border: none;
-      padding: 14px 12px;
+      background: #0d1722;
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      padding: 15px;
+      border-radius: 12px;
       color: #fff;
-      font-size: 14px;
+      margin-bottom: 15px;
       outline: none;
     }
+    input:focus { border-color: var(--neon-cyan); }
 
-    .eyeBtn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 5px;
-    }
-
-    .foxActionRow {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 15px;
-    }
-
-    .foxLinkBtn {
-      background: transparent;
-      border: none;
-      color: var(--neon-cyan);
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .foxPrimary {
+    .btn-login {
       width: 100%;
-      background: linear-gradient(135deg, #00b4cc, var(--neon-cyan));
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
+      background: var(--neon-cyan);
       color: #000;
+      padding: 15px;
+      border-radius: 12px;
       font-weight: 800;
-      font-size: 15px;
+      border: none;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
-      transition: all 0.25s ease;
-      margin-bottom: 15px;
+      margin-top: 10px;
     }
-
-    .foxPrimary:hover {
-      box-shadow: 0 4px 25px rgba(0, 243, 255, 0.5);
-      transform: translateY(-2px);
-    }
-
-    .foxDivider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: #64748b;
-      font-size: 12px;
-      margin: 15px 0;
-    }
-
-    .foxDivider::before, .foxDivider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .foxDivider span {
-      padding: 0 10px;
-    }
-
-    .foxSocials {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .foxSocial {
-      flex: 1;
-      background: #0d1722;
-      border: 1px solid rgba(30, 58, 99, 0.5);
+    
+    .social-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(0, 243, 255, 0.3);
       padding: 12px;
       border-radius: 12px;
       color: #fff;
-      font-weight: 600;
-      font-size: 13px;
+      margin-top: 10px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
     }
-
-    .foxSocial:hover {
-      background: #131f30;
-      border-color: var(--neon-cyan);
-    }
-
-    .googleIcon { color: #ea4335; font-weight: 800; }
-    .fbIcon { color: #1877f2; font-weight: 800; }
-
-    .foxBottomText, .foxSmallBack {
-      text-align: center;
-      font-size: 13px;
-      color: #94a3b8;
-      display: block;
-      margin-top: 10px;
-    }
-
-    .foxBottomText a {
-      color: var(--neon-cyan);
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .foxSmallBack {
-      color: #64748b;
-      text-decoration: none;
-    }
-
-    .foxSmallBack:hover {
-      color: #fff;
-    }
-
-    .foxMsg {
-      color: #f43f5e;
-      font-size: 13px;
-      text-align: center;
-      margin-top: 10px;
-      font-weight: 600;
-    }
-
-    /* قسم الماسكوت (شعار أو صورة الفوكس الجانبية) */
-    .foxMascotWrap {
-      flex: 1;
-      background: radial-gradient(circle, rgba(0,243,255,0.05) 0%, rgba(5,11,20,1) 80%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      position: relative;
-    }
-
-    .foxMascotWrap img {
-      max-width: 85%;
-      max-height: 380px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.2));
-    }
-
-    .foxPurpleSlice {
-      display: none;
-    }
-
-    /* التجاوب التام للموبايل والشاشات الصغيرة */
-    @media (max-width: 768px) {
-      .foxAuthStage {
-        flex-direction: column;
-        max-width: 450px;
-      }
-      .foxMascotWrap {
-        display: none; /* إخفاء الصورة الجانبية في الموبايل لتوفير مساحة وتركيز الكارت */
-      }
-      .foxCard {
-        padding: 25px 20px;
-      }
-    }
-    /* ================= END TECH GAMING STYLING ================= */
   </style>
 </head>
-<body class="foxAuthPage">
-  <main class="foxAuthStage">
-    <div class="foxPurpleSlice"></div>
+<body>
 
-    <section class="foxCard">
-      <div class="foxLogoRow">
-        <div class="foxLogoMark"><i class="fa-solid fa-gamepad"></i></div>
-        <div class="foxLogoText">TECH <span>GAMING</span></div>
-      </div>
-
-      <h1>Welcome back!</h1>
-      <p class="foxSub">Login to continue</p>
-
-      <div class="foxField">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
-        <input id="email" placeholder="Email or Phone">
-      </div>
-
-      <div class="foxField">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
-        <input id="password" type="password" placeholder="Password">
-        <button class="eyeBtn" onclick="togglePass()">◉</button>
-      </div>
-
-      <div class="foxActionRow">
-        <button class="foxLinkBtn" onclick="resetPassword()">Forgot password?</button>
-      </div>
-
-      <button class="foxPrimary" onclick="loginEmail()">Login</button>
-
-      <div class="foxDivider"><span>or continue with</span></div>
-
-      <div class="foxSocials">
-        <button class="foxSocial" onclick="loginGoogle()"><span class="googleIcon">G</span> Google</button>
-        <button class="foxSocial" onclick="loginFacebook()"><span class="fbIcon">f</span> Facebook</button>
-      </div>
-
-      <p class="foxBottomText">Don’t have an account? <a href="/register.html">Sign up</a></p>
-      <a class="foxSmallBack" href="/">Back to Store</a>
-      <div class="foxMsg" id="msg"></div>
-      <div id="recaptcha-container"></div>
-    </section>
-
-    <div class="foxMascotWrap">
-      <img src="/assets/fox-auth-mascot.png" alt="Tech Gaming Mascot">
+  <div class="auth-container">
+    <div class="brand-area">
+      <div class="brand-icon"><i class="fa-solid fa-gamepad"></i></div>
+      <div class="brand-name">TECH <span>GAMING</span></div>
     </div>
-  </main>
+
+    <input id="email" placeholder="البريد الإلكتروني">
+    <input id="password" type="password" placeholder="كلمة المرور">
+    
+    <button class="btn-login" onclick="loginEmail()">دخول</button>
+    
+    <button class="social-btn" onclick="loginGoogle()">
+      <i class="fa-brands fa-google"></i> تسجيل بجوجل
+    </button>
+
+    <div id="msg" style="margin-top: 15px; color: #ff4d4d; font-size: 14px;"></div>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
