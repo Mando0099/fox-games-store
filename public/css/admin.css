@@ -1,22 +1,23 @@
 /* ==========================================================================
    Fox Store Admin - Ultimate Gaming Dark Theme (Fully Responsive & Pro)
+   مع إضافة أنيميشن شعار TECH GAMING بالنيون
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
 :root {
   /* نظام الألوان الأساسي */
-  --bg-main: #060b11;         /* خلفية المتصفح الأساسية */
-  --bg-card: #0d1520;         /* خلفية الكروت والأقسام */
-  --bg-input: #080d14;        /* خلفية حقول الإدخال */
-  --bg-accent: #142032;       /* حقول التركيز والـ Hover */
+  --bg-main: #050b14;       /* خلفية متناسقة مع متجر Tech Gaming */
+  --bg-card: #08101e;       /* خلفية الكروت والأقسام */
+  --bg-input: #0d1722;      /* خلفية حقول الإدخال */
+  --bg-accent: #131f30;     /* حقول التركيز والـ Hover */
 
   /* ألوان الهوية والإضاءة النيون */
-  --neon-blue: #3b82f6;       /* الأزرق المضيء الأساسي */
-  --neon-purple: #9d4edd;     /* البنفسجي */
-  --neon-green: #65cc00;      /* الأخضر للأرباح */
-  --neon-orange: #ff9f1c;     /* البرتقالي للتنبيهات */
-  --neon-pink: #f72585;       /* الوردي */
+  --neon-blue: #00f3ff;     /* الأزرق النيون اللامع الأساسي لـ Tech Gaming */
+  --neon-purple: #9d4edd;   /* البنفسجي */
+  --neon-green: #22c55e;    /* الأخضر للأرباح */
+  --neon-orange: #ff9f1c;   /* البرتقالي للتنبيهات */
+  --neon-pink: #f72585;     /* الوردي */
 
   /* النصوص */
   --text-main: #ffffff;
@@ -61,16 +62,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neon-blue);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
 }
 
 /* ==========================================================================
-   القائمة الجانبية (Sidebar) - مثبتة على اليمين
+   القائمة الجانبية (Sidebar) والشعار المتحرك TECH GAMING
    ========================================================================== */
 .sidebar {
   width: 270px;
   background-color: var(--bg-card);
-  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 1px solid rgba(30, 58, 99, 0.4);
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
@@ -84,29 +85,72 @@ body {
   align-items: center;
   gap: 15px;
   margin-bottom: 10px;
-  padding: 0 10px;
+  padding: 12px 10px;
+  background: rgba(0, 243, 255, 0.03);
+  border-radius: var(--radius-main);
+  border: 1px solid rgba(0, 243, 255, 0.1);
 }
 
 .logo {
-  font-size: 28px;
+  font-size: 26px;
   color: var(--neon-blue);
-  text-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+  animation: logoSpinGlow 4s linear infinite;
 }
 
 .brand h1 {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 19px;
+  font-weight: 900;
   letter-spacing: 1px;
-  background: linear-gradient(135deg, #fff, var(--text-muted));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
+  animation: logoFloat 3s ease-in-out infinite alternate;
+}
+
+/* تطبيق أنيميشن النيون المضيء على كلمة GAMING في اللوجو */
+.brand h1 span, .brand .neon-text {
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue);
+  animation: neonPulseAdmin 1.5s ease-in-out infinite alternate;
+}
+
+.brand:hover h1 span, .brand:hover .neon-text {
+  animation: neonPulseHoverAdmin 0.6s ease-in-out infinite alternate;
 }
 
 .brand span {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--neon-blue);
+  color: var(--text-muted);
   opacity: 0.9;
+  letter-spacing: 2px;
+}
+
+/* Keyframes لأنيميشن اللوجو والنيون */
+@keyframes neonPulseAdmin {
+  0% {
+    opacity: 0.8;
+    text-shadow: 0 0 8px var(--neon-blue), 0 0 15px var(--neon-blue);
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue), 0 0 60px var(--neon-blue);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes neonPulseHoverAdmin {
+  0% { transform: scale(1); text-shadow: 0 0 15px var(--neon-blue); }
+  100% { transform: scale(1.08); text-shadow: 0 0 25px var(--neon-blue), 0 0 50px var(--neon-blue); }
+}
+
+@keyframes logoFloat {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-2px); }
+}
+
+@keyframes logoSpinGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px var(--neon-blue)); transform: rotate(0deg); }
+  50% { filter: drop-shadow(0 0 15px var(--neon-blue)); transform: rotate(5deg) scale(1.05); }
 }
 
 .sidebar nav {
@@ -144,7 +188,7 @@ body {
 
 .nav-btn.active {
   color: var(--text-main);
-  background: linear-gradient(270deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%);
+  background: linear-gradient(270deg, rgba(0, 243, 255, 0.15) 0%, rgba(0, 243, 255, 0) 100%);
   border-right: 4px solid var(--neon-blue);
   padding-right: 14px;
 }
@@ -244,7 +288,7 @@ body {
 
 .icon-btn, .lang-btn {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(30, 58, 99, 0.4);
   color: white;
   padding: 11px 16px;
   border-radius: var(--radius-main);
@@ -256,6 +300,7 @@ body {
 
 .icon-btn:hover, .lang-btn:hover {
   background-color: var(--bg-accent);
+  border-color: var(--neon-blue);
 }
 
 .icon-btn .badge {
@@ -347,7 +392,7 @@ body {
 
 .stat-card {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(30, 58, 99, 0.4);
   padding: 25px;
   border-radius: 18px;
   display: flex;
@@ -387,10 +432,10 @@ body {
 .purple .stat-icon { background: rgba(157, 78, 221, 0.12); color: var(--neon-purple); }
 .purple { border-bottom: 3px solid var(--neon-purple); }
 
-.blue .stat-icon { background: rgba(59, 130, 246, 0.12); color: var(--neon-blue); }
+.blue .stat-icon { background: rgba(0, 243, 255, 0.12); color: var(--neon-blue); }
 .blue { border-bottom: 3px solid var(--neon-blue); }
 
-.green .stat-icon { background: rgba(101, 204, 0, 0.12); color: var(--neon-green); }
+.green .stat-icon { background: rgba(34, 197, 94, 0.12); color: var(--neon-green); }
 .green { border-bottom: 3px solid var(--neon-green); }
 
 .orange .stat-icon { background: rgba(255, 159, 28, 0.12); color: var(--neon-orange); }
@@ -408,7 +453,7 @@ body {
 
 .panel {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(30, 58, 99, 0.4);
   border-radius: 18px;
   padding: 25px;
   margin-bottom: 25px;
@@ -492,7 +537,7 @@ body {
 input, textarea, select {
   width: 100%;
   background: var(--bg-input);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(30, 58, 99, 0.4);
   padding: 14px 18px;
   border-radius: var(--radius-main);
   color: white;
@@ -504,7 +549,7 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   border-color: var(--neon-blue);
   background-color: var(--bg-accent);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
 }
 
 /* ==========================================================================
@@ -512,7 +557,7 @@ input:focus, textarea:focus, select:focus {
    ========================================================================== */
 .dropzone-area {
   flex: 1;
-  border: 2px dashed rgba(59, 130, 246, 0.25);
+  border: 2px dashed rgba(0, 243, 255, 0.25);
   background: var(--bg-input);
   border-radius: var(--radius-main);
   position: relative;
@@ -529,7 +574,7 @@ input:focus, textarea:focus, select:focus {
 .dropzone-area:hover, .dropzone-area.dragover {
   border-color: var(--neon-blue);
   background: var(--bg-accent);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
 }
 
 .dropzone-area input[type="file"] {
@@ -547,7 +592,7 @@ input:focus, textarea:focus, select:focus {
   font-size: 45px;
   color: var(--neon-blue);
   margin-bottom: 12px;
-  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
   transition: transform var(--transition-fast);
 }
 
@@ -626,14 +671,16 @@ input:focus, textarea:focus, select:focus {
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #2563eb, var(--neon-blue)) !important;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #00b4cc, var(--neon-blue)) !important;
+  color: #000 !important;
+  box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
   padding: 12px 25px !important;
   font-size: 14px !important;
+  font-weight: 700;
 }
 
 .btn-submit:hover {
-  box-shadow: 0 4px 25px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 4px 25px rgba(0, 243, 255, 0.5);
 }
 
 .btn-clear {
@@ -688,6 +735,7 @@ input:focus, textarea:focus, select:focus {
   top: 10px;
   right: 10px;
   background: var(--neon-blue);
+  color: #000;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -732,10 +780,10 @@ input:focus, textarea:focus, select:focus {
 }
 
 .card-actions button, .actions button, .form-panel button {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: linear-gradient(135deg, #00b4cc, var(--neon-blue));
   border: none;
   padding: 10px 18px;
-  color: white;
+  color: #000;
   border-radius: var(--radius-main);
   cursor: pointer;
   font-weight: 700;
@@ -768,7 +816,7 @@ input:focus, textarea:focus, select:focus {
   -webkit-overflow-scrolling: touch;
   background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(30, 58, 99, 0.4);
   margin-bottom: 20px;
 }
 
@@ -802,7 +850,7 @@ td {
 }
 
 tr:hover td {
-  background-color: rgba(59, 130, 246, 0.03);
+  background-color: rgba(0, 243, 255, 0.03);
   color: #fff;
   transition: background-color var(--transition-fast);
 }
@@ -838,7 +886,7 @@ tr:hover td {
 }
 
 .status-badge.available {
-  background: rgba(101, 204, 0, 0.15);
+  background: rgba(34, 197, 94, 0.15);
   color: var(--neon-green);
 }
 
