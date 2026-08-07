@@ -1,79 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --bg: #030712;        
-  --card: rgba(13, 23, 34, 0.85);      
+  --card: rgba(8, 15, 28, 0.85);      
   --text: #ffffff;      
   --muted: #94a3b8;     
   --accent: #00f3ff;    /* اللون النيون الأزرق الأصلي */
-  --line: rgba(0, 243, 255, 0.3); 
+  --line: rgba(0, 243, 255, 0.25); 
 }
 
 * { 
   box-sizing: border-box; 
   margin: 0; 
   padding: 0; 
+  font-family: 'Inter', 'Cairo', sans-serif !important;
 }
 
-/* خلفية متحركة بالكامل مع تدرجات نيون مضيئة */
+/* خلفية الصفحة مع شبكة جيمنج وألوان متحركة */
 body.foxAuthPage {
   min-height: 100vh;
-  font-family: Inter, Arial, sans-serif;
   color: var(--text);
-  background: linear-gradient(135deg, #030712, #0b1329, #020617);
-  background-size: 400% 400%;
-  animation: neonBackgroundMove 12s ease infinite;
+  background-color: var(--bg);
+  background-image: 
+    linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
+  overflow: hidden;
   padding: 20px;
   position: relative;
 }
 
-@keyframes neonBackgroundMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* إضاءات نيون متحركة في الخلفية */
-body.foxAuthPage::before {
-  content: '';
+/* خلفية الجيمنج المتحركة والشعارات العائمة */
+.gaming-bg-elements {
   position: absolute;
-  width: 400px;
-  height: 400px;
-  background: rgba(0, 243, 255, 0.15);
-  filter: blur(120px);
-  border-radius: 50%;
-  top: 10%;
-  left: 20%;
-  animation: pulseGlow 6s ease-in-out infinite alternate;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
   z-index: 0;
 }
 
-@keyframes pulseGlow {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.3); opacity: 0.8; }
+/* دوائر إضاءة نيون متحركة (Glow Orbs) */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
 }
 
-/* تمركز الكارت في منتصف الشاشة بعرض مثالي */
+.orb-1 {
+  width: 350px;
+  height: 350px;
+  background: #00f3ff;
+  top: 10%;
+  left: 15%;
+  animation: floatOrb1 8s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  width: 400px;
+  height: 400px;
+  background: #0051ff;
+  bottom: 10%;
+  right: 15%;
+  animation: floatOrb2 10s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, 30px) scale(1.2); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-40px, -40px) scale(1.15); }
+}
+
+/* شعارات TECH GAMING متحركة في الخلفية بشفافية خفيفة */
+.floating-logo-bg {
+  position: absolute;
+  font-size: 7vw;
+  font-weight: 900;
+  color: rgba(0, 243, 255, 0.025);
+  white-space: nowrap;
+  user-select: none;
+  animation: floatLogo 15s linear infinite;
+}
+
+.logo-2 {
+  top: 60%;
+  left: -10%;
+  animation-duration: 22s;
+  animation-direction: reverse;
+  color: rgba(255, 255, 255, 0.015);
+}
+
+.logo-3 {
+  top: 20%;
+  right: -10%;
+  animation-duration: 18s;
+}
+
+@keyframes floatLogo {
+  0% { transform: translateX(-100px) rotate(-5deg); }
+  100% { transform: translateX(100vw) rotate(-5deg); }
+}
+
+/* تصميم كارت تسجيل الدخول الاحترافي والرايق للعين */
 .foxAuthStage {
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .foxCard {
-  position: relative;
-  z-index: 3;
   background: var(--card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--line);
   border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 243, 255, 0.15);
-  padding: 40px 35px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 243, 255, 0.1);
+  padding: 42px 38px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -83,13 +134,14 @@ body.foxAuthPage::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 25px;
 }
 
 .foxLogoText {
   font-size: 28px;
   font-weight: 900;
+  color: #fff;
   letter-spacing: 1px;
 }
 
@@ -99,14 +151,15 @@ body.foxAuthPage::before {
 }
 
 .foxCard h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
+  margin: 0 0 6px;
+  font-size: 26px;
   font-weight: 800;
   text-align: center;
+  color: #fff;
 }
 
 .foxSub {
-  margin: 0 0 24px;
+  margin: 0 0 26px;
   color: var(--muted);
   font-size: 14px;
   font-weight: 500;
@@ -115,20 +168,21 @@ body.foxAuthPage::before {
 
 .foxField {
   height: 52px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(0, 243, 255, 0.2);
   border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  margin-bottom: 15px;
-  background: rgba(13, 25, 45, 0.8);
-  transition: .25s;
+  margin-bottom: 16px;
+  background: rgba(12, 21, 36, 0.9);
+  transition: all 0.3s ease;
 }
 
 .foxField:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 15px rgba(0, 243, 255, 0.25);
+  background: rgba(15, 27, 48, 0.95);
 }
 
 .foxField svg { 
@@ -161,34 +215,38 @@ body.foxAuthPage::before {
   height: 24px;
 }
 
-.foxActionRow { display: flex; justify-content: flex-end; margin: 2px 0 20px; }
+.foxActionRow { display: flex; justify-content: flex-end; margin: 4px 0 20px; }
 .foxLinkBtn { border: 0; background: transparent; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
 .foxLinkBtn:hover { text-decoration: underline; }
 
 .foxPrimary {
   width: 100%; height: 50px; border: 0; border-radius: 12px;
   color: #030712; font-size: 16px; font-weight: 800; cursor: pointer;
-  background: var(--accent); box-shadow: 0 4px 20px rgba(0, 243, 255, 0.4);
-  transition: .25s;
+  background: linear-gradient(135deg, #00d2ff, var(--accent)); 
+  box-shadow: 0 4px 20px rgba(0, 243, 255, 0.35);
+  transition: all 0.3s ease;
 }
-.foxPrimary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 243, 255, 0.6); }
+.foxPrimary:hover { 
+  transform: translateY(-2px); 
+  box-shadow: 0 6px 25px rgba(0, 243, 255, 0.6); 
+}
 
-.foxDivider { margin: 20px 0 18px; display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
+.foxDivider { margin: 22px 0 18px; display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
 .foxDivider:before, .foxDivider:after { content: ""; height: 1px; flex: 1; background: var(--line); }
 
 .foxSocials { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .foxSocial {
   height: 48px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02);
   border-radius: 12px; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px; transition: .25s;
+  display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.25s ease;
 }
-.foxSocial:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--accent); }
+.foxSocial:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transform: translateY(-1px); }
 .googleIcon { font-weight: 900; font-size: 18px; background: conic-gradient(#4285f4,#34a853,#fbbc05,#ea4335,#4285f4); -webkit-background-clip: text; color: transparent; }
 .fbIcon { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: #1877f2; color: white; font-weight: 900; font-size: 14px; }
 
-.foxBottomText { margin: 20px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
+.foxBottomText { margin: 22px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
 .foxBottomText a { color: var(--accent); font-weight: 700; text-decoration: none; margin-left: 4px; }
-.foxSmallBack { margin-top: 14px; display: block; text-align: center; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 13px; }
+.foxSmallBack { margin-top: 14px; display: block; text-align: center; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 13px; transition: color 0.2s; }
 .foxSmallBack:hover { color: #fff; }
 
 .foxMsg { color: #f59e0b; margin-top: 12px; text-align: center; font-weight: 600; font-size: 13px; }
