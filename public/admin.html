@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH GAMING - لوحة التحكم الإدارية</title>
+  <title>Fox Store - لوحة التحكم الإدارية</title>
 
   <!-- الخطوط والأيقونات -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -14,84 +14,6 @@
   
   <!-- الملف المنسق للوحة -->
   <link rel="stylesheet" href="/css/admin.css" />
-
-  <style>
-    /* ================= TECH GAMING ADMIN LOGO & NEON ANIMATIONS ================= */
-    :root {
-      --neon-cyan: #00f3ff;
-      --cyan-dim: rgba(0, 243, 255, 0.2);
-    }
-
-    .sidebar .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 16px;
-      background: rgba(0, 243, 255, 0.03);
-      border-bottom: 1px solid rgba(0, 243, 255, 0.15);
-    }
-
-    .sidebar .brand .logo {
-      font-size: 24px;
-      color: var(--neon-cyan);
-      animation: logoSpinGlow 4s linear infinite;
-    }
-
-    .sidebar .brand .brand-text h1 {
-      font-family: 'Cairo', sans-serif;
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 1px;
-      margin: 0;
-      animation: logoFloat 3s ease-in-out infinite alternate;
-    }
-
-    .sidebar .brand .brand-text h1 .neon-text {
-      color: var(--neon-cyan);
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-      animation: neonPulseAdmin 1.5s ease-in-out infinite alternate;
-    }
-
-    .sidebar .brand .brand-text span {
-      font-size: 10px;
-      color: #94a3b8;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .sidebar .brand:hover .brand-text h1 .neon-text {
-      animation: neonPulseHoverAdmin 0.6s ease-in-out infinite alternate;
-    }
-
-    @keyframes neonPulseAdmin {
-      0% {
-        opacity: 0.8;
-        text-shadow: 0 0 8px var(--neon-cyan), 0 0 15px var(--neon-cyan);
-      }
-      100% {
-        opacity: 1;
-        text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan), 0 0 60px var(--neon-cyan);
-        transform: scale(1.03);
-      }
-    }
-
-    @keyframes logoFloat {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-2px); }
-    }
-
-    @keyframes logoSpinGlow {
-      0%, 100% { filter: drop-shadow(0 0 5px var(--neon-cyan)); transform: rotate(0deg); }
-      50% { filter: drop-shadow(0 0 15px var(--neon-cyan)); transform: rotate(5deg) scale(1.05); }
-    }
-
-    @keyframes neonPulseHoverAdmin {
-      0% { transform: scale(1); text-shadow: 0 0 15px var(--neon-cyan); }
-      100% { transform: scale(1.08); text-shadow: 0 0 25px var(--neon-cyan), 0 0 50px var(--neon-cyan); }
-    }
-    /* ================= END LOGO ANIMATIONS ================= */
-  </style>
 
   <!-- حزمة SDK الخاصة بـ Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -109,7 +31,7 @@
     <div class="brand">
       <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
       <div class="brand-text">
-        <h1>TECH <span class="neon-text">GAMING</span></h1>
+        <h1>FOX STORE</h1>
         <span>ADMIN SYSTEM</span>
       </div>
     </div>
