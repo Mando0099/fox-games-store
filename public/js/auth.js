@@ -7,101 +7,154 @@ function show(text){ if(msg) msg.textContent = text; }
 function valueOf(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 function togglePass(){
-  const p = document.getElementById('password');
-  if(p) p.type = p.type === 'password' ? 'text' : 'password';
+  const p = document.getElementById('password');
+  if(p) p.type = p.type === 'password' ? 'text' : 'password';
 }
 
 async function saveUser(user, extra = {}){
-  if(!user) return;
-  const countryCode = extra.countryCode || '';
-  const phoneOnly = extra.phone || '';
-  const fullPhone = phoneOnly ? `${countryCode}${phoneOnly}` : '';
+  if(!user) return;
+  const countryCode = extra.countryCode || '';
+  const phoneOnly = extra.phone || '';
+  const fullPhone = phoneOnly ? `${countryCode}${phoneOnly}` : '';
 
-  await db.collection('users').doc(user.uid).set({
-    uid:user.uid,
-    name:extra.name || user.displayName || '',
-    email:user.email || extra.email || '',
-    countryCode,
-    phone:phoneOnly,
-    fullPhone,
-    role:'user',
-    active:true,
-    emailVerified:!!user.emailVerified,
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  }, {merge:true});
+  await db.collection('users').doc(user.uid).set({
+    uid:user.uid,
+    name:extra.name || user.displayName || '',
+    email:user.email || extra.email || '',
+    countryCode,
+    phone:phoneOnly,
+    fullPhone,
+    role:'user',
+    active:true,
+    emailVerified:!!user.emailVerified,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true});
 }
 
 async function goAfterLogin(user){
-  await saveUser(user);
-  const adminSnap = await db.collection('admins')
-    .where('email','==',user.email || '')
-    .where('active','==',true)
-    .limit(1)
-    .get();
+  await saveUser(user);
+  const adminSnap = await db.collection('admins')
+    .where('email','==',user.email || '')
+    .where('active','==',true)
+    .limit(1)
+    .get();
 
-  location.href = adminSnap.empty ? '/' : '/admin.html';
+  location.href = adminSnap.empty ? '/' : '/admin.html';
 }
 
 async function loginEmail(){
-  try{
-    const email = valueOf('email');
-    const password = valueOf('password');
+  try{
+    const email = valueOf('email');
+    const password = valueOf('password');
 
-    if(!email || !password) return show('Please enter email and password.');
+    if(!email || !password) return show('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
 
-    // email/password login. If user typed phone here, show clear message.
-    if(!email.includes('@')) return show('Phone login uses SMS OTP. Use email here or enable phone OTP form.');
+    if(!email.includes('@')) return show('تسجيل الدخول برقم الهاتف يتطلب رمز تحقق SMS. استخدم البريد الإلكتروني هنا.');
 
-    const r = await firebase.auth().signInWithEmailAndPassword(email, password);
-    await goAfterLogin(r.user);
-  }catch(e){ show(e.message); }
+    const r = await firebase.auth().signInWithEmailAndPassword(email, password);
+    await goAfterLogin(r.user);
+  }catch(e){ 
+    handleAuthError(e); 
+  }
 }
 
 async function resetPassword(){
-  try{
-    const email = valueOf('email');
-    if(!email || !email.includes('@')) return show('Enter your email first.');
-    await firebase.auth().sendPasswordResetEmail(email);
-    show('Password reset email sent.');
-  }catch(e){ show(e.message); }
+  try{
+    const email = valueOf('email');
+    if(!email || !email.includes('@')) return show('الرجاء إدخال البريد الإلكتروني أولاً.');
+    await firebase.auth().sendPasswordResetEmail(email);
+    if(msg) msg.style.color = '#00f3ff';
+    show('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.');
+  }catch(e){ 
+    handleAuthError(e); 
+  }
 }
 
 async function createAccount(){
-  try{
-    const name = valueOf('fullName');
-    const countryCode = valueOf('countryCode');
-    const phone = valueOf('phone');
-    const email = valueOf('email');
-    const password = valueOf('password');
-    const confirmPassword = valueOf('confirmPassword');
+  try{
+    const name = valueOf('fullName');
+    const countryCode = valueOf('countryCode');
+    const phone = valueOf('phone');
+    const email = valueOf('email');
+    const password = valueOf('password');
+    const confirmPassword = valueOf('confirmPassword');
 
-    if(!name || !email || !password) return show('Name, email and password are required.');
-    if(password.length < 6) return show('Password must be at least 6 characters.');
-    if(password !== confirmPassword) return show('Passwords do not match.');
+    if(!name || !email || !password) return show('الاسم، البريد الإلكتروني، وكلمة المرور حقول مطلوبة.');
+    if(password.length < 6) return show('يجب ألا تقل كلمة المرور عن 6 أحرف.');
+    if(password !== confirmPassword) return show('كلمتا المرور غير متطابقتين.');
 
-    const r = await firebase.auth().createUserWithEmailAndPassword(email, password);
-    await r.user.updateProfile({displayName:name});
-    await saveUser(r.user, {name,email,countryCode,phone});
-    await r.user.sendEmailVerification();
+    const r = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    await r.user.updateProfile({displayName:name});
+    await saveUser(r.user, {name,email,countryCode,phone});
+    await r.user.sendEmailVerification();
 
-    show('Account created. Verification email sent. You can login now.');
-    setTimeout(() => location.href = '/login.html', 1200);
-  }catch(e){ show(e.message); }
+    if(msg) msg.style.color = '#00f3ff';
+    show('تم إنشاء الحساب بنجاح! تم إرسال رسالة تفعيل إلى بريدك الإلكتروني.');
+    setTimeout(() => location.href = '/login.html', 3000);
+  }catch(e){ 
+    handleAuthError(e); 
+  }
 }
 
 async function loginGoogle(){
-  try{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const r = await firebase.auth().signInWithPopup(provider);
-    await goAfterLogin(r.user);
-  }catch(e){ show(e.message); }
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await firebase.auth().signInWithRedirect(provider);
+  }catch(e){ handleAuthError(e); }
 }
 
 async function loginFacebook(){
-  try{
-    const provider = new firebase.auth.FacebookAuthProvider();
-    const r = await firebase.auth().signInWithPopup(provider);
-    await goAfterLogin(r.user);
-  }catch(e){ show(e.message); }
-} 
+  try{
+    const provider = new firebase.auth.FacebookAuthProvider();
+    await firebase.auth().signInWithRedirect(provider);
+  }catch(e){ handleAuthError(e); }
+}
+
+// دالة لمعالجة وترجمة جميع رسائل أخطاء فايربيز للعربية
+function handleAuthError(error) {
+  let message = 'حدث خطأ ما، يرجى المحاولة مرة أخرى.';
+
+  switch (error.code) {
+    case 'auth/email-already-in-use':
+      message = 'هذا الحساب مستخدم من قبل، يرجى تسجيل الدخول أو استخدام بريد آخر.';
+      break;
+    case 'auth/invalid-email':
+      message = 'صيغة البريد الإلكتروني غير صحيحة.';
+      break;
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      message = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+      break;
+    case 'auth/weak-password':
+      message = 'كلمة المرور ضعيفة جداً، يرجى اختيار كلمة مرور أقوى.';
+      break;
+    case 'auth/too-many-requests':
+      message = 'تم حظر المحاولات مؤقتاً بسبب كثرة الطلبات، حاول لاحقاً.';
+      break;
+    case 'auth/operation-not-allowed':
+      message = 'طريقة تسجيل الدخول هذه غير مفعلة حالياً في لوحة التحكم.';
+      break;
+    default:
+      message = error.message;
+      break;
+  }
+
+  if(msg) {
+    msg.style.color = '#f59e0b';
+    show(message);
+  }
+}
+
+// معالجة النتيجة عند العودة من إعادة التوجيه (Redirect)
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const result = await firebase.auth().getRedirectResult();
+    if (result && result.user) {
+      await goAfterLogin(result.user);
+    }
+  } catch (e) {
+    handleAuthError(e);
+  }
+});
