@@ -3,7 +3,38 @@ if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
 const msg = document.getElementById('msg');
 const db = firebase.firestore();
 
-function show(text){ if(msg) msg.textContent = text; }
+// دالة إظهار النافذة المنبثقة الاحترافية
+function show(text, isSuccess = false){
+  const modal = document.getElementById('customModal');
+  const msgEl = document.getElementById('modalMessage');
+  const iconEl = document.getElementById('modalIcon');
+  
+  if(msgEl && modal) {
+    msgEl.textContent = text;
+    
+    if(isSuccess) {
+      iconEl.textContent = '✅';
+      modal.querySelector('div > div').style.borderColor = '#00f3ff';
+    } else {
+      iconEl.textContent = '⚠️';
+      modal.querySelector('div > div').style.borderColor = '#f59e0b';
+    }
+    
+    modal.style.display = 'flex';
+  } else {
+    // كاحتياط لو الـ Modal مش موجود في الصفحة
+    alert(text);
+  }
+}
+
+// دالة إغلاق النافذة المنبثقة
+function closeModal() {
+  const modal = document.getElementById('customModal');
+  if(modal) {
+    modal.style.display = 'none';
+  }
+}
+
 function valueOf(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 function togglePass(){
@@ -64,8 +95,7 @@ async function resetPassword(){
     const email = valueOf('email');
     if(!email || !email.includes('@')) return show('الرجاء إدخال البريد الإلكتروني أولاً.');
     await firebase.auth().sendPasswordResetEmail(email);
-    if(msg) msg.style.color = '#00f3ff';
-    show('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.');
+    show('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.', true);
   }catch(e){ 
     handleAuthError(e); 
   }
@@ -89,9 +119,8 @@ async function createAccount(){
     await saveUser(r.user, {name,email,countryCode,phone});
     await r.user.sendEmailVerification();
 
-    if(msg) msg.style.color = '#00f3ff';
-    show('تم إنشاء الحساب بنجاح! تم إرسال رسالة تفعيل إلى بريدك الإلكتروني.');
-    setTimeout(() => location.href = '/login.html', 3000);
+    show('تم إنشاء الحساب بنجاح! تم إرسال رسالة تفعيل إلى بريدك الإلكتروني.', true);
+    setTimeout(() => location.href = '/login.html', 3500);
   }catch(e){ 
     handleAuthError(e); 
   }
@@ -111,7 +140,7 @@ async function loginFacebook(){
   }catch(e){ handleAuthError(e); }
 }
 
-// دالة لمعالجة وترجمة جميع رسائل أخطاء فايربيز للعربية
+// دالة لمعالجة وترجمة جميع رسائل أخطاء فايربيز للعربية وتنبيه المستخدم بالنافذة المنبثقة
 function handleAuthError(error) {
   let message = 'حدث خطأ ما، يرجى المحاولة مرة أخرى.';
 
@@ -141,10 +170,7 @@ function handleAuthError(error) {
       break;
   }
 
-  if(msg) {
-    msg.style.color = '#f59e0b';
-    show(message);
-  }
+  show(message, false);
 }
 
 // معالجة النتيجة عند العودة من إعادة التوجيه (Redirect)
