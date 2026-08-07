@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up | Fox Games</title>
+  <title>Sign Up | TECH GAMING</title>
+  <!-- خط Cairo الفخم -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="./css/fox-auth.css"/>
 </head>
 <body class="foxAuthPage">
@@ -12,41 +15,51 @@
 
     <section class="foxCard">
       <div class="foxLogoRow">
-        <div class="foxLogoMark"><img src="/assets/logo-wolf.svg" alt="Fox"></div>
-        <div class="foxLogoText">FOX <span>GAMES</span></div>
+        <div class="foxLogoMark"><i class="fa-solid fa-gamepad"></i></div>
+        <div class="foxLogoText">TECH <span>GAMING</span></div>
       </div>
 
-      <h1>Create account</h1>
-      <p class="foxSub">Join Fox Games and save your details.</p>
+      <h1>إنشاء حساب جديد</h1>
+      <p class="foxSub">انضم إلى TECH GAMING واحفظ تفاصيل طلباتك.</p>
 
-      <div class="foxField"><input id="fullName" placeholder="Full Name"></div>
-      <div class="foxField"><input id="email" placeholder="Email"></div>
-      <div class="foxField"><input id="password" type="password" placeholder="Password"></div>
-      <div class="foxField"><input id="confirmPassword" type="password" placeholder="Confirm Password"></div>
+      <div class="foxField">
+        <input id="fullName" placeholder="الاسم الكامل">
+      </div>
+      <div class="foxField">
+        <input id="email" placeholder="البريد الإلكتروني">
+      </div>
+      <div class="foxField">
+        <input id="password" type="password" placeholder="كلمة المرور">
+      </div>
+      <div class="foxField">
+        <input id="confirmPassword" type="password" placeholder="تأكيد كلمة المرور">
+      </div>
 
       <div class="foxPhoneGrid">
         <div class="foxField">
           <select id="countryCode">
-            <option value="">Country</option>
-            <option value="+20">Egypt +20</option>
-            <option value="+966">Saudi +966</option>
-            <option value="+971">UAE +971</option>
-            <option value="+965">Kuwait +965</option>
-            <option value="+1">USA +1</option>
+            <option value="">الدولة</option>
+            <option value="+20">مصر +20</option>
+            <option value="+966">السعودية +966</option>
+            <option value="+971">الإمارات +971</option>
+            <option value="+965">الكويت +965</option>
+            <option value="+1">أمريكا +1</option>
           </select>
         </div>
-        <div class="foxField"><input id="phone" placeholder="Phone optional"></div>
+        <div class="foxField">
+          <input id="phone" placeholder="رقم الهاتف (اختياري)">
+        </div>
       </div>
 
-      <button class="foxPrimary" onclick="createAccount()">Sign up</button>
+      <button class="foxPrimary" onclick="createAccount()">تسجيل حساب</button>
 
-      <p class="foxBottomText">Already have an account? <a href="/login.html">Login</a></p>
-      <a class="foxSmallBack" href="/">Back to Store</a>
+      <p class="foxBottomText">لديك حساب بالفعل؟ <a href="/login.html">تسجيل الدخول</a></p>
+      <a class="foxSmallBack" href="/">العودة إلى المتجر</a>
       <div class="foxMsg" id="msg"></div>
     </section>
 
     <div class="foxMascotWrap">
-      <img src="/assets/fox-auth-mascot.png" alt="Fox Games mascot">
+      <img src="/assets/fox-auth-mascot.png" alt="Tech Gaming mascot">
     </div>
   </main>
 
