@@ -23,7 +23,7 @@ const translations = {
     b_feat3_title: "24/7 Support", b_feat3_desc: "We are here to help you anytime",
     b_feat4_title: "Best Prices", b_feat4_desc: "Competitive prices on all accounts and services",
     check_title: "Secure Payment Methods", check_desc: "Choose your product, add it to cart, and complete the order securely.",
-    sup_title: "Need Help With Your Order?", sup_desc: "Payment failed, code delayed, or account issue — contact support instantly.",
+    sup_title: "Need Help With Your Order?", sup_desc: "Payment failed, code delayed— contact support instantly.",
     btn_live_chat: "Live Chat", cart_title: "Your Cart", btn_apply: "Apply",
     cart_subtotal: "Subtotal", cart_discount: "Discount", cart_total: "Total",
     holder_name: "Full Name", holder_phone: "Phone Number", holder_email: "Email Address",
