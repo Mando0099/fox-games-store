@@ -1,126 +1,83 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | TECH GAMING</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <link rel="stylesheet" href="./css/fox-auth.css"/>
   <style>
-    :root {
-      --neon-cyan: #00f3ff;
-      --bg-main: #050b14;
-      --bg-card: #08101e;
-      --border-glow: rgba(0, 243, 255, 0.25);
-    }
-
-    body {
-      background-color: var(--bg-main) !important;
-      margin: 0;
-      padding: 0;
-      font-family: 'Cairo', sans-serif !important;
-      min-height: 100vh;
+    /* تأثير التوهج والأنيميشن الخاص بشعار الجيمنج */
+    .gamingLogoGlow {
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 26px;
+      color: var(--accent, #65cc00);
+      animation: gamingGlowPulse 2s ease-in-out infinite alternate;
     }
 
-    .auth-container {
-      width: 100%;
-      max-width: 450px;
-      background: var(--bg-card);
-      padding: 40px;
-      border-radius: 24px;
-      border: 1px solid var(--border-glow);
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 243, 255, 0.1);
-      text-align: center;
-      margin: 20px;
-    }
-
-    /* أنيميشن لوجو TECH GAMING */
-    .brand-area { margin-bottom: 30px; }
-    .brand-icon {
-      font-size: 50px;
-      color: var(--neon-cyan);
-      margin-bottom: 10px;
-      animation: logoSpinGlow 4s linear infinite;
-    }
-    .brand-name {
-      font-size: 28px;
-      font-weight: 900;
-      color: #fff;
-    }
-    .brand-name span {
-      color: var(--neon-cyan);
-      text-shadow: 0 0 15px var(--neon-cyan);
-      animation: neonPulse 1.5s infinite alternate;
-    }
-
-    @keyframes neonPulse {
-      from { text-shadow: 0 0 10px var(--neon-cyan); }
-      to { text-shadow: 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
-    }
-    @keyframes logoSpinGlow {
-      0%, 100% { filter: drop-shadow(0 0 5px var(--neon-cyan)); transform: rotate(0deg); }
-      50% { filter: drop-shadow(0 0 15px var(--neon-cyan)); transform: rotate(5deg) scale(1.05); }
-    }
-
-    input {
-      width: 100%;
-      background: #0d1722;
-      border: 1px solid rgba(0, 243, 255, 0.2);
-      padding: 15px;
-      border-radius: 12px;
-      color: #fff;
-      margin-bottom: 15px;
-      outline: none;
-    }
-    input:focus { border-color: var(--neon-cyan); }
-
-    .btn-login {
-      width: 100%;
-      background: var(--neon-cyan);
-      color: #000;
-      padding: 15px;
-      border-radius: 12px;
-      font-weight: 800;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    
-    .social-btn {
-      width: 100%;
-      background: transparent;
-      border: 1px solid rgba(0, 243, 255, 0.3);
-      padding: 12px;
-      border-radius: 12px;
-      color: #fff;
-      margin-top: 10px;
-      cursor: pointer;
+    @keyframes gamingGlowPulse {
+      0% { 
+        filter: drop-shadow(0 0 5px var(--accent, #65cc00)); 
+        transform: scale(1);
+      }
+      100% { 
+        filter: drop-shadow(0 0 15px var(--accent, #65cc00)) drop-shadow(0 0 25px var(--accent, #65cc00)); 
+        transform: scale(1.08); 
+      }
     }
   </style>
 </head>
-<body>
+<body class="foxAuthPage">
+  <main class="foxAuthStage">
+    <div class="foxPurpleSlice"></div>
 
-  <div class="auth-container">
-    <div class="brand-area">
-      <div class="brand-icon"><i class="fa-solid fa-gamepad"></i></div>
-      <div class="brand-name">TECH <span>GAMING</span></div>
+    <section class="foxCard">
+      <div class="foxLogoRow">
+        <div class="foxLogoMark gamingLogoGlow">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <div class="foxLogoText">TECH <span>GAMING</span></div>
+      </div>
+
+      <h1>Welcome back!</h1>
+      <p class="foxSub">Login to continue</p>
+
+      <div class="foxField">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+        <input id="email" placeholder="Email or Phone">
+      </div>
+
+      <div class="foxField">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+        <input id="password" type="password" placeholder="Password">
+        <button class="eyeBtn" onclick="togglePass()">◉</button>
+      </div>
+
+      <div class="foxActionRow">
+        <button class="foxLinkBtn" onclick="resetPassword()">Forgot password?</button>
+      </div>
+
+      <button class="foxPrimary" onclick="loginEmail()">Login</button>
+
+      <div class="foxDivider"><span>or continue with</span></div>
+
+      <div class="foxSocials">
+        <button class="foxSocial" onclick="loginGoogle()"><span class="googleIcon">G</span> Google</button>
+        <button class="foxSocial" onclick="loginFacebook()"><span class="fbIcon">f</span> Facebook</button>
+      </div>
+
+      <p class="foxBottomText">Don’t have an account? <a href="/register.html">Sign up</a></p>
+      <a class="foxSmallBack" href="/">Back to Store</a>
+      <div class="foxMsg" id="msg"></div>
+      <div id="recaptcha-container"></div>
+    </section>
+
+    <div class="foxMascotWrap">
+      <img src="/assets/fox-auth-mascot.png" alt="Tech Gaming mascot">
     </div>
-
-    <input id="email" placeholder="البريد الإلكتروني">
-    <input id="password" type="password" placeholder="كلمة المرور">
-    
-    <button class="btn-login" onclick="loginEmail()">دخول</button>
-    
-    <button class="social-btn" onclick="loginGoogle()">
-      <i class="fa-brands fa-google"></i> تسجيل بجوجل
-    </button>
-
-    <div id="msg" style="margin-top: 15px; color: #ff4d4d; font-size: 14px;"></div>
-  </div>
+  </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
