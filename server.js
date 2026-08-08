@@ -262,7 +262,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. Kashier Hosted Payment Page (HPP) - (كما هي تماماً بدون تعديل التوقيع)
+    // 1. Kashier Hosted Payment Page (HPP)
     if (provider.includes('kashier')) {
       const paymentApiKey = gateway.token || gateway.apiKey;
       if (!gateway.merchantId || !paymentApiKey) {
@@ -452,7 +452,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler (تم دعم تسجيل المعاملات فورا في الوج والبانل هنا)
+// Kashier Webhook / Callback Handler
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const query = req.body || req.query;
@@ -464,7 +464,6 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
     if (orderId) {
       const isPaid = String(paymentStatus).toLowerCase() === 'success' || String(paymentStatus).toLowerCase() === 'paid';
       
-      // تسجيل المعاملة في الـ transactions لتظهر فورا في البانل سواء نجحت أو فشلت
       await db.collection('transactions').doc(String(orderId)).set({
         paymentId: String(orderId),
         status: isPaid ? 'paid' : 'failed',
@@ -473,13 +472,26 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
       }, { merge: true });
 
       if (isPaid) {
-        const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
-        if (pendingDoc.exists) {
-          const orderData = pendingDoc.data();
-          const existingOrder = await db.collection('orders').doc(String(orderId)).get();
+        let pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+        let orderData = null;
+        let finalOrderId = orderId;
+
+        if (!pendingDoc.exists) {
+          const latestPending = await db.collection('pending_orders').orderBy('createdAt', 'desc').limit(1).get();
+          if (!latestPending.empty) {
+            const doc = latestPending.docs[0];
+            orderData = doc.data();
+            finalOrderId = doc.id;
+          }
+        } else {
+          orderData = pendingDoc.data();
+        }
+
+        if (orderData && orderData.items) {
+          const existingOrder = await db.collection('orders').doc(String(finalOrderId)).get();
           if (!existingOrder.exists) {
-            await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
-            console.log("Order fulfilled and email sent successfully for:", orderId);
+            await fulfillOrderAndSendCodes(finalOrderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+            console.log("Order fulfilled via Kashier Webhook for:", finalOrderId);
           }
         }
       }
@@ -491,7 +503,7 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
-// مسار تسجيل المعاملات من المتصفح (Admin Panel & Result Page Fallback)
+// مسار تسجيل المعاملات من المتصفح (مع البحث الذكي عن أحدث طلب معلق لو تباينت المعرفات)
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
@@ -501,11 +513,35 @@ app.post('/api/record-transaction', async (req, res) => {
 
     if (status === 'paid') {
       const existingOrder = await db.collection('orders').doc(String(paymentId)).get();
+      
       if (!existingOrder.exists) {
-        const pendingDoc = await db.collection('pending_orders').doc(String(paymentId)).get();
-        if (pendingDoc.exists) {
-          const orderData = pendingDoc.data();
-          await fulfillOrderAndSendCodes(paymentId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+        let pendingDoc = await db.collection('pending_orders').doc(String(paymentId)).get();
+        let orderData = null;
+        let finalOrderId = paymentId;
+
+        if (!pendingDoc.exists) {
+          const latestPending = await db.collection('pending_orders').orderBy('createdAt', 'desc').limit(1).get();
+          if (!latestPending.empty) {
+            const doc = latestPending.docs[0];
+            orderData = doc.data();
+            finalOrderId = doc.id;
+          }
+        } else {
+          orderData = pendingDoc.data();
+        }
+
+        if (orderData && orderData.items) {
+          const checkAgain = await db.collection('orders').doc(String(finalOrderId)).get();
+          if (!checkAgain.exists) {
+            await fulfillOrderAndSendCodes(
+              finalOrderId, 
+              orderData.customerEmail, 
+              orderData.amount, 
+              orderData.currency, 
+              orderData.items
+            );
+            console.log("تم تسليم الأكواد بنجاح من المتصفح للطلب:", finalOrderId);
+          }
         }
       }
     }
