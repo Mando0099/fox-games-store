@@ -709,6 +709,7 @@ async function checkout() {
       });
 
     } else {
+      // المسار الديناميكي الصحيح 100% المتوافق مع السيرفر الجديد
       const apiRes = await fetch(`/api/${gatewayKey}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
