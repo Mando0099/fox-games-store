@@ -558,6 +558,12 @@ function initEventListeners() {
     const clearFormBtn = $('clear-form');
     const menuBtn = $('menuBtn');
 
+    // ربط مستمع الحدث لقائمة بوابات الدفع لضمان عمل دالة renderGatewayFields بشكل سليم
+    const gatewaySelect = $('gatewaySelect');
+    if (gatewaySelect) {
+        gatewaySelect.addEventListener('change', renderGatewayFields);
+    }
+
     if (menuBtn) {
         menuBtn.onclick = toggleSidebar;
     }
