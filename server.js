@@ -79,7 +79,7 @@ async function getActivePaymentGateway() {
       return {
         id: doc.id,
         provider: provider,
-        isLive: true, // فرض اللامحدود للـ Live
+        isLive: true,
         token: decrypt(rawTokenOrKey),
         apiKey: decrypt(rawTokenOrKey),
         secretKey: decrypt(rawSecret),
@@ -103,10 +103,6 @@ async function getActivePaymentGateway() {
 function money(amount) {
   const value = Number(amount || 0);
   return Number(value.toFixed(2));
-}
-
-function cleanPhone(phone = '') {
-  return String(phone).replace(/[^\d+]/g, '').slice(0, 20);
 }
 
 function getMyFatoorahError(data) {
@@ -185,7 +181,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
       merchantId: merchantId ?? existingData.merchantId ?? '',
       iframeId: iframeId ?? existingData.iframeId ?? '',
       isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
-      isLive: true, // فرض حقيقي دائماً
+      isLive: true,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
@@ -258,62 +254,45 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const amount = money(order.total);
     const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
     const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
-    const customerPhone = (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11);
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
     // 1. Kashier Hosted Payment Page (HPP)
-    // Kashier signs the HPP hash with the Payment API Key.
-    // Secret Key is not used for this browser-side HPP hash.
     if (provider.includes('kashier')) {
-      const paymentApiKey = gateway.token || gateway.apiKey;
-      if (!gateway.merchantId || !paymentApiKey) {
+      const merchantId = gateway.merchantId || gateway.credentials?.merchantId || '';
+      const secretKey = gateway.secretKey || gateway.credentials?.secretKey || gateway.apiSecretKey || '';
+
+      if (!merchantId || !secretKey) {
         return res.status(400).json({
           success: false,
-          message: 'Kashier Merchant ID or Payment API Key is missing.'
+          message: 'Kashier Merchant ID or Secret Key is missing.'
         });
       }
 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = 'live';
-      const amountForKashier = Number(amount).toFixed(2);
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // Kashier HPP hash source: /?payment=MID.ORDER_ID.AMOUNT.CURRENCY
-      const hashSource = `/?payment=${gateway.merchantId}.${orderId}.${amountForKashier}.${currency}`;
-      const hash = crypto.createHmac('sha256', paymentApiKey)
-        .update(hashSource, 'utf8')
-        .digest('hex');
-
-      const params = new URLSearchParams({
-        merchantId: gateway.merchantId,
+      // تخزين معلومات العربة مؤقتاً في الكوليكشن أو تمريرها كبيانات للربط لاحقاً
+      await db.collection('pending_orders').doc(orderId).set({
         orderId,
-        mode,
-        amount: amountForKashier,
+        customerEmail,
+        amount,
         currency,
-        hash,
-        merchantRedirect,
-        allowedMethods: 'card,wallet,bank_installments',
-        display: 'en'
+        items,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      const paymentUrl = `https://checkout.kashier.io/?${params.toString()}`;
+      const pathString = `/?amount=${amount}&currency=${currency}&merchantId=${merchantId}&merchantRedirect=${merchantRedirect}&mode=${mode}&orderId=${orderId}`;
+      const hash = crypto.createHmac('sha256', secretKey).update(pathString).digest('hex');
 
-      console.log('KASHIER HPP:', JSON.stringify({
-        orderId,
-        merchantId: gateway.merchantId,
-        amount: amountForKashier,
-        currency,
-        mode,
-        hashSource,
-        paymentUrl: paymentUrl.replace(hash, '[HASH]')
-      }));
+      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
 
       return res.json({ success: true, paymentUrl });
     }
 
-    // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
+    // 2. معالجة ماي فاتورة (MyFatoorah)
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
       if (!tokenToUse) {
@@ -325,7 +304,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
         DisplayCurrencyIso: 'EGP',
         CustomerName: customerName,
         CustomerEmail: customerEmail,
-        CustomerMobile: customerPhone,
+        CustomerMobile: (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11),
         CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
         ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
         UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
@@ -360,9 +339,57 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 });
 
 // ==========================================
-// 📦 WEBHOOK & EMAIL NOTIFICATIONS
+// 📦 WEBHOOK & EMAIL NOTIFICATIONS (Shared Handler)
 // ==========================================
 
+async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency, cartItems) {
+  const purchasedCodes = [];
+
+  await db.runTransaction(async (transaction) => {
+    for (const item of cartItems) {
+      const productId = item.id || item.productId;
+      if (!productId) continue;
+
+      const codesRef = db.collection('productCodes');
+      const availableCodeQuery = codesRef.where('productId', '==', productId).where('status', '==', 'available').limit(1);
+      const codeSnapshot = await transaction.get(availableCodeQuery);
+
+      if (codeSnapshot.empty) continue;
+
+      const codeDoc = codeSnapshot.docs[0];
+      const codeData = codeDoc.data();
+
+      transaction.update(codeDoc.ref, {
+        status: 'used',
+        orderId: String(orderId),
+        customerEmail,
+        usedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      purchasedCodes.push({
+        productName: item.name || productId,
+        code: codeData.code
+      });
+    }
+  });
+
+  await db.collection('orders').doc(String(orderId)).set({
+    orderId: String(orderId),
+    customerEmail,
+    amount: Number(amount || 0),
+    currency: currency || 'EGP',
+    orderStatus: 'paid',
+    paymentStatus: 'paid',
+    codes: purchasedCodes,
+    createdAt: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  if (purchasedCodes.length > 0) {
+    await sendCodesEmail(customerEmail, orderId, purchasedCodes);
+  }
+}
+
+// 1. MyFatoorah Webhook
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
@@ -381,51 +408,65 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
     const orderId = paymentData.InvoiceId || invoice.Id;
     const customerEmail = paymentData.CustomerEmail || 'customer@tech-gaming.store';
-    const purchasedCodes = [];
 
-    await db.runTransaction(async (transaction) => {
-      for (const item of cartItems) {
-        const productId = item.id || item.productId;
-        if (!productId) continue;
-
-        const codesRef = db.collection('productCodes');
-        const availableCodeQuery = codesRef.where('productId', '==', productId).where('status', '==', 'available').limit(1);
-        const codeSnapshot = await transaction.get(availableCodeQuery);
-
-        if (codeSnapshot.empty) continue;
-
-        const codeDoc = codeSnapshot.docs[0];
-        const codeData = codeDoc.data();
-
-        transaction.update(codeDoc.ref, {
-          status: 'used',
-          orderId,
-          customerEmail,
-          usedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-
-        purchasedCodes.push({
-          productName: item.name || productId,
-          code: codeData.code
-        });
-      }
-    });
-
-    await db.collection('orders').doc(String(orderId)).set({
-      orderId: String(orderId),
-      customerEmail,
-      amount: Number(paymentData.InvoiceValue || 0),
-      currency: paymentData.CurrencyIso || 'EGP',
-      orderStatus: 'paid',
-      paymentStatus: 'paid',
-      codes: purchasedCodes,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    await fulfillOrderAndSendCodes(orderId, customerEmail, paymentData.InvoiceValue, paymentData.CurrencyIso, cartItems);
 
     return res.status(200).send('SUCCESS');
   } catch (error) { 
-    console.error('Webhook Error:', error.message);
+    console.error('MyFatoorah Webhook Error:', error.message);
     return res.status(500).send('Internal Server Error'); 
+  }
+});
+
+// 2. Kashier Webhook / Callback Handler
+app.post('/api/kashier/webhook', async (req, res) => {
+  try {
+    const query = req.body || req.query;
+    const orderId = query.merchantOrderId || query.orderId;
+    const paymentStatus = query.paymentStatus || query.status;
+
+    if (!orderId || String(paymentStatus).toLowerCase() !== 'success') {
+      return res.status(200).send('Ignored or Failed');
+    }
+
+    // جلب تفاصيل الطلب المخزنة مسبقاً
+    const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+    if (!pendingDoc.exists) {
+      return res.status(200).send('Order not found');
+    }
+
+    const orderData = pendingDoc.data();
+    await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+
+    return res.status(200).send('SUCCESS');
+  } catch (error) {
+    console.error('Kashier Webhook Error:', error.message);
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+// دعم جلب الإشعار عبر GET أيضاً إذا قامت كاشير بالتحويل المباشر (Redirect Callback)
+app.get('/api/kashier/webhook', async (req, res) => {
+  try {
+    const query = req.query;
+    const orderId = query.merchantOrderId || query.orderId;
+    const paymentStatus = query.paymentStatus || query.status;
+
+    if (orderId && String(paymentStatus).toLowerCase() === 'success') {
+      const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+      if (pendingDoc.exists) {
+        const orderData = pendingDoc.data();
+        // تأكد من عدم التكرار إذا تم تنفيذه مسبقاً
+        const existingOrder = await db.collection('orders').doc(String(orderId)).get();
+        if (!existingOrder.exists) {
+          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+        }
+      }
+    }
+    return res.redirect(`${PUBLIC_BASE_URL}/payment-result.html?status=success`);
+  } catch (error) {
+    console.error('Kashier Get Callback Error:', error.message);
+    return res.redirect(`${PUBLIC_BASE_URL}/payment-result.html?status=success`);
   }
 });
 
