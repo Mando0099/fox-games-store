@@ -278,7 +278,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const amountForKashier = Number(amount).toFixed(2);
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // تخزين تفاصيل السلة مؤقتاً لكي تستخدم عند إرسال الإيميل لاحقاً
+      // تخزين تفاصيل السلة مؤقتاً لتستخدم عند إرسال الإيميل لاحقاً وتضمين orderId في الرابط
       await db.collection('pending_orders').doc(orderId).set({
         orderId,
         customerEmail,
@@ -476,13 +476,13 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
-// مسار تسجيل المعاملات في لوحة التحكم (Admin Panel) سواء نجحت أو فشلت
+// مسار تسجيل المعاملات في لوحة التحكم (Admin Panel) وإجبار السيرفر على إرسال الأكواد عند عودة العميل
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
     if (!paymentId) return res.status(400).json({ success: false });
 
-    // لو العملية ناجحة، نتحقق وننفذ تسليم الأكواد وإرسال الإيميل لو لم يتم تنفيذه عبر الـ Webhook
+    // لو العملية ناجحة، نتحقق وننفذ تسليم الأكواد وإرسال الإيميل لو لم يتم تنفيذه مسبقاً
     if (status === 'paid') {
       const existingOrder = await db.collection('orders').doc(String(paymentId)).get();
       if (!existingOrder.exists) {
