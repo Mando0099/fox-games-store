@@ -267,22 +267,18 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     // 1. معالجة بوابة كاشير (Kashier) باستخدام صفحة الدفع الاحترافية المباشرة (Hosted Checkout Page)
  // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
     // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
+    // معالجة بوابة كاشير (بدون redirectUrl لتجنب التعقيد)
     if (provider.includes('kashier')) {
-      if (!gateway.merchantId || !gateway.secretKey) {
-        return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
-      }
-
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = gateway.isLive ? 'live' : 'test';
-      const redirectUrl = `${PUBLIC_BASE_URL}/payment-result.html?status=success`;
       
-      // الترتيب الصحيح والتكوين القياسي للـ pathString حسب توثيق كاشير
-      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}&redirectUrl=${redirectUrl}`;
+      // التكوين الأساسي الذي تقبله كاشير بدون أخطاء
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
       const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
-      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&redirect=true`;
+      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}`;
       
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
