@@ -288,7 +288,7 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 UNIFIED STORE PAYMENT ROUTE (Supports MyFatoorah SendPayment & Kashier)
+// 💳 UNIFIED STORE PAYMENT ROUTE (Dynamic Gateway Handler)
 // ==========================================
 
 app.post('/api/:gatewayKey/create-payment', async (req, res) => {
@@ -303,7 +303,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    // 1. معالجة ماي فاتورة باستخدام SendPayment ليعرض كل وسائل الدفع المتاحة للعميل
+    // 1. معالجة ماي فاتورة باستخدام SendPayment ليعرض كل وسائل الدفع المتاحة
     if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
       if (!gateway.token) {
         return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
