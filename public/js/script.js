@@ -591,7 +591,7 @@ function processSecureCheckout() {
     }
 }
 
-// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً من الفايربيز
+// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً من الفايربيز بدون قيود معقدة
 async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
@@ -664,21 +664,21 @@ async function checkout() {
 
     const activeGateway = gatewaySnap.docs[0].data();
     const gatewayKey = activeGateway.key;
+    const creds = activeGateway.credentials || {};
 
-    if (gatewayKey === 'vodafone_cash' || gatewayKey === 'instapay') {
+    // إذا كانت البوابة يدوية (مثل instapay)
+    if (gatewayKey === 'instapay') {
       Swal.close();
       if (drawer) drawer.style.display = 'block';
 
-      const detailsText = gatewayKey === 'vodafone_cash' 
-        ? `رقم المحفظة للتحويل: <b>${activeGateway.credentials.walletNumber}</b><br>${activeGateway.credentials.instructions || ''}`
-        : `عنوان الدفع (IPA): <b>${activeGateway.credentials.ipaAddress}</b><br>اسم الحساب: ${activeGateway.credentials.accountName}`;
+      const detailsText = `عنوان الدفع (IPA): <b>${creds.ipaAddress || 'غير محدد'}</b><br>اسم الحساب: ${creds.accountName || ''}`;
 
       Swal.fire({
-        title: currentLang === 'ar' ? 'تعليمات الدفع اليدوي' : 'Manual Payment Instructions',
+        title: currentLang === 'ar' ? 'تعليمات إتمام الدفع' : 'Payment Instructions',
         html: `
-          <p style="margin-bottom:10px;">الإجمالي المطلوب تحويله: <b style="color:var(--neon-cyan);">${total} EGP</b></p>
+          <p style="margin-bottom:10px;">الإجمالي المطلوب: <b style="color:var(--neon-cyan);">${total} EGP</b></p>
           <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:13px;">${detailsText}</p>
-          <p style="margin-top:10px; font-size:12px; color:#94a3b8;">بعد التحويل، تواصل معنا عبر الدعم الفني لإرسال الإيصال واستلام طلبك.</p>
+          <p style="margin-top:10px; font-size:12px; color:#94a3b8;">بعد إتمام العملية، اضغط تأكيد لتسجيل طلبك وتسليمه الفوري.</p>
         `,
         icon: 'info',
         confirmButtonText: currentLang === 'ar' ? 'تأكيد وإتمام الطلب' : 'Confirm Order',
@@ -705,19 +705,20 @@ async function checkout() {
           Swal.fire({
             icon: 'success',
             title: currentLang === 'ar' ? 'تم تسجيل طلبك بنجاح' : 'Order Placed',
-            text: currentLang === 'ar' ? 'سيتم مراجعة التحويل وتسليمك المنتج في أقرب وقت.' : 'Your order is pending verification.',
+            text: currentLang === 'ar' ? 'سيتم مراجعة الطلب وتسليمك المنتج فوراً.' : 'Your order has been placed successfully.',
             background: '#090f17', color: '#fff'
           });
         }
       });
 
     } else {
+      // إرسال طلب الدفع الإلكتروني لأي بوابة أخرى (MyFatoorah, Kashier, Stripe, Paymob, إلخ)
       const apiRes = await fetch(`https://tech-gaming.store/api/${gatewayKey}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gatewayKey: gatewayKey,
-          credentials: activeGateway.credentials,
+          credentials: creds,
           customer: { name, phone, email },
           total,
           items: cart.map(item => ({
