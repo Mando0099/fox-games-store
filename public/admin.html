@@ -125,6 +125,8 @@
       <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
       <button class="nav-btn" onclick="showPage('payments', this)"><i class="fa-solid fa-wallet"></i> بوابات الدفع</button>
       <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
+      <!-- زر إدارة الأدمنه الجديد -->
+      <button class="nav-btn" onclick="showPage('admins-management', this)"><i class="fa-solid fa-user-shield"></i> إدارة الأدمنه</button>
     </nav>
 
     <div class="admin-box">
@@ -143,7 +145,6 @@
     
     <!-- الشريط العلوي -->
     <header class="topbar">
-      <!-- زر الهامبرجر منسق بوضوح في بداية التوب‌بار -->
       <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" aria-label="فتح القائمة">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -482,7 +483,6 @@
 
       <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
         
-        <!-- المحافظ الإلكترونية (فودافون كاش / أورنج / اتصالات) -->
         <div class="panel form-panel">
           <div class="panel-head">
             <h3><i class="fa-solid fa-mobile-screen-button" style="color:#ef4444;"></i> المحافظ الإلكترونية (Cash)</h3>
@@ -501,7 +501,6 @@
           </div>
         </div>
 
-        <!-- تطبيق InstaPay -->
         <div class="panel form-panel">
           <div class="panel-head">
             <h3><i class="fa-solid fa-building-columns" style="color:#8b5cf6;"></i> حساب InstaPay</h3>
@@ -520,7 +519,6 @@
           </div>
         </div>
 
-        <!-- بوابة Paymob / الكروت والفيزا -->
         <div class="panel form-panel">
           <div class="panel-head">
             <h3><i class="fa-solid fa-credit-card" style="color:#3b82f6;"></i> بوابة Paymob / فيزا و كارت</h3>
@@ -546,6 +544,52 @@
       </div>
     </section>
 
+    <!-- صفحة إدارة الأدمنه والصلاحيات الجديده -->
+    <section id="admins-management-page" class="page">
+      <div class="page-head">
+        <h2>صلاحيات وإدارة الأدمنه</h2>
+        <p>إضافة إيميلات جديدة للوحة التحكم، وتحديد صلاحياتهم بدقة (تحكم كامل أو تحقّق مقيد)</p>
+      </div>
+
+      <div class="panel form-panel">
+        <form id="admin-add-form" onsubmit="event.preventDefault(); addNewAdmin();">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="newAdminEmail">البريد الإلكتروني للأدمن *</label>
+              <input id="newAdminEmail" type="email" placeholder="admin@tech-gaming.store" required />
+            </div>
+            <div class="form-group">
+              <label for="newAdminRole">مستوى الصلاحية *</label>
+              <select id="newAdminRole">
+                <option value="admin">أدمن عام (يدير المنتجات والطلبات فقط - ممنوع تعديل الصلاحيات)</option>
+                <option value="superadmin">مشرف رئيسي / Super Admin (تحكم كامل في النظام والأدمنه)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top: 15px;">
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-user-plus"></i> إضافة وصلاحية للأدمن</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel table-box" style="margin-top: 25px;">
+        <h3>الأدمنه المصرح لهم بالدخول</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>البريد الإلكتروني</th>
+              <th>نوع الصلاحية</th>
+              <th>الحالة</th>
+              <th>إجراءات الحجب والتحكم</th>
+            </tr>
+          </thead>
+          <tbody id="adminsListTable">
+            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">جاري تحميل قائمة الأدمنه...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- صفحة التقارير -->
     <section id="reports-page" class="page">
       <div class="page-head">
@@ -566,7 +610,6 @@
 
   <!-- السكربتات التفاعلية الداخلية -->
   <script>
-    // دالة التحكم في القائمة الجانبية للموبايل والـ Overlay
     function toggleSidebar() {
       const sidebar = document.getElementById('appSidebar');
       const overlay = document.getElementById('sidebarOverlay');
@@ -577,7 +620,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-      // إغلاق القائمة تلقائياً عند الضغط على أي زر تابة في الموبايل
       document.querySelectorAll('.sidebar nav .nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           if (window.innerWidth <= 1000) {
@@ -585,96 +627,10 @@
           }
         });
       });
-
-      // معاينة صورة التصنيف
-      const catFileInput = document.getElementById('categoryImageFile');
-      const catPreviewImg = document.getElementById('categoryImagePreview');
-      if (catFileInput && catPreviewImg) {
-        catFileInput.addEventListener('change', function() {
-          const file = this.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              catPreviewImg.src = e.target.result;
-              catPreviewImg.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-          } else {
-            catPreviewImg.style.display = 'none';
-          }
-        });
-      }
-
-      // رسم بياني تفصيلي لصفحة التقارير
-      const ctxDetailed = document.getElementById('detailedReportChart');
-      if(ctxDetailed) {
-        new Chart(ctxDetailed, {
-          type: 'bar', 
-          data: {
-            labels: ['ببجي موبايل', 'فلاي ديجي', 'ستيم ستور', 'بلايستيشن نيتورك', 'رايزر جولد', 'فري فاير'],
-            datasets: [{
-              label: 'حجم المبيعات بالـ EGP',
-              data: [5400, 3200, 7100, 4800, 9600, 2100],
-              backgroundColor: 'rgba(59, 130, 246, 0.6)',
-              borderColor: '#3b82f6',
-              borderWidth: 1,
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } },
-              tooltip: { backgroundColor: '#142032', titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } }
-            },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } },
-              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'Cairo' } } }
-            }
-          }
-        });
-      }
     });
-
-    // دالة آمنة لحفظ إعدادات بوابات الدفع في Firestore
-    async function savePaymentGateways() {
-      try {
-        const firestoreDb = window.db || firebase.firestore();
-        const paymentData = {
-          vodafoneCashNumber: document.getElementById('vodafoneCashNumber').value,
-          cashInstructions: document.getElementById('cashInstructions').value,
-          cashActive: document.getElementById('cashActive').checked,
-          instapayAddress: document.getElementById('instapayAddress').value,
-          instapayName: document.getElementById('instapayName').value,
-          instapayActive: document.getElementById('instapayActive').checked,
-          paymobApiKey: document.getElementById('paymobApiKey').value,
-          paymobIntegrationCard: document.getElementById('paymobIntegrationCard').value,
-          paymobActive: document.getElementById('paymobActive').checked,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        await firestoreDb.collection('settings').doc('payments').set(paymentData, { merge: true });
-
-        Swal.fire({
-          icon: 'success',
-          title: 'تم الحفظ بنجاح',
-          text: 'تم تحديث إعدادات بوابات الدفع للعملاء في المتجر!',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      } catch (error) {
-        console.error("Error saving payment settings: ", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          text: 'حدث خطأ أثناء حفظ الإعدادات: ' + error.message
-        });
-      }
-    }
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=200"></script>
+  <script src="/js/admin.js?v=201"></script>
 </body>
 </html>
