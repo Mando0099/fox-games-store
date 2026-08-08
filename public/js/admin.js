@@ -330,6 +330,7 @@ async function saveAndActivateGateway() {
             name: $('gatewaySelect').options[$('gatewaySelect').selectedIndex].text,
             credentials,
             isActive: false,
+            isLive: false, // افتراضياً وضع التجربة
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
         
@@ -355,15 +356,21 @@ async function loadConfiguredGateways() {
         snap.forEach(doc => {
             const g = doc.data();
             const isActive = g.isActive === true;
+            const isLive = g.isLive === true;
+
             html += `
                 <div class="panel" style="background: #080d14; border: 1px solid ${isActive ? '#22c55e' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> ${g.name}</h4>
                         <button class="delete-btn" style="padding: 5px 10px; font-size: 11px;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
                     </div>
-                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الحالة: <strong style="color: ${isActive ? '#22c55e' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
-                    
-                    <div style="display: flex; gap: 10px;">
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#22c55e' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الوضع الحالي: <strong style="color: ${isLive ? '#10b981' : '#f59e0b'}">${isLive ? '🚀 حقيقي (Live)' : '🧪 تجريبي (Test)'}</strong></p>
+                     
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isLive ? '#f59e0b' : '#10b981'} !important;" onclick="toggleGatewayLiveMode('${doc.id}', ${!isLive})">
+                            ${isLive ? '<i class="fa-solid fa-flask"></i> التبديل إلى وضع التجربة (Test)' : '<i class="fa-solid fa-rocket"></i> تفعيل الوضع الحقيقي (Live)'}
+                      </button>
                         <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isActive ? '#10b981' : '#334155'} !important;" onclick="setExclusiveActiveGateway('${doc.id}')">
                             ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
                         </button>
@@ -372,6 +379,16 @@ async function loadConfiguredGateways() {
         });
         container.innerHTML = html;
     } catch (err) { console.error("Error loading gateways:", err); }
+}
+
+async function toggleGatewayLiveMode(id, newLiveStatus) {
+    try {
+        await db.collection('payment_gateways').doc(id).update({ isLive: newLiveStatus });
+        await loadConfiguredGateways();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: newLiveStatus ? 'تم التبديل إلى الوضع الحقيقي (Live)' : 'تم التبديل إلى وضع التجربة (Test)', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+    } catch (err) {
+        console.error("Error updating live mode:", err);
+    }
 }
 
 async function setExclusiveActiveGateway(activeId) {
@@ -558,7 +575,6 @@ function initEventListeners() {
     const clearFormBtn = $('clear-form');
     const menuBtn = $('menuBtn');
 
-    // ربط مستمع الحدث لقائمة بوابات الدفع لضمان عمل دالة renderGatewayFields بشكل سليم
     const gatewaySelect = $('gatewaySelect');
     if (gatewaySelect) {
         gatewaySelect.addEventListener('change', renderGatewayFields);
@@ -1278,7 +1294,7 @@ function updateRevenueChart(labels, dataValues) {
                 }]
             },
             options: { responsive: true, maintainAspectRatio: false }
-        });
+          });
     }
 }
 
