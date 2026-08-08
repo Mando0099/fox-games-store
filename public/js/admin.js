@@ -5,6 +5,7 @@
 let db = null;
 let currentUser = null;
 let revenueChartInstance = null;
+let currentAdminData = null; // تخزين صلاحيات الأدمن الحالي
 
 const $ = (id) => document.getElementById(id);
 
@@ -15,27 +16,20 @@ const swalConfig = {
   cancelButtonColor: '#475569'
 };
 
-// 📱 دالة تشغيل وإغلاق القائمة الجانبية بشكل مؤكد ومباشر
+// 📱 دالة تشغيل وإغلاق القائمة الجانبية بنظام الكلاسات النظيف
 function toggleSidebar() {
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
     if (sidebar) {
-        // لو القائمة ظاهرة (right معملهاش تعارض) اقفلها، والعكس
-        const isOpen = sidebar.classList.contains('active');
-        if (isOpen) {
-            sidebar.classList.remove('active');
-            sidebar.style.right = '-320px';
-            if (overlay) overlay.classList.remove('active');
-        } else {
-            sidebar.classList.add('active');
-            sidebar.style.right = '0px';
-            if (overlay) overlay.classList.add('active');
-        }
+        sidebar.classList.toggle('active');
+    }
+    if (overlay) {
+        overlay.classList.toggle('active');
     }
 }
 
-// 🔄 التنقل بين التابات مع الحفاظ على عمل زر الـ 3 شرط دائماً
+// 🔄 التنقل بين التابات وإغلاق القائمة فوراً
 function showPage(pageName, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = $(`${pageName}-page`);
@@ -49,14 +43,11 @@ function showPage(pageName, btn) {
         if (targetBtn) targetBtn.classList.add('active');
     }
 
-    // إغلاق القائمة فوراً عند الضغط على أي تابة
+    // إغلاق القائمة والـ Overlay عند اختيار أي تابة
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
-    if (sidebar) {
-        sidebar.classList.remove('active');
-        sidebar.style.right = '-320px';
-    }
+    if (sidebar) sidebar.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,17 +58,15 @@ function val(id) {
     return ($(id)?.value || '').trim();
 }
 
-// التأكد من ربط الأحداث وإصلاح زر القائمة فور تحميل الصفحة
+// التأكد من ربط زر الهامبرجر فور تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
     const menuBtn = $('menuBtn');
     if (menuBtn) {
-        // إزالة أي ربط قديم وإعادة تعيينه لمنع تكرار الأحداث
-        menuBtn.onclick = null;
         menuBtn.onclick = toggleSidebar;
     }
 });
 
-// 🔐 التحقق الأمني الصارم
+// 🔐 التحقق الأمني الصارم وصلاحيات الأدمن
 firebase.auth().onAuthStateChanged(async (user) => {
   if (!user) {
     window.location.replace('/login.html');
@@ -90,8 +79,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
   try {
     const adminCheck = await db.collection('admins')
-      .where('email', '==', user.email)
-      .where('active', '==', true)
+      .where('email', '==', user.email.toLowerCase().trim())
       .limit(1)
       .get();
 
@@ -102,16 +90,33 @@ firebase.auth().onAuthStateChanged(async (user) => {
         text: 'هذا الحساب ليس لديه صلاحيات أدمن للوصول إلى لوحة التحكم!',
         ...swalConfig
       });
-      window.location.replace('/');
+      await firebase.auth().signOut();
+      window.location.replace('/login.html');
+      return;
+    }
+
+    currentAdminData = adminCheck.docs[0].data();
+
+    // التحقق هل الحساب محجوب (active == false)
+    if (currentAdminData.active === false) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'حساب محجوب',
+        text: 'تم إيقاف صلاحيات وصولك إلى لوحة التحكم من قبل الإدارة!',
+        ...swalConfig
+      });
+      await firebase.auth().signOut();
+      window.location.replace('/login.html');
       return;
     }
 
     initEventListeners();
     await loadAll();
+    await loadAdminsManagement(); // تحميل جدول الأدمنه
 
   } catch (error) {
     console.error("خطأ في التحقق من صلاحيات الأدمن:", error);
-    window.location.replace('/');
+    window.location.replace('/login.html');
   }
 });
 
@@ -124,7 +129,116 @@ async function loadAll() {
   await loadCustomers();
   await loadStats();
   await loadPaymentGateways();
+  await loadAdminsManagement();
 }
+
+// ==========================================
+// 🛡️ دوال نظام إدارة الصلاحيات والأدمنه
+// ==========================================
+
+async function loadAdminsManagement() {
+    const container = $('adminsListTable');
+    if (!container) return;
+
+    try {
+        const snap = await db.collection('admins').get();
+        if (snap.empty) {
+            container.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">لا توجد إيميلات مضافة حالياً</td></tr>';
+            return;
+        }
+
+        let html = '';
+        snap.forEach(doc => {
+            const d = doc.data();
+            const isActive = d.active !== false;
+            const isSuper = d.role === 'superadmin' || d.role === 'super_admin';
+            
+            // هل الأدمن الحالي هو مشرف رئيسي يملك حق التعديل؟
+            const canControl = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+
+            html += `
+                <tr>
+                    <td><strong>${d.email}</strong></td>
+                    <td>
+                        <span class="status-badge" style="background:${isSuper ? 'rgba(157,78,221,0.15)' : 'rgba(59,130,246,0.15)'}; color:${isSuper ? '#9d4edd' : '#3b82f6'};">
+                            ${isSuper ? 'مشرف رئيسي (Super Admin)' : 'أدمن عام'}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="color: ${isActive ? '#22c55e' : '#ef4444'}; font-weight:600;">
+                            ${isActive ? '● مفعل (نشط)' : '○ محجوب (موقوف)'}
+                        </span>
+                    </td>
+                    <td>
+                        ${canControl ? `
+                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}', ${!isActive})">
+                                ${isActive ? '<i class="fa-solid fa-ban"></i> حجب الدخول' : '<i class="fa-solid fa-check"></i> تفعيل'}
+                            </button>
+                        ` : '<span style="color:#64748b; font-size:12px;">صلاحيات مقيدة</span>'}
+                    </td>
+                </tr>
+            `;
+        });
+        container.innerHTML = html;
+    } catch (err) {
+        console.error("Error loading admins:", err);
+    }
+}
+
+async function addNewAdmin() {
+    const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+    if (!isSuper) {
+        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية إضافة أدمنه جدد. هذه الصلاحية للمشرف الرئيسي فقط!', ...swalConfig });
+        return;
+    }
+
+    const email = (val('newAdminEmail') || '').toLowerCase().trim();
+    const role = $('newAdminRole')?.value || 'admin';
+
+    if (!email) return;
+
+    try {
+        const check = await db.collection('admins').where('email', '==', email).get();
+        if (!check.empty) {
+            Swal.fire({ icon: 'warning', title: 'موجود مسبقاً', text: 'هذا البريد الإلكتروني مسجل كأدمن بالفعل!', ...swalConfig });
+            return;
+        }
+
+        await db.collection('admins').add({
+            email: email,
+            role: role,
+            active: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        $('newAdminEmail').value = '';
+        await loadAdminsManagement();
+
+        Swal.fire({ icon: 'success', title: 'تمت الإضافة بنجاح', text: 'تم منح صلاحيات الأدمن لهذا البريد بنجاح.', timer: 2000, showConfirmButton: false, ...swalConfig });
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر إضافة الأدمن الجديد.', ...swalConfig });
+    }
+}
+
+async function toggleAdminStatus(docId, newStatus) {
+    const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+    if (!isSuper) {
+        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية حجب أو تفعيل الأدمنه!', ...swalConfig });
+        return;
+    }
+
+    try {
+        await db.collection('admins').doc(docId).update({ active: newStatus });
+        await loadAdminsManagement();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: newStatus ? 'تم تفعيل الأدمن' : 'تم حجب الأدمن بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+    } catch (err) {
+        console.error("Error updating status:", err);
+    }
+}
+
+// ==========================================
+// باقي دوال المتجر وإدارة المنتجات
+// ==========================================
 
 function initEventListeners() {
     const dropzone = $('dropzone');
