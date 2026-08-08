@@ -661,7 +661,6 @@ async function checkout() {
     }
 
     const activeGateway = gatewaySnap.docs[0].data();
-    // تصحيح قراءة كود البوابة لضمان عمل المسار الديناميكي والثابت بدون أي إيرور
     const gatewayKey = (activeGateway.key || activeGateway.provider || activeGateway.name || 'myfatoorah').toLowerCase();
     const creds = activeGateway.credentials || {};
 
@@ -710,22 +709,22 @@ async function checkout() {
       });
 
     } else {
-      // إرسال الطلب بالمسار الصحيح وتنسيق بيانات العميل لتجنب خطأ Invalid data
-      const apiRes = await fetch('/api/myfatoorah/create-payment', {
+      // إرسال الطلب بالصيغة الصحيحة المنظفة لتجنب خطأ Invalid data تماماً مع منع الكاش عبر إضافة الوقت
+      const apiRes = await fetch(`/api/myfatoorah/create-payment?v=${Date.now()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gatewayKey: gatewayKey,
           credentials: creds,
           customer: { 
-            name: name || 'Gamer', 
-            phone: phone || '01000000000', 
-            email: email || 'customer@tech-gaming.store' 
+            name: name.substring(0, 50), 
+            phone: phone.replace(/\D/g, '').slice(-11) || '01000000000', 
+            email: email 
           },
           total: Number(total),
           items: cart.map(item => ({
             id: String(item.id || item.docId || '1'),
-            name: String(item.name || 'Digital Product'),
+            name: String(item.name || 'Digital Product').substring(0, 100),
             category: String(item.category || ''),
             price: Number(item.price || 0)
           }))
