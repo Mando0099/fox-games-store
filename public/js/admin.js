@@ -75,7 +75,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
   currentUser = user;
   db = firebase.firestore();
-  if ($('adminEmail')) $('adminEmail').textContent = user.email;
+  if ($('adminEmail'))$('adminEmail').textContent = user.email;
 
   try {
     const adminCheck = await db.collection('admins')
@@ -170,7 +170,7 @@ async function loadAdminsManagement() {
                     </td>
                     <td>
                         ${canControl ? `
-                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}', ${!isActive})">
+                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}',${!isActive})">
                                 ${isActive ? '<i class="fa-solid fa-ban"></i> حجب الدخول' : '<i class="fa-solid fa-check"></i> تفعيل'}
                             </button>
                         ` : '<span style="color:#64748b; font-size:12px;">صلاحيات مقيدة</span>'}
@@ -236,41 +236,45 @@ async function toggleAdminStatus(docId, newStatus) {
 }
 
 // ==========================================
-// 💳 دوال بوابات الدفع الديناميكية والاحترافية الجديدة
+// 💳 دوال بوابات الدفع الديناميكية والاحترافية (مع الـ API الأساسي لكل البوابات)
 // ==========================================
 
 const gatewayConfigs = {
     myfatoorah: [
-        { id: 'apiKey', label: 'MyFatoorah API Token', type: 'password', placeholder: 'أدخل الـ Token الخاص بـ ماي فاتورة' },
+        { id: 'apiKey', label: 'MyFatoorah API Token / Key *', type: 'password', placeholder: 'أدخل الـ Token أو مفتاح الـ API الأساسي' },
         { id: 'mode', label: 'الوضع', type: 'select', options: [{val: 'test', text: 'تجريبي (Test)'}, {val: 'live', text: 'حقيقي (Live)'}] }
     ],
     paymob: [
-        { id: 'apiKey', label: 'Paymob API Key', type: 'password', placeholder: 'مفتاح الـ API' },
-        { id: 'integrationId', label: 'Integration ID', type: 'text', placeholder: 'مثال: 123456' },
-        { id: 'iframeId', label: 'Iframe ID', type: 'text', placeholder: 'مثال: 78910' }
+        { id: 'apiKey', label: 'Paymob API Key *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
+        { id: 'integrationId', label: 'Integration ID *', type: 'text', placeholder: 'مثال: 123456' },
+        { id: 'iframeId', label: 'Iframe ID *', type: 'text', placeholder: 'مثال: 78910' }
     ],
     stripe: [
-        { id: 'publishableKey', label: 'Publishable Key', type: 'text', placeholder: 'pk_live_...' },
-        { id: 'secretKey', label: 'Secret Key', type: 'password', placeholder: 'sk_live_...' }
+        { id: 'apiKey', label: 'Stripe Secret API Key *', type: 'password', placeholder: 'sk_live_... أو sk_test_...' },
+        { id: 'publishableKey', label: 'Publishable Key', type: 'text', placeholder: 'pk_live_...' }
     ],
     paypal: [
-        { id: 'clientId', label: 'PayPal Client ID', type: 'text', placeholder: 'Client ID' },
-        { id: 'secretKey', label: 'PayPal Secret Key', type: 'password', placeholder: 'Secret Key' }
+        { id: 'apiKey', label: 'PayPal Secret API Key *', type: 'password', placeholder: 'المفتاح السري الأساسي للـ API' },
+        { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'Client ID' },
+        { id: 'mode', label: 'بيئة العمل', type: 'select', options: [{val: 'sandbox', text: 'Sandbox (تجريبي)'}, {val: 'live', text: 'Live (حقيقي)'}] }
     ],
     cashier: [
-        { id: 'merchantId', label: 'Merchant ID', type: 'text', placeholder: 'معرف التاجر' },
-        { id: 'secretKey', label: 'Secret Key', type: 'password', placeholder: 'مفتاح الأمان' }
+        { id: 'apiKey', label: 'Cashier API Key *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
+        { id: 'merchantId', label: 'Merchant ID *', type: 'text', placeholder: 'معرف التاجر' }
     ],
     fawaterak: [
-        { id: 'token', label: 'Fawaterak API Token', type: 'password', placeholder: 'توكن فواتيرك' }
+        { id: 'apiKey', label: 'Fawaterak API Token / Key *', type: 'password', placeholder: 'توكن أو مفتاح الـ API لفواتيرك' },
+        { id: 'mode', label: 'البيئة', type: 'select', options: [{val: 'test', text: 'تجريبي'}, {val: 'live', text: 'حقيقي'}] }
     ],
     instapay: [
-        { id: 'ipaAddress', label: 'عنوان الدفع (IPA)', type: 'text', placeholder: 'username@instapay' },
-        { id: 'accountName', label: 'اسم صاحب الحساب', type: 'text', placeholder: 'محمد أشرف' }
+        { id: 'apiKey', label: 'مفتاح الـ API (إن وجد)', type: 'password', placeholder: 'اختياري' },
+        { id: 'ipaAddress', label: 'عنوان الدفع (IPA) *', type: 'text', placeholder: 'username@instapay' },
+        { id: 'accountName', label: 'اسم صاحب الحساب *', type: 'text', placeholder: 'محمد أشرف' }
     ],
     vodafone_cash: [
-        { id: 'walletNumber', label: 'رقم المحفظة', type: 'text', placeholder: '01012345678' },
-        { id: 'instructions', label: 'تعليمات الدفع للعميل', type: 'textarea', placeholder: 'تعليمات التحويل...' }
+        { id: 'apiKey', label: 'مفتاح الـ API (إن وجد)', type: 'password', placeholder: 'اختياري' },
+        { id: 'walletNumber', label: 'رقم المحفظة *', type: 'text', placeholder: '01012345678' },
+        { id: 'instructions', label: 'تعليمات الدفع للعميل *', type: 'textarea', placeholder: 'تعليمات التحويل...' }
     ]
 };
 
@@ -288,11 +292,11 @@ function renderGatewayFields() {
     gatewayConfigs[selectedGateway].forEach(field => {
         if (field.type === 'select') {
             let options = field.options.map(o => `<option value="${o.val}">${o.text}</option>`).join('');
-            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><select id="gw_${field.id}">${options}</select></div>`;
+            fieldsHtml += `<div class="form-group"><label>${field.label}</label><select id="gw_${field.id}">${options}</select></div>`;
         } else if (field.type === 'textarea') {
-            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><textarea id="gw_${field.id}" rows="2" placeholder="${field.placeholder}"></textarea></div>`;
+            fieldsHtml += `<div class="form-group"><label>${field.label}</label><textarea id="gw_${field.id}" rows="2" placeholder="${field.placeholder}"></textarea></div>`;
         } else {
-            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
+            fieldsHtml += `<div class="form-group"><label>${field.label}</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
         }
     });
     container.innerHTML = fieldsHtml;
@@ -305,8 +309,10 @@ async function saveAndActivateGateway() {
     let credentials = {};
     for (let field of gatewayConfigs[gatewayKey]) {
         const valInput = $(`gw_${field.id}`)?.value;
-        if (!valInput) return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label} مطلوب!`, ...swalConfig });
-        credentials[field.id] = valInput;
+        if (field.label.includes('*') && !valInput) {
+            return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label.replace('*', '')} مطلوب أساسي!`, ...swalConfig });
+        }
+        credentials[field.id] = valInput || '';
     }
 
     try {
@@ -322,7 +328,7 @@ async function saveAndActivateGateway() {
         renderGatewayFields();
         await loadConfiguredGateways();
 
-        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ إعدادات ومتطلبات البوابة بنجاح.', ...swalConfig });
+        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ مفاتيح الـ API وإعدادات البوابة بنجاح.', ...swalConfig });
     } catch (err) { 
         console.error(err);
         Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل حفظ الإعدادات.', ...swalConfig }); 
