@@ -65,18 +65,18 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway)
+// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway) - [محدث بقراءة ذكية للمفاتيح]
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
       const data = doc.data();
+      const creds = data.credentials || {}; // دعم الاستخراج من كائن credentials الفرعي إن وجد
 
       const isLive = Boolean(data.isLive);
-      const provider = (data.provider || data.name || 'myfatoorah').toLowerCase();
+      const provider = (data.provider || data.name || doc.id || 'myfatoorah').toLowerCase();
 
-      // روابط التخلف الافتراضية للـ Demo والـ Live حسب كل بوابة
       let defaultSandbox = 'https://apitest.myfatoorah.com';
       let defaultLive = 'https://api-eg.myfatoorah.com';
 
@@ -90,24 +90,25 @@ async function getActivePaymentGateway() {
 
       const sandboxUrl = data.sandboxUrl || defaultSandbox;
       const liveUrl = data.liveUrl || defaultLive;
-
-      // اختيار رابط الـ API تلقائياً بناءً على وضع isLive
       const targetApiUrl = (isLive ? liveUrl : sandboxUrl).replace(/\/v2\/?$/, '');
+
+      // استخراج المفتاح بذكاء من أي مكان تم حفظه فيه في قاعدة البيانات
+      const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey || creds.apiSecretKey;
 
       return {
         id: doc.id,
         name: data.name || provider,
         provider: provider,
         isLive: isLive,
-        token: decrypt(data.token || data.apiKey),
-        apiKey: decrypt(data.apiKey || data.token),
-        secretKey: decrypt(data.secretKey),
-        webhookSecret: decrypt(data.webhookSecret),
+        token: decrypt(rawTokenOrKey),
+        apiKey: decrypt(rawTokenOrKey),
+        secretKey: decrypt(data.secretKey || creds.secretKey),
+        webhookSecret: decrypt(data.webhookSecret || creds.webhookSecret),
         apiUrl: targetApiUrl,
         sandboxUrl: sandboxUrl,
         liveUrl: liveUrl,
-        merchantId: data.merchantId || '',
-        iframeId: data.iframeId || ''
+        merchantId: data.merchantId || creds.merchantId || '',
+        iframeId: data.iframeId || creds.iframeId || ''
       };
     }
   } catch (err) {
@@ -169,7 +170,6 @@ async function myfatoorahPost(gatewayConfig, endpoint, body) {
 // 🛠️ ADMIN GATEWAY MANAGEMENT APIs
 // ==========================================
 
-// 1. Get all payment gateways (For Admin Panel)
 app.get('/api/admin/payment-gateways', async (req, res) => {
   try {
     const snapshot = await db.collection('payment_gateways').get();
@@ -187,9 +187,7 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
         sandboxUrl: data.sandboxUrl || '',
         liveUrl: data.liveUrl || '',
         merchantId: data.merchantId || '',
-        tokenSet: !!(data.token || data.apiKey),
-        secretKeySet: !!data.secretKey,
-        webhookSecretSet: !!data.webhookSecret,
+        tokenSet: !!(data.token || data.apiKey || data.credentials),
         updatedAt: data.updatedAt
       });
     });
@@ -200,7 +198,6 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
   }
 });
 
-// 2. Add or Update a Payment Gateway (Encrypts keys before saving)
 app.post('/api/admin/payment-gateways', async (req, res) => {
   try {
     const { 
@@ -211,7 +208,6 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     
     const docId = id || (provider ? provider.toLowerCase() : (name ? name.toLowerCase() : 'gateway_' + Date.now()));
 
-    // If activating this gateway, deactivate all others first
     if (isActive) {
       const allGateways = await db.collection('payment_gateways').get();
       const batch = db.batch();
@@ -239,7 +235,6 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
-    // Only re-encrypt if a new key/token is provided
     if (inputToken) gatewayPayload.token = encrypt(inputToken);
     if (secretKey) gatewayPayload.secretKey = encrypt(secretKey);
     if (webhookSecret) gatewayPayload.webhookSecret = encrypt(webhookSecret);
@@ -256,7 +251,6 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
   }
 });
 
-// 3. Quick Toggle Gateway Active Status
 app.post('/api/admin/payment-gateways/activate', async (req, res) => {
   try {
     const { id } = req.body;
@@ -277,7 +271,6 @@ app.post('/api/admin/payment-gateways/activate', async (req, res) => {
   }
 });
 
-// 4. Quick Toggle Live / Demo Mode
 app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
   try {
     const { id, isLive } = req.body;
@@ -347,7 +340,6 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
 
     console.log(`[MODE: ${gateway.isLive ? 'LIVE' : 'DEMO'}] ACTIVE_GATEWAY_URL:`, gateway.apiUrl);
 
-    // Step 1: get a valid PaymentMethodId
     const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
       InvoiceAmount: amount,
       CurrencyIso: 'EGP'
