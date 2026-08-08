@@ -152,8 +152,8 @@ function getMyFatoorahError(data) {
 }
 
 async function myfatoorahPost(gatewayConfig, endpoint, body) {
-  const token = gatewayConfig.token;
-  const apiUrl = gatewayConfig.apiUrl;
+  const token = gatewayConfig.token || process.env.MYFATOORAH_TOKEN;
+  const apiUrl = gatewayConfig.apiUrl || 'https://api-eg.myfatoorah.com';
 
   return axios.post(`${apiUrl}/v2/${endpoint}`, body, {
     headers: {
@@ -291,13 +291,11 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 // 💳 UNIFIED STORE PAYMENT ROUTES (Dynamic & Static Fallback)
 // ==========================================
 
-// مسار احتياطي ثابت لضمان عدم حدوث خطأ 400 لو المتصفح ما زال يطلب الرابط القديم
 app.post('/api/myfatoorah/create-payment', async (req, res) => {
   req.params.gatewayKey = 'myfatoorah';
   return handleCreatePayment(req, res);
 });
 
-// المسار الديناميكي الموحد الأساسي
 app.post('/api/:gatewayKey/create-payment', async (req, res) => {
   return handleCreatePayment(req, res);
 });
@@ -314,33 +312,53 @@ async function handleCreatePayment(req, res) {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    // 1. معالجة ماي فاتورة باستخدام SendPayment ليعرض كل وسائل الدفع المتاحة
+    // 1. معالجة ماي فاتورة بالطريقة الآمنة والمباشرة
     if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
-      if (!gateway.token) {
-        return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
-      }
-
-      const invoiceBody = {
-        InvoiceValue: amount,
-        DisplayCurrencyIso: 'EGP',
-        CustomerEmail: customerEmail,
-        CustomerName: customerName,
-        CustomerMobile: customerPhone,
-        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-        UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
-      };
-
-      const executeResponse = await myfatoorahPost(gateway, 'SendPayment', invoiceBody);
-
-      if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.InvoiceURL) {
-        return res.json({ success: true, paymentUrl: executeResponse.data.Data.InvoiceURL });
-      }
+      const tokenToUse = gateway.token || process.env.MYFATOORAH_TOKEN;
       
-      return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) });
+      if (!tokenToUse) {
+        return res.status(500).json({ success: false, message: 'Missing payment token/API key.' });
+      }
+
+      try {
+        const invoiceBody = {
+          InvoiceValue: amount,
+          DisplayCurrencyIso: 'EGP',
+          CustomerEmail: customerEmail,
+          CustomerName: customerName,
+          CustomerMobile: customerPhone,
+          CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
+          ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+          UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
+        };
+
+        const executeResponse = await axios.post(`${gateway.apiUrl || 'https://api-eg.myfatoorah.com'}/v2/SendPayment`, invoiceBody, {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        });
+
+        if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.InvoiceURL) {
+          return res.json({ success: true, paymentUrl: executeResponse.data.Data.InvoiceURL });
+        }
+        
+        return res.status(400).json({ 
+          success: false, 
+          message: getMyFatoorahError(executeResponse.data) || 'MyFatoorah rejected payment.' 
+        });
+
+      } catch (apiErr) {
+        console.error('MyFatoorah API Detailed Error:', apiErr.response?.data || apiErr.message);
+        return res.status(400).json({ 
+          success: false, 
+          message: apiErr.response?.data?.Message || apiErr.message || 'Payment gateway connection error.' 
+        });
+      }
     }
 
-    // 2. معالجة بوابة Kashier (كاشير) بدون مشاكل الـ undefined
+    // 2. معالجة بوابة Kashier (كاشير)
     if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
       const merchantId = gateway.merchantId;
       const secretKey = gateway.secretKey;
