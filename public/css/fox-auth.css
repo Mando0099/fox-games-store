@@ -251,5 +251,69 @@ body.foxAuthPage {
 
 .foxMsg { color: #f59e0b; margin-top: 12px; text-align: center; font-weight: 600; font-size: 13px; }
 
+/* ==========================================
+   تصميم النافذة المنبثقة العائمة (Toast Popup) الاحترافية
+   ========================================== */
+#customModal {
+  display: none;
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: rgba(18, 18, 20, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  padding: 18px 28px;
+  border-radius: 14px;
+  z-index: 99999;
+  min-width: 300px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 243, 255, 0.25);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#customModal.show-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+#modalIcon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+#modalMessage {
+  color: #f3f4f6;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  font-family: 'Cairo', sans-serif;
+}
+
+#modalBtn {
+  background: linear-gradient(135deg, #00d2ff, var(--accent));
+  color: #030712;
+  border: none;
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
+}
+
+#modalBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 243, 255, 0.5);
+}
+
 /* إلغاء أي عناصر قديمة نهائياً */
 .foxPurpleSlice, .foxMascotWrap { display: none !important; }
