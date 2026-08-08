@@ -272,23 +272,39 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = 'live';
-      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
       try {
-        // الطلب الصحيح عبر الـ API باستخدام الـ Secret Key كما ذكرت
-        const kashierApiUrl = 'https://api.kashier.io/orders'; // أو نقطة اتصال الجلسات المعتمدة
+        // نقطة الاتصال الرسمية الصحيحة لإنشاء جلسة كاشير من السيرفر
+        const response = await axios.post('https://api.kashier.io/v1/sessions', {
+          amount: amount,
+          currency: currency,
+          merchantOrderId: orderId,
+          mode: mode,
+          allowedMethods: ['card', 'wallet']
+        }, {
+          headers: {
+            Authorization: gateway.secretKey,
+            'Content-Type': 'application/json'
+          },
+          timeout: 15000
+        });
 
-        // التنسيق القياسي للـ Hash الخاص بطلب الـ API لكاشير
-        // المعادلة الرسمية للـ Hash في كاشير تعتمد على: /?merchantId=...&orderId=...&amount=...&currency=...
-        const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&merchantRedirect=${merchantRedirect}&mode=${mode}`;
-        const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+        // استخراج الـ sessionId المشفر من استجابة كاشير
+        const sessionId = response.data?.body?.sessionId || response.data?.sessionId;
 
-        const paymentPageUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
-        return res.json({ success: true, paymentUrl: paymentPageUrl });
+        if (sessionId) {
+          const secureSessionUrl = `https://payments.kashier.io/session/${sessionId}?mode=${mode}`;
+          return res.json({ success: true, paymentUrl: secureSessionUrl });
+        } else {
+          throw new Error('Invalid session response from Kashier.');
+        }
 
-      } catch (err) {
-        console.error('Kashier API Error:', err.message);
-        return res.status(400).json({ success: false, message: 'Kashier payment initialization failed.' });
+      } catch (sessionErr) {
+        console.error('Kashier Session API Error:', sessionErr.response?.data || sessionErr.message);
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Kashier Session Error: ' + (sessionErr.response?.data?.message || sessionErr.message) 
+        });
       }
     }
 
