@@ -330,7 +330,7 @@ async function saveAndActivateGateway() {
             name: $('gatewaySelect').options[$('gatewaySelect').selectedIndex].text,
             credentials,
             isActive: false,
-            isLive: false, // افتراضياً وضع التجربة
+            isLive: false,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
         
@@ -370,7 +370,7 @@ async function loadConfiguredGateways() {
                     <div style="display: flex; gap: 10px; flex-direction: column;">
                         <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isLive ? '#f59e0b' : '#10b981'} !important;" onclick="toggleGatewayLiveMode('${doc.id}', ${!isLive})">
                             ${isLive ? '<i class="fa-solid fa-flask"></i> التبديل إلى وضع التجربة (Test)' : '<i class="fa-solid fa-rocket"></i> تفعيل الوضع الحقيقي (Live)'}
-                      </button>
+                        </button>
                         <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isActive ? '#10b981' : '#334155'} !important;" onclick="setExclusiveActiveGateway('${doc.id}')">
                             ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
                         </button>
@@ -563,7 +563,7 @@ function resetCouponForm() {
 }
 
 // ==========================================
-// باقي دوال المتجر وإدارة المنتجات
+// إدارة أحداث المتجر
 // ==========================================
 
 function initEventListeners() {
@@ -806,8 +806,9 @@ async function loadProducts() {
 }
 
 async function editProduct(id) {
-  const doc = await db.collection('products').doc(id).get();
-  const p = doc.data();
+  const docSnap = await db.collection('products').doc(id).get();
+  if (!docSnap.exists) return;
+  const p = docSnap.data();
 
   if ($('productId')) $('productId').value = id;
   if ($('name')) $('name').value = p.name || '';
@@ -826,7 +827,7 @@ async function editProduct(id) {
   }
 
   showPage('products');
-  scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function deleteProduct(id) {
