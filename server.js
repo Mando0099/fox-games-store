@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==========================================
 // 🔐 ENCRYPTION & DECRYPTION HELPERS (AES-256)
 // ==========================================
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'foxgamessecretkey12345678901234'; // Must be 32 bytes/chars
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'foxgamessecretkey12345678901234';
 const ALGORITHM = 'aes-256-cbc';
 
 function encrypt(text) {
@@ -56,16 +56,14 @@ function decrypt(text) {
   }
 }
 
-// Fallback .env MyFatoorah Settings
 const ENV_MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
 const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
-// Resend email settings
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway)
+// Helper to get active gateway dynamically
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
@@ -289,8 +287,28 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 UNIFIED STORE PAYMENT ROUTE (Dynamic Gateway Handler)
+// 💳 UNIFIED STORE PAYMENT ROUTE (Supports MyFatoorah Methods & Kashier)
 // ==========================================
+
+app.get('/api/myfatoorah/payment-methods', async (req, res) => {
+  try {
+    const gateway = await getActivePaymentGateway();
+    const amount = money(req.query.amount || 1);
+
+    const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
+      InvoiceAmount: amount,
+      CurrencyIso: 'EGP'
+    });
+
+    if (!initiateResponse.data?.IsSuccess) {
+      return res.status(400).json({ success: false, message: getMyFatoorahError(initiateResponse.data) });
+    }
+
+    return res.json({ success: true, methods: initiateResponse.data?.Data?.PaymentMethods || [] });
+  } catch (e) {
+    return res.status(400).json({ success: false, message: getMyFatoorahError(e.response?.data) || e.message });
+  }
+});
 
 app.post('/api/:gatewayKey/create-payment', async (req, res) => {
   try {
@@ -304,7 +322,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    // 1. معالجة بوابة MyFatoorah
+    // 1. معالجة ماي فاتورة (مع دعم اختيار طريقة الدفع مثل الفيزا والمحافظ)
     if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
       if (!gateway.token) {
         return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
@@ -320,7 +338,14 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
       }
 
       const paymentMethods = initiateResponse.data?.Data?.PaymentMethods || [];
-      const paymentMethodId = Number(paymentMethods[0]?.PaymentMethodId || 1);
+      const selectedPaymentMethodId = Number(order.paymentMethodId || 0);
+
+      const selectedMethod = selectedPaymentMethodId
+        ? paymentMethods.find(m => Number(m.PaymentMethodId) === selectedPaymentMethodId)
+        : null;
+
+      const defaultMethod = selectedMethod || paymentMethods[0];
+      const paymentMethodId = Number(defaultMethod?.PaymentMethodId || 1);
 
       const executeResponse = await myfatoorahPost(gateway, 'ExecutePayment', {
         PaymentMethodId: paymentMethodId,
@@ -340,7 +365,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
       return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) });
     }
 
-    // 2. معالجة بوابة Kashier (كاشير) - تم تصحيح الرابط هنا
+    // 2. معالجة بوابة Kashier (كاشير) بالشكل السليم
     if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
       const merchantId = gateway.merchantId;
       const secretKey = gateway.secretKey;
@@ -361,7 +386,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
 
-    return res.status(400).json({ success: false, message: `Gateway ${gatewayKey} is not fully configured or supported yet.` });
+    return res.status(400).json({ success: false, message: `Gateway ${gatewayKey} is not supported.` });
 
   } catch (e) {
     console.error('Unified Payment Creation Error:', e.response?.data || e.message);
@@ -374,23 +399,17 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
 // ==========================================
 
 app.post('/api/myfatoorah/webhook', async (req, res) => {
-  console.log('WEBHOOK BODY:', JSON.stringify(req.body, null, 2));
-
   try {
     const gateway = await getActivePaymentGateway();
     const invoice = req.body?.Data?.Invoice;
     const status = String(invoice?.Status || '').toUpperCase();
 
     if (!invoice || status !== 'PAID') {
-      console.log('Webhook ignored. Invoice status:', status || 'NO_STATUS');
       return res.status(200).send('Ignored');
     }
 
     const invoiceId = invoice.Id;
-    if (!invoiceId) {
-      console.error('Webhook paid but missing invoice id.');
-      return res.status(200).send('Missing invoice id');
-    }
+    if (!invoiceId) return res.status(200).send('Missing invoice id');
 
     const verification = await myfatoorahPost(gateway, 'GetPaymentStatus', {
       Key: invoiceId,
@@ -398,29 +417,16 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
     });
 
     const paymentData = verification.data?.Data || {};
-    const customerEmail =
-      paymentData.CustomerEmail ||
-      req.body?.Data?.Customer?.Email ||
-      invoice.CustomerEmail ||
-      '';
+    const customerEmail = paymentData.CustomerEmail || invoice.CustomerEmail || '';
 
     let cartItems = [];
     try {
       cartItems = JSON.parse(paymentData.UserDefinedField || invoice.UserDefinedField || '[]');
     } catch (parseErr) {
-      console.error('Could not parse UserDefinedField:', parseErr.message);
       cartItems = [];
     }
 
-    if (!customerEmail || customerEmail === 'customer@foxgames.local') {
-      console.error('No valid customer email found. Codes cannot be delivered.');
-      return res.status(200).send('No customer email');
-    }
-
-    if (!Array.isArray(cartItems) || !cartItems.length) {
-      console.error('No cart items found in payment UserDefinedField.');
-      return res.status(200).send('No cart items');
-    }
+    if (!customerEmail || !cartItems.length) return res.status(200).send('Invalid data');
 
     const orderId = paymentData.InvoiceId || invoiceId;
     const purchasedCodes = [];
@@ -428,21 +434,13 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
     await db.runTransaction(async (transaction) => {
       for (const item of cartItems) {
         const productId = item.id || item.productId;
-
         if (!productId) continue;
 
         const codesRef = db.collection('productCodes');
-        const availableCodeQuery = codesRef
-          .where('productId', '==', productId)
-          .where('status', '==', 'available')
-          .limit(1);
-
+        const availableCodeQuery = codesRef.where('productId', '==', productId).where('status', '==', 'available').limit(1);
         const codeSnapshot = await transaction.get(availableCodeQuery);
 
-        if (codeSnapshot.empty) {
-          console.error('No available code for product:', productId, item.name);
-          continue;
-        }
+        if (codeSnapshot.empty) continue;
 
         const codeDoc = codeSnapshot.docs[0];
         const codeData = codeDoc.data();
@@ -451,51 +449,26 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
           status: 'used',
           orderId,
           customerEmail,
-          usedAt: admin.firestore.FieldValue.serverTimestamp(),
-          purchasedAt: admin.firestore.FieldValue.serverTimestamp()
+          usedAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
         purchasedCodes.push({
           productName: item.name || productId,
-          code: codeData.code,
-          codeDocId: codeDoc.id,
-          productId
+          code: codeData.code
         });
       }
     });
 
-    if (!purchasedCodes.length) {
-      console.error('Payment paid, but no codes were pulled from Firebase.');
-      return res.status(200).send('No codes available');
-    }
+    if (!purchasedCodes.length) return res.status(200).send('No codes available');
 
     await db.collection('orders').doc(String(orderId)).set({
       orderId: String(orderId),
-      invoiceId: String(orderId),
       customerEmail,
-      customerName: paymentData.CustomerName || req.body?.Data?.Customer?.Name || '',
-      customerPhone: paymentData.CustomerMobile || req.body?.Data?.Customer?.Mobile || '',
-      amount: Number(paymentData.InvoiceValue || paymentData.InvoiceDisplayValue || req.body?.Data?.Amount?.ValueInBaseCurrency || 0),
-      currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
+      amount: Number(paymentData.InvoiceValue || 0),
+      currency: paymentData.CurrencyIso || 'EGP',
       orderStatus: 'paid',
       paymentStatus: 'paid',
-      paymentProvider: gateway.name || 'myfatoorah',
-      isLive: gateway.isLive,
-      items: cartItems,
       codes: purchasedCodes,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
-    await db.collection('transactions').doc(String(orderId)).set({
-      orderId: String(orderId),
-      invoiceId: String(orderId),
-      transactionId: paymentData.InvoiceTransactions?.[0]?.TransactionId || req.body?.Data?.Invoice?.Id || '',
-      customerEmail,
-      amount: Number(paymentData.InvoiceValue || paymentData.InvoiceDisplayValue || req.body?.Data?.Amount?.ValueInBaseCurrency || 0),
-      currency: paymentData.InvoiceDisplayCurrencyIso || paymentData.CurrencyIso || 'EGP',
-      paymentStatus: 'paid',
-      provider: gateway.name || 'myfatoorah',
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 
@@ -503,7 +476,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
     return res.status(200).send('SUCCESS');
 
   } catch (error) {
-    console.error('Webhook processing error:', error.response?.data || error.message);
     return res.status(500).send('Internal Server Error');
   }
 });
@@ -528,47 +500,22 @@ async function sendCodesEmail(email, orderId, codes) {
         <p>تم تأكيد دفع طلبك بنجاح. إليك الأكواد الرقمية الفورية الخاصة بك:</p>
         <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
         ${codesHtml}
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
-        <p style="font-size: 12px; color: #94a3b8; text-align: center;">إذا واجهت أي مشكلة في الشحن، تواصل مع الدعم الفني فوراً عبر الواتساب.</p>
       </div>`
   };
 
-  if (!RESEND_API_KEY) {
-    throw new Error('Missing RESEND_API_KEY in Render Environment Variables.');
-  }
+  if (!RESEND_API_KEY) return;
 
-  await axios.post(
-    'https://api.resend.com/emails',
-    {
-      from: RESEND_FROM,
-      to: [email],
-      subject: mailOptions.subject,
-      html: mailOptions.html
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    }
-  );
+  await axios.post('https://api.resend.com/emails', {
+    from: RESEND_FROM,
+    to: [email],
+    subject: mailOptions.subject,
+    html: mailOptions.html
+  }, {
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    timeout: 30000
+  });
 }
-
-app.get('/test-email', async (req, res) => {
-  try {
-    await sendCodesEmail('namy9585@gmail.com', 'TEST-001', [
-      { productName: 'PUBG UC Test', code: 'TEST-CODE-1234' }
-    ]);
-
-    res.send('Email sent successfully');
-  } catch (err) {
-    console.error('TEST EMAIL ERROR:', err);
-    res.status(500).send(err.message);
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Fox Games running on http://localhost:${PORT}`);
-  console.log(`Fallback MyFatoorah API URL: ${ENV_MYFATOORAH_API_URL}`);
 });
