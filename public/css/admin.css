@@ -79,6 +79,7 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
+  transition: transform var(--transition-fast), right var(--transition-fast);
   z-index: 999;
 }
 
@@ -708,32 +709,32 @@ th {
 }
 
 /* ==========================================================================
-   إصلاح تجاوب الموبايل والقائمة الجانبية (مصحح تماماً لواجهات RTL)
+   إصلاح تجاوب الموبايل والقائمة الجانبية (محاذاة تامة لأقصى اليمين في واجهات RTL)
    ========================================================================== */
 @media (max-width: 1000px) {
   body {
     flex-direction: column !important;
   }
 
-  /* جعل القائمة الجانبية تستقر في أقصى اليمين وتختفي كلياً نحوه */
+  /* إجبار السايدبار على التموضع الصحيح في أقصى يمين الشاشة وإخفائها كلياً لليمين */
   .sidebar {
     position: fixed !important;
     top: 0 !important;
     left: auto !important;
-    right: 0 !important;             /* تثبيت الحافة اليمنى للقائمة بآخر الشاشة */
+    right: 0 !important;
     width: 280px !important;
     height: 100vh !important;
     z-index: 999999 !important;
     background-color: var(--bg-card) !important;
     box-shadow: -15px 0 40px rgba(0, 0, 0, 0.9) !important;
-    transform: translateX(100%) !important; /* إخفاء تام جهة اليمين خارج حدود الشاشة */
+    transform: translateX(100%) !important; /* إخفاء تام جهة اليمين خارج الشاشة */
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 20px 15px !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  /* انزلاق القائمة بسلاسة تامة لتغطي أقصى اليمين عند تفعيل الكلاس active */
+  /* عند الفتح تعود إلى مكانها الطبيعي في أقصى اليمين تماماً */
   .sidebar.active {
     transform: translateX(0) !important;
   }
