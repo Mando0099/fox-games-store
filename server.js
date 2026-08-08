@@ -266,6 +266,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
     // 1. معالجة بوابة كاشير (Kashier) باستخدام صفحة الدفع الاحترافية المباشرة (Hosted Checkout Page)
  // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
+    // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
     if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
@@ -285,7 +286,6 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
-
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
