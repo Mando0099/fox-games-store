@@ -264,7 +264,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
     // 1. معالجة بوابة كاشير (Kashier) على وضع الـ Live حصرياً لتجاوز أي مشاكل Forbidden
 // معالجة بوابة كاشير بطريقة الـ Sessions المطابقة للموقع الشغال تماماً
-    if (provider.includes('kashier')) {
+  if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
       }
@@ -272,42 +272,15 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = 'live';
+      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      try {
-        // إنشاء جلسة دفع (Session) مباشرة من سيرفر كاشير
-        const kashierApiUrl = gateway.isLive 
-          ? 'https://api.kashier.io/sessions' 
-          : 'https://test-api.kashier.io/sessions';
+      // الترتيب الدقيق جداً المطلوب للـ pathString حسب توثيق كاشير الرسمي
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}&merchantRedirect=${merchantRedirect}`;
+      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-        const sessionResponse = await axios.post(kashierApiUrl, {
-          amount: amount,
-          currency: currency,
-          merchantOrderId: orderId,
-          mode: mode,
-          allowedMethods: ['card', 'wallet']
-        }, {
-          headers: {
-            Authorization: gateway.secretKey,
-            'Content-Type': 'application/json'
-          },
-          timeout: 15000
-        });
-
-        const sessionId = sessionResponse.data?.body?.sessionId || sessionResponse.data?.sessionId;
-
-        if (sessionId) {
-          const sessionPageUrl = `https://payments.kashier.io/session/${sessionId}?mode=${mode}`;
-          return res.json({ success: true, paymentUrl: sessionPageUrl });
-        } else {
-          throw new Error('Failed to retrieve Kashier session ID.');
-        }
-
-      } catch (apiErr) {
-        console.error('Kashier Session Error:', apiErr.response?.data || apiErr.message);
-        // Fallback آمن بالطريقة المباشرة لو الـ API جاب نتيجة مختلفة
-        const fallbackUrl = `https://payments.kashier.io/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
-        return res.json({ success: true, paymentUrl: fallbackUrl });
-      }
+      const kashierUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
+      
+      return res.json({ success: true, paymentUrl: kashierUrl });
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
