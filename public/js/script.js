@@ -63,7 +63,7 @@ window.addEventListener('load', () => {
 });
 
 function waitForDataAndRender(attempt = 0) {
-  const maxAttempts = 20;      // يعني حد أقصى 10 ثواني انتظار (20 × 500ms)
+  const maxAttempts = 20;      
   const dataIsReady = typeof products !== 'undefined' && products.length > 0;
 
   if (dataIsReady) {
@@ -75,7 +75,6 @@ function waitForDataAndRender(attempt = 0) {
   }
 
   if (attempt >= maxAttempts) {
-    // البيانات فشلت تحمل خالص - وريله رسالة واضحة بدل ما يفضل فاضي
     const grid = $('categoryGrid');
     if (grid) {
       grid.innerHTML = `<p style="color:var(--muted); grid-column:1/-1; text-align:center; padding:20px;">
@@ -122,12 +121,10 @@ function checkSession() {
 }
 setInterval(checkSession, 60000);
 
-// تصحيح دالة عرض الأقسام الحقيقية برمجياً وبدون بيانات وهمية
 function renderCategories() {
   const grid = $('categoryGrid');
   if (!grid) return;
 
-  // إذا لم يتم جلب الأقسام بعد، يتم استخراجها فوراً من المنتجات المتاحة في قاعدة البيانات
   if ((typeof categories === 'undefined' || !categories.length) && typeof products !== 'undefined' && products.length > 0) {
     const uniqueCats = [...new Set(products.map(p => p.category).filter(Boolean))];
     window.categories = uniqueCats.map(c => ({
@@ -151,14 +148,12 @@ function renderCategories() {
   reveal();
 }
 
-// دالة الفلترة مع أنيميشن سلس عند اختيار التصنيف
 function filterByCategory(categoryName) {
     const categoryFilterSelect = $('categoryFilter');
     if (categoryFilterSelect) {
         categoryFilterSelect.value = categoryName;
     }
     
-    // الانتقال لقسم المنتجات مع تأثير أنيميشن ناعم
     scrollToId('products');
     
     const productGrid = $('productGrid');
@@ -216,7 +211,6 @@ function renderProducts() {
     const imgUrl = p.img || p.image || '';
     const stockCount = Number(p.stock || 0);
     
-    // التحقق لو الكمية خلصت لتحويل الزرار إلى "نفذت الكمية"
     const isOutOfStock = stockCount <= 0;
     const btnText = isOutOfStock 
       ? (currentLang === 'ar' ? 'نفذت الكمية' : 'Out of Stock') 
@@ -597,6 +591,7 @@ function processSecureCheckout() {
     }
 }
 
+// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً من الفايربيز
 async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
@@ -649,7 +644,7 @@ async function checkout() {
   }
 
   Swal.fire({
-    title: currentLang === 'ar' ? 'جاري تجهيز بوابة الدفع...' : 'Preparing Secure Gateway...',
+    title: currentLang === 'ar' ? 'جاري التحقق من بوابة الدفع...' : 'Checking Active Gateway...',
     allowOutsideClick: false,
     background: '#090f17', color: '#fff',
     customClass: { container: 'high-z-index-alert' },
@@ -657,34 +652,97 @@ async function checkout() {
   });
 
   try {
-    const res = await fetch('https://tech-gaming.store/api/myfatoorah/create-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customer: { name, phone, email },
-        total,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category || '',
-          price: Number(item.price || 0)
-        }))
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.paymentUrl) {
-      throw new Error(data.message || 'Payment link was not created.');
-    }
-
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    await updateProductStockAfterPurchase(cart);
-    if (currentUser) {
-        await registerVerifiedBuyer(cart, currentUser.uid);
-    }
+    if (typeof firebase === 'undefined' || !firebase.firestore) throw new Error('Firebase not initialized');
+    const db = firebase.firestore();
     
-    clearCartAfterPurchase();
-    window.location.href = data.paymentUrl;
+    // جلب البوابة المفعلة حصرياً من اللوحة
+    const gatewaySnap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
+    
+    if (gatewaySnap.empty) {
+      throw new Error(currentLang === 'ar' ? 'لا توجد بوابة دفع مفعلة حالياً من الإدارة.' : 'No active payment gateway configured.');
+    }
+
+    const activeGateway = gatewaySnap.docs[0].data();
+    const gatewayKey = activeGateway.key;
+
+    if (gatewayKey === 'vodafone_cash' || gatewayKey === 'instapay') {
+      Swal.close();
+      if (drawer) drawer.style.display = 'block';
+
+      const detailsText = gatewayKey === 'vodafone_cash' 
+        ? `رقم المحفظة للتحويل: <b>${activeGateway.credentials.walletNumber}</b><br>${activeGateway.credentials.instructions || ''}`
+        : `عنوان الدفع (IPA): <b>${activeGateway.credentials.ipaAddress}</b><br>اسم الحساب: ${activeGateway.credentials.accountName}`;
+
+      Swal.fire({
+        title: currentLang === 'ar' ? 'تعليمات الدفع اليدوي' : 'Manual Payment Instructions',
+        html: `
+          <p style="margin-bottom:10px;">الإجمالي المطلوب تحويله: <b style="color:var(--neon-cyan);">${total} EGP</b></p>
+          <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:13px;">${detailsText}</p>
+          <p style="margin-top:10px; font-size:12px; color:#94a3b8;">بعد التحويل، تواصل معنا عبر الدعم الفني لإرسال الإيصال واستلام طلبك.</p>
+        `,
+        icon: 'info',
+        confirmButtonText: currentLang === 'ar' ? 'تأكيد وإتمام الطلب' : 'Confirm Order',
+        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+        customClass: { container: 'high-z-index-alert' }
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const currentUser = firebase.auth().currentUser;
+          await updateProductStockAfterPurchase(cart);
+          if (currentUser) await registerVerifiedBuyer(cart, currentUser.uid);
+          
+          await db.collection('orders').add({
+            customerName: name,
+            phone,
+            email,
+            total,
+            items: cart,
+            gateway: activeGateway.name,
+            status: 'Pending Verification',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          clearCartAfterPurchase();
+          Swal.fire({
+            icon: 'success',
+            title: currentLang === 'ar' ? 'تم تسجيل طلبك بنجاح' : 'Order Placed',
+            text: currentLang === 'ar' ? 'سيتم مراجعة التحويل وتسليمك المنتج في أقرب وقت.' : 'Your order is pending verification.',
+            background: '#090f17', color: '#fff'
+          });
+        }
+      });
+
+    } else {
+      const apiRes = await fetch(`https://tech-gaming.store/api/${gatewayKey}/create-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gatewayKey: gatewayKey,
+          credentials: activeGateway.credentials,
+          customer: { name, phone, email },
+          total,
+          items: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.category || '',
+            price: Number(item.price || 0)
+          }))
+        })
+      });
+
+      const data = await apiRes.json();
+      if (!apiRes.ok || !data.paymentUrl) {
+        throw new Error(data.message || 'Payment link was not created.');
+      }
+
+      const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+      await updateProductStockAfterPurchase(cart);
+      if (currentUser) {
+          await registerVerifiedBuyer(cart, currentUser.uid);
+      }
+      
+      clearCartAfterPurchase();
+      window.location.href = data.paymentUrl;
+    }
 
   } catch (e) {
     console.error('Checkout error:', e);
