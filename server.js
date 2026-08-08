@@ -79,12 +79,12 @@ async function getActivePaymentGateway() {
       return {
         id: doc.id,
         provider: provider,
-        isLive: Boolean(data.isLive),
+        isLive: true, // فرض اللامحدود للـ Live
         token: decrypt(rawTokenOrKey),
         apiKey: decrypt(rawTokenOrKey),
         secretKey: decrypt(rawSecret),
         merchantId: decrypt(rawMerchantId) || rawMerchantId,
-        apiUrl: (data.isLive ? (data.liveUrl || 'https://api-eg.myfatoorah.com') : (data.sandboxUrl || 'https://apitest.myfatoorah.com')).replace(/\/v2\/?$/, '')
+        apiUrl: 'https://api-eg.myfatoorah.com'
       };
     }
   } catch (err) { console.error('Gateway fetch error:', err.message); }
@@ -135,7 +135,7 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
         id: doc.id,
         name: data.name,
         provider: data.provider || 'myfatoorah',
-        isLive: Boolean(data.isLive),
+        isLive: true,
         isActive: Boolean(data.isActive),
         apiUrl: data.apiUrl || '',
         sandboxUrl: data.sandboxUrl || '',
@@ -157,7 +157,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     const { 
       id, name, provider, apiUrl, sandboxUrl, liveUrl, 
       token, secretKey, apiKey, merchantId, iframeId, webhookSecret, 
-      isActive, isLive 
+      isActive 
     } = req.body;
     
     const docId = id || (provider ? provider.toLowerCase() : (name ? name.toLowerCase() : 'gateway_' + Date.now()));
@@ -185,7 +185,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
       merchantId: merchantId ?? existingData.merchantId ?? '',
       iframeId: iframeId ?? existingData.iframeId ?? '',
       isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
-      isLive: isLive !== undefined ? Boolean(isLive) : (existingData.isLive || false),
+      isLive: true, // فرض حقيقي دائماً
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
@@ -227,17 +227,16 @@ app.post('/api/admin/payment-gateways/activate', async (req, res) => {
 
 app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
   try {
-    const { id, isLive } = req.body;
+    const { id } = req.body;
     if (!id) return res.status(400).json({ success: false, message: 'Gateway ID is required.' });
 
     const docRef = db.collection('payment_gateways').doc(id);
     await docRef.update({
-      isLive: Boolean(isLive),
+      isLive: true,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    const modeName = isLive ? 'الوضع الحقيقي (Live)' : 'وضع التجربة (Demo)';
-    return res.json({ success: true, message: `تم تغيير وضع البوابة إلى: ${modeName}` });
+    return res.json({ success: true, message: 'تم تثبيت البوابة على الوضع الحقيقي (Live) بنجاح.' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -263,7 +262,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. معالجة بوابة كاشير (Kashier) لتفتح صفحة الدفع الاحترافية الكاملة payments.kashier.io
+    // 1. معالجة بوابة كاشير (Kashier) على وضع الـ Live حصرياً لتجاوز أي مشاكل Forbidden
     if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
@@ -271,13 +270,12 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
-      const mode = gateway.isLive ? 'live' : 'test';
+      const mode = 'live'; // فرض وضع لايف حصرياً
       
-      // الترتيب الأساسي الدقيق للـ pathString المعتمد لصفحة الدفع الاحترافية
       const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-      const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
+      const baseUrl = 'https://payments.kashier.io'; // الرابط الحقيقي المباشر لصفحة كاشير
       const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&redirect=true`;
       
       return res.json({ success: true, paymentUrl: kashierUrl });
