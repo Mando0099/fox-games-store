@@ -274,13 +274,13 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const currency = 'EGP';
       const mode = gateway.isLive ? 'live' : 'test';
       
-      // التوجيه إلى صفحة الدفع الاحترافية لـ كاشير (payments.kashier.io)
-      const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
-      
-      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}&redirect=true`;
+      // الترتيب الصحيح لمعاملات الـ pathString بحسب توثيق كاشير الرسمي
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}`;
+      const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
+      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&redirect=true`;
+      
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
 
