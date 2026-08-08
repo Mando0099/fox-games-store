@@ -128,7 +128,7 @@ async function loadAll() {
   await loadCoupons();
   await loadCustomers();
   await loadStats();
-  await loadConfiguredGateways(); // تحميل بوابات الدفع الذكية المحدثة
+  await loadConfiguredGateways(); // تحميل بوابات الدفع الذكية
   await loadAdminsManagement();
 }
 
@@ -304,15 +304,15 @@ async function saveAndActivateGateway() {
 
     let credentials = {};
     for (let field of gatewayConfigs[gatewayKey]) {
-        const val = $(`gw_${field.id}`)?.value;
-        if (!val) return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label} مطلوب!`, ...swalConfig });
-        credentials[field.id] = val;
+        const valInput = $(`gw_${field.id}`)?.value;
+        if (!valInput) return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label} مطلوب!`, ...swalConfig });
+        credentials[field.id] = valInput;
     }
 
     try {
         await db.collection('payment_gateways').doc(gatewayKey).set({
             key: gatewayKey,
-            name: $('gatewaySelect').options[$('gatewaySelect'].selectedIndex].text,
+            name: $('gatewaySelect').options[$('gatewaySelect').selectedIndex].text,
             credentials,
             isActive: false,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -531,7 +531,7 @@ function resetCouponForm() {
 }
 
 // ==========================================
-// باقي دوال المتجر وإدارة المنتجات والأكواد
+// باقي دوال المتجر وإدارة المنتجات
 // ==========================================
 
 function initEventListeners() {
