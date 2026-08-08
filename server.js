@@ -262,25 +262,55 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. معالجة بوابة كاشير (Kashier) على وضع الـ Live حصرياً لتجاوز أي مشاكل Forbidden
-// معالجة بوابة كاشير بطريقة الـ Sessions المطابقة للموقع الشغال تماماً
-if (provider.includes('kashier')) {
-      if (!gateway.merchantId || !gateway.secretKey) {
-        return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
+    // 1. Kashier Hosted Payment Page (HPP)
+    // Kashier signs the HPP hash with the Payment API Key.
+    // Secret Key is not used for this browser-side HPP hash.
+    if (provider.includes('kashier')) {
+      const paymentApiKey = gateway.token || gateway.apiKey;
+      if (!gateway.merchantId || !paymentApiKey) {
+        return res.status(400).json({
+          success: false,
+          message: 'Kashier Merchant ID or Payment API Key is missing.'
+        });
       }
 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = 'live';
+      const amountForKashier = Number(amount).toFixed(2);
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // الترتيب الدقيق للبارامترات مع إضافة merchantRedirect بوضوح
-      const pathString = `/?amount=${amount}&currency=${currency}&merchantId=${gateway.merchantId}&merchantRedirect=${merchantRedirect}&mode=${mode}&orderId=${orderId}`;
-      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+      // Kashier HPP hash source: /?payment=MID.ORDER_ID.AMOUNT.CURRENCY
+      const hashSource = `/?payment=${gateway.merchantId}.${orderId}.${amountForKashier}.${currency}`;
+      const hash = crypto.createHmac('sha256', paymentApiKey)
+        .update(hashSource, 'utf8')
+        .digest('hex');
 
-      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
-      
-      return res.json({ success: true, paymentUrl: paymentUrl });
+      const params = new URLSearchParams({
+        merchantId: gateway.merchantId,
+        orderId,
+        mode,
+        amount: amountForKashier,
+        currency,
+        hash,
+        merchantRedirect,
+        allowedMethods: 'card,wallet,bank_installments',
+        display: 'en'
+      });
+
+      const paymentUrl = `https://checkout.kashier.io/?${params.toString()}`;
+
+      console.log('KASHIER HPP:', JSON.stringify({
+        orderId,
+        merchantId: gateway.merchantId,
+        amount: amountForKashier,
+        currency,
+        mode,
+        hashSource,
+        paymentUrl: paymentUrl.replace(hash, '[HASH]')
+      }));
+
+      return res.json({ success: true, paymentUrl });
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
