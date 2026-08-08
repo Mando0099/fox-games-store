@@ -591,7 +591,7 @@ function processSecureCheckout() {
     }
 }
 
-// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً من الفايربيز بدون قيود معقدة
+// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً وتوجه للرابط الديناميكي الموحد بالسيرفر
 async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
@@ -712,8 +712,8 @@ async function checkout() {
       });
 
     } else {
-      // إرسال طلب الدفع الإلكتروني لأي بوابة أخرى (MyFatoorah, Kashier, Stripe, Paymob, إلخ)
-      const apiRes = await fetch(`https://tech-gaming.store/api/${gatewayKey}/create-payment`, {
+      // التوجيه السليم والمباشر للمسار الديناميكي الموحد بالسيرفر (`/api/${gatewayKey}/create-payment`)
+      const apiRes = await fetch(`/api/${gatewayKey}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
