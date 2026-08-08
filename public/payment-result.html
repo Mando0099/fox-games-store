@@ -190,13 +190,13 @@
     const params = new URLSearchParams(window.location.search);
     
     // التقاط الحالة ورقم العملية بدقة من جميع البوابات (كاشير وماي فاتورة)
-    const rawStatus = (params.get('status') || params.get('paymentStatus') || '').toLowerCase();
+    const rawStatus = (params.get('status') || params.get('paymentStatus') || params.get('payment') || '').toLowerCase();
     const paymentId = params.get('paymentId') || params.get('invoiceId') || params.get('Id') || params.get('orderId') || params.get('merchantOrderId') || '';
     
     const successView = document.getElementById('successView');
     const failedView = document.getElementById('failedView');
 
-    const isSuccess = rawStatus === 'success' || rawStatus === 'paid' || params.get('success') === 'true';
+    const isSuccess = rawStatus === 'success' || rawStatus === 'paid' || params.get('success') === 'true' || rawStatus.includes('success');
 
     if (isSuccess) {
       successView.style.display = 'block';
@@ -216,7 +216,7 @@
       }
     }
 
-    // إرسال تفاصيل المعاملة للسيرفر لتظهر في لوحة التحكم (Admin Panel)
+    // إرسال تفاصيل المعاملة للسيرفر فوراً لتنفيذ إرسال الإيميل وتسجيلها في لوحة التحكم
     if (paymentId) {
       fetch('/api/record-transaction', {
         method: 'POST',
@@ -226,7 +226,10 @@
           status: isSuccess ? 'paid' : 'failed',
           gatewayResponse: Object.fromEntries(params.entries())
         })
-      }).catch(err => console.log('Transaction logging error:', err));
+      })
+      .then(res => res.json())
+      .then(data => console.log('Transaction response:', data))
+      .catch(err => console.log('Transaction logging error:', err));
     }
   </script>
 </body>
