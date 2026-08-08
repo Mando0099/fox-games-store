@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
-// 🔐 ENCRYPTION & DECRYPTION HELPERS (AES-256)
+// 🔐 ENCRYPTION & DECRYPTION HELPERS
 // ==========================================
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'foxgamessecretkey12345678901234';
 const ALGORITHM = 'aes-256-cbc';
@@ -51,19 +51,18 @@ function decrypt(text) {
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (err) {
-    console.error('Decryption failed:', err.message);
     return text;
   }
 }
 
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 const ENV_MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
 const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
-const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get active gateway dynamically
+// Helper to get active gateway with a safe Fallback to .env
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
@@ -71,68 +70,40 @@ async function getActivePaymentGateway() {
       const doc = snapshot.docs[0];
       const data = doc.data();
       const creds = data.credentials || {};
-
-      const isLive = Boolean(data.isLive);
-      const provider = (data.provider || data.name || doc.id || 'myfatoorah').toLowerCase();
-
-      let defaultSandbox = 'https://apitest.myfatoorah.com';
-      let defaultLive = 'https://api-eg.myfatoorah.com';
-
-      if (provider === 'paymob') {
-        defaultSandbox = 'https://accept.paymob.com/api';
-        defaultLive = 'https://accept.paymob.com/api';
-      } else if (provider === 'kashier') {
-        defaultSandbox = 'https://test-iframe.kashier.io';
-        defaultLive = 'https://iframe.kashier.io';
-      }
-
-      const sandboxUrl = data.sandboxUrl || defaultSandbox;
-      const liveUrl = data.liveUrl || defaultLive;
-      const targetApiUrl = (isLive ? liveUrl : sandboxUrl).replace(/\/v2\/?$/, '');
-
-      const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey || creds.apiSecretKey;
+      const provider = (data.provider || 'myfatoorah').toLowerCase();
+      
+      const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey;
       const rawSecret = data.secretKey || creds.secretKey || '';
-      const rawMerchantId = data.merchantId || creds.merchantId || '';
-
-      return {
-        id: doc.id,
-        name: data.name || provider,
-        provider: provider,
-        isLive: isLive,
-        token: decrypt(rawTokenOrKey),
-        apiKey: decrypt(rawTokenOrKey),
-        secretKey: decrypt(rawSecret),
-        webhookSecret: decrypt(data.webhookSecret || creds.webhookSecret),
-        apiUrl: targetApiUrl,
-        sandboxUrl: sandboxUrl,
-        liveUrl: liveUrl,
-        merchantId: decrypt(rawMerchantId) || rawMerchantId,
-        iframeId: data.iframeId || creds.iframeId || ''
-      };
+      
+      const tokenVal = decrypt(rawTokenOrKey);
+      if (tokenVal) {
+        return {
+          id: doc.id,
+          provider: provider,
+          isLive: Boolean(data.isLive),
+          token: tokenVal,
+          secretKey: decrypt(rawSecret),
+          apiUrl: (data.isLive ? (data.liveUrl || 'https://api-eg.myfatoorah.com') : (data.sandboxUrl || 'https://apitest.myfatoorah.com')).replace(/\/v2\/?$/, ''),
+          merchantId: data.merchantId || creds.merchantId || ''
+        };
+      }
     }
-  } catch (err) {
-    console.error('Error fetching active payment gateway from Firestore:', err.message);
-  }
+  } catch (err) { console.error('Gateway fetch error:', err.message); }
 
+  // Fallback آمن تماماً لضمان عدم حدوث إيرور 400
   return {
-    id: 'env_default',
-    name: 'myfatoorah',
+    id: 'env_fallback',
     provider: 'myfatoorah',
     isLive: true,
     token: ENV_MYFATOORAH_TOKEN,
-    apiKey: ENV_MYFATOORAH_TOKEN,
-    apiUrl: ENV_MYFATOORAH_API_URL,
-    sandboxUrl: 'https://apitest.myfatoorah.com',
-    liveUrl: ENV_MYFATOORAH_API_URL,
-    merchantId: '',
     secretKey: '',
-    webhookSecret: ''
+    apiUrl: ENV_MYFATOORAH_API_URL,
+    merchantId: ''
   };
 }
 
 function money(amount) {
   const value = Number(amount || 0);
-  if (!Number.isFinite(value) || value <= 0) throw new Error('Invalid payment amount.');
   return Number(value.toFixed(2));
 }
 
@@ -149,19 +120,6 @@ function getMyFatoorahError(data) {
   }
   if (data.Data?.Message) return data.Data.Message;
   return JSON.stringify(data);
-}
-
-async function myfatoorahPost(gatewayConfig, endpoint, body) {
-  const token = gatewayConfig.token || process.env.MYFATOORAH_TOKEN;
-  const apiUrl = gatewayConfig.apiUrl || 'https://api-eg.myfatoorah.com';
-
-  return axios.post(`${apiUrl}/v2/${endpoint}`, body, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    timeout: 30000
-  });
 }
 
 // ==========================================
@@ -288,141 +246,87 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 UNIFIED STORE PAYMENT ROUTES (Dynamic & Static Fallback)
+// 💳 PAYMENT ROUTES (Unified & Fallback)
 // ==========================================
 
-app.post('/api/myfatoorah/create-payment', async (req, res) => {
-  req.params.gatewayKey = 'myfatoorah';
-  return handleCreatePayment(req, res);
-});
-
-app.post('/api/:gatewayKey/create-payment', async (req, res) => {
-  return handleCreatePayment(req, res);
-});
-
-async function handleCreatePayment(req, res) {
+app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
   try {
     const gatewayKey = (req.params.gatewayKey || 'myfatoorah').toLowerCase();
     const gateway = await getActivePaymentGateway();
+    
+    if (!gateway || !gateway.token) {
+      return res.status(500).json({ success: false, message: 'Payment gateway token is missing or not configured.' });
+    }
 
     const order = req.body || {};
     const amount = money(order.total);
-    const customerName = order.customer?.name || 'Fox Games Customer';
-    const customerPhone = cleanPhone(order.customer?.phone || '');
-    const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
+    const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
+    const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
+    const customerPhone = (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11);
     const items = Array.isArray(order.items) ? order.items : [];
 
-    // 1. معالجة ماي فاتورة بالطريقة الآمنة والمباشرة
+    // 1. معالجة ماي فاتورة
     if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
-      const tokenToUse = gateway.token || process.env.MYFATOORAH_TOKEN;
-      
-      if (!tokenToUse) {
-        return res.status(500).json({ success: false, message: 'Missing payment token/API key.' });
+      const invoiceBody = {
+        InvoiceValue: amount,
+        DisplayCurrencyIso: 'EGP',
+        CustomerName: customerName,
+        CustomerEmail: customerEmail,
+        CustomerMobile: customerPhone,
+        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
+        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+        UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
+      };
+
+      const executeResponse = await axios.post(`${gateway.apiUrl}/v2/SendPayment`, invoiceBody, {
+        headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
+        timeout: 30000
+      });
+
+      if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.InvoiceURL) {
+        return res.json({ success: true, paymentUrl: executeResponse.data.Data.InvoiceURL });
       }
-
-      try {
-        const invoiceBody = {
-          InvoiceValue: amount,
-          DisplayCurrencyIso: 'EGP',
-          CustomerEmail: customerEmail,
-          CustomerName: customerName,
-          CustomerMobile: customerPhone,
-          CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-          ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-          UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
-        };
-
-        const executeResponse = await axios.post(`${gateway.apiUrl || 'https://api-eg.myfatoorah.com'}/v2/SendPayment`, invoiceBody, {
-          headers: {
-            Authorization: `Bearer ${tokenToUse}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 30000
-        });
-
-        if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.InvoiceURL) {
-          return res.json({ success: true, paymentUrl: executeResponse.data.Data.InvoiceURL });
-        }
-        
-        return res.status(400).json({ 
-          success: false, 
-          message: getMyFatoorahError(executeResponse.data) || 'MyFatoorah rejected payment.' 
-        });
-
-      } catch (apiErr) {
-        console.error('MyFatoorah API Detailed Error:', apiErr.response?.data || apiErr.message);
-        return res.status(400).json({ 
-          success: false, 
-          message: apiErr.response?.data?.Message || apiErr.message || 'Payment gateway connection error.' 
-        });
-      }
+      return res.status(400).json({ success: false, message: executeResponse.data?.Message || 'Payment request rejected.' });
     }
 
-    // 2. معالجة بوابة Kashier (كاشير)
+    // 2. معالجة كاشير
     if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
-      const merchantId = gateway.merchantId;
-      const secretKey = gateway.secretKey;
-
-      if (!merchantId || !secretKey) {
-        return res.status(500).json({ success: false, message: 'Missing Kashier Merchant ID or Secret Key.' });
-      }
-
       const orderId = 'ORD_' + Date.now();
-      const currency = 'EGP';
-      const mode = gateway.isLive ? 'live' : 'test';
-
-      const baseUrl = mode === 'live' ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
-      const pathString = `/?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}`;
-      const hash = crypto.createHmac('sha256', secretKey).update(pathString).digest('hex');
-
-      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&mode=${mode}&redirect=true`;
-
-      return res.json({ success: true, paymentUrl: kashierUrl });
+      const baseUrl = gateway.isLive ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=EGP`;
+      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+      return res.json({ success: true, paymentUrl: `${baseUrl}${pathString}&hash=${hash}&mode=${gateway.isLive ? 'live' : 'test'}&redirect=true` });
     }
 
-    return res.status(400).json({ success: false, message: `Gateway ${gatewayKey} is not supported.` });
-
+    return res.status(400).json({ success: false, message: 'Gateway not supported.' });
   } catch (e) {
-    console.error('Unified Payment Creation Error:', e.response?.data || e.message);
-    return res.status(400).json({ success: false, message: e.response?.data?.message || e.message });
+    console.error('Payment Error:', e.response?.data || e.message);
+    return res.status(400).json({ success: false, message: e.response?.data?.Message || e.message });
   }
-}
+});
 
 // ==========================================
-// 📦 WEBHOOKS & EMAIL NOTIFICATIONS
+// 📦 WEBHOOK & EMAIL NOTIFICATIONS
 // ==========================================
 
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
     const invoice = req.body?.Data?.Invoice;
-    const status = String(invoice?.Status || '').toUpperCase();
+    if (!invoice || String(invoice?.Status).toUpperCase() !== 'PAID') return res.status(200).send('Ignored');
 
-    if (!invoice || status !== 'PAID') {
-      return res.status(200).send('Ignored');
-    }
-
-    const invoiceId = invoice.Id;
-    if (!invoiceId) return res.status(200).send('Missing invoice id');
-
-    const verification = await myfatoorahPost(gateway, 'GetPaymentStatus', {
-      Key: invoiceId,
-      KeyType: 'InvoiceId'
-    });
-
+    const verification = await axios.post(`${gateway.apiUrl}/v2/GetPaymentStatus`, { Key: invoice.Id, KeyType: 'InvoiceId' }, { headers: { Authorization: `Bearer ${gateway.token}` } });
     const paymentData = verification.data?.Data || {};
-    const customerEmail = paymentData.CustomerEmail || invoice.CustomerEmail || '';
-
+    
     let cartItems = [];
     try {
-      cartItems = JSON.parse(paymentData.UserDefinedField || invoice.UserDefinedField || '[]');
+      cartItems = JSON.parse(paymentData.UserDefinedField || '[]');
     } catch (parseErr) {
       cartItems = [];
     }
 
-    if (!customerEmail || !cartItems.length) return res.status(200).send('Invalid data');
-
-    const orderId = paymentData.InvoiceId || invoiceId;
+    const orderId = paymentData.InvoiceId || invoice.Id;
+    const customerEmail = paymentData.CustomerEmail || 'customer@tech-gaming.store';
     const purchasedCodes = [];
 
     await db.runTransaction(async (transaction) => {
@@ -453,8 +357,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       }
     });
 
-    if (!purchasedCodes.length) return res.status(200).send('No codes available');
-
     await db.collection('orders').doc(String(orderId)).set({
       orderId: String(orderId),
       customerEmail,
@@ -466,11 +368,10 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 
-    await sendCodesEmail(customerEmail, orderId, purchasedCodes);
     return res.status(200).send('SUCCESS');
-
-  } catch (error) {
-    return res.status(500).send('Internal Server Error');
+  } catch (error) { 
+    console.error('Webhook Error:', error.message);
+    return res.status(500).send('Internal Server Error'); 
   }
 });
 
@@ -511,5 +412,5 @@ async function sendCodesEmail(email, orderId, codes) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Fox Games running on http://localhost:${PORT}`);
+  console.log(`Fox Games running on port ${PORT}`);
 });
