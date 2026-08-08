@@ -75,7 +75,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
   currentUser = user;
   db = firebase.firestore();
-  if ($('adminEmail'))$('adminEmail').textContent = user.email;
+  if ($('adminEmail')) $('adminEmail').textContent = user.email;
 
   try {
     const adminCheck = await db.collection('admins')
@@ -170,7 +170,7 @@ async function loadAdminsManagement() {
                     </td>
                     <td>
                         ${canControl ? `
-                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}',${!isActive})">
+                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}', ${!isActive})">
                                 ${isActive ? '<i class="fa-solid fa-ban"></i> حجب الدخول' : '<i class="fa-solid fa-check"></i> تفعيل'}
                             </button>
                         ` : '<span style="color:#64748b; font-size:12px;">صلاحيات مقيدة</span>'}
@@ -236,45 +236,54 @@ async function toggleAdminStatus(docId, newStatus) {
 }
 
 // ==========================================
-// 💳 دوال بوابات الدفع الديناميكية والاحترافية (مع الـ API الأساسي لكل البوابات)
+// 💳 دوال بوابات الدفع الديناميكية والاحترافية الدقيقة
 // ==========================================
 
 const gatewayConfigs = {
     myfatoorah: [
-        { id: 'apiKey', label: 'MyFatoorah API Token / Key *', type: 'password', placeholder: 'أدخل الـ Token أو مفتاح الـ API الأساسي' },
-        { id: 'mode', label: 'الوضع', type: 'select', options: [{val: 'test', text: 'تجريبي (Test)'}, {val: 'live', text: 'حقيقي (Live)'}] }
+        { id: 'apiKey', label: 'API Key / Token *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
+        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'المفتاح السري (Secret Key)' },
+        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
     ],
-    paymob: [
-        { id: 'apiKey', label: 'Paymob API Key *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
-        { id: 'integrationId', label: 'Integration ID *', type: 'text', placeholder: 'مثال: 123456' },
-        { id: 'iframeId', label: 'Iframe ID *', type: 'text', placeholder: 'مثال: 78910' }
+    kashier: [
+        { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'مفتاح الـ API' },
+        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'المفتاح السري (Secret Key)' },
+        { id: 'merchantId', label: 'Merchant ID / Account *', type: 'text', placeholder: 'معرف التاجر' }
+    ],
+    fawry: [
+        { id: 'merchantId', label: 'Merchant ID *', type: 'text', placeholder: 'معرف التاجر' },
+        { id: 'securityKey', label: 'Security Key / API Credentials *', type: 'password', placeholder: 'مفتاح الأمان' },
+        { id: 'callbackUrl', label: 'Callback URL *', type: 'text', placeholder: 'https://yourstore.com/callback' },
+        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
+    ],
+    fawaterk: [
+        { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'مفتاح الـ API' },
+        { id: 'apiSecret', label: 'API Secret / Token *', type: 'password', placeholder: 'السري / التوكن' },
+        { id: 'merchantAccount', label: 'Merchant Account *', type: 'text', placeholder: 'حساب التاجر' },
+        { id: 'callbackUrl', label: 'Callback / Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/callback' }
     ],
     stripe: [
-        { id: 'apiKey', label: 'Stripe Secret API Key *', type: 'password', placeholder: 'sk_live_... أو sk_test_...' },
-        { id: 'publishableKey', label: 'Publishable Key', type: 'text', placeholder: 'pk_live_...' }
+        { id: 'publishableKey', label: 'Publishable Key *', type: 'text', placeholder: 'pk_live_...' },
+        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'sk_live_...' },
+        { id: 'webhookSecret', label: 'Webhook Secret *', type: 'password', placeholder: 'مفتاح الـ Webhook' },
+        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
     ],
     paypal: [
-        { id: 'apiKey', label: 'PayPal Secret API Key *', type: 'password', placeholder: 'المفتاح السري الأساسي للـ API' },
-        { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'Client ID' },
-        { id: 'mode', label: 'بيئة العمل', type: 'select', options: [{val: 'sandbox', text: 'Sandbox (تجريبي)'}, {val: 'live', text: 'Live (حقيقي)'}] }
+        { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'معرف العميل' },
+        { id: 'clientSecret', label: 'Client Secret *', type: 'password', placeholder: 'المفتاح السري' },
+        { id: 'webhookId', label: 'Webhook ID / Secret *', type: 'text', placeholder: 'معرف أو سري الـ Webhook' },
+        { id: 'returnUrl', label: 'Return / Cancel URLs *', type: 'text', placeholder: 'https://yourstore.com/return' }
     ],
-    cashier: [
-        { id: 'apiKey', label: 'Cashier API Key *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
-        { id: 'merchantId', label: 'Merchant ID *', type: 'text', placeholder: 'معرف التاجر' }
-    ],
-    fawaterak: [
-        { id: 'apiKey', label: 'Fawaterak API Token / Key *', type: 'password', placeholder: 'توكن أو مفتاح الـ API لفواتيرك' },
-        { id: 'mode', label: 'البيئة', type: 'select', options: [{val: 'test', text: 'تجريبي'}, {val: 'live', text: 'حقيقي'}] }
+    paymob: [
+        { id: 'apiSecretKey', label: 'API Secret Key *', type: 'password', placeholder: 'المفتاح السري للـ API' },
+        { id: 'publicKey', label: 'Public Key *', type: 'text', placeholder: 'المفتاح العام' },
+        { id: 'integrationId', label: 'Integration ID *', type: 'text', placeholder: 'معرف التكامل' },
+        { id: 'iframeId', label: 'Iframe ID (اختياري)', type: 'text', placeholder: 'معرف الإطار' },
+        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
     ],
     instapay: [
-        { id: 'apiKey', label: 'مفتاح الـ API (إن وجد)', type: 'password', placeholder: 'اختياري' },
         { id: 'ipaAddress', label: 'عنوان الدفع (IPA) *', type: 'text', placeholder: 'username@instapay' },
-        { id: 'accountName', label: 'اسم صاحب الحساب *', type: 'text', placeholder: 'محمد أشرف' }
-    ],
-    vodafone_cash: [
-        { id: 'apiKey', label: 'مفتاح الـ API (إن وجد)', type: 'password', placeholder: 'اختياري' },
-        { id: 'walletNumber', label: 'رقم المحفظة *', type: 'text', placeholder: '01012345678' },
-        { id: 'instructions', label: 'تعليمات الدفع للعميل *', type: 'textarea', placeholder: 'تعليمات التحويل...' }
+        { id: 'accountName', label: 'اسم صاحب الحساب *', type: 'text', placeholder: 'الاسم ثلاثي' }
     ]
 };
 
@@ -328,7 +337,7 @@ async function saveAndActivateGateway() {
         renderGatewayFields();
         await loadConfiguredGateways();
 
-        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ مفاتيح الـ API وإعدادات البوابة بنجاح.', ...swalConfig });
+        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ مفاتيح الـ API وإعدادات البوابة بدقة.', ...swalConfig });
     } catch (err) { 
         console.error(err);
         Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل حفظ الإعدادات.', ...swalConfig }); 
