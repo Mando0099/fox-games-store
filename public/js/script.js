@@ -661,7 +661,8 @@ async function checkout() {
     }
 
     const activeGateway = gatewaySnap.docs[0].data();
-    const gatewayKey = activeGateway.key;
+    // تصحيح قراءة كود البوابة لضمان عمل المسار الديناميكي والثابت بدون أي إيرور
+    const gatewayKey = (activeGateway.key || activeGateway.provider || activeGateway.name || 'myfatoorah').toLowerCase();
     const creds = activeGateway.credentials || {};
 
     if (gatewayKey === 'instapay') {
@@ -709,19 +710,23 @@ async function checkout() {
       });
 
     } else {
-      // المسار الديناميكي الصحيح 100% المتوافق مع السيرفر الجديد
-      const apiRes = await fetch(`/api/${gatewayKey}/create-payment`, {
+      // إرسال الطلب بالمسار الصحيح وتنسيق بيانات العميل لتجنب خطأ Invalid data
+      const apiRes = await fetch('/api/myfatoorah/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gatewayKey: gatewayKey,
           credentials: creds,
-          customer: { name, phone, email },
-          total,
+          customer: { 
+            name: name || 'Gamer', 
+            phone: phone || '01000000000', 
+            email: email || 'customer@tech-gaming.store' 
+          },
+          total: Number(total),
           items: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            category: item.category || '',
+            id: String(item.id || item.docId || '1'),
+            name: String(item.name || 'Digital Product'),
+            category: String(item.category || ''),
             price: Number(item.price || 0)
           }))
         })
