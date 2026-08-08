@@ -241,7 +241,6 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
   }
 });
 
-// مسار حذف بوابة دفع
 app.delete('/api/admin/payment-gateways/:id', async (req, res) => {
   try {
     await db.collection('payment_gateways').doc(req.params.id).delete();
@@ -251,7 +250,6 @@ app.delete('/api/admin/payment-gateways/:id', async (req, res) => {
   }
 });
 
-// مسارات تعديل وحذف المنتجات
 app.put('/api/admin/products/:id', async (req, res) => {
   try {
     await db.collection('products').doc(req.params.id).set({
@@ -273,7 +271,6 @@ app.delete('/api/admin/products/:id', async (req, res) => {
   }
 });
 
-// مسارات تعديل وحذف كوبونات الخصم
 app.put('/api/admin/coupons/:id', async (req, res) => {
   try {
     await db.collection('coupons').doc(req.params.id).set({
@@ -316,7 +313,6 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const provider = (gateway.provider || '').toLowerCase();
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
-    // 1. Kashier
     if (provider.includes('kashier')) {
       const paymentApiKey = gateway.token || gateway.apiKey;
       if (!gateway.merchantId || !paymentApiKey) {
@@ -363,7 +359,6 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       return res.json({ success: true, paymentUrl });
     }
 
-    // 2. MyFatoorah
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
       if (!tokenToUse) {
@@ -474,7 +469,6 @@ async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency
 // 🌐 WEBHOOKS & TRANSACTIONS
 // ==========================================
 
-// MyFatoorah Webhook
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
@@ -503,7 +497,6 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const data = { ...(req.body || {}), ...(req.query || {}) };
@@ -555,7 +548,6 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
-// مسار تسجيل المعاملات الاحتياطي من المتصفح
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
@@ -684,17 +676,25 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
       </div>`
   };
 
-  if (!RESEND_API_KEY) return;
+  if (!RESEND_API_KEY) {
+    console.error("Resend API Key is missing.");
+    return;
+  }
 
-  await axios.post('https://api.resend.com/emails', {
-    from: RESEND_FROM,
-    to: [email],
-    subject: mailOptions.subject,
-    html: mailOptions.html
-  }, {
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    timeout: 30000
-  });
+  try {
+    const response = await axios.post('https://api.resend.com/emails', {
+      from: RESEND_FROM,
+      to: [email],
+      subject: mailOptions.subject,
+      html: mailOptions.html
+    }, {
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      timeout: 30000
+    });
+    console.log("Email sent successfully to:", email, response.data);
+  } catch (error) {
+    console.error('Resend Email Error Details:', error.response?.data || error.message);
+  }
 }
 
 app.listen(PORT, () => {
