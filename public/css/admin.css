@@ -884,34 +884,38 @@ select option {
 
 @media (max-width: 1000px) {
   body {
-    flex-direction: column;
+    flex-direction: column !important;
   }
 
+  /* إخفاء القائمة الجانبية كلياً برا الشاشة وحمايتها من التداخل */
   .sidebar {
-    position: fixed;
-    top: 0;
-    right: -280px;
-    width: 280px;
-    height: 100vh;
-    z-index: 1000;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 20px 12px;
+    position: fixed !important;
+    top: 0 !important;
+    right: -320px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    background-color: var(--bg-card) !important;
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.95) !important;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 20px 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
+  /* إظهار القائمة بانسياقية تامة عند تفعيل الكلاس */
   .sidebar.active {
-    right: 0;
+    right: 0 !important;
   }
 
   .main {
-    max-width: 100%;
-    padding: 20px;
-    width: 100%;
+    max-width: 100% !important;
+    padding: 15px !important;
+    width: 100% !important;
   }
 
   .menu-btn {
-    display: flex;
+    display: flex !important;
   }
 
   .topbar {
@@ -927,8 +931,7 @@ select option {
   }
 
   .search-container {
-    width: 100%;
-    max-width: 200px;
+    display: none !important;
   }
 
   .stats-grid {
@@ -947,10 +950,6 @@ select option {
 
 @media (max-width: 680px) {
   .top-actions .welcome {
-    display: none;
-  }
-  
-  .search-container {
     display: none;
   }
 }
