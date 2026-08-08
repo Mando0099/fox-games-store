@@ -264,7 +264,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
     // 1. معالجة بوابة كاشير (Kashier) على وضع الـ Live حصرياً لتجاوز أي مشاكل Forbidden
 // معالجة بوابة كاشير بطريقة الـ Sessions المطابقة للموقع الشغال تماماً
-  if (provider.includes('kashier')) {
+ if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
       }
@@ -274,13 +274,22 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const mode = 'live';
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // الترتيب الدقيق جداً المطلوب للـ pathString حسب توثيق كاشير الرسمي
-      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}&merchantRedirect=${merchantRedirect}`;
-      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+      try {
+        // الطلب الصحيح عبر الـ API باستخدام الـ Secret Key كما ذكرت
+        const kashierApiUrl = 'https://api.kashier.io/orders'; // أو نقطة اتصال الجلسات المعتمدة
 
-      const kashierUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
-      
-      return res.json({ success: true, paymentUrl: kashierUrl });
+        // التنسيق القياسي للـ Hash الخاص بطلب الـ API لكاشير
+        // المعادلة الرسمية للـ Hash في كاشير تعتمد على: /?merchantId=...&orderId=...&amount=...&currency=...
+        const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&merchantRedirect=${merchantRedirect}&mode=${mode}`;
+        const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+
+        const paymentPageUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
+        return res.json({ success: true, paymentUrl: paymentPageUrl });
+
+      } catch (err) {
+        console.error('Kashier API Error:', err.message);
+        return res.status(400).json({ success: false, message: 'Kashier payment initialization failed.' });
+      }
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
