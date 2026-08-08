@@ -60,7 +60,7 @@ const ENV_MYFATOORAH_TOKEN = process.env.MYFATOORAH_TOKEN;
 const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-eg.myfatoorah.com').replace(/\/v2\/?$/, '');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
+const RESEND_FROM = process.env.RESEND_FROM || 'Tech Gaming <onboarding@resend.dev>';
 
 // Helper to get active gateway with dynamic provider detection (Supports Kashier & MyFatoorah)
 async function getActivePaymentGateway() {
@@ -274,7 +274,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const mode = 'live';
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // تخزين معلومات العربة مؤقتاً في الكوليكشن أو تمريرها كبيانات للربط لاحقاً
+      // تخزين معلومات العربة مؤقتاً للربط عند العودة أو الـ Webhook
       await db.collection('pending_orders').doc(orderId).set({
         orderId,
         customerEmail,
@@ -339,7 +339,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 });
 
 // ==========================================
-// 📦 WEBHOOK & EMAIL NOTIFICATIONS (Shared Handler)
+// 📦 WEBHOOK & TRANSACTION LOGGING
 // ==========================================
 
 async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency, cartItems) {
@@ -429,7 +429,6 @@ app.post('/api/kashier/webhook', async (req, res) => {
       return res.status(200).send('Ignored or Failed');
     }
 
-    // جلب تفاصيل الطلب المخزنة مسبقاً
     const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
     if (!pendingDoc.exists) {
       return res.status(200).send('Order not found');
@@ -445,7 +444,6 @@ app.post('/api/kashier/webhook', async (req, res) => {
   }
 });
 
-// دعم جلب الإشعار عبر GET أيضاً إذا قامت كاشير بالتحويل المباشر (Redirect Callback)
 app.get('/api/kashier/webhook', async (req, res) => {
   try {
     const query = req.query;
@@ -456,17 +454,35 @@ app.get('/api/kashier/webhook', async (req, res) => {
       const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
       if (pendingDoc.exists) {
         const orderData = pendingDoc.data();
-        // تأكد من عدم التكرار إذا تم تنفيذه مسبقاً
         const existingOrder = await db.collection('orders').doc(String(orderId)).get();
         if (!existingOrder.exists) {
           await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
         }
       }
     }
-    return res.redirect(`${PUBLIC_BASE_URL}/payment-result.html?status=success`);
+    return res.redirect(`${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId || ''}`);
   } catch (error) {
     console.error('Kashier Get Callback Error:', error.message);
     return res.redirect(`${PUBLIC_BASE_URL}/payment-result.html?status=success`);
+  }
+});
+
+// 3. مسار تسجيل المعاملات في لوحة التحكم (Admin Panel)
+app.post('/api/record-transaction', async (req, res) => {
+  try {
+    const { paymentId, status, gatewayResponse } = req.body;
+    if (!paymentId) return res.status(400).json({ success: false });
+
+    await db.collection('transactions').doc(String(paymentId)).set({
+      paymentId: String(paymentId),
+      status: status || 'unknown', // paid أو failed
+      gatewayResponse: gatewayResponse || {},
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 });
 
@@ -483,10 +499,10 @@ async function sendCodesEmail(email, orderId, codes) {
   const mailOptions = {
     from: RESEND_FROM,
     to: email,
-    subject: `أكواد طلبك رقم #${orderId} - Fox Games`,
+    subject: `أكواد طلبك رقم #${orderId} - Tech Gaming`,
     html: `
       <div style="font-family: sans-serif; direction: rtl; text-align: right; padding: 20px; background: #090f17; color: #fff; max-width: 500px; margin: auto; border: 1px solid rgba(101,204,0,0.2); border-radius: 12px;">
-        <h2 style="color: #65cc00; text-align: center;">شكرًا لشرائك من Fox Games!</h2>
+        <h2 style="color: #65cc00; text-align: center;">شكرًا لشرائك من Tech Gaming!</h2>
         <p>تم تأكيد دفع طلبك بنجاح. إليك الأكواد الرقمية الفورية الخاصة بك:</p>
         <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
         ${codesHtml}
@@ -507,5 +523,5 @@ async function sendCodesEmail(email, orderId, codes) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Fox Games running on port ${PORT}`);
+  console.log(`Tech Gaming running on port ${PORT}`);
 });
