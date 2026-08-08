@@ -11,8 +11,8 @@
       --card:#0d1722;
       --line:rgba(255,255,255,.10);
       --muted:#94a3b8;
-      --green:#65cc00;
       --blue:#38bdf8;
+      --green:#65cc00;
       --red:#ef4444;
     }
 
@@ -20,8 +20,7 @@
       margin:0;
       min-height:100vh;
       background:
-        radial-gradient(circle at top, rgba(101,204,0,.12), transparent 35%),
-        radial-gradient(circle at bottom, rgba(56,189,248,.10), transparent 35%),
+        radial-gradient(circle at top, rgba(56,189,248,.15), transparent 40%),
         linear-gradient(180deg,#050b14,#03070d);
       color:#fff;
       font-family:Inter,Arial,sans-serif;
@@ -39,11 +38,11 @@
       width:100%;
       max-width:620px;
       background:rgba(13,23,34,.95);
-      border:2px solid var(--green);
+      border:2px solid var(--blue);
       border-radius:24px;
       padding:34px;
       text-align:center;
-      box-shadow:0 0 35px rgba(101,204,0,.2), 0 24px 70px rgba(0,0,0,.5);
+      box-shadow:0 0 40px rgba(56,189,248,.25), 0 24px 70px rgba(0,0,0,.5);
       backdrop-filter:blur(18px);
     }
 
@@ -52,16 +51,16 @@
       height:70px;
       object-fit:contain;
       margin-bottom:14px;
-      filter: drop-shadow(0 0 8px rgba(101,204,0,.5));
+      filter: drop-shadow(0 0 10px rgba(56,189,248,.6));
     }
 
     .store-brand {
       font-family: monospace;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 900;
-      color: var(--green);
+      color: var(--blue);
       letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(101,204,0,0.5);
+      text-shadow: 0 0 12px rgba(56,189,248,0.7);
       margin-bottom: 22px;
     }
 
@@ -77,9 +76,9 @@
     }
 
     .success-icon{
-      color:var(--green);
-      background:rgba(101,204,0,.12);
-      box-shadow:0 0 35px rgba(101,204,0,.25);
+      color:var(--blue);
+      background:rgba(56,189,248,.12);
+      box-shadow:0 0 35px rgba(56,189,248,.3);
     }
 
     .failed-icon{
@@ -106,15 +105,16 @@
       font-size:13px;
     }
 
-    /* صندوق تفاصيل الطلب الاحترافي */
+    /* صندوق تفاصيل الطلب الاحترافي بالأزرق النيون */
     .order-details-box {
       background: #070b12;
-      border: 1px solid rgba(56,189,248,0.3);
+      border: 1px solid rgba(56,189,248,0.4);
       border-radius: 14px;
       padding: 18px;
       margin: 22px auto 0;
       text-align: right;
       max-width: 480px;
+      box-shadow: inset 0 0 15px rgba(56,189,248,0.05);
     }
 
     .order-details-box h3 {
@@ -123,12 +123,13 @@
       color: var(--blue);
       border-bottom: 1px solid rgba(255,255,255,0.08);
       padding-bottom: 8px;
+      text-shadow: 0 0 8px rgba(56,189,248,0.3);
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-size: 14px;
     }
 
@@ -142,15 +143,15 @@
     }
 
     .payment-id{
-      margin:12px auto 0;
-      padding:10px 14px;
-      border-radius:10px;
+      margin:8px auto 0;
+      padding:8px 12px;
+      border-radius:8px;
       background:rgba(255,255,255,.03);
       border:1px solid var(--line);
       color:var(--blue);
       font-family:monospace;
       word-break:break-all;
-      font-size:13px;
+      font-size:12px;
     }
 
     .actions{
@@ -174,9 +175,9 @@
     }
 
     .btn-primary{
-      background:var(--green);
-      color:#071006;
-      box-shadow: 0 0 15px rgba(101,204,0,0.3);
+      background:var(--blue);
+      color:#050b14;
+      box-shadow: 0 0 20px rgba(56,189,248,0.4);
     }
 
     .btn-secondary{
@@ -189,7 +190,7 @@
       transform:translateY(-2px);
     }
 
-    .success-title{color:var(--green); text-shadow: 0 0 10px rgba(101,204,0,0.3);}
+    .success-title{color:var(--blue); text-shadow: 0 0 12px rgba(56,189,248,0.5);}
     .failed-title{color:var(--red)}
 
     @media(max-width:520px){
@@ -204,7 +205,7 @@
 <body>
   <main class="payment-result-page">
     <section class="payment-card">
-      <!-- شعار Tech Gaming النيون -->
+      <!-- شعار Tech Gaming الأزرق النيون -->
       <img class="logo" src="/assets/TECH-GAMING-LOGO.png" alt="Tech Gaming" onerror="this.style.display='none'">
       <div class="store-brand">TECH GAMING</div>
 
@@ -216,19 +217,19 @@
         
         <!-- تفاصيل المنتج والمعاملة -->
         <div class="order-details-box">
-          <h3>📦 تفاصيل الطلب</h3>
+          <h3>📦 تفاصيل الطلب المؤكد</h3>
           <div class="detail-row">
             <span>اسم المنتج:</span>
-            <span id="resProductName">شحن رصيد / منتج رقمي</span>
+            <span id="resProductName" style="color:var(--blue); font-weight:bold;">جاري التحميل...</span>
           </div>
           <div class="detail-row">
             <span>الإجمالي المدفوع:</span>
             <span id="resProductPrice" style="color:var(--green);">-- EGP</span>
           </div>
-          <div class="detail-row" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <span>رقم المعاملة:</span>
+          <div class="detail-row" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px; display:block;">
+            <span style="display:block; margin-bottom:4px;">رقم المعاملة:</span>
+            <div id="successPaymentId" class="payment-id">--</div>
           </div>
-          <div id="successPaymentId" class="payment-id">جاري الجلب...</div>
         </div>
 
         <div class="actions">
@@ -250,10 +251,10 @@
             <span>حالة الدفع:</span>
             <span style="color:var(--red);">مرفوضة / ملغاة</span>
           </div>
-          <div class="detail-row" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <span>معرف العملية:</span>
+          <div class="detail-row" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px; display:block;">
+            <span style="display:block; margin-bottom:4px;">معرف العملية:</span>
+            <div id="failedPaymentId" class="payment-id">--</div>
           </div>
-          <div id="failedPaymentId" class="payment-id">--</div>
         </div>
 
         <div class="actions">
@@ -267,10 +268,10 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     
-    // التقاط الحالة ورقم العملية بدقة من جميع البوابات (كاشير وماي فاتورة)
     const rawStatus = (params.get('status') || params.get('paymentStatus') || params.get('payment') || '').toLowerCase();
     const paymentId = params.get('paymentId') || params.get('invoiceId') || params.get('Id') || params.get('orderId') || params.get('merchantOrderId') || 'N/A';
     const amount = params.get('amount') || params.get('total') || '';
+    const productNameParam = params.get('productName') || params.get('name') || '';
     
     const successView = document.getElementById('successView');
     const failedView = document.getElementById('failedView');
@@ -286,7 +287,15 @@
       if (amount) {
         document.getElementById('resProductPrice').textContent = amount + ' EGP';
       } else {
-        document.getElementById('resProductPrice').textContent = 'تم الدفع بنجاح';
+        document.getElementById('resProductPrice').textContent = 'مدفوع';
+      }
+
+      if (productNameParam) {
+        document.getElementById('resProductName').textContent = productNameParam;
+      } else {
+        // محاولة استرجاع اسم المنتج المحفوظ مؤقتاً لو وُجد
+        const savedName = localStorage.getItem('lastPurchasedProduct') || 'منتج رقمي / شحنة فوري';
+        document.getElementById('resProductName').textContent = savedName;
       }
     } else {
       failedView.style.display = 'block';
