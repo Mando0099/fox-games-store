@@ -153,7 +153,6 @@ async function loadAdminsManagement() {
             const isActive = d.active !== false;
             const isSuper = d.role === 'superadmin' || d.role === 'super_admin';
             
-            // هل الأدمن الحالي هو مشرف رئيسي يملك حق التعديل؟
             const canControl = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
 
             html += `
@@ -234,6 +233,144 @@ async function toggleAdminStatus(docId, newStatus) {
     } catch (err) {
         console.error("Error updating status:", err);
     }
+}
+
+// ==========================================
+// 🎟️ دوال قسائم وأكواد الخصم الاحترافية المحدثة
+// ==========================================
+
+async function saveCoupon() {
+  const docId = val('couponDocId');
+  const code = val('couponCode').toUpperCase();
+  const value = Number(val('couponValue') || 0);
+  const expiryDate = val('couponExpiry');
+  const maxUses = val('couponMaxUses') ? Number(val('couponMaxUses')) : null;
+
+  if (!code || !value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'بيانات ناقصة',
+      text: 'رمز الكود ونسبة الخصم حقول أساسية مطلوبة!',
+      ...swalConfig
+    });
+    return;
+  }
+
+  try {
+    const couponData = {
+      code,
+      value,
+      expiryDate: expiryDate || '',
+      maxUses: maxUses,
+      type: 'percent',
+      active: true,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (docId) {
+      await db.collection('coupons').doc(docId).set(couponData, { merge: true });
+    } else {
+      await db.collection('coupons').doc(code).set({
+        ...couponData,
+        usedCount: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    resetCouponForm();
+    await loadCoupons();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'تم الحفظ بنجاح',
+      text: 'تم تفعيل وضبط إعدادات الكوبون بالمتجر.',
+      timer: 1500,
+      showConfirmButton: false,
+      ...swalConfig
+    });
+
+  } catch (err) {
+    console.error("Error saving coupon:", err);
+    Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حفظ الكوبون.', ...swalConfig });
+  }
+}
+
+async function loadCoupons() {
+  const snap = await db.collection('coupons').get();
+  const list = $('couponsList');
+  if (!list) return;
+  
+  list.innerHTML = '';
+
+  if (snap.empty) {
+    list.innerHTML = '<p style="color:#94a3b8; grid-column: 1/-1;">لا توجد قسائم خصم مضافة حالياً.</p>';
+    return;
+  }
+
+  snap.forEach(doc => {
+    const c = doc.data();
+    const expiryText = c.expiryDate ? `📅 ينتهي في: ${c.expiryDate}` : '📅 بدون تاريخ انتهاء';
+    const usesText = c.maxUses ? `🔄 الاستخدام: ${c.usedCount || 0} / ${c.maxUses}` : '🔄 استخدام غير محدود';
+
+    list.innerHTML += `
+      <div class="panel" style="border-bottom: 3px solid #f97316; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+        <div>
+          <h4 style="display:flex; justify-content:space-between; align-items:center;">
+            <span>الكود: <span style="color:#f97316; font-family:monospace;">${c.code}</span></span>
+            <span style="font-size: 14px; background: rgba(249,115,22,0.15); color: #f97316; padding: 2px 8px; border-radius: 6px;">${c.value}% خصم</span>
+          </h4>
+          <p style="margin: 10px 0 5px 0; font-size: 12px; color: var(--text-muted);">${expiryText}</p>
+          <p style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">${usesText}</p>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+          <button class="edit-btn" style="flex:1; padding: 6px; font-size: 12px; background: var(--bg-accent); border:none; border-radius:6px; color:#fff; cursor:pointer;" onclick="editCoupon('${doc.id}', '${c.code}', ${c.value}, '${c.expiryDate || ''}', '${c.maxUses || ''}')">
+            <i class="fa-solid fa-pen"></i> تعديل
+          </button>
+          <button class="delete-btn" style="flex:1; padding: 6px; font-size: 12px; background: rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:6px; color:#ef4444; cursor:pointer;" onclick="deleteCoupon('${doc.id}')">
+            <i class="fa-solid fa-trash"></i> حذف
+          </button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function editCoupon(docId, code, value, expiry, maxUses) {
+  $('couponDocId').value = docId;
+  $('couponCode').value = code;
+  $('couponValue').value = value;
+  $('couponExpiry').value = expiry !== 'undefined' ? expiry : '';
+  $('couponMaxUses').value = maxUses !== 'undefined' ? maxUses : '';
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteCoupon(docId) {
+  Swal.fire({
+    title: 'حذف الكوبون؟',
+    text: "لن يتمكن العملاء من استخدام هذا الكود بعد الآن!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    confirmButtonText: 'نعم، احذف',
+    cancelButtonText: 'إلغاء',
+    ...swalConfig
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await db.collection('coupons').doc(docId).delete();
+      await loadCoupons();
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+    }
+  });
+}
+
+function resetCouponForm() {
+  $('couponDocId').value = '';
+  $('couponCode').value = '';
+  $('couponValue').value = '';
+  $('couponExpiry').value = '';
+  $('couponMaxUses').value = '';
 }
 
 // ==========================================
@@ -820,64 +957,6 @@ async function deleteCode(id) {
       } catch (err) {
         console.error("حدث خطأ أثناء محاولة حذف الكود: ", err);
       }
-    }
-  });
-}
-
-async function saveCoupon() {
-  const code = val('couponCode').toUpperCase();
-  const value = Number(val('couponValue') || 0);
-
-  if (!code || !value) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'بيانات ناقصة',
-      text: 'الرمز وقيمة نسبة الخصم المئوية مطلوبين لتوليد الكوبون الفعال الحركي!',
-      ...swalConfig
-    });
-    return;
-  }
-
-  await db.collection('coupons').doc(code).set({
-    code,
-    value,
-    type: 'percent',
-    active: true,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  if ($('couponCode')) $('couponCode').value = '';
-  if ($('couponValue')) $('couponValue').value = '';
-
-  await loadCoupons();
-  
-  Swal.fire({
-    icon: 'success',
-    title: 'تم تفعيل الكوبون',
-    text: 'تم حفظ الكوبون بنجاح وهو متاح للمستعملين بالمتجر الرقمي حالياً.',
-    timer: 1500,
-    showConfirmButton: false,
-    ...swalConfig
-  });
-}
-
-async function loadCoupons() {
-  const snap = await db.collection('coupons').get();
-  const list = $('couponsList');
-  if (list) list.innerHTML = '';
-
-  snap.forEach(doc => {
-    const c = doc.data();
-    if (list) {
-      list.innerHTML += `
-        <div class="panel" style="border-bottom: 3px solid #f97316;">
-          <h4>رمز الكوبون: <span style="color:#f97316; font-family:monospace;">${c.code}</span></h4>
-          <p style="margin: 8px 0 4px 0;">نسبة الخصم الحالية: <strong>${c.value}%</strong></p>
-          <small style="color: ${c.active ? '#22c55e' : '#ec4899'}; font-weight: 600;">
-            ${c.active ? '● مفعل حالياً بالمتجر' : '○ معطل وموقوف'}
-          </small>
-        </div>
-      `;
     }
   });
 }
