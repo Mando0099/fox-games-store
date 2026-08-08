@@ -125,6 +125,7 @@ async function loadAll() {
   await loadProducts();
   await loadCodes();
   await loadOrders();
+  await loadTransactions(); // تحميل سجل المعاملات ورقم العملية في البانل
   await loadCoupons();
   await loadCustomers();
   await loadStats();
@@ -1182,6 +1183,41 @@ async function loadOrders() {
 
   if ($('ordersList')) $('ordersList').innerHTML = table;
   if ($('latestOrders')) $('latestOrders').innerHTML = table;
+}
+
+// دالة لجلب وعرض المعاملات وسجل الدفع ورقم المعاملة في لوحة التحكم
+async function loadTransactions() {
+  const container = $('transactionsListTable') || $('transactionsList');
+  if (!container) return;
+
+  try {
+    const snap = await db.collection('transactions').orderBy('updatedAt', 'desc').limit(50).get();
+    
+    if (snap.empty) {
+      container.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8; padding: 20px;">لا توجد معاملات مسجلة حالياً</td></tr>';
+      return;
+    }
+
+    let html = '';
+    snap.forEach(doc => {
+      const t = doc.data();
+      const isPaid = t.status === 'paid';
+      html += `
+        <tr>
+          <td><strong style="font-family:monospace; color:#3b82f6;">${t.paymentId || doc.id}</strong></td>
+          <td>
+            <span class="status-badge" style="background:${isPaid ? 'rgba(101,204,0,0.15)' : 'rgba(239,68,68,0.15)'}; color:${isPaid ? '#65cc00' : '#ef4444'}; padding: 4px 10px; border-radius: 6px;">
+              ${isPaid ? 'مدفوعة (Paid)' : 'مرفوضة / فاشلة'}
+            </span>
+          </td>
+          <td>${t.updatedAt ? t.updatedAt.toDate().toLocaleString('ar-EG') : 'وقت حديث'}</td>
+        </tr>
+      `;
+    });
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("خطأ في تحميل المعاملات:", err);
+  }
 }
 
 async function loadCustomers() {
