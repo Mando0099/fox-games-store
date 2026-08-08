@@ -887,18 +887,19 @@ select option {
     flex-direction: column !important;
   }
 
-  /* إخفاء القائمة الجانبية كلياً برا الشاشة وحمايتها من التداخل */
+  /* إخفاء القائمة الجانبية كلياً برا الشاشة وحمايتها من التداخل باستخدام Transform */
   .sidebar {
     position: fixed !important;
     top: 0 !important;
-    right: -320px !important;
+    right: 0 !important; /* تثبيتها في الجانب الأيمن */
     left: auto !important;
     width: 280px !important;
     height: 100vh !important;
     z-index: 999999 !important;
     background-color: var(--bg-card) !important;
     box-shadow: -20px 0 50px rgba(0, 0, 0, 0.95) !important;
-    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateX(100%) !important; /* الإزاحة الكاملة يميناً لإخفائها */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 20px 15px !important;
     display: flex !important;
     flex-direction: column !important;
@@ -906,7 +907,7 @@ select option {
 
   /* إظهار القائمة بانسياقية تامة عند تفعيل الكلاس */
   .sidebar.active {
-    right: 0 !important;
+    transform: translateX(0) !important; /* إعادة القائمة لمكانها الأصلي */
   }
 
   .main {
