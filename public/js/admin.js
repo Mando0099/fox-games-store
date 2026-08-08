@@ -8,7 +8,6 @@ let revenueChartInstance = null;
 
 const $ = (id) => document.getElementById(id);
 
-// تيسير تخصيص التنبيهات المظلمة المتناسقة مع اللوحة
 const swalConfig = {
   background: '#0b1320',
   color: '#fff',
@@ -16,32 +15,32 @@ const swalConfig = {
   cancelButtonColor: '#475569'
 };
 
-// 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي) - تعديل مباشر للـ Style
+// 📱 دالة تشغيل وإغلاق القائمة الجانبية بشكل مؤكد ومباشر
 function toggleSidebar() {
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = $('sidebarOverlay');
+    const overlay = document.getElementById('sidebarOverlay');
     
     if (sidebar) {
-        // التحقق من الوضع الحالي وإجبار القائمة على الحركة الفورية
-        const currentRight = window.getComputedStyle(sidebar).right;
-        if (currentRight === '0px' || sidebar.style.right === '0px') {
+        // لو القائمة ظاهرة (right معملهاش تعارض) اقفلها، والعكس
+        const isOpen = sidebar.classList.contains('active');
+        if (isOpen) {
+            sidebar.classList.remove('active');
             sidebar.style.right = '-320px';
             if (overlay) overlay.classList.remove('active');
         } else {
+            sidebar.classList.add('active');
             sidebar.style.right = '0px';
             if (overlay) overlay.classList.add('active');
         }
     }
 }
 
-// 🔄 تنقل التابات والصفحات مع الإغلاق التلقائي الأكيد للموبايل
+// 🔄 التنقل بين التابات مع الحفاظ على عمل زر الـ 3 شرط دائماً
 function showPage(pageName, btn) {
-    // إخفاء كافة الصفحات وتفعيل الصفحة المطلوبة بناءً على الصيغة الجديدة id-page
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = $(`${pageName}-page`);
     if (targetPage) targetPage.classList.add('active');
 
-    // تحديث حالة أزرار القائمة الجانبية (الزر النشط)
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if (btn) {
         btn.classList.add('active');
@@ -50,14 +49,16 @@ function showPage(pageName, btn) {
         if (targetBtn) targetBtn.classList.add('active');
     }
 
-    // إغلاق القائمة والـ Overlay فوراً عند التنقل على الأجهزة المحمولة
+    // إغلاق القائمة فوراً عند الضغط على أي تابة
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = $('sidebarOverlay');
+    const overlay = document.getElementById('sidebarOverlay');
     
-    if (sidebar) sidebar.style.right = '-320px';
+    if (sidebar) {
+        sidebar.classList.remove('active');
+        sidebar.style.right = '-320px';
+    }
     if (overlay) overlay.classList.remove('active');
 
-    // إعادة التمرير للأعلى بسلاسة
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -66,7 +67,17 @@ function val(id) {
     return ($(id)?.value || '').trim();
 }
 
-// 🔐 التحقق الأمني الصارم ومنع أي مستخدم عادي أو رابط خارجي من الدخول
+// التأكد من ربط الأحداث وإصلاح زر القائمة فور تحميل الصفحة
+document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = $('menuBtn');
+    if (menuBtn) {
+        // إزالة أي ربط قديم وإعادة تعيينه لمنع تكرار الأحداث
+        menuBtn.onclick = null;
+        menuBtn.onclick = toggleSidebar;
+    }
+});
+
+// 🔐 التحقق الأمني الصارم
 firebase.auth().onAuthStateChanged(async (user) => {
   if (!user) {
     window.location.replace('/login.html');
@@ -95,7 +106,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
       return;
     }
 
-    // تهيئة مستمعي الأحداث والـ Drag & Drop فور تأكيد الصلاحيات بأمان تام
     initEventListeners();
     await loadAll();
 
@@ -105,19 +115,17 @@ firebase.auth().onAuthStateChanged(async (user) => {
   }
 });
 
-// تحميل كافة البيانات والعدادات فور الدخول للوحة
 async function loadAll() {
-  await loadCategories(); // جلب التصنيفات أولاً لتغذية القوائم المنسدلة
+  await loadCategories();
   await loadProducts();
   await loadCodes();
   await loadOrders();
   await loadCoupons();
   await loadCustomers();
   await loadStats();
-  await loadPaymentGateways(); // جلب بوابات الدفع وإدارتها
+  await loadPaymentGateways();
 }
 
-// 🌐 تهيئة مستمعي الأحداث والـ Drag & Drop لمنطقة رفع صور المنتجات
 function initEventListeners() {
     const dropzone = $('dropzone');
     const fileInput = $('product-image');
@@ -128,7 +136,7 @@ function initEventListeners() {
     const menuBtn = $('menuBtn');
 
     if (menuBtn) {
-        menuBtn.addEventListener('click', toggleSidebar);
+        menuBtn.onclick = toggleSidebar;
     }
 
     if (dropzone && fileInput) {
@@ -138,7 +146,6 @@ function initEventListeners() {
             handleProductFileSelect(this.files[0]);
         });
 
-        // تأثيرات السحب فوق المنطقة
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropzone.classList.add('dragover');
@@ -157,10 +164,9 @@ function initEventListeners() {
         });
     }
 
-    // زر إزالة معاينة الصورة
     if (removeImgBtn) {
         removeImgBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // منع فتح نافذة اختيار الملفات
+            e.stopPropagation();
             if (fileInput) fileInput.value = '';
             if (previewContainer) previewContainer.classList.remove('active');
             if (imagePreview) imagePreview.src = '';
@@ -171,7 +177,6 @@ function initEventListeners() {
         clearFormBtn.addEventListener('click', clearProductForm);
     }
 
-    // ربط فلاتر جدول الأكواد المتقدم تلقائياً
     if ($('search-codes-input')) {
         $('search-codes-input').addEventListener('input', filterCodesTablePro);
     }
@@ -180,7 +185,6 @@ function initEventListeners() {
     }
 }
 
-// دالة معالجة وعرض معاينة ملف الصورة المرفوع
 function handleProductFileSelect(file) {
     const previewContainer = $('img-preview-container');
     const imagePreview = $('imagePreview');
@@ -195,7 +199,6 @@ function handleProductFileSelect(file) {
     }
 }
 
-// تفريغ فورم المنتجات بالكامل وإعادة ضبط غلاف المعاينة التفاعلي
 function clearProductForm() {
   ['productId', 'name', 'category', 'game', 'amount', 'price', 'description']
     .forEach(id => {
@@ -216,7 +219,6 @@ function clearProductForm() {
   if (active) active.checked = true;
 }
 
-// 📸 دالة رفع الصور إلى Cloudinary مع معالجة الأخطاء
 async function uploadImage(file) {
   try {
     const formData = new FormData();
@@ -240,7 +242,6 @@ async function uploadImage(file) {
   }
 }
 
-// 💾 حفظ أو تحديث منتج بشكل آمن ومحمي
 async function saveProduct() {
   const file = $('product-image')?.files[0];
   let imageUrl = $('imagePreview')?.src || '';
@@ -276,7 +277,7 @@ async function saveProduct() {
       game: val('game'),
       amount: Number(val('amount') || 0),
       price: price,
-      image: imageUrl.startsWith('data:') ? '' : imageUrl, // تأمين خلو الرابط من بيانات الكاش المحلية
+      image: imageUrl.startsWith('data:') ? '' : imageUrl,
       description: val('description'),
       active: $('active') ? $('active').checked : true,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -315,7 +316,6 @@ async function saveProduct() {
   }
 }
 
-// جلب المنتجات وعرضها بالتصميم الـ Gaming الجديد المتجاوب
 async function loadProducts() {
   const snap = await db.collection('products').get();
   const list = $('productsList');
@@ -360,7 +360,6 @@ async function loadProducts() {
   });
 }
 
-// تعديل منتج وإرسال بياناته للفورم مع تفعيل الغلاف التفاعلي
 async function editProduct(id) {
   const doc = await db.collection('products').doc(id).get();
   const p = doc.data();
@@ -385,7 +384,6 @@ async function editProduct(id) {
   scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// حذف منتج بأكشن وتأكيد داخلي متقدم
 async function deleteProduct(id) {
   Swal.fire({
     title: 'تأكيد حذف المنتج؟',
@@ -425,7 +423,6 @@ async function deleteProduct(id) {
   });
 }
 
-// حفظ تصنيف جديد آمن
 async function saveCategory() {
   const name = val('catName');
   const file = document.getElementById('categoryImageFile')?.files?.[0];
@@ -482,7 +479,6 @@ async function saveCategory() {
   }
 }
 
-// جلب التصنيفات الحقيقية وتحديث الكروت وقوائم الاختيارات المنسدلة
 async function loadCategories() {
   const snap = await db.collection('categories').get();
   const list = $('categoriesList');
@@ -516,7 +512,6 @@ async function loadCategories() {
   });
 }
 
-// حذف تصنيف بأكشن داخلي
 async function deleteCategory(id) {
   Swal.fire({
     title: 'هل تريد حذف هذا التصنيف؟',
@@ -554,7 +549,6 @@ async function deleteCategory(id) {
   });
 }
 
-// 💎 حفظ أكواد المنتجات بدعم الـ Batch والـ SweetAlert2 الداخلي
 async function saveCodes() {
   const productId = val('codeProductId');
   const raw = val('codesInput');
@@ -596,7 +590,6 @@ async function saveCodes() {
   });
 }
 
-// 📊 جلب وتوليد صفوف جدول الأكواد المتطورة داخل الحاوية الجديدة
 async function loadCodes() {
   const container = $('codes-list-container');
   if (!container) return;
@@ -644,7 +637,6 @@ async function loadCodes() {
   container.innerHTML = rowsHtml;
 }
 
-// 🔍 محرك الفلترة والبحث اللحظي لجدول الأكواد المحدث 
 function filterCodesTablePro() {
   const query = ($('search-codes-input')?.value || '').toLowerCase().trim();
   const statusFilter = $('filter-status-select')?.value || 'all';
@@ -668,7 +660,6 @@ function filterCodesTablePro() {
   });
 }
 
-// 🗑️ دالة حذف كود محدد نهائياً مع أنيميشن سلس وبوب-آب داخلي
 async function deleteCode(id) {
   Swal.fire({
     title: 'هل أنت متأكد؟',
@@ -719,7 +710,6 @@ async function deleteCode(id) {
   });
 }
 
-// حفظ الكوبونات وقسائم التخفيض المالي
 async function saveCoupon() {
   const code = val('couponCode').toUpperCase();
   const value = Number(val('couponValue') || 0);
@@ -757,7 +747,6 @@ async function saveCoupon() {
   });
 }
 
-// جلب الكوبونات لعرضها
 async function loadCoupons() {
   const snap = await db.collection('coupons').get();
   const list = $('couponsList');
@@ -779,7 +768,6 @@ async function loadCoupons() {
   });
 }
 
-// جلب وعرض الطلبات وفواتير الشراء تلقائياً
 async function loadOrders() {
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
 
@@ -823,7 +811,6 @@ async function loadOrders() {
   if ($('latestOrders')) $('latestOrders').innerHTML = table;
 }
 
-// جلب وسجلات قاعدة بيانات العملاء
 async function loadCustomers() {
   const snap = await db.collection('users').limit(100).get();
 
@@ -855,10 +842,6 @@ async function loadCustomers() {
     `;
   }
 }
-
-// ==========================================
-// 💳 إدارة بوابات الدفع (Payment Gateways API)
-// ==========================================
 
 async function loadPaymentGateways() {
   const container = $('paymentGatewaysList') || $('payment-gateways-container');
@@ -909,7 +892,6 @@ async function loadPaymentGateways() {
   }
 }
 
-// ⚡ حساب المبيعات الحقيقية والعدادات الشاملة
 async function loadStats() {
   try {
     const [products, orders, users, codes] = await Promise.all([
@@ -949,7 +931,6 @@ async function loadStats() {
   }
 }
 
-// دالة تحديث الرسوم البيانية
 function updateRevenueChart(labels, dataValues) {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
@@ -979,7 +960,6 @@ function updateRevenueChart(labels, dataValues) {
     }
 }
 
-// تسجيل الخروج
 function logout() {
   Swal.fire({
     title: 'تسجيل الخروج؟',
