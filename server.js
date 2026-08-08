@@ -79,7 +79,7 @@ async function getActivePaymentGateway() {
       return {
         id: doc.id,
         provider: provider,
-        isLive: true, // فرض اللامحدود للـ Live
+        isLive: true,
         token: decrypt(rawTokenOrKey),
         apiKey: decrypt(rawTokenOrKey),
         secretKey: decrypt(rawSecret),
@@ -185,7 +185,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
       merchantId: merchantId ?? existingData.merchantId ?? '',
       iframeId: iframeId ?? existingData.iframeId ?? '',
       isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
-      isLive: true, // فرض حقيقي دائماً
+      isLive: true,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
@@ -258,13 +258,11 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const amount = money(order.total);
     const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
     const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
-    const customerPhone = (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11);
+    const customerPhone = cleanPhone(order.customer?.phone || '01000000000');
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. Kashier Hosted Payment Page (HPP)
-    // Kashier signs the HPP hash with the Payment API Key.
-    // Secret Key is not used for this browser-side HPP hash.
+    // 1. Kashier Hosted Payment Page (HPP) - (كما هي تماماً بدون تعديل التوقيع)
     if (provider.includes('kashier')) {
       const paymentApiKey = gateway.token || gateway.apiKey;
       if (!gateway.merchantId || !paymentApiKey) {
@@ -280,7 +278,16 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const amountForKashier = Number(amount).toFixed(2);
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
 
-      // Kashier HPP hash source: /?payment=MID.ORDER_ID.AMOUNT.CURRENCY
+      // تخزين تفاصيل السلة مؤقتاً لكي تستخدم عند إرسال الإيميل لاحقاً
+      await db.collection('pending_orders').doc(orderId).set({
+        orderId,
+        customerEmail,
+        amount: amountForKashier,
+        currency,
+        items,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
       const hashSource = `/?payment=${gateway.merchantId}.${orderId}.${amountForKashier}.${currency}`;
       const hash = crypto.createHmac('sha256', paymentApiKey)
         .update(hashSource, 'utf8')
@@ -300,36 +307,37 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
       const paymentUrl = `https://checkout.kashier.io/?${params.toString()}`;
 
-      console.log('KASHIER HPP:', JSON.stringify({
-        orderId,
-        merchantId: gateway.merchantId,
-        amount: amountForKashier,
-        currency,
-        mode,
-        hashSource,
-        paymentUrl: paymentUrl.replace(hash, '[HASH]')
-      }));
-
       return res.json({ success: true, paymentUrl });
     }
 
-    // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
+    // 2. معالجة ماي فاتورة (MyFatoorah)
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
       if (!tokenToUse) {
         return res.status(400).json({ success: false, message: 'MyFatoorah Token is missing.' });
       }
 
+      const orderId = 'ORD_' + Date.now();
       const invoiceBody = {
         InvoiceValue: amount,
         DisplayCurrencyIso: 'EGP',
         CustomerName: customerName,
         CustomerEmail: customerEmail,
         CustomerMobile: customerPhone,
-        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId}`,
+        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed&paymentId=${orderId}`,
         UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
       };
+
+      // حفظ الـ pending order لماي فاتورة أيضاً
+      await db.collection('pending_orders').doc(orderId).set({
+        orderId,
+        customerEmail,
+        amount,
+        currency: 'EGP',
+        items,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
 
       let executeResponse;
       try {
@@ -360,9 +368,62 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 });
 
 // ==========================================
-// 📦 WEBHOOK & EMAIL NOTIFICATIONS
+// 📦 FULFILLMENT & EMAIL HELPER
 // ==========================================
 
+async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency, cartItems) {
+  const purchasedCodes = [];
+
+  await db.runTransaction(async (transaction) => {
+    for (const item of cartItems) {
+      const productId = item.id || item.productId;
+      if (!productId) continue;
+
+      const codesRef = db.collection('productCodes');
+      const availableCodeQuery = codesRef.where('productId', '==', productId).where('status', '==', 'available').limit(1);
+      const codeSnapshot = await transaction.get(availableCodeQuery);
+
+      if (codeSnapshot.empty) continue;
+
+      const codeDoc = codeSnapshot.docs[0];
+      const codeData = codeDoc.data();
+
+      transaction.update(codeDoc.ref, {
+        status: 'used',
+        orderId: String(orderId),
+        customerEmail,
+        usedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      purchasedCodes.push({
+        productName: item.name || productId,
+        code: codeData.code
+      });
+    }
+  });
+
+  // حفظ الطلب في الـ orders لتظهر في الـ Admin Panel
+  await db.collection('orders').doc(String(orderId)).set({
+    orderId: String(orderId),
+    customerEmail,
+    amount: Number(amount || 0),
+    currency: currency || 'EGP',
+    orderStatus: 'paid',
+    paymentStatus: 'paid',
+    codes: purchasedCodes,
+    createdAt: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  if (purchasedCodes.length > 0) {
+    await sendCodesEmail(customerEmail, orderId, purchasedCodes);
+  }
+}
+
+// ==========================================
+// 🌐 WEBHOOKS & TRANSACTIONS
+// ==========================================
+
+// MyFatoorah Webhook
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
@@ -381,51 +442,70 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
 
     const orderId = paymentData.InvoiceId || invoice.Id;
     const customerEmail = paymentData.CustomerEmail || 'customer@tech-gaming.store';
-    const purchasedCodes = [];
 
-    await db.runTransaction(async (transaction) => {
-      for (const item of cartItems) {
-        const productId = item.id || item.productId;
-        if (!productId) continue;
-
-        const codesRef = db.collection('productCodes');
-        const availableCodeQuery = codesRef.where('productId', '==', productId).where('status', '==', 'available').limit(1);
-        const codeSnapshot = await transaction.get(availableCodeQuery);
-
-        if (codeSnapshot.empty) continue;
-
-        const codeDoc = codeSnapshot.docs[0];
-        const codeData = codeDoc.data();
-
-        transaction.update(codeDoc.ref, {
-          status: 'used',
-          orderId,
-          customerEmail,
-          usedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-
-        purchasedCodes.push({
-          productName: item.name || productId,
-          code: codeData.code
-        });
-      }
-    });
-
-    await db.collection('orders').doc(String(orderId)).set({
-      orderId: String(orderId),
-      customerEmail,
-      amount: Number(paymentData.InvoiceValue || 0),
-      currency: paymentData.CurrencyIso || 'EGP',
-      orderStatus: 'paid',
-      paymentStatus: 'paid',
-      codes: purchasedCodes,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    await fulfillOrderAndSendCodes(orderId, customerEmail, paymentData.InvoiceValue, paymentData.CurrencyIso, cartItems);
 
     return res.status(200).send('SUCCESS');
   } catch (error) { 
     console.error('Webhook Error:', error.message);
     return res.status(500).send('Internal Server Error'); 
+  }
+});
+
+// Kashier Webhook / Callback Handler
+app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
+  try {
+    const query = req.body || req.query;
+    const orderId = query.merchantOrderId || query.orderId;
+    const paymentStatus = query.paymentStatus || query.status;
+
+    if (orderId && String(paymentStatus).toLowerCase() === 'success') {
+      const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+      if (pendingDoc.exists) {
+        const orderData = pendingDoc.data();
+        const existingOrder = await db.collection('orders').doc(String(orderId)).get();
+        if (!existingOrder.exists) {
+          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+        }
+      }
+    }
+    return res.status(200).send('SUCCESS');
+  } catch (error) {
+    console.error('Kashier Webhook Error:', error.message);
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+// مسار تسجيل المعاملات في لوحة التحكم (Admin Panel) سواء نجحت أو فشلت
+app.post('/api/record-transaction', async (req, res) => {
+  try {
+    const { paymentId, status, gatewayResponse } = req.body;
+    if (!paymentId) return res.status(400).json({ success: false });
+
+    // لو العملية ناجحة، نتحقق وننفذ تسليم الأكواد وإرسال الإيميل لو لم يتم تنفيذه عبر الـ Webhook
+    if (status === 'paid') {
+      const existingOrder = await db.collection('orders').doc(String(paymentId)).get();
+      if (!existingOrder.exists) {
+        const pendingDoc = await db.collection('pending_orders').doc(String(paymentId)).get();
+        if (pendingDoc.exists) {
+          const orderData = pendingDoc.data();
+          await fulfillOrderAndSendCodes(paymentId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+        }
+      }
+    }
+
+    // حفظ تفاصيل المعاملة في جدول الـ transactions لتظهر في البانل برقم المعاملة وحالتها
+    await db.collection('transactions').doc(String(paymentId)).set({
+      paymentId: String(paymentId),
+      status: status || 'unknown',
+      gatewayResponse: gatewayResponse || {},
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Record Transaction Error:', err.message);
+    return res.status(500).json({ success: false, message: err.message });
   }
 });
 
