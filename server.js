@@ -62,7 +62,7 @@ const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-e
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get active gateway with a safe Fallback to .env
+// Helper to get active gateway with dynamic provider detection (Supports Kashier & MyFatoorah)
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
@@ -70,27 +70,26 @@ async function getActivePaymentGateway() {
       const doc = snapshot.docs[0];
       const data = doc.data();
       const creds = data.credentials || {};
-      const provider = (data.provider || 'myfatoorah').toLowerCase();
+      const provider = (data.provider || data.key || doc.id || 'myfatoorah').toLowerCase();
       
-      const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey;
-      const rawSecret = data.secretKey || creds.secretKey || '';
+      const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey || creds.apiSecretKey;
+      const rawSecret = data.secretKey || creds.secretKey || creds.apiSecret || '';
+      const rawMerchantId = data.merchantId || creds.merchantId || '';
       
-      const tokenVal = decrypt(rawTokenOrKey);
-      if (tokenVal) {
-        return {
-          id: doc.id,
-          provider: provider,
-          isLive: Boolean(data.isLive),
-          token: tokenVal,
-          secretKey: decrypt(rawSecret),
-          apiUrl: (data.isLive ? (data.liveUrl || 'https://api-eg.myfatoorah.com') : (data.sandboxUrl || 'https://apitest.myfatoorah.com')).replace(/\/v2\/?$/, ''),
-          merchantId: data.merchantId || creds.merchantId || ''
-        };
-      }
+      return {
+        id: doc.id,
+        provider: provider,
+        isLive: Boolean(data.isLive),
+        token: decrypt(rawTokenOrKey),
+        apiKey: decrypt(rawTokenOrKey),
+        secretKey: decrypt(rawSecret),
+        merchantId: decrypt(rawMerchantId) || rawMerchantId,
+        apiUrl: (data.isLive ? (data.liveUrl || 'https://api-eg.myfatoorah.com') : (data.sandboxUrl || 'https://apitest.myfatoorah.com')).replace(/\/v2\/?$/, '')
+      };
     }
   } catch (err) { console.error('Gateway fetch error:', err.message); }
 
-  // Fallback آمن تماماً لضمان عدم حدوث إيرور 400
+  // Fallback آمن تماماً لضمان عدم حدوث إيرور
   return {
     id: 'env_fallback',
     provider: 'myfatoorah',
@@ -246,16 +245,15 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 PAYMENT ROUTES (Unified & Fallback for Visa/Mastercard)
+// 💳 PAYMENT ROUTES (Unified for Kashier & MyFatoorah)
 // ==========================================
 
 app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
   try {
-    const gatewayKey = (req.params.gatewayKey || 'myfatoorah').toLowerCase();
     const gateway = await getActivePaymentGateway();
     
-    if (!gateway || !gateway.token) {
-      return res.status(500).json({ success: false, message: 'Payment gateway token is missing or not configured.' });
+    if (!gateway) {
+      return res.status(500).json({ success: false, message: 'Payment gateway is not configured.' });
     }
 
     const order = req.body || {};
@@ -264,9 +262,33 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
     const customerPhone = (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11);
     const items = Array.isArray(order.items) ? order.items : [];
+    const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. معالجة ماي فاتورة (دعم الفيزا والماستر كارد مباشرة عبر ExecutePayment أو SendPayment)
-    if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
+    // 1. معالجة بوابة كاشير (Kashier) ديناميكياً وصحيح 100%
+    if (provider.includes('kashier')) {
+      if (!gateway.merchantId || !gateway.secretKey) {
+        return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
+      }
+
+      const orderId = 'ORD_' + Date.now();
+      const currency = 'EGP';
+      const mode = gateway.isLive ? 'live' : 'test';
+      const baseUrl = gateway.isLive ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
+      
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}`;
+      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+
+      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&mode=${mode}&redirect=true`;
+      return res.json({ success: true, paymentUrl: kashierUrl });
+    }
+
+    // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
+    if (provider.includes('myfatoorah') || !provider) {
+      const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
+      if (!tokenToUse) {
+        return res.status(400).json({ success: false, message: 'MyFatoorah Token is missing.' });
+      }
+
       const invoiceBody = {
         InvoiceValue: amount,
         DisplayCurrencyIso: 'EGP',
@@ -282,13 +304,13 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       try {
         // محاولة التوجيه المباشر للبطاقات البنكية (Visa / MasterCard - PaymentMethodId: 2)
         executeResponse = await axios.post(`${gateway.apiUrl}/v2/ExecutePayment`, { ...invoiceBody, PaymentMethodId: 2 }, {
-          headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
+          headers: { Authorization: `Bearer ${tokenToUse}`, 'Content-Type': 'application/json' },
           timeout: 30000
         });
       } catch (err) {
-        // لو طريقة الفيزا المباشرة غير مفعلة، يتم التحويل للطريقة العامة SendPayment لعرض كل الخيارات المتاحة
+        // لو طريقة الفيزا غير مفعلة، تحويل للطريقة العامة SendPayment
         executeResponse = await axios.post(`${gateway.apiUrl}/v2/SendPayment`, invoiceBody, {
-          headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
+          headers: { Authorization: `Bearer ${tokenToUse}`, 'Content-Type': 'application/json' },
           timeout: 30000
         });
       }
@@ -301,16 +323,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) || 'Payment request rejected.' });
     }
 
-    // 2. معالجة كاشير
-    if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
-      const orderId = 'ORD_' + Date.now();
-      const baseUrl = gateway.isLive ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
-      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=EGP`;
-      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
-      return res.json({ success: true, paymentUrl: `${baseUrl}${pathString}&hash=${hash}&mode=${gateway.isLive ? 'live' : 'test'}&redirect=true` });
-    }
-
-    return res.status(400).json({ success: false, message: 'Gateway not supported.' });
+    return res.status(400).json({ success: false, message: `Gateway provider ${provider} is not supported.` });
   } catch (e) {
     console.error('Payment Error:', e.response?.data || e.message);
     return res.status(400).json({ success: false, message: e.response?.data?.Message || e.message });
