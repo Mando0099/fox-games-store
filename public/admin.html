@@ -436,7 +436,7 @@
       </div>
     </section>
 
-    <!-- صفحة أكواد الخصم المحدثة -->
+    <!-- صفحة أكواد الخصم -->
     <section id="coupons-page" class="page">
       <div class="page-head">
         <h2>أكواد وقسائم الخصم الاحترافية</h2>
@@ -487,73 +487,57 @@
       </div>
     </section>
 
-    <!-- صفحة بوابات الدفع -->
+    <!-- صفحة بوابات الدفع الاحترافية الجديدة -->
     <section id="payments-page" class="page">
       <div class="page-head">
-        <h2>إدارة طرق وبوابات الدفع</h2>
-        <p>تعديل أرقام المحافظ الكاش، InstaPay، ومفاتيح الربط لشركات الدفع الإلكتروني</p>
+        <h2>إدارة بوابات وطرق الدفع الذكية</h2>
+        <p>اختر بوابة الدفع، أدخل متطلباتها الحقيقية، وتحكم في تفعيل بوابة واحدة رئيسية للمتجر بضغطة زر</p>
       </div>
 
-      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
-        
-        <div class="panel form-panel">
-          <div class="panel-head">
-            <h3><i class="fa-solid fa-mobile-screen-button" style="color:#ef4444;"></i> المحافظ الإلكترونية (Cash)</h3>
+      <!-- لوحة إضافة / اختيار بوابة جديدة -->
+      <div class="panel form-panel" style="margin-bottom: 25px;">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-circle-plus"></i> إضافة أو ربط بوابة دفع جديدة</h3>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 2fr auto; align-items: flex-end; gap: 15px;">
+          <div class="form-group">
+            <label for="gatewaySelect">اختر بوابة الدفع *</label>
+            <select id="gatewaySelect" onchange="renderGatewayFields()">
+              <option value="">-- اختر البوابة --</option>
+              <option value="myfatoorah">MyFatoorah (ماي فاتورة)</option>
+              <option value="paymob">Paymob (باي موب)</option>
+              <option value="stripe">Stripe (سترايب - دولي)</option>
+              <option value="paypal">PayPal (بي بال)</option>
+              <option value="cashier">Cashier (كاشير)</option>
+              <option value="fawaterak">Fawaterak (فواتيرك)</option>
+              <option value="instapay">InstaPay (انستاباي)</option>
+              <option value="vodafone_cash">Vodafone Cash (محفظة فودافون)</option>
+            </select>
           </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="vodafoneCashNumber">رقم المحفظة الرئيسي للتحويل</label>
-            <input type="text" id="vodafoneCashNumber" placeholder="01012345678" />
+
+          <div id="dynamicGatewayInputs" style="display: contents;">
+            <div class="form-group">
+              <label>متطلبات البوابة</label>
+              <input type="text" disabled placeholder="الرجاء اختيار بوابة الدفع أولاً..." />
+            </div>
           </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="cashInstructions">تعليمات الدفع للعميل</label>
-            <textarea id="cashInstructions" rows="3" placeholder="مثال: يرجى تحويل المبلغ ثم إرفاق صورة الإيصال..."></textarea>
-          </div>
-          <div class="form-checkbox-group" style="margin-top: 10px;">
-            <input type="checkbox" id="cashActive" checked />
-            <label for="cashActive">تفعيل الدفع كاش للمتجر</label>
+
+          <div class="form-group">
+            <button type="button" class="btn-submit" onclick="saveAndActivateGateway()" style="height: 48px; white-space: nowrap;">
+              <i class="fa-solid fa-plug-circle-plus"></i> حفظ وربط البوابة
+            </button>
           </div>
         </div>
-
-        <div class="panel form-panel">
-          <div class="panel-head">
-            <h3><i class="fa-solid fa-building-columns" style="color:#8b5cf6;"></i> حساب InstaPay</h3>
-          </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="instapayAddress">عنوان الدفع (IPA) أو رقم الهاتف</label>
-            <input type="text" id="instapayAddress" placeholder="username@instapay أو 01012345678" />
-          </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="instapayName">اسم صاحب الحساب (للتحقق)</label>
-            <input type="text" id="instapayName" placeholder="مثال: Mohamed Ashraf" />
-          </div>
-          <div class="form-checkbox-group" style="margin-top: 10px;">
-            <input type="checkbox" id="instapayActive" checked />
-            <label for="instapayActive">تفعيل InstaPay للمتجر</label>
-          </div>
-        </div>
-
-        <div class="panel form-panel">
-          <div class="panel-head">
-            <h3><i class="fa-solid fa-credit-card" style="color:#3b82f6;"></i> بوابة Paymob / فيزا و كارت</h3>
-          </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="paymobApiKey">API Key</label>
-            <input type="password" id="paymobApiKey" placeholder="مفتاح API الخاص بـ Paymob" />
-          </div>
-          <div class="form-group" style="margin-top: 10px;">
-            <label for="paymobIntegrationCard">Integration ID (بطاقات البنك)</label>
-            <input type="text" id="paymobIntegrationCard" placeholder="مثال: 123456" />
-          </div>
-          <div class="form-checkbox-group" style="margin-top: 10px;">
-            <input type="checkbox" id="paymobActive" />
-            <label for="paymobActive">تفعيل بوابة Paymob التلقائية</label>
-          </div>
-        </div>
-
       </div>
 
-      <div class="form-actions" style="margin-top: 20px;">
-        <button type="button" class="btn-submit" onclick="savePaymentGateways()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة إعدادات الدفع</button>
+      <!-- استعراض البوابات المضافة والمفعلة حالياً -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-wallet"></i> بوابات الدفع المضافة للمتجر (اختر بوابة واحدة نشطة)</h3>
+        </div>
+        <div id="configuredGatewaysList" class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+          <p style="color: #94a3b8; text-align: center; grid-column: 1/-1; padding: 20px;">جاري تحميل البوابات المربوطة...</p>
+        </div>
       </div>
     </section>
 
@@ -644,6 +628,6 @@
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=202"></script>
+  <script src="/js/admin.js?v=203"></script>
 </body>
 </html>
