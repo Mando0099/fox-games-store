@@ -591,7 +591,6 @@ function processSecureCheckout() {
     }
 }
 
-// دالة إتمام الشراء المحدثة لتقرأ البوابة النشطة ديناميكياً وتوجه للرابط الديناميكي الموحد بالسيرفر
 async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
@@ -655,7 +654,6 @@ async function checkout() {
     if (typeof firebase === 'undefined' || !firebase.firestore) throw new Error('Firebase not initialized');
     const db = firebase.firestore();
     
-    // جلب البوابة المفعلة حصرياً من اللوحة
     const gatewaySnap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
     
     if (gatewaySnap.empty) {
@@ -666,7 +664,6 @@ async function checkout() {
     const gatewayKey = activeGateway.key;
     const creds = activeGateway.credentials || {};
 
-    // إذا كانت البوابة يدوية (مثل instapay)
     if (gatewayKey === 'instapay') {
       Swal.close();
       if (drawer) drawer.style.display = 'block';
@@ -712,7 +709,6 @@ async function checkout() {
       });
 
     } else {
-      // التوجيه السليم والمباشر للمسار الديناميكي الموحد بالسيرفر (`/api/${gatewayKey}/create-payment`)
       const apiRes = await fetch(`/api/${gatewayKey}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
