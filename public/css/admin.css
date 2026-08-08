@@ -79,7 +79,6 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
-  transition: transform var(--transition-fast), right var(--transition-fast);
   z-index: 999;
 }
 
@@ -716,7 +715,7 @@ th {
     flex-direction: column !important;
   }
 
-  /* إجبار السايدبار على التموضع الصحيح في أقصى يمين الشاشة وإخفائها كلياً لليمين */
+  /* إجبار السايدبار على التموضع الصحيح في أقصى يمين الشاشة مع الإخفاء والانزلاق الصحيح */
   .sidebar {
     position: fixed !important;
     top: 0 !important;
@@ -727,16 +726,17 @@ th {
     z-index: 999999 !important;
     background-color: var(--bg-card) !important;
     box-shadow: -15px 0 40px rgba(0, 0, 0, 0.9) !important;
-    transform: translateX(100%) !important; /* إخفاء تام جهة اليمين خارج الشاشة */
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateX(0) !important; /* الوضع الافتراضي عند الفتح أو التموضع */
+    right: -320px !important;            /* إخفاء القائمة بالكامل لليمين خارج الشاشة */
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 20px 15px !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  /* عند الفتح تعود إلى مكانها الطبيعي في أقصى اليمين تماماً */
+  /* عند تفعيل الكلاس active تظهر فوراً من اليمين بـ right: 0 */
   .sidebar.active {
-    transform: translateX(0) !important;
+    right: 0 !important;
   }
 
   .main {
