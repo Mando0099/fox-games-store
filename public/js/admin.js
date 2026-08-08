@@ -18,10 +18,15 @@ const swalConfig = {
 
 // 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي)
 function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = $('sidebarOverlay');
-    if (sidebar) sidebar.classList.toggle('active');
-    if (overlay) overlay.classList.toggle('active');
+    const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+    }
+    if (overlay) {
+        overlay.classList.toggle('active');
+    }
 }
 
 // 🔄 تنقل التابات والصفحات مع الإغلاق التلقائي الأكيد للموبايل
@@ -41,8 +46,9 @@ function showPage(pageName, btn) {
     }
 
     // إغلاق القائمة والـ Overlay فوراً عند التنقل على الأجهزة المحمولة
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = $('sidebarOverlay');
+    const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
     if (sidebar) sidebar.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
 
