@@ -89,7 +89,6 @@ async function getActivePaymentGateway() {
     }
   } catch (err) { console.error('Gateway fetch error:', err.message); }
 
-  // Fallback آمن تماماً لضمان عدم حدوث إيرور
   return {
     id: 'env_fallback',
     provider: 'myfatoorah',
@@ -264,7 +263,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. معالجة بوابة كاشير (Kashier) بالصيغة القياسية المؤكدة للـ iFrame
+    // 1. معالجة بوابة كاشير (Kashier) لتفتح صفحة الدفع الاحترافية الكاملة payments.kashier.io
     if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
@@ -274,10 +273,11 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const currency = 'EGP';
       const mode = gateway.isLive ? 'live' : 'test';
       
+      // الترتيب الأساسي الدقيق للـ pathString المعتمد لصفحة الدفع الاحترافية
       const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-      const baseUrl = gateway.isLive ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
+      const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
       const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&redirect=true`;
       
       return res.json({ success: true, paymentUrl: kashierUrl });
