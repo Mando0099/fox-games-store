@@ -55,7 +55,7 @@
     .footer-payments i { font-size: 30px; color: #94a3b8; transition: 0.3s; }
     .footer-payments i:hover { color: var(--neon-cyan); }
 
-    /* ================= DYNAMIC HERO SLIDER STYLES (بانر بخلفيات صور احترافية) ================= */
+    /* ================= DYNAMIC HERO SLIDER STYLES ================= */
     .hero-banner-section {
       position: relative;
       width: 100%;
@@ -83,7 +83,6 @@
       transition: opacity 0.6s ease-in-out;
       box-shadow: 0 20px 55px rgba(0,0,0,.6);
     }
-    /* طبقة تغميق فوق الصورة لتوضيح الكتابة */
     .hero-slide::before {
       content: '';
       position: absolute;
@@ -508,6 +507,14 @@
       </div>
     </section>
 
+    <!-- قسم لعرض بوابة الدفع النشطة حالياً ديناميكياً للعملاء -->
+    <section class="section" id="activePaymentGatewaySection" style="display: none;">
+      <div class="panel" style="background: #0d1722; border: 1px solid rgba(0,243,255,0.3); padding: 20px; border-radius: 12px; text-align: center;">
+        <h3 style="color: var(--neon-cyan); margin-bottom: 10px;"><i class="fas fa-wallet"></i> طريقة الدفع المعتمدة حالياً بالمتجر</h3>
+        <p id="activeGatewayInfoDesc" style="color: #cbd5e1; font-size: 14px;"></p>
+      </div>
+    </section>
+
     <section class="section" id="support">
       <div class="supportBox reveal">
         <div>
@@ -591,7 +598,7 @@
                 <!-- سيتم عرض التعليقات هنا برمجياً -->
             </div>
             
-            <!-- صندوق كتابة التعليق (مخفي افتراضياً ولن يظهر إلا للمشتري الحقيقي) -->
+            <!-- صندوق كتابة التعليق -->
             <div id="addReviewBox" class="add-review-box foxHidden">
                 <textarea id="reviewText" placeholder="اكتب تقييمك للمنتج هنا... (متاح للمشترين فقط)"></textarea>
                 <button onclick="submitReview()" class="btn-submit-review">إرسال التقييم</button>
@@ -687,11 +694,41 @@
       startSlider();
     }
 
+    /* دالة جلب بوابة الدفع النشطة من فايربيز وعرضها ديناميكياً للعميل */
+    async function fetchActivePaymentGatewayForStore() {
+      try {
+        if (typeof firebase === 'undefined' || !firebase.firestore) return;
+        const db = firebase.firestore();
+        const snap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
+        
+        const section = document.getElementById('activePaymentGatewaySection');
+        const descEl = document.getElementById('activeGatewayInfoDesc');
+
+        if (!snap.empty && section && descEl) {
+          const gatewayData = snap.docs[0].data();
+          section.style.display = 'block';
+          
+          if (gatewayData.key === 'vodafone_cash') {
+            descEl.innerHTML = `الدفع متاح عبر محفظة فودافون كاش الرسمية.<br>رقم التحويل: <b>${gatewayData.credentials.walletNumber || ''}</b><br><small>${gatewayData.credentials.instructions || ''}</small>`;
+          } else if (gatewayData.key === 'instapay') {
+            descEl.innerHTML = `الدفع متاح عبر حساب InstaPay.<br>عنوان الدفع (IPA): <b>${gatewayData.credentials.ipaAddress || ''}</b> (باسم: ${gatewayData.credentials.accountName || ''})`;
+          } else {
+            descEl.innerHTML = `بوابة الدفع الإلكترونية النشطة حالياً: <b>${gatewayData.name}</b> (آمنة ومشفرة بالكامل)`;
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching active gateway:", e);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       if (slides.length > 0) {
         showSlide(currentSlideIndex);
         startSlider();
       }
+
+      // استدعاء جلب بوابة الدفع النشطة عند تحميل الصفحة
+      fetchActivePaymentGatewayForStore();
 
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
@@ -803,7 +840,7 @@
         }
     }
 
-    function processSecureCheckout() {
+    async function processSecureCheckout() {
         const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
         if (!currentUser) {
             Swal.fire({
@@ -820,6 +857,24 @@
                 }
             });
             return;
+        }
+
+        // تحقق إضافي من بوابة الدفع المفعلة قبل إتمام الطلب
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
+          if (snap.empty) {
+            Swal.fire({
+              icon: 'error',
+              title: 'تنبيه إداري',
+              text: 'عذراً، لا توجد بوابة دفع مفعلة حالياً من قبل الإدارة لإتمام الطلب.',
+              background: '#090f17',
+              color: '#fff'
+            });
+            return;
+          }
+        } catch (e) {
+          console.error(e);
         }
 
         if(typeof checkout === 'function') {
