@@ -264,11 +264,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
 
-    // 1. معالجة بوابة كاشير (Kashier) باستخدام صفحة الدفع الاحترافية المباشرة (Hosted Checkout Page)
- // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
-    // 1. معالجة بوابة كاشير (Kashier) بالشكل الصحيح 100%
-    // معالجة بوابة كاشير (بدون redirectUrl لتجنب التعقيد)
-   // معالجة بوابة كاشير (Kashier) مع إضافة merchantRedirect الإجباري
+    // 1. معالجة بوابة كاشير (Kashier) بالصيغة القياسية المؤكدة للـ iFrame
     if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
@@ -277,16 +273,16 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const orderId = 'ORD_' + Date.now();
       const currency = 'EGP';
       const mode = gateway.isLive ? 'live' : 'test';
-      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
       
-      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}&merchantRedirect=${merchantRedirect}`;
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-      const baseUrl = gateway.isLive ? 'https://payments.kashier.io' : 'https://test-payments.kashier.io';
-      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}`;
+      const baseUrl = gateway.isLive ? 'https://iframe.kashier.io' : 'https://test-iframe.kashier.io';
+      const kashierUrl = `${baseUrl}${pathString}&hash=${hash}&redirect=true`;
       
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
+
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
@@ -307,13 +303,11 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
       let executeResponse;
       try {
-        // محاولة التوجيه المباشر للبطاقات البنكية (Visa / MasterCard - PaymentMethodId: 2)
         executeResponse = await axios.post(`${gateway.apiUrl}/v2/ExecutePayment`, { ...invoiceBody, PaymentMethodId: 2 }, {
           headers: { Authorization: `Bearer ${tokenToUse}`, 'Content-Type': 'application/json' },
           timeout: 30000
         });
       } catch (err) {
-        // لو طريقة الفيزا غير مفعلة، تحويل للطريقة العامة SendPayment
         executeResponse = await axios.post(`${gateway.apiUrl}/v2/SendPayment`, invoiceBody, {
           headers: { Authorization: `Bearer ${tokenToUse}`, 'Content-Type': 'application/json' },
           timeout: 30000
