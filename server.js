@@ -273,12 +273,11 @@ if (provider.includes('kashier')) {
       const currency = 'EGP';
       const mode = 'live';
 
-      // بناء مسار الرابط والـ Hash بالطريقة القياسية الصحيحة
+      // الطريقة المباشرة البسيطة تماماً بدون تعقيد
       const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
       const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
 
-      // تجهيز الرابط المباشر وإرساله بالشكل الذي يتوقعه script.js تماماً
-      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
+      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}`;
       
       return res.json({ success: true, paymentUrl: paymentUrl });
     }
