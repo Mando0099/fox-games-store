@@ -105,7 +105,7 @@
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- السايدبار الجانبي -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="appSidebar">
     <div class="brand">
       <div class="logo"><i class="fa-solid fa-gamepad"></i></div>
       <div class="brand-text">
@@ -562,7 +562,26 @@
 
   <!-- السكربتات التفاعلية الداخلية -->
   <script>
+    // دالة التحكم في القائمة الجانبية للموبايل والـ Overlay
+    function toggleSidebar() {
+      const sidebar = document.getElementById('appSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if(sidebar && overlay) {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
+      // إغلاق القائمة تلقائياً عند الضغط على أي زر تابة في الموبايل
+      document.querySelectorAll('.sidebar nav .nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (window.innerWidth <= 1000) {
+            toggleSidebar();
+          }
+        });
+      });
+
       // معاينة صورة التصنيف
       const catFileInput = document.getElementById('categoryImageFile');
       const catPreviewImg = document.getElementById('categoryImagePreview');
