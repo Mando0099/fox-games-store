@@ -273,17 +273,14 @@ if (provider.includes('kashier')) {
       const currency = 'EGP';
       const mode = 'live';
 
-      // إرسال البيانات المطلوبة للـ Frontend لتوليد نافذة الدفع أو الجلسة الرسمية بدون Forbidden
-      return res.json({
-        success: true,
-        gatewayType: 'kashier',
-        merchantId: gateway.merchantId,
-        orderId: orderId,
-        amount: amount,
-        currency: currency,
-        mode: mode,
-        hash: crypto.createHmac('sha256', gateway.secretKey).update(`/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`).digest('hex')
-      });
+      // بناء مسار الرابط والـ Hash بالطريقة القياسية الصحيحة
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`;
+      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+
+      // تجهيز الرابط المباشر وإرساله بالشكل الذي يتوقعه script.js تماماً
+      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
+      
+      return res.json({ success: true, paymentUrl: paymentUrl });
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
