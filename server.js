@@ -65,14 +65,14 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Fox Games <onboarding@resend.dev>';
 
-// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway) - [محدث بقراءة ذكية للمفاتيح]
+// Helper to get current active gateway from DB (Dynamic Demo/Live & Multi-gateway)
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
       const data = doc.data();
-      const creds = data.credentials || {}; // دعم الاستخراج من كائن credentials الفرعي إن وجد
+      const creds = data.credentials || {};
 
       const isLive = Boolean(data.isLive);
       const provider = (data.provider || data.name || doc.id || 'myfatoorah').toLowerCase();
@@ -92,8 +92,8 @@ async function getActivePaymentGateway() {
       const liveUrl = data.liveUrl || defaultLive;
       const targetApiUrl = (isLive ? liveUrl : sandboxUrl).replace(/\/v2\/?$/, '');
 
-      // استخراج المفتاح بذكاء من أي مكان تم حفظه فيه في قاعدة البيانات
       const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey || creds.apiSecretKey;
+      const rawSecret = data.secretKey || creds.secretKey || '';
 
       return {
         id: doc.id,
@@ -102,7 +102,7 @@ async function getActivePaymentGateway() {
         isLive: isLive,
         token: decrypt(rawTokenOrKey),
         apiKey: decrypt(rawTokenOrKey),
-        secretKey: decrypt(data.secretKey || creds.secretKey),
+        secretKey: decrypt(rawSecret),
         webhookSecret: decrypt(data.webhookSecret || creds.webhookSecret),
         apiUrl: targetApiUrl,
         sandboxUrl: sandboxUrl,
@@ -115,7 +115,6 @@ async function getActivePaymentGateway() {
     console.error('Error fetching active payment gateway from Firestore:', err.message);
   }
 
-  // Fallback to default .env config
   return {
     id: 'env_default',
     name: 'myfatoorah',
@@ -290,46 +289,13 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 STORE PAYMENT ROUTES
+// 💳 UNIFIED STORE PAYMENT ROUTE (Dynamic Gateway Handler)
 // ==========================================
 
-app.get('/api/myfatoorah/payment-methods', async (req, res) => {
+app.post('/api/:gatewayKey/create-payment', async (req, res) => {
   try {
+    const gatewayKey = req.params.gatewayKey.toLowerCase();
     const gateway = await getActivePaymentGateway();
-    const amount = money(req.query.amount || 1);
-
-    const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
-      InvoiceAmount: amount,
-      CurrencyIso: 'EGP'
-    });
-
-    if (!initiateResponse.data?.IsSuccess) {
-      return res.status(400).json({
-        success: false,
-        message: getMyFatoorahError(initiateResponse.data)
-      });
-    }
-
-    return res.json({
-      success: true,
-      methods: initiateResponse.data?.Data?.PaymentMethods || []
-    });
-  } catch (e) {
-    console.error('Payment methods error:', e.response?.data || e.message);
-    return res.status(400).json({
-      success: false,
-      message: getMyFatoorahError(e.response?.data) || e.message
-    });
-  }
-});
-
-app.post('/api/myfatoorah/create-payment', async (req, res) => {
-  try {
-    const gateway = await getActivePaymentGateway();
-
-    if (!gateway.token) {
-      return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
-    }
 
     const order = req.body || {};
     const amount = money(order.total);
@@ -338,85 +304,74 @@ app.post('/api/myfatoorah/create-payment', async (req, res) => {
     const customerEmail = order.customer?.email || order.email || 'customer@foxgames.local';
     const items = Array.isArray(order.items) ? order.items : [];
 
-    console.log(`[MODE: ${gateway.isLive ? 'LIVE' : 'DEMO'}] ACTIVE_GATEWAY_URL:`, gateway.apiUrl);
+    // 1. معالجة بوابة MyFatoorah
+    if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
+      if (!gateway.token) {
+        return res.status(500).json({ success: false, message: 'Missing payment token/API key for active gateway.' });
+      }
 
-    const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
-      InvoiceAmount: amount,
-      CurrencyIso: 'EGP'
-    });
-
-    if (!initiateResponse.data?.IsSuccess) {
-      return res.status(400).json({
-        success: false,
-        message: getMyFatoorahError(initiateResponse.data)
+      const initiateResponse = await myfatoorahPost(gateway, 'InitiatePayment', {
+        InvoiceAmount: amount,
+        CurrencyIso: 'EGP'
       });
+
+      if (!initiateResponse.data?.IsSuccess) {
+        return res.status(400).json({ success: false, message: getMyFatoorahError(initiateResponse.data) });
+      }
+
+      const paymentMethods = initiateResponse.data?.Data?.PaymentMethods || [];
+      const paymentMethodId = Number(paymentMethods[0]?.PaymentMethodId || 1);
+
+      const executeResponse = await myfatoorahPost(gateway, 'ExecutePayment', {
+        PaymentMethodId: paymentMethodId,
+        InvoiceValue: amount,
+        DisplayCurrencyIso: 'EGP',
+        CustomerEmail: customerEmail,
+        CustomerName: customerName,
+        CustomerMobile: customerPhone,
+        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
+        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
+        UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
+      });
+
+      if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.PaymentURL) {
+        return res.json({ success: true, paymentUrl: executeResponse.data.Data.PaymentURL });
+      }
+      return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) });
     }
 
-    const paymentMethods = initiateResponse.data?.Data?.PaymentMethods || [];
-    if (!paymentMethods.length) {
-      return res.status(400).json({
-        success: false,
-        message: 'No payment methods returned from MyFatoorah. Check account/currency activation.'
-      });
+    // 2. معالجة بوابة Kashier (كاشير)
+    if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
+      const merchantId = gateway.merchantId;
+      const secretKey = gateway.secretKey;
+
+      if (!merchantId || !secretKey) {
+        return res.status(500).json({ success: false, message: 'Missing Kashier Merchant ID or Secret Key.' });
+      }
+
+      const orderId = 'ORD_' + Date.now();
+      const currency = 'EGP';
+      const mode = gateway.isLive ? 'live' : 'test';
+
+      const pathString = `/pay?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&path=`;
+      const hash = crypto.createHmac('sha256', secretKey).update(pathString).digest('hex');
+
+      const kashierUrl = `https://${mode === 'live' ? '' : 'test-'}iframe.kashier.io/pay?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&hash=${hash}&mode=${mode}&redirect=true&allowedMethods=card,wallet`;
+
+      return res.json({ success: true, paymentUrl: kashierUrl });
     }
 
-    const selectedPaymentMethodId = Number(order.paymentMethodId || 0);
-    const selectedMethod = selectedPaymentMethodId
-      ? paymentMethods.find(m => Number(m.PaymentMethodId) === selectedPaymentMethodId)
-      : null;
+    return res.status(400).json({ success: false, message: `Gateway ${gatewayKey} is not fully configured or supported yet.` });
 
-    const defaultMethod =
-      selectedMethod ||
-      paymentMethods.find(m => /visa|master|card/i.test(`${m.PaymentMethodEn || ''} ${m.PaymentMethodAr || ''}`)) ||
-      paymentMethods[0];
-
-    const paymentMethodId = Number(defaultMethod.PaymentMethodId);
-
-    const executeBody = {
-      PaymentMethodId: paymentMethodId,
-      InvoiceValue: amount,
-      DisplayCurrencyIso: 'EGP',
-      CustomerEmail: customerEmail,
-      CustomerName: customerName,
-      CustomerMobile: customerPhone,
-      CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-      ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-      UserDefinedField: JSON.stringify(items.map(item => ({
-        id: item.id || item.productId || '',
-        name: item.name || '',
-        category: item.category || '',
-        price: item.price || 0
-      })))
-    };
-
-    const executeResponse = await myfatoorahPost(gateway, 'ExecutePayment', executeBody);
-
-    if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.PaymentURL) {
-      return res.json({
-        success: true,
-        invoiceId: executeResponse.data.Data.InvoiceId,
-        paymentMethodId,
-        paymentUrl: executeResponse.data.Data.PaymentURL
-      });
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: getMyFatoorahError(executeResponse.data) || 'Failed to create payment execution link.'
-    });
   } catch (e) {
-    console.error('=== PAYMENT CREATION ERROR DETAILS ===');
-    console.error('Status:', e.response?.status);
-    console.error('Data:', JSON.stringify(e.response?.data, null, 2));
-    console.error('Message:', e.message);
-    console.error('======================================');
-
-    return res.status(400).json({
-      success: false,
-      message: getMyFatoorahError(e.response?.data) || e.message
-    });
+    console.error('Unified Payment Creation Error:', e.response?.data || e.message);
+    return res.status(400).json({ success: false, message: e.response?.data?.message || e.message });
   }
 });
+
+// ==========================================
+// 📦 WEBHOOKS & EMAIL NOTIFICATIONS
+// ==========================================
 
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   console.log('WEBHOOK BODY:', JSON.stringify(req.body, null, 2));
