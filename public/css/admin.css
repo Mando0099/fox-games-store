@@ -6,17 +6,17 @@
 
 :root {
   /* نظام الألوان الأساسي */
-  --bg-main: #060b11;         /* خلفية المتصفح الأساسية */
-  --bg-card: #0d1520;         /* خلفية الكروت والأقسام */
-  --bg-input: #080d14;        /* خلفية حقول الإدخال */
-  --bg-accent: #142032;       /* حقول التركيز والـ Hover */
+  --bg-main: #060b11;
+  --bg-card: #0d1520;
+  --bg-input: #080d14;
+  --bg-accent: #142032;
 
   /* ألوان الهوية والإضاءة النيون */
-  --neon-blue: #3b82f6;       /* الأزرق المضيء الأساسي */
-  --neon-purple: #9d4edd;     /* البنفسجي */
-  --neon-green: #65cc00;      /* الأخضر للأرباح */
-  --neon-orange: #ff9f1c;     /* البرتقالي للتنبيهات */
-  --neon-pink: #f72585;       /* الوردي */
+  --neon-blue: #3b82f6;
+  --neon-purple: #9d4edd;
+  --neon-green: #65cc00;
+  --neon-orange: #ff9f1c;
+  --neon-pink: #f72585;
 
   /* النصوص */
   --text-main: #ffffff;
@@ -43,7 +43,7 @@ body {
   overflow-x: hidden;
 }
 
-/* تخصيص شريط التمرير (Custom Gaming Scrollbar) */
+/* تخصيص شريط التمرير */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -65,7 +65,7 @@ body {
 }
 
 /* ==========================================================================
-   القائمة الجانبية (Sidebar) - معدلة بالكامل لتتوزع بسلاسة وبدون تداخل
+   القائمة الجانبية (Sidebar) - Desktop
    ========================================================================== */
 .sidebar {
   width: 270px;
@@ -79,7 +79,6 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
-  transition: transform var(--transition-fast), right var(--transition-fast);
   z-index: 999;
 }
 
@@ -314,7 +313,7 @@ body {
 }
 
 /* ==========================================================================
-   حل مشكلة تداخل الصفحات والتابات
+   إدارة الصفحات
    ========================================================================== */
 .page {
   display: none !important;
@@ -332,7 +331,7 @@ body {
 }
 
 /* ==========================================================================
-   العناصر الداخلية للإحصائيات والكروت
+   الإحصائيات والكروت
    ========================================================================== */
 .page-head {
   margin-bottom: 35px;
@@ -394,7 +393,6 @@ body {
   margin: 4px 0;
 }
 
-/* تلوين حواف وإضاءات كروت الإحصائيات */
 .purple .stat-icon { background: rgba(157, 78, 221, 0.12); color: var(--neon-purple); }
 .purple { border-bottom: 3px solid var(--neon-purple); }
 
@@ -410,7 +408,6 @@ body {
 .pink .stat-icon { background: rgba(247, 37, 133, 0.12); color: var(--neon-pink); }
 .pink { border-bottom: 3px solid var(--neon-pink); }
 
-/* الجداول والأقسام */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.6fr 1.1fr;
@@ -433,7 +430,7 @@ body {
 }
 
 /* ==========================================================================
-   تنظيم وهيكلة فورم إدارة المنتجات الاحترافية
+   النماذج والحقول
    ========================================================================== */
 .form-container {
   display: flex;
@@ -519,7 +516,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* ==========================================================================
-   تصميم منطقة رفع الصور الحديثة (Custom Drag & Drop Dropzone)
+   منطقة رفع الصور (Dropzone)
    ========================================================================== */
 .dropzone-area {
   flex: 1;
@@ -558,12 +555,6 @@ input:focus, textarea:focus, select:focus {
   font-size: 45px;
   color: var(--neon-blue);
   margin-bottom: 12px;
-  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-  transition: transform var(--transition-fast);
-}
-
-.dropzone-area:hover .dropzone-content i {
-  transform: translateY(-5px);
 }
 
 .dropzone-content p {
@@ -576,11 +567,6 @@ input:focus, textarea:focus, select:focus {
 .dropzone-content p span {
   color: var(--neon-blue);
   text-decoration: underline;
-}
-
-.dropzone-content small {
-  color: var(--text-muted);
-  font-size: 11px;
 }
 
 .image-preview-overlay {
@@ -621,12 +607,6 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
   font-size: 14px;
   z-index: 12;
-  transition: var(--transition-fast);
-}
-
-.remove-img-btn:hover {
-  background: #ef4444;
-  transform: scale(1.1);
 }
 
 .form-actions {
@@ -640,28 +620,16 @@ input:focus, textarea:focus, select:focus {
   background: linear-gradient(135deg, #2563eb, var(--neon-blue)) !important;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   padding: 12px 25px !important;
-  font-size: 14px !important;
-}
-
-.btn-submit:hover {
-  box-shadow: 0 4px 25px rgba(59, 130, 246, 0.5);
 }
 
 .btn-clear {
   background: var(--bg-input) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: var(--text-muted) !important;
   padding: 12px 22px !important;
-  font-size: 14px !important;
-}
-
-.btn-clear:hover {
-  background: var(--bg-accent) !important;
-  color: var(--text-main) !important;
 }
 
 /* ==========================================================================
-   ستايل كروت المنتجات
+   الكروت والجداول
    ========================================================================== */
 .cards-grid {
   display: grid;
@@ -676,11 +644,6 @@ input:focus, textarea:focus, select:focus {
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  transition: var(--transition-fast);
-}
-
-.product-card-custom:hover {
-  transform: translateY(-5px);
 }
 
 .product-card-hero {
@@ -713,201 +676,66 @@ input:focus, textarea:focus, select:focus {
   justify-content: space-between;
 }
 
-.product-card-body h4 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.product-card-body p {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.product-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-}
-
 .price-tag {
   color: var(--neon-green);
   font-size: 18px;
   font-weight: 700;
 }
 
-.card-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.card-actions button, .actions button, .form-panel button {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  border: none;
-  padding: 10px 18px;
-  color: white;
-  border-radius: var(--radius-main);
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
-  transition: var(--transition-fast);
-}
-
-.actions button.ghost, .edit-btn {
-  background: var(--bg-accent) !important;
-  color: var(--text-main);
-}
-
-.delete-btn {
-  background: rgba(239, 68, 68, 0.1) !important;
-  color: #ef4444 !important;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.delete-btn:hover {
-  background: #ef4444 !important;
-  color: white !important;
-}
-
-/* ==========================================================================
-   حماية وتجاوب الجداول وحمايتها من النصوص الطويلة جداً
-   ========================================================================== */
 .table-box {
   width: 100% !important;
   overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
   background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  margin-bottom: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   text-align: right;
-  margin-top: 10px;
   min-width: 650px;
 }
 
-th {
-  background-color: rgba(255, 255, 255, 0.02);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 16px 20px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-  letter-spacing: 0.5px;
-}
-
-td {
+th, td {
   padding: 16px 20px;
   font-size: 14px;
-  color: var(--text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 250px;
 }
 
-tr:hover td {
-  background-color: rgba(59, 130, 246, 0.03);
-  color: #fff;
-  transition: background-color var(--transition-fast);
-}
-
-.code-text-protect {
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: 600;
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
-  display: inline-block;
-  max-width: 280px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  direction: ltr;
-}
-
-.product-relation-badge {
-  color: var(--neon-blue);
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.status-badge.available {
-  background: rgba(101, 204, 0, 0.15);
-  color: var(--neon-green);
-}
-
-.status-badge.used {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-  background-repeat: no-repeat;
-  background-position: left 15px center;
-  padding-left: 40px;
-  cursor: pointer;
-}
-
-select option {
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  padding: 10px;
+th {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 /* ==========================================================================
-   تحسين نظام التجاوب الشامل للموبايل (Media Queries)
+   إصلاح تجاوب الموبايل والقائمة الجانبية (مصحح تماماً لواجهات RTL)
    ========================================================================== */
-@media (max-width: 1150px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
-}
-
 @media (max-width: 1000px) {
   body {
     flex-direction: column !important;
   }
 
-  /* إخفاء القائمة الجانبية كلياً برا الشاشة وحمايتها من التداخل باستخدام Transform */
+  /* جعل القائمة الجانبية تستقر في أقصى اليمين وتختفي كلياً نحوه */
   .sidebar {
     position: fixed !important;
     top: 0 !important;
-    right: 0 !important; /* تثبيتها في الجانب الأيمن */
     left: auto !important;
+    right: 0 !important;             /* تثبيت الحافة اليمنى للقائمة بآخر الشاشة */
     width: 280px !important;
     height: 100vh !important;
     z-index: 999999 !important;
     background-color: var(--bg-card) !important;
-    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.95) !important;
-    transform: translateX(100%) !important; /* الإزاحة الكاملة يميناً لإخفائها */
+    box-shadow: -15px 0 40px rgba(0, 0, 0, 0.9) !important;
+    transform: translateX(100%) !important; /* إخفاء تام جهة اليمين خارج حدود الشاشة */
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 20px 15px !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  /* إظهار القائمة بانسياقية تامة عند تفعيل الكلاس */
+  /* انزلاق القائمة بسلاسة تامة لتغطي أقصى اليمين عند تفعيل الكلاس active */
   .sidebar.active {
-    transform: translateX(0) !important; /* إعادة القائمة لمكانها الأصلي */
+    transform: translateX(0) !important;
   }
 
   .main {
