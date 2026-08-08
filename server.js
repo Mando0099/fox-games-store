@@ -288,12 +288,23 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 UNIFIED STORE PAYMENT ROUTE (Dynamic Gateway Handler)
+// 💳 UNIFIED STORE PAYMENT ROUTES (Dynamic & Static Fallback)
 // ==========================================
 
+// مسار احتياطي ثابت لضمان عدم حدوث خطأ 400 لو المتصفح ما زال يطلب الرابط القديم
+app.post('/api/myfatoorah/create-payment', async (req, res) => {
+  req.params.gatewayKey = 'myfatoorah';
+  return handleCreatePayment(req, res);
+});
+
+// المسار الديناميكي الموحد الأساسي
 app.post('/api/:gatewayKey/create-payment', async (req, res) => {
+  return handleCreatePayment(req, res);
+});
+
+async function handleCreatePayment(req, res) {
   try {
-    const gatewayKey = req.params.gatewayKey.toLowerCase();
+    const gatewayKey = (req.params.gatewayKey || 'myfatoorah').toLowerCase();
     const gateway = await getActivePaymentGateway();
 
     const order = req.body || {};
@@ -357,7 +368,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
     console.error('Unified Payment Creation Error:', e.response?.data || e.message);
     return res.status(400).json({ success: false, message: e.response?.data?.message || e.message });
   }
-});
+}
 
 // ==========================================
 // 📦 WEBHOOKS & EMAIL NOTIFICATIONS
