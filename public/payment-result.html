@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fox Games | نتيجة الدفع</title>
+  <title>Tech Gaming | نتيجة الدفع</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root{
@@ -155,13 +155,14 @@
 <body>
   <main class="payment-result-page">
     <section class="payment-card">
-      <img class="logo" src="/assets/FOX-LOGO.png" alt="Fox Games">
+      <!-- شعار Tech Gaming -->
+      <img class="logo" src="/assets/TECH-GAMING-LOGO.png" alt="Tech Gaming" onerror="this.src='/assets/FOX-LOGO.png'">
 
       <div id="successView" style="display:none;">
         <div class="status-icon success-icon">✓</div>
         <h1 class="success-title">تم الدفع بنجاح</h1>
-        <p>تم استلام طلبك بنجاح وجاري معالجته.</p>
-        <p class="muted">شكراً لاختيارك Fox Games.</p>
+        <p>تم استلام طلبك بنجاح وإرسال الأكواد إلى بريدك الإلكتروني.</p>
+        <p class="muted">شكراً لاختيارك Tech Gaming.</p>
         <div id="successPaymentId" class="payment-id" style="display:none;"></div>
 
         <div class="actions">
@@ -173,8 +174,8 @@
       <div id="failedView" style="display:none;">
         <div class="status-icon failed-icon">×</div>
         <h1 class="failed-title">تعذر إتمام عملية الدفع</h1>
-        <p>لم تكتمل عملية الدفع بنجاح.</p>
-        <p class="muted">يرجى إعادة المحاولة أو استخدام وسيلة دفع أخرى. إذا استمرت المشكلة، تواصل مع فريق الدعم.</p>
+        <p>لم تكتمل عملية الدفع بنجاح أو تم إلغاؤها.</p>
+        <p class="muted">يرجى إعادة المحاولة أو استخدام وسيلة دفع أخرى. إذا واجهتك مشكلة، تواصل معنا.</p>
         <div id="failedPaymentId" class="payment-id" style="display:none;"></div>
 
         <div class="actions">
@@ -187,19 +188,23 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const status = (params.get('status') || '').toLowerCase();
-    const paymentId = params.get('paymentId') || params.get('invoiceId') || params.get('Id') || '';
-
+    
+    // التقاط الحالة ورقم العملية بدقة من جميع البوابات (كاشير وماي فاتورة)
+    const rawStatus = (params.get('status') || params.get('paymentStatus') || '').toLowerCase();
+    const paymentId = params.get('paymentId') || params.get('invoiceId') || params.get('Id') || params.get('orderId') || params.get('merchantOrderId') || '';
+    
     const successView = document.getElementById('successView');
     const failedView = document.getElementById('failedView');
 
-    if (status === 'success' || status === 'paid') {
+    const isSuccess = rawStatus === 'success' || rawStatus === 'paid' || params.get('success') === 'true';
+
+    if (isSuccess) {
       successView.style.display = 'block';
 
       if (paymentId) {
         const box = document.getElementById('successPaymentId');
         box.style.display = 'block';
-        box.textContent = 'رقم العملية: ' + paymentId;
+        box.textContent = 'رقم المعاملة: ' + paymentId;
       }
     } else {
       failedView.style.display = 'block';
@@ -207,8 +212,21 @@
       if (paymentId) {
         const box = document.getElementById('failedPaymentId');
         box.style.display = 'block';
-        box.textContent = 'رقم العملية: ' + paymentId;
+        box.textContent = 'رقم المعاملة: ' + paymentId;
       }
+    }
+
+    // إرسال تفاصيل المعاملة للسيرفر لتظهر في لوحة التحكم (Admin Panel)
+    if (paymentId) {
+      fetch('/api/record-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentId: paymentId,
+          status: isSuccess ? 'paid' : 'failed',
+          gatewayResponse: Object.fromEntries(params.entries())
+        })
+      }).catch(err => console.log('Transaction logging error:', err));
     }
   </script>
 </body>
