@@ -125,7 +125,6 @@
       <button class="nav-btn" onclick="showPage('customers', this)"><i class="fa-solid fa-users"></i> العملاء</button>
       <button class="nav-btn" onclick="showPage('payments', this)"><i class="fa-solid fa-wallet"></i> بوابات الدفع</button>
       <button class="nav-btn" onclick="showPage('reports', this)"><i class="fa-solid fa-chart-line"></i> التقارير</button>
-      <!-- زر إدارة الأدمنه الجديد -->
       <button class="nav-btn" onclick="showPage('admins-management', this)"><i class="fa-solid fa-user-shield"></i> إدارة الأدمنه</button>
     </nav>
 
@@ -437,15 +436,18 @@
       </div>
     </section>
 
-    <!-- صفحة أكواد الخصم -->
+    <!-- صفحة أكواد الخصم المحدثة -->
     <section id="coupons-page" class="page">
       <div class="page-head">
-        <h2>أكواد وقسائم الخصم</h2>
-        <p>إنشاء وتوليد كوبونات التخفيض المالي لعملائك</p>
+        <h2>أكواد وقسائم الخصم الاحترافية</h2>
+        <p>إنشاء وتوليد وتعديل قسائم التخفيض مع تحديد الصلاحية وعدد مرات الاستخدام</p>
       </div>
+
       <div class="panel form-panel">
         <form id="coupon-form" onsubmit="event.preventDefault(); saveCoupon();">
-          <div class="form-grid">
+          <input type="hidden" id="couponDocId" />
+          
+          <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
             <div class="form-group">
               <label for="couponCode">كود الخصم *</label>
               <input id="couponCode" type="text" placeholder="مثال: FOX10" style="text-transform: uppercase;" required />
@@ -454,13 +456,24 @@
               <label for="couponValue">نسبة الخصم (%) *</label>
               <input id="couponValue" type="number" min="1" max="100" placeholder="مثال: 10" required />
             </div>
+            <div class="form-group">
+              <label for="couponExpiry">تاريخ انتهاء الصلاحية</label>
+              <input id="couponExpiry" type="date" />
+            </div>
+            <div class="form-group">
+              <label for="couponMaxUses">الحد الأقصى لعدد الاستخدامات</label>
+              <input id="couponMaxUses" type="number" min="1" placeholder="مثال: 50 مرة (اختياري)" />
+            </div>
           </div>
+
           <div class="form-actions" style="margin-top: 15px;">
-            <button type="submit" class="btn-submit"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
+            <button type="submit" class="btn-submit" id="saveCouponBtn"><i class="fa-solid fa-tags"></i> حفظ وتفعيل الكوبون</button>
+            <button type="button" class="btn-clear" onclick="resetCouponForm()"><i class="fa-solid fa-broom"></i> تفريغ الحقول</button>
           </div>
         </form>
       </div>
-      <div id="couponsList" class="cards-grid" style="margin-top: 20px;"></div>
+
+      <div id="couponsList" class="cards-grid" style="margin-top: 25px;"></div>
     </section>
 
     <!-- صفحة العملاء -->
@@ -544,7 +557,7 @@
       </div>
     </section>
 
-    <!-- صفحة إدارة الأدمنه والصلاحيات الجديده -->
+    <!-- صفحة إدارة الأدمنه والصلاحيات -->
     <section id="admins-management-page" class="page">
       <div class="page-head">
         <h2>صلاحيات وإدارة الأدمنه</h2>
@@ -631,6 +644,6 @@
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=201"></script>
+  <script src="/js/admin.js?v=202"></script>
 </body>
 </html>
