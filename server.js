@@ -120,7 +120,7 @@ function getMyFatoorahError(data) {
 }
 
 // ==========================================
-// 🛠️ ADMIN GATEWAY MANAGEMENT APIs
+// 🛠️ ADMIN GATEWAY & MANAGEMENT APIs
 // ==========================================
 
 app.get('/api/admin/payment-gateways', async (req, res) => {
@@ -236,6 +236,60 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
     });
 
     return res.json({ success: true, message: 'تم تثبيت البوابة على الوضع الحقيقي (Live) بنجاح.' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// مسار حذف بوابة دفع
+app.delete('/api/admin/payment-gateways/:id', async (req, res) => {
+  try {
+    await db.collection('payment_gateways').doc(req.params.id).delete();
+    return res.json({ success: true, message: 'تم حذف بوابة الدفع بنجاح' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// مسارات تعديل وحذف المنتجات
+app.put('/api/admin/products/:id', async (req, res) => {
+  try {
+    await db.collection('products').doc(req.params.id).set({
+      ...req.body,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    return res.json({ success: true, message: 'تم تحديث المنتج بنجاح' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/products/:id', async (req, res) => {
+  try {
+    await db.collection('products').doc(req.params.id).delete();
+    return res.json({ success: true, message: 'تم حذف المنتج بنجاح' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// مسارات تعديل وحذف كوبونات الخصم
+app.put('/api/admin/coupons/:id', async (req, res) => {
+  try {
+    await db.collection('coupons').doc(req.params.id).set({
+      ...req.body,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    return res.json({ success: true, message: 'تم تحديث الكوبون بنجاح' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/coupons/:id', async (req, res) => {
+  try {
+    await db.collection('coupons').doc(req.params.id).delete();
+    return res.json({ success: true, message: 'تم حذف الكوبون بنجاح' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -449,7 +503,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler (محدث لضمان الالتقاط الفوري بنجاح تام)
+// Kashier Webhook / Callback Handler
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const data = { ...(req.body || {}), ...(req.query || {}) };
@@ -460,7 +514,6 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
     const cardLast4 = data.cardLast4 || data.maskedCard || data.brand || 'بطاقة إلكترونية';
 
     if (orderId) {
-      // التحقق الشامل من حالة الدفع بكافة صيغ كاشير الممكنة
       const isPaid = paymentStatus === 'success' || paymentStatus === 'paid' || paymentStatus === 'approved' || paymentStatus === 'completed' || data.success === true || data.success === 'true';
       
       await db.collection('transactions').doc(String(orderId)).set({
