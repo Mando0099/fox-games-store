@@ -452,20 +452,35 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler
+// Kashier Webhook / Callback Handler (تم دعم تسجيل المعاملات فورا في الوج والبانل هنا)
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const query = req.body || req.query;
-    const orderId = query.merchantOrderId || query.orderId;
+    console.log("Kashier Callback Received:", JSON.stringify(query));
+
+    const orderId = query.merchantOrderId || query.orderId || query.paymentId;
     const paymentStatus = query.paymentStatus || query.status;
 
-    if (orderId && String(paymentStatus).toLowerCase() === 'success') {
-      const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
-      if (pendingDoc.exists) {
-        const orderData = pendingDoc.data();
-        const existingOrder = await db.collection('orders').doc(String(orderId)).get();
-        if (!existingOrder.exists) {
-          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+    if (orderId) {
+      const isPaid = String(paymentStatus).toLowerCase() === 'success' || String(paymentStatus).toLowerCase() === 'paid';
+      
+      // تسجيل المعاملة في الـ transactions لتظهر فورا في البانل سواء نجحت أو فشلت
+      await db.collection('transactions').doc(String(orderId)).set({
+        paymentId: String(orderId),
+        status: isPaid ? 'paid' : 'failed',
+        gatewayResponse: query,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      if (isPaid) {
+        const pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+        if (pendingDoc.exists) {
+          const orderData = pendingDoc.data();
+          const existingOrder = await db.collection('orders').doc(String(orderId)).get();
+          if (!existingOrder.exists) {
+            await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+            console.log("Order fulfilled and email sent successfully for:", orderId);
+          }
         }
       }
     }
@@ -476,13 +491,14 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
-// مسار تسجيل المعاملات في لوحة التحكم (Admin Panel) وإجبار السيرفر على إرسال الأكواد عند عودة العميل
+// مسار تسجيل المعاملات من المتصفح (Admin Panel & Result Page Fallback)
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
+    console.log("Record Transaction Called from Browser:", paymentId, status);
+
     if (!paymentId) return res.status(400).json({ success: false });
 
-    // لو العملية ناجحة، نتحقق وننفذ تسليم الأكواد وإرسال الإيميل لو لم يتم تنفيذه مسبقاً
     if (status === 'paid') {
       const existingOrder = await db.collection('orders').doc(String(paymentId)).get();
       if (!existingOrder.exists) {
@@ -494,7 +510,6 @@ app.post('/api/record-transaction', async (req, res) => {
       }
     }
 
-    // حفظ تفاصيل المعاملة في جدول الـ transactions لتظهر في البانل برقم المعاملة وحالتها
     await db.collection('transactions').doc(String(paymentId)).set({
       paymentId: String(paymentId),
       status: status || 'unknown',
