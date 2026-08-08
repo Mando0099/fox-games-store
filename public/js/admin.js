@@ -405,23 +405,32 @@ async function setExclusiveActiveGateway(activeId) {
     } catch (err) { console.error("Error setting active gateway:", err); }
 }
 
+// تعديل حذف بوابة الدفع عبر مسار السيرفر
 async function deleteGateway(id) {
-    Swal.fire({
-        title: 'حذف البوابة؟',
-        text: "لن يتمكن العملاء من الدفع عبر هذه البوابة بعد الآن!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        confirmButtonText: 'نعم، احذف',
-        cancelButtonText: 'إلغاء',
-        ...swalConfig
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            await db.collection('payment_gateways').doc(id).delete();
-            await loadConfiguredGateways();
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
-        }
-    });
+  Swal.fire({
+    title: 'حذف البوابة؟',
+    text: "لن يتمكن العملاء من الدفع عبر هذه البوابة بعد الآن!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    confirmButtonText: 'نعم، احذف',
+    cancelButtonText: 'إلغاء',
+    ...swalConfig
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/api/admin/payment_gateways/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.message || 'فشل الحذف');
+        
+        await loadConfiguredGateways();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حذف البوابة من السيرفر.', ...swalConfig });
+      }
+    }
+  });
 }
 
 // ==========================================
@@ -535,10 +544,10 @@ function editCoupon(docId, code, value, expiry, maxUses) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// تعديل حذف الكوبون عبر مسار السيرفر
 async function deleteCoupon(docId) {
   Swal.fire({
     title: 'حذف الكوبون؟',
-    text: "لن يتمكن العملاء من استخدام هذا الكود بعد الآن!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#ef4444',
@@ -547,9 +556,17 @@ async function deleteCoupon(docId) {
     ...swalConfig
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await db.collection('coupons').doc(docId).delete();
-      await loadCoupons();
-      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+      try {
+        const res = await fetch(`/api/admin/coupons/${docId}`, { method: 'DELETE' });
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.message || 'فشل الحذف');
+        
+        await loadCoupons();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حذف الكوبون.', ...swalConfig });
+      }
     }
   });
 }
@@ -563,7 +580,7 @@ function resetCouponForm() {
 }
 
 // ==========================================
-// إدارة أحداث المتجر
+// إدارة أحداث المتجر والمنتجات
 // ==========================================
 
 function initEventListeners() {
@@ -830,10 +847,11 @@ async function editProduct(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// تعديل حذف المنتج عبر مسار السيرفر
 async function deleteProduct(id) {
   Swal.fire({
     title: 'تأكيد حذف المنتج؟',
-    text: "سيتم إزالة هذا المنتج نهائياً من المتجر واختفاء كروته التعريفية للعملاء!",
+    text: "سيتم إزالة هذا المنتج نهائياً من المتجر!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -842,29 +860,21 @@ async function deleteProduct(id) {
     ...swalConfig
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await db.collection('products').doc(id).delete();
-      
-      const prodCard = document.getElementById(`product-${id}`);
-      if (prodCard) {
-        prodCard.style.transition = "all 0.3s";
-        prodCard.style.opacity = "0";
-        setTimeout(() => prodCard.remove(), 300);
-      } else {
-        await loadProducts();
+      try {
+        const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.message || 'فشل الحذف');
+
+        const prodCard = document.getElementById(`product-${id}`);
+        if (prodCard) prodCard.remove();
+        else await loadProducts();
+        
+        await loadStats();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حذف المنتج من السيرفر.', ...swalConfig });
       }
-      
-      await loadStats();
-      
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'تم حذف المنتج بنجاح',
-        showConfirmButton: false,
-        timer: 1500,
-        background: '#101a26',
-        color: '#fff'
-      });
     }
   });
 }
@@ -958,10 +968,10 @@ async function loadCategories() {
   });
 }
 
+// تعديل حذف التصنيف عبر مسار السيرفر
 async function deleteCategory(id) {
   Swal.fire({
     title: 'هل تريد حذف هذا التصنيف؟',
-    text: "تأكد أنه لا توجد منتجات نشطة معتمدة عليه حالياً لتفادي تلف العرض الداخلي للعميل.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -970,27 +980,20 @@ async function deleteCategory(id) {
     ...swalConfig
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await db.collection('categories').doc(id).delete();
-      
-      const catCard = document.getElementById(`cat-${id}`);
-      if (catCard) {
-        catCard.style.transition = "all 0.3s";
-        catCard.style.opacity = "0";
-        setTimeout(() => catCard.remove(), 300);
-      } else {
-        await loadCategories();
+      try {
+        const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.message || 'فشل الحذف');
+
+        const catCard = document.getElementById(`cat-${id}`);
+        if (catCard) catCard.remove();
+        else await loadCategories();
+
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم حذف التصنيف', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حذف التصنيف.', ...swalConfig });
       }
-      
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'تم حذف التصنيف',
-        showConfirmButton: false,
-        timer: 1500,
-        background: '#101a26',
-        color: '#fff'
-      });
     }
   });
 }
@@ -1106,10 +1109,11 @@ function filterCodesTablePro() {
   });
 }
 
+// تعديل حذف الكود عبر مسار السيرفر
 async function deleteCode(id) {
   Swal.fire({
     title: 'هل أنت متأكد؟',
-    text: "لن تتمكن من استعادة هذا الكود الرقمي التسلسلي بعد حذفه من السجلات!",
+    text: "لن تتمكن من استعادة هذا الكود التسلسلي!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#f43f5e',
@@ -1119,38 +1123,19 @@ async function deleteCode(id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        await db.collection('productCodes').doc(id).delete();
-        
+        const res = await fetch(`/api/admin/codes/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.message || 'فشل الحذف');
+
         const row = document.getElementById(`row-${id}`);
-        if (row) {
-          row.style.transition = "all 0.3s ease";
-          row.style.opacity = "0";
-          row.style.transform = "translateX(-30px)";
-          
-          setTimeout(() => {
-            row.remove();
-            const container = $('codes-list-container');
-            if (container && container.children.length === 0) {
-              container.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">لا توجد أكواد مضافة حالياً في قاعدة البيانات</td></tr>';
-            }
-          }, 300);
-        }
-        
+        if (row) row.remove();
+        else await loadCodes();
+
         await loadStats();
-
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: 'تم حذف الكود بنجاح',
-          showConfirmButton: false,
-          timer: 1500,
-          background: '#101a26',
-          color: '#fff'
-        });
-
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم حذف الكود بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
       } catch (err) {
-        console.error("حدث خطأ أثناء محاولة حذف الكود: ", err);
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر حذف الكود.', ...swalConfig });
       }
     }
   });
