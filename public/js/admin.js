@@ -45,6 +45,9 @@ function showPage(pageName, btn) {
     const overlay = $('sidebarOverlay');
     if (sidebar) sidebar.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
+
+    // إعادة التمرير للأعلى بسلاسة
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // دالة جلب قيم المدخلات
