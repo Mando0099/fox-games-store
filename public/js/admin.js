@@ -12,7 +12,7 @@ const $ = (id) => document.getElementById(id);
 const swalConfig = {
   background: '#0b1320',
   color: '#fff',
-  confirmButtonColor: '#3b82f6',
+  confirmButtonColor: '#38bdf8',
   cancelButtonColor: '#475569'
 };
 
@@ -43,7 +43,6 @@ function showPage(pageName, btn) {
         if (targetBtn) targetBtn.classList.add('active');
     }
 
-    // إغلاق القائمة والـ Overlay عند اختيار أي تابة
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
@@ -58,7 +57,6 @@ function val(id) {
     return ($(id)?.value || '').trim();
 }
 
-// التأكد من ربط زر الهامبرجر فور تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
     const menuBtn = $('menuBtn');
     if (menuBtn) {
@@ -97,7 +95,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
     currentAdminData = adminCheck.docs[0].data();
 
-    // التحقق هل الحساب محجوب (active == false)
     if (currentAdminData.active === false) {
       await Swal.fire({
         icon: 'error',
@@ -112,7 +109,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
     initEventListeners();
     await loadAll();
-    await loadAdminsManagement(); // تحميل جدول الأدمنه
+    await loadAdminsManagement();
 
   } catch (error) {
     console.error("خطأ في التحقق من صلاحيات الأدمن:", error);
@@ -125,11 +122,11 @@ async function loadAll() {
   await loadProducts();
   await loadCodes();
   await loadOrders();
-  await loadTransactions(); // تحميل سجل المعاملات ورقم العملية في البانل
+  await loadTransactions();
   await loadCoupons();
   await loadCustomers();
   await loadStats();
-  await loadConfiguredGateways(); // تحميل بوابات الدفع الذكية
+  await loadConfiguredGateways();
   await loadAdminsManagement();
 }
 
@@ -160,7 +157,7 @@ async function loadAdminsManagement() {
                 <tr>
                     <td><strong>${d.email}</strong></td>
                     <td>
-                        <span class="status-badge" style="background:${isSuper ? 'rgba(157,78,221,0.15)' : 'rgba(59,130,246,0.15)'}; color:${isSuper ? '#9d4edd' : '#3b82f6'};">
+                        <span class="status-badge" style="background:${isSuper ? 'rgba(157,78,221,0.15)' : 'rgba(56,189,248,0.15)'}; color:${isSuper ? '#9d4edd' : '#38bdf8'};">
                             ${isSuper ? 'مشرف رئيسي (Super Admin)' : 'أدمن عام'}
                         </span>
                     </td>
@@ -188,7 +185,7 @@ async function loadAdminsManagement() {
 async function addNewAdmin() {
     const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
     if (!isSuper) {
-        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية إضافة أدمنه جدد. هذه الصلاحية للمشرف الرئيسي فقط!', ...swalConfig });
+        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية إضافة أدمنه جدد!', ...swalConfig });
         return;
     }
 
@@ -214,7 +211,7 @@ async function addNewAdmin() {
         $('newAdminEmail').value = '';
         await loadAdminsManagement();
 
-        Swal.fire({ icon: 'success', title: 'تمت الإضافة بنجاح', text: 'تم منح صلاحيات الأدمن لهذا البريد بنجاح.', timer: 2000, showConfirmButton: false, ...swalConfig });
+        Swal.fire({ icon: 'success', title: 'تمت الإضافة بنجاح', text: 'تم منح صلاحيات الأدمن لهذا البريد.', timer: 2000, showConfirmButton: false, ...swalConfig });
     } catch (err) {
         Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر إضافة الأدمن الجديد.', ...swalConfig });
     }
@@ -237,7 +234,7 @@ async function toggleAdminStatus(docId, newStatus) {
 }
 
 // ==========================================
-// 💳 دوال بوابات الدفع الديناميكية والاحترافية الدقيقة
+// 💳 دوال بوابات الدفع الديناميكية والاحترافية
 // ==========================================
 
 const gatewayConfigs = {
@@ -253,13 +250,13 @@ const gatewayConfigs = {
     ],
     fawry: [
         { id: 'merchantId', label: 'Merchant ID *', type: 'text', placeholder: 'معرف التاجر' },
-        { id: 'securityKey', label: 'Security Key / API Credentials *', type: 'password', placeholder: 'مفتاح الأمان' },
+        { id: 'securityKey', label: 'Security Key *', type: 'password', placeholder: 'مفتاح الأمان' },
         { id: 'callbackUrl', label: 'Callback URL *', type: 'text', placeholder: 'https://yourstore.com/callback' },
         { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
     ],
     fawaterk: [
         { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'مفتاح الـ API' },
-        { id: 'apiSecret', label: 'API Secret / Token *', type: 'password', placeholder: 'السري / التوكن' },
+        { id: 'apiSecret', label: 'API Secret *', type: 'password', placeholder: 'السري / التوكن' },
         { id: 'merchantAccount', label: 'Merchant Account *', type: 'text', placeholder: 'حساب التاجر' },
         { id: 'callbackUrl', label: 'Callback / Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/callback' }
     ],
@@ -272,8 +269,8 @@ const gatewayConfigs = {
     paypal: [
         { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'معرف العميل' },
         { id: 'clientSecret', label: 'Client Secret *', type: 'password', placeholder: 'المفتاح السري' },
-        { id: 'webhookId', label: 'Webhook ID / Secret *', type: 'text', placeholder: 'معرف أو سري الـ Webhook' },
-        { id: 'returnUrl', label: 'Return / Cancel URLs *', type: 'text', placeholder: 'https://yourstore.com/return' }
+        { id: 'webhookId', label: 'Webhook ID *', type: 'text', placeholder: 'معرف أو سري الـ Webhook' },
+        { id: 'returnUrl', label: 'Return URLs *', type: 'text', placeholder: 'https://yourstore.com/return' }
     ],
     paymob: [
         { id: 'apiSecretKey', label: 'API Secret Key *', type: 'password', placeholder: 'المفتاح السري للـ API' },
@@ -300,14 +297,7 @@ function renderGatewayFields() {
 
     let fieldsHtml = '';
     gatewayConfigs[selectedGateway].forEach(field => {
-        if (field.type === 'select') {
-            let options = field.options.map(o => `<option value="${o.val}">${o.text}</option>`).join('');
-            fieldsHtml += `<div class="form-group"><label>${field.label}</label><select id="gw_${field.id}">${options}</select></div>`;
-        } else if (field.type === 'textarea') {
-            fieldsHtml += `<div class="form-group"><label>${field.label}</label><textarea id="gw_${field.id}" rows="2" placeholder="${field.placeholder}"></textarea></div>`;
-        } else {
-            fieldsHtml += `<div class="form-group"><label>${field.label}</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
-        }
+        fieldsHtml += `<div class="form-group"><label>${field.label}</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
     });
     container.innerHTML = fieldsHtml;
 }
@@ -326,16 +316,19 @@ async function saveAndActivateGateway() {
     }
 
     try {
+        const gatewaySelectElem = $('gatewaySelect');
+        const gatewayName = gatewaySelectElem.options[gatewaySelectElem.selectedIndex]?.text || gatewayKey;
+
         await db.collection('payment_gateways').doc(gatewayKey).set({
             key: gatewayKey,
-            name: $('gatewaySelect').options[$('gatewaySelectselectedIndex']?.text || 'Gateway',
+            name: gatewayName,
             credentials,
             isActive: false,
             isLive: false,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
         
-        $('gatewaySelect').value = '';
+        gatewaySelectElem.value = '';
         renderGatewayFields();
         await loadConfiguredGateways();
 
@@ -360,19 +353,19 @@ async function loadConfiguredGateways() {
             const isLive = g.isLive === true;
 
             html += `
-                <div class="panel" style="background: #080d14; border: 1px solid ${isActive ? '#22c55e' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative;">
+                <div class="panel" style="background: #0d1722; border: 1px solid ${isActive ? '#38bdf8' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> ${g.name || doc.id}</h4>
-                        <button class="delete-btn" style="padding: 5px 10px; font-size: 11px;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i> ${g.name || doc.id}</h4>
+                        <button class="delete-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
                     </div>
-                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#22c55e' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
-                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الوضع الحالي: <strong style="color: ${isLive ? '#10b981' : '#f59e0b'}">${isLive ? '🚀 حقيقي (Live)' : '🧪 تجريبي (Test)'}</strong></p>
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#38bdf8' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الوضع الحالي: <strong style="color: ${isLive ? '#38bdf8' : '#f59e0b'}">${isLive ? '🚀 حقيقي (Live)' : '🧪 تجريبي (Test)'}</strong></p>
                      
                     <div style="display: flex; gap: 10px; flex-direction: column;">
-                        <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isLive ? '#f59e0b' : '#10b981'} !important;" onclick="toggleGatewayLiveMode('${doc.id}', ${!isLive})">
+                        <button class="btn-submit" style="width: 100%; padding: 10px; font-size: 13px; background: ${isLive ? '#f59e0b' : '#38bdf8'} !important; color: ${isLive ? '#fff' : '#050b14'}; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;" onclick="toggleGatewayLiveMode('${doc.id}', ${!isLive})">
                             ${isLive ? '<i class="fa-solid fa-flask"></i> التبديل إلى وضع التجربة (Test)' : '<i class="fa-solid fa-rocket"></i> تفعيل الوضع الحقيقي (Live)'}
                         </button>
-                        <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isActive ? '#10b981' : '#334155'} !important;" onclick="setExclusiveActiveGateway('${doc.id}')">
+                        <button class="btn-submit" style="width: 100%; padding: 10px; font-size: 13px; background: ${isActive ? '#38bdf8' : '#1e293b'} !important; color: ${isActive ? '#050b14' : '#fff'}; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;" onclick="setExclusiveActiveGateway('${doc.id}')">
                             ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
                         </button>
                     </div>
@@ -406,7 +399,6 @@ async function setExclusiveActiveGateway(activeId) {
     } catch (err) { console.error("Error setting active gateway:", err); }
 }
 
-// تعديل حذف بوابة الدفع عبر مسار السيرفر
 async function deleteGateway(id) {
   Swal.fire({
     title: 'حذف البوابة؟',
@@ -518,21 +510,21 @@ async function loadCoupons() {
     const usesText = c.maxUses ? `🔄 الاستخدام: ${c.usedCount || 0} / ${c.maxUses}` : '🔄 استخدام غير محدود';
 
     list.innerHTML += `
-      <div class="panel" style="border-bottom: 3px solid #f97316; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+      <div class="panel" style="border-bottom: 3px solid #38bdf8; background: #0d1722; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
         <div>
-          <h4 style="display:flex; justify-content:space-between; align-items:center;">
-            <span>الكود: <span style="color:#f97316; font-family:monospace;">${c.code}</span></span>
-            <span style="font-size: 14px; background: rgba(249,115,22,0.15); color: #f97316; padding: 2px 8px; border-radius: 6px;">${c.value}% خصم</span>
+          <h4 style="display:flex; justify-content:space-between; align-items:center; color:#fff;">
+            <span>الكود: <span style="color:#38bdf8; font-family:monospace;">${c.code}</span></span>
+            <span style="font-size: 14px; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 2px 8px; border-radius: 6px;">${c.value}% خصم</span>
           </h4>
-          <p style="margin: 10px 0 5px 0; font-size: 12px; color: var(--text-muted);">${expiryText}</p>
-          <p style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">${usesText}</p>
+          <p style="margin: 10px 0 5px 0; font-size: 12px; color: #94a3b8;">${expiryText}</p>
+          <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8;">${usesText}</p>
         </div>
 
         <div style="display: flex; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
-          <button class="edit-btn" style="flex:1; padding: 6px; font-size: 12px; background: var(--bg-accent); border:none; border-radius:6px; color:#fff; cursor:pointer;" onclick="editCoupon('${doc.id}', '${c.code}', ${c.value}, '${c.expiryDate || ''}', '${c.maxUses || ''}')">
+          <button class="edit-btn" style="flex:1; padding: 8px; font-size: 12px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius:8px; color:#38bdf8; cursor:pointer;" onclick="editCoupon('${doc.id}', '${c.code}', ${c.value}, '${c.expiryDate || ''}', '${c.maxUses || ''}')">
             <i class="fa-solid fa-pen"></i> تعديل
           </button>
-          <button class="delete-btn" style="flex:1; padding: 6px; font-size: 12px; background: rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:6px; color:#ef4444; cursor:pointer;" onclick="deleteCoupon('${doc.id}')">
+          <button class="delete-btn" style="flex:1; padding: 8px; font-size: 12px; background: rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#ef4444; cursor:pointer;" onclick="deleteCoupon('${doc.id}')">
             <i class="fa-solid fa-trash"></i> حذف
           </button>
         </div>
@@ -551,7 +543,6 @@ function editCoupon(docId, code, value, expiry, maxUses) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// تعديل حذف الكوبون عبر مسار السيرفر
 async function deleteCoupon(docId) {
   Swal.fire({
     title: 'حذف الكوبون؟',
@@ -810,22 +801,22 @@ async function loadProducts() {
 
     if (list) {
       list.innerHTML += `
-        <div class="product-card-custom" id="product-${doc.id}">
-          <div class="product-card-hero">
-            <img src="${p.image || '/assets/default-game.jpg'}" alt="${p.name}">
-            <span class="product-badge">${p.active ? 'نشط' : 'مخفي'}</span>
+        <div class="product-card-custom" id="product-${doc.id}" style="background: #0d1722; border: 1px solid rgba(56,189,248,0.2); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+          <div class="product-card-hero" style="position: relative; height: 160px; background: #050b14;">
+            <img src="${p.image || '/assets/default-game.jpg'}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="product-badge" style="position: absolute; top: 10px; right: 10px; background: rgba(56,189,248,0.2); color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">${p.active ? 'نشط' : 'مخفي'}</span>
           </div>
-          <div class="product-card-body">
+          <div class="product-card-body" style="padding: 15px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between;">
             <div>
-              <h4>${p.name || '-'}</h4>
-              <p>التصنيف: ${p.category || '-'}</p>
-              <p>اللعبة: ${p.game || '-'}</p>
+              <h4 style="color: #fff; margin: 0 0 8px 0; font-size: 16px;">${p.name || '-'}</h4>
+              <p style="color: #94a3b8; font-size: 13px; margin: 4px 0;">التصنيف: ${p.category || '-'}</p>
+              <p style="color: #94a3b8; font-size: 13px; margin: 4px 0;">اللعبة: ${p.game || '-'}</p>
             </div>
-            <div class="product-card-footer">
-              <span class="price-tag">${p.price || 0} EGP</span>
-              <div class="card-actions">
-                <button class="edit-btn" onclick="editProduct('${doc.id}')" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button class="delete-btn" onclick="deleteProduct('${doc.id}')" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+            <div class="product-card-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); pt-12;">
+              <span class="price-tag" style="color: #65cc00; font-weight: bold; font-size: 15px;">${p.price || 0} EGP</span>
+              <div class="card-actions" style="display: flex; gap: 8px;">
+                <button class="edit-btn" onclick="editProduct('${doc.id}')" title="تعديل" style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; padding: 8px 12px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="delete-btn" onclick="deleteProduct('${doc.id}')" title="حذف" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 8px 12px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
           </div>
@@ -860,14 +851,13 @@ async function editProduct(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// تعديل حذف المنتج عبر مسار السيرفر
 async function deleteProduct(id) {
   Swal.fire({
     title: 'تأكيد حذف المنتج؟',
     text: "سيتم إزالة هذا المنتج نهائياً من المتجر!",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#f43f5e',
+    confirmButtonColor: '#ef4444',
     confirmButtonText: 'نعم، احذفه',
     cancelButtonText: 'إلغاء',
     ...swalConfig
@@ -933,7 +923,7 @@ async function saveCategory() {
     Swal.fire({
       icon: 'success',
       title: 'تم إضافة التصنيف',
-      text: 'تم حفظ التصنيف بنجاح فوري وجاري تغذية الفورم.',
+      text: 'تم حفظ التصنيف بنجاح.',
       timer: 1500,
       showConfirmButton: false,
       ...swalConfig
@@ -942,7 +932,7 @@ async function saveCategory() {
     Swal.fire({
       icon: 'error',
       title: 'خطأ في الإضافة',
-      text: 'تعذر رفع الصورة أو حفظ التصنيف، يرجى المحاولة لاحقاً.',
+      text: 'تعذر رفع الصورة أو حفظ التصنيف.',
       ...swalConfig
     });
   }
@@ -967,13 +957,13 @@ async function loadCategories() {
 
     if (list) {
       list.innerHTML += `
-        <div class="product-card-custom" id="cat-${doc.id}">
-          <div class="product-card-hero" style="height: 140px;">
-            <img src="${c.image || '/assets/default-cat.jpg'}" alt="${c.name}">
+        <div class="product-card-custom" id="cat-${doc.id}" style="background: #0d1722; border: 1px solid rgba(56,189,248,0.2); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+          <div class="product-card-hero" style="height: 140px; background: #050b14;">
+            <img src="${c.image || '/assets/default-cat.jpg'}" alt="${c.name}" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
-          <div class="product-card-body" style="padding: 15px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-            <h4 style="margin: 0;">${c.name || '-'}</h4>
-            <button class="delete-btn" style="padding: 8px 12px;" onclick="deleteCategory('${doc.id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
+          <div class="product-card-body" style="padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; color: #fff; font-size: 16px;">${c.name || '-'}</h4>
+            <button class="delete-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer;" onclick="deleteCategory('${doc.id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
           </div>
         </div>
       `;
@@ -981,13 +971,12 @@ async function loadCategories() {
   });
 }
 
-// تعديل حذف التصنيف عبر مسار السيرفر
 async function deleteCategory(id) {
   Swal.fire({
     title: 'هل تريد حذف هذا التصنيف؟',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#f43f5e',
+    confirmButtonColor: '#ef4444',
     confirmButtonText: 'نعم، احذفه',
     cancelButtonText: 'إلغاء',
     ...swalConfig
@@ -1019,7 +1008,7 @@ async function saveCodes() {
     Swal.fire({
       icon: 'warning',
       title: 'بيانات غير مكتملة',
-      text: 'برجاء اختيار المنتج واكتب الأكواد أولاً داخل الحقل المخصص للشحن التلقائي.',
+      text: 'برجاء اختيار المنتج واكتب الأكواد أولاً.',
       ...swalConfig
     });
     return;
@@ -1047,7 +1036,7 @@ async function saveCodes() {
   Swal.fire({
     icon: 'success',
     title: 'اكتمل التخزين والتعبئة',
-    text: `تم حفظ وحقن (${codes.length}) كود رقمي بنجاح فوري وجاهز للتسليم الآلي!`,
+    text: `تم حفظ وحقن (${codes.length}) كود رقمي بنجاح!`,
     ...swalConfig
   });
 }
@@ -1079,16 +1068,16 @@ async function loadCodes() {
     const statusText = isAvailable ? 'متاح' : 'مُستخدم';
     
     const badgeStyle = isAvailable 
-      ? 'background: rgba(101, 204, 0, 0.1); color: #65cc00; border: 1px solid rgba(101, 204, 0, 0.2);' 
+      ? 'background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2);' 
       : 'background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2);';
 
     rowsHtml += `
       <tr id="row-${doc.id}" data-status="${c.status}" data-product-name="${productName.toLowerCase()}">
         <td style="font-family: monospace; letter-spacing: 1px; font-weight: 600; color: #fff; text-align: right; direction: ltr; padding-right: 20px;">${c.code || '-'}</td>
-        <td><span style="color: #3b82f6; font-weight: 600; font-size: 14px;">${productName}</span></td>
+        <td><span style="color: #38bdf8; font-weight: 600; font-size: 14px;">${productName}</span></td>
         <td><span class="status-badge" style="padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; ${badgeStyle}">${statusText}</span></td>
         <td>
-          <button class="delete-btn" style="padding: 6px 10px; font-size: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.1);" onclick="deleteCode('${doc.id}')" title="حذف الكود نهائياً">
+          <button class="delete-btn" style="padding: 6px 10px; font-size: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 6px; cursor: pointer;" onclick="deleteCode('${doc.id}')" title="حذف الكود نهائياً">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </td>
@@ -1122,7 +1111,6 @@ function filterCodesTablePro() {
   });
 }
 
-// تعديل حذف الكود عبر مسار السيرفر
 async function deleteCode(id) {
   Swal.fire({
     title: 'هل أنت متأكد؟',
@@ -1172,7 +1160,7 @@ async function loadOrders() {
       <tbody>
       ${snap.docs.map(doc => {
         const o = doc.data();
-        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي الشحنة';
+        const pName = o.productName || o.name || o.title || o.product_name || 'منتج رقمي';
         const orderPrice = Number(o.total || o.price || o.amount || 0);
         const customer = o.customerName || o.email || o.username || '-';
         const status = o.status || o.paymentStatus || o.payment_status || '-';
@@ -1184,8 +1172,8 @@ async function loadOrders() {
             <td>${customer}</td>
             <td>${pName}</td>
             <td><strong>${orderPrice} EGP</strong></td>
-            <td><span class="status-badge">${status}</span></td>
-            <td><code>${code}</code></td>
+            <td><span class="status-badge" style="background: rgba(56,189,248,0.1); color: #38bdf8; padding: 4px 8px; border-radius: 6px;">${status}</span></td>
+            <td><code style="color: #38bdf8;">${code}</code></td>
           </tr>
         `;
       }).join('')}
@@ -1197,7 +1185,6 @@ async function loadOrders() {
   if ($('latestOrders')) $('latestOrders').innerHTML = table;
 }
 
-// دالة لجلب وعرض المعاملات وسجل الدفع ورقم المعاملة في لوحة التحكم
 async function loadTransactions() {
   const container = $('transactionsListTable') || $('transactionsList');
   if (!container) return;
@@ -1216,9 +1203,9 @@ async function loadTransactions() {
       const isPaid = t.status === 'paid';
       html += `
         <tr>
-          <td><strong style="font-family:monospace; color:#3b82f6;">${t.paymentId || doc.id}</strong></td>
+          <td><strong style="font-family:monospace; color:#38bdf8;">${t.paymentId || doc.id}</strong></td>
           <td>
-            <span class="status-badge" style="background:${isPaid ? 'rgba(101,204,0,0.15)' : 'rgba(239,68,68,0.15)'}; color:${isPaid ? '#65cc00' : '#ef4444'}; padding: 4px 10px; border-radius: 6px;">
+            <span class="status-badge" style="background:${isPaid ? 'rgba(56,189,248,0.15)' : 'rgba(239,68,68,0.15)'}; color:${isPaid ? '#38bdf8' : '#ef4444'}; padding: 4px 10px; border-radius: 6px;">
               ${isPaid ? 'مدفوعة (Paid)' : 'مرفوضة / فاشلة'}
             </span>
           </td>
@@ -1321,7 +1308,8 @@ function updateRevenueChart(labels, dataValues) {
                 labels: finalLabels,
                 datasets: [{
                     data: finalData,
-                    borderColor: '#3b82f6',
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56,189,248,0.1)',
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4
@@ -1338,7 +1326,7 @@ function logout() {
     text: "هل أنت متأكد من رغبتك في مغادرة لوحة التحكم؟",
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#3b82f6',
+    confirmButtonColor: '#38bdf8',
     cancelButtonColor: '#475569',
     ...swalConfig
   }).then((result) => {
