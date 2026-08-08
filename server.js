@@ -449,18 +449,19 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler (تلقائي فوري في الخلفية)
+// Kashier Webhook / Callback Handler (محدث لضمان الالتقاط الفوري بنجاح تام)
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const data = { ...(req.body || {}), ...(req.query || {}) };
     console.log("Kashier Webhook/Callback Received:", JSON.stringify(data));
 
     const orderId = data.merchantOrderId || data.orderId || data.paymentId;
-    const paymentStatus = data.paymentStatus || data.status;
+    const paymentStatus = String(data.paymentStatus || data.status || '').toLowerCase();
     const cardLast4 = data.cardLast4 || data.maskedCard || data.brand || 'بطاقة إلكترونية';
 
     if (orderId) {
-      const isPaid = String(paymentStatus).toLowerCase() === 'success' || String(paymentStatus).toLowerCase() === 'paid';
+      // التحقق الشامل من حالة الدفع بكافة صيغ كاشير الممكنة
+      const isPaid = paymentStatus === 'success' || paymentStatus === 'paid' || paymentStatus === 'approved' || paymentStatus === 'completed' || data.success === true || data.success === 'true';
       
       await db.collection('transactions').doc(String(orderId)).set({
         paymentId: String(orderId),
@@ -507,7 +508,9 @@ app.post('/api/record-transaction', async (req, res) => {
     const { paymentId, status, gatewayResponse } = req.body;
     if (!paymentId) return res.status(400).json({ success: false });
 
-    if (status === 'paid') {
+    const isPaidStatus = String(status).toLowerCase() === 'success' || String(status).toLowerCase() === 'paid' || String(status).toLowerCase() === 'approved';
+
+    if (isPaidStatus) {
       const existingOrder = await db.collection('orders').doc(String(paymentId)).get();
       
       if (!existingOrder.exists) {
@@ -543,7 +546,7 @@ app.post('/api/record-transaction', async (req, res) => {
 
     await db.collection('transactions').doc(String(paymentId)).set({
       paymentId: String(paymentId),
-      status: status || 'unknown',
+      status: isPaidStatus ? 'paid' : (status || 'unknown'),
       gatewayResponse: gatewayResponse || {},
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
