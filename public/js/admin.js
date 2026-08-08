@@ -328,7 +328,7 @@ async function saveAndActivateGateway() {
     try {
         await db.collection('payment_gateways').doc(gatewayKey).set({
             key: gatewayKey,
-            name: $('gatewaySelect').options[$('gatewaySelect').selectedIndex].text,
+            name: $('gatewaySelect').options[$('gatewaySelectselectedIndex']?.text || 'Gateway',
             credentials,
             isActive: false,
             isLive: false,
@@ -362,7 +362,7 @@ async function loadConfiguredGateways() {
             html += `
                 <div class="panel" style="background: #080d14; border: 1px solid ${isActive ? '#22c55e' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> ${g.name}</h4>
+                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> ${g.name || doc.id}</h4>
                         <button class="delete-btn" style="padding: 5px 10px; font-size: 11px;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
                     </div>
                     <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#22c55e' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
@@ -420,7 +420,7 @@ async function deleteGateway(id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`/api/admin/payment_gateways/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/admin/payment-gateways/${id}`, { method: 'DELETE' });
         const data = await res.json();
         
         if (!data.success) throw new Error(data.message || 'فشل الحذف');
@@ -467,7 +467,13 @@ async function saveCoupon() {
     };
 
     if (docId) {
-      await db.collection('coupons').doc(docId).set(couponData, { merge: true });
+      const res = await fetch(`/api/admin/coupons/${docId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(couponData)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'فشل التحديث');
     } else {
       await db.collection('coupons').doc(code).set({
         ...couponData,
@@ -749,7 +755,13 @@ async function saveProduct() {
     const id = val('productId');
 
     if (id) {
-      await db.collection('products').doc(id).set(data, { merge: true });
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || 'فشل التحديث');
     } else {
       await db.collection('products').add({
         ...data,
