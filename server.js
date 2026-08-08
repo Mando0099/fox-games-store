@@ -246,7 +246,7 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 PAYMENT ROUTES (Unified & Fallback)
+// 💳 PAYMENT ROUTES (Unified & Fallback for Visa/Mastercard)
 // ==========================================
 
 app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
@@ -265,7 +265,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const customerPhone = (order.customer?.phone || '01000000000').replace(/\D/g, '').slice(-11);
     const items = Array.isArray(order.items) ? order.items : [];
 
-    // 1. معالجة ماي فاتورة
+    // 1. معالجة ماي فاتورة (دعم الفيزا والماستر كارد مباشرة عبر ExecutePayment أو SendPayment)
     if (gatewayKey === 'myfatoorah' || gateway.provider === 'myfatoorah') {
       const invoiceBody = {
         InvoiceValue: amount,
@@ -278,15 +278,27 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
         UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
       };
 
-      const executeResponse = await axios.post(`${gateway.apiUrl}/v2/SendPayment`, invoiceBody, {
-        headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
-        timeout: 30000
-      });
-
-      if (executeResponse.data?.IsSuccess && executeResponse.data?.Data?.InvoiceURL) {
-        return res.json({ success: true, paymentUrl: executeResponse.data.Data.InvoiceURL });
+      let executeResponse;
+      try {
+        // محاولة التوجيه المباشر للبطاقات البنكية (Visa / MasterCard - PaymentMethodId: 2)
+        executeResponse = await axios.post(`${gateway.apiUrl}/v2/ExecutePayment`, { ...invoiceBody, PaymentMethodId: 2 }, {
+          headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
+          timeout: 30000
+        });
+      } catch (err) {
+        // لو طريقة الفيزا المباشرة غير مفعلة، يتم التحويل للطريقة العامة SendPayment لعرض كل الخيارات المتاحة
+        executeResponse = await axios.post(`${gateway.apiUrl}/v2/SendPayment`, invoiceBody, {
+          headers: { Authorization: `Bearer ${gateway.token}`, 'Content-Type': 'application/json' },
+          timeout: 30000
+        });
       }
-      return res.status(400).json({ success: false, message: executeResponse.data?.Message || 'Payment request rejected.' });
+
+      const paymentUrl = executeResponse.data?.Data?.PaymentURL || executeResponse.data?.Data?.InvoiceURL;
+
+      if (executeResponse.data?.IsSuccess && paymentUrl) {
+        return res.json({ success: true, paymentUrl: paymentUrl });
+      }
+      return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) || 'Payment request rejected.' });
     }
 
     // 2. معالجة كاشير
