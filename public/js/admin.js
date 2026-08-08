@@ -128,7 +128,7 @@ async function loadAll() {
   await loadCoupons();
   await loadCustomers();
   await loadStats();
-  await loadPaymentGateways();
+  await loadConfiguredGateways(); // تحميل بوابات الدفع الذكية المحدثة
   await loadAdminsManagement();
 }
 
@@ -236,7 +236,164 @@ async function toggleAdminStatus(docId, newStatus) {
 }
 
 // ==========================================
-// 🎟️ دوال قسائم وأكواد الخصم الاحترافية المحدثة
+// 💳 دوال بوابات الدفع الديناميكية والاحترافية الجديدة
+// ==========================================
+
+const gatewayConfigs = {
+    myfatoorah: [
+        { id: 'apiKey', label: 'MyFatoorah API Token', type: 'password', placeholder: 'أدخل الـ Token الخاص بـ ماي فاتورة' },
+        { id: 'mode', label: 'الوضع', type: 'select', options: [{val: 'test', text: 'تجريبي (Test)'}, {val: 'live', text: 'حقيقي (Live)'}] }
+    ],
+    paymob: [
+        { id: 'apiKey', label: 'Paymob API Key', type: 'password', placeholder: 'مفتاح الـ API' },
+        { id: 'integrationId', label: 'Integration ID', type: 'text', placeholder: 'مثال: 123456' },
+        { id: 'iframeId', label: 'Iframe ID', type: 'text', placeholder: 'مثال: 78910' }
+    ],
+    stripe: [
+        { id: 'publishableKey', label: 'Publishable Key', type: 'text', placeholder: 'pk_live_...' },
+        { id: 'secretKey', label: 'Secret Key', type: 'password', placeholder: 'sk_live_...' }
+    ],
+    paypal: [
+        { id: 'clientId', label: 'PayPal Client ID', type: 'text', placeholder: 'Client ID' },
+        { id: 'secretKey', label: 'PayPal Secret Key', type: 'password', placeholder: 'Secret Key' }
+    ],
+    cashier: [
+        { id: 'merchantId', label: 'Merchant ID', type: 'text', placeholder: 'معرف التاجر' },
+        { id: 'secretKey', label: 'Secret Key', type: 'password', placeholder: 'مفتاح الأمان' }
+    ],
+    fawaterak: [
+        { id: 'token', label: 'Fawaterak API Token', type: 'password', placeholder: 'توكن فواتيرك' }
+    ],
+    instapay: [
+        { id: 'ipaAddress', label: 'عنوان الدفع (IPA)', type: 'text', placeholder: 'username@instapay' },
+        { id: 'accountName', label: 'اسم صاحب الحساب', type: 'text', placeholder: 'محمد أشرف' }
+    ],
+    vodafone_cash: [
+        { id: 'walletNumber', label: 'رقم المحفظة', type: 'text', placeholder: '01012345678' },
+        { id: 'instructions', label: 'تعليمات الدفع للعميل', type: 'textarea', placeholder: 'تعليمات التحويل...' }
+    ]
+};
+
+function renderGatewayFields() {
+    const selectedGateway = $('gatewaySelect')?.value;
+    const container = $('dynamicGatewayInputs');
+    if (!container) return;
+
+    if (!selectedGateway || !gatewayConfigs[selectedGateway]) {
+        container.innerHTML = '<div class="form-group"><label>متطلبات البوابة</label><input type="text" disabled placeholder="الرجاء اختيار بوابة الدفع أولاً..." /></div>';
+        return;
+    }
+
+    let fieldsHtml = '';
+    gatewayConfigs[selectedGateway].forEach(field => {
+        if (field.type === 'select') {
+            let options = field.options.map(o => `<option value="${o.val}">${o.text}</option>`).join('');
+            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><select id="gw_${field.id}">${options}</select></div>`;
+        } else if (field.type === 'textarea') {
+            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><textarea id="gw_${field.id}" rows="2" placeholder="${field.placeholder}"></textarea></div>`;
+        } else {
+            fieldsHtml += `<div class="form-group"><label>${field.label} *</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
+        }
+    });
+    container.innerHTML = fieldsHtml;
+}
+
+async function saveAndActivateGateway() {
+    const gatewayKey = $('gatewaySelect')?.value;
+    if (!gatewayKey) return Swal.fire({ icon: 'warning', title: 'خطأ', text: 'اختر بوابة أولاً', ...swalConfig });
+
+    let credentials = {};
+    for (let field of gatewayConfigs[gatewayKey]) {
+        const val = $(`gw_${field.id}`)?.value;
+        if (!val) return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label} مطلوب!`, ...swalConfig });
+        credentials[field.id] = val;
+    }
+
+    try {
+        await db.collection('payment_gateways').doc(gatewayKey).set({
+            key: gatewayKey,
+            name: $('gatewaySelect').options[$('gatewaySelect'].selectedIndex].text,
+            credentials,
+            isActive: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        $('gatewaySelect').value = '';
+        renderGatewayFields();
+        await loadConfiguredGateways();
+
+        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ إعدادات ومتطلبات البوابة بنجاح.', ...swalConfig });
+    } catch (err) { 
+        console.error(err);
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل حفظ الإعدادات.', ...swalConfig }); 
+    }
+}
+
+async function loadConfiguredGateways() {
+    const container = $('configuredGatewaysList');
+    if (!container) return;
+    try {
+        const snap = await db.collection('payment_gateways').get();
+        if (snap.empty) return container.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1/-1; padding: 20px;">لا توجد بوابات دفع مضافة حالياً.</p>';
+        
+        let html = '';
+        snap.forEach(doc => {
+            const g = doc.data();
+            const isActive = g.isActive === true;
+            html += `
+                <div class="panel" style="background: #080d14; border: 1px solid ${isActive ? '#22c55e' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> ${g.name}</h4>
+                        <button class="delete-btn" style="padding: 5px 10px; font-size: 11px;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+                    </div>
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الحالة: <strong style="color: ${isActive ? '#22c55e' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-submit" style="width: 100%; padding: 8px; font-size: 13px; background: ${isActive ? '#10b981' : '#334155'} !important;" onclick="setExclusiveActiveGateway('${doc.id}')">
+                            ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
+                        </button>
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    } catch (err) { console.error("Error loading gateways:", err); }
+}
+
+async function setExclusiveActiveGateway(activeId) {
+    try {
+        const snap = await db.collection('payment_gateways').get();
+        const batch = db.batch();
+        snap.forEach(doc => {
+            const ref = db.collection('payment_gateways').doc(doc.id);
+            batch.update(ref, { isActive: doc.id === activeId });
+        });
+        await batch.commit();
+        await loadConfiguredGateways();
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم تفعيل هذه البوابة وإيقاف الباقي تلقائياً', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+    } catch (err) { console.error("Error setting active gateway:", err); }
+}
+
+async function deleteGateway(id) {
+    Swal.fire({
+        title: 'حذف البوابة؟',
+        text: "لن يتمكن العملاء من الدفع عبر هذه البوابة بعد الآن!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        ...swalConfig
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await db.collection('payment_gateways').doc(id).delete();
+            await loadConfiguredGateways();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم الحذف بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+        }
+    });
+}
+
+// ==========================================
+// 🎟️ دوال قسائم وأكواد الخصم الاحترافية
 // ==========================================
 
 async function saveCoupon() {
@@ -374,7 +531,7 @@ function resetCouponForm() {
 }
 
 // ==========================================
-// باقي دوال المتجر وإدارة المنتجات
+// باقي دوال المتجر وإدارة المنتجات والأكواد
 // ==========================================
 
 function initEventListeners() {
@@ -1033,55 +1190,6 @@ async function loadCustomers() {
         </tbody>
       </table>
     `;
-  }
-}
-
-async function loadPaymentGateways() {
-  const container = $('paymentGatewaysList') || $('payment-gateways-container');
-  if (!container) return;
-
-  try {
-    const res = await fetch('/api/admin/payment-gateways');
-    const data = await res.json();
-
-    if (!data.success) {
-      container.innerHTML = `<div style="color: #f43f5e; padding: 15px; text-align: center;">فشل جلب بيانات البوابات: ${data.message}</div>`;
-      return;
-    }
-
-    const gateways = data.gateways || [];
-    if (!gateways.length) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 25px; color: #64748b;">
-          لا توجد بوابات دفع مضافة حالياً.
-        </div>`;
-      return;
-    }
-
-    let html = '';
-    gateways.forEach(g => {
-      const isLive = Boolean(g.isLive);
-      const isActive = Boolean(g.isActive);
-
-      html += `
-        <div class="panel" style="border: 1px solid ${isActive ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; margin-bottom: 15px; padding: 18px; border-radius: 12px; background: #0f172a; position: relative;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <h3 style="margin: 0; color: #fff; font-size: 18px; display: flex; align-items: center; gap: 8px;">
-                ${g.name || g.provider}
-                <span style="font-size: 11px; padding: 3px 10px; border-radius: 20px; ${isActive ? 'background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);' : 'background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);'}">
-                  ${isActive ? '● نشط حالياً بالمتجر' : '○ غير مفعل'}
-                </span>
-              </h3>
-              <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">مزود الخدمة: <strong>${(g.provider || 'myfatoorah').toUpperCase()}</strong></span>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-    container.innerHTML = html;
-  } catch (err) {
-    console.error("Error loading gateways:", err);
   }
 }
 
