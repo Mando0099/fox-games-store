@@ -283,22 +283,24 @@ if (provider.includes('kashier')) {
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
-    if (provider.includes('myfatoorah') || !provider) {
-      const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
-      if (!tokenToUse) {
-        return res.status(400).json({ success: false, message: 'MyFatoorah Token is missing.' });
+    if (provider.includes('kashier')) {
+      if (!gateway.merchantId || !gateway.secretKey) {
+        return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
       }
 
-      const invoiceBody = {
-        InvoiceValue: amount,
-        DisplayCurrencyIso: 'EGP',
-        CustomerName: customerName,
-        CustomerEmail: customerEmail,
-        CustomerMobile: customerPhone,
-        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success`,
-        ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed`,
-        UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
-      };
+      const orderId = 'ORD_' + Date.now();
+      const currency = 'EGP';
+      const mode = 'live';
+      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
+
+      // وضع الرابط صريحاً مع الترتيب الصحيح للـ Hash
+      const pathString = `/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&merchantRedirect=${merchantRedirect}&mode=${mode}`;
+      const hash = crypto.createHmac('sha256', gateway.secretKey).update(pathString).digest('hex');
+
+      const paymentUrl = `https://payments.kashier.io${pathString}&hash=${hash}&redirect=true`;
+      
+      return res.json({ success: true, paymentUrl: paymentUrl });
+    }
 
       let executeResponse;
       try {
