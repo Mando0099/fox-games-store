@@ -3,7 +3,7 @@ if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
 const msg = document.getElementById('msg');
 const db = firebase.firestore();
 
-// دالة إظهار النافذة المنبثقة الاحترافية
+// دالة إظهار البوب أب العائم مع أنيميشن احترافي من الأعلى
 function show(text, isSuccess = false){
   const modal = document.getElementById('customModal');
   const msgEl = document.getElementById('modalMessage');
@@ -11,24 +11,28 @@ function show(text, isSuccess = false){
   
   if(msgEl && modal) {
     msgEl.textContent = text;
+    
     if(isSuccess) {
-      iconEl.textContent = '✅';
-      modal.querySelector('div > div').style.borderColor = '#00f3ff';
+      iconEl.textContent = '🔥'; // أيقونة نجاح حماسية تليق بالجيمنج
     } else {
-      iconEl.textContent = '⚠️';
-      modal.querySelector('div > div').style.borderColor = '#f59e0b';
+      iconEl.textContent = '⚡'; // أيقونة تنبيه شيك للخطأ
     }
+    
     modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show-modal'), 10);
   } else {
     alert(text);
   }
 }
 
-// دالة إغلاق النافذة المنبثقة
+// دالة إغلاق البوب أب بانيميشن ناعم
 function closeModal() {
   const modal = document.getElementById('customModal');
   if(modal) {
-    modal.style.display = 'none';
+    modal.classList.remove('show-modal');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
   }
 }
 
@@ -146,7 +150,7 @@ async function loginFacebook(){
   }
 }
 
-// دالة ترجمة الأخطاء لعرضها في النافذة المنبثقة
+// دالة ترجمة الأخطاء لعرضها في النافذة المنبثقة العائمة
 function handleAuthError(error) {
   let message = 'حدث خطأ ما، يرجى المحاولة مرة أخرى.';
 
