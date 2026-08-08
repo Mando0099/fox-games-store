@@ -16,16 +16,21 @@ const swalConfig = {
   cancelButtonColor: '#475569'
 };
 
-// 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي)
+// 📱 تحكم السايدبار الذكي للموبايل (قائمة برجر والـ Overlay الخلفي) - تعديل مباشر للـ Style
 function toggleSidebar() {
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    const overlay = $('sidebarOverlay');
     
     if (sidebar) {
-        sidebar.classList.toggle('active');
-    }
-    if (overlay) {
-        overlay.classList.toggle('active');
+        // التحقق من الوضع الحالي وإجبار القائمة على الحركة الفورية
+        const currentRight = window.getComputedStyle(sidebar).right;
+        if (currentRight === '0px' || sidebar.style.right === '0px') {
+            sidebar.style.right = '-320px';
+            if (overlay) overlay.classList.remove('active');
+        } else {
+            sidebar.style.right = '0px';
+            if (overlay) overlay.classList.add('active');
+        }
     }
 }
 
@@ -47,9 +52,9 @@ function showPage(pageName, btn) {
 
     // إغلاق القائمة والـ Overlay فوراً عند التنقل على الأجهزة المحمولة
     const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    const overlay = $('sidebarOverlay');
     
-    if (sidebar) sidebar.classList.remove('active');
+    if (sidebar) sidebar.style.right = '-320px';
     if (overlay) overlay.classList.remove('active');
 
     // إعادة التمرير للأعلى بسلاسة
