@@ -62,7 +62,6 @@ const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-e
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Tech Gaming <onboarding@resend.dev>';
 
-// Helper to get active gateway with dynamic provider detection (Supports Kashier & MyFatoorah)
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
@@ -243,7 +242,7 @@ app.post('/api/admin/payment-gateways/toggle-live', async (req, res) => {
 });
 
 // ==========================================
-// 💳 PAYMENT ROUTES (Unified for Kashier & MyFatoorah)
+// 💳 PAYMENT ROUTES
 // ==========================================
 
 app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
@@ -261,8 +260,9 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const customerPhone = cleanPhone(order.customer?.phone || '01000000000');
     const items = Array.isArray(order.items) ? order.items : [];
     const provider = (gateway.provider || '').toLowerCase();
+    const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
-    // 1. Kashier Hosted Payment Page (HPP)
+    // 1. Kashier
     if (provider.includes('kashier')) {
       const paymentApiKey = gateway.token || gateway.apiKey;
       if (!gateway.merchantId || !paymentApiKey) {
@@ -276,7 +276,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const currency = 'EGP';
       const mode = 'live';
       const amountForKashier = Number(amount).toFixed(2);
-      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html`;
+      const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html?productName=${encodeURIComponent(firstProductName)}`;
 
       await db.collection('pending_orders').doc(orderId).set({
         orderId,
@@ -309,7 +309,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       return res.json({ success: true, paymentUrl });
     }
 
-    // 2. معالجة ماي فاتورة (MyFatoorah)
+    // 2. MyFatoorah
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
       if (!tokenToUse) {
@@ -323,7 +323,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
         CustomerName: customerName,
         CustomerEmail: customerEmail,
         CustomerMobile: customerPhone,
-        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId}`,
+        CallBackUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId}&productName=${encodeURIComponent(firstProductName)}`,
         ErrorUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed&paymentId=${orderId}`,
         UserDefinedField: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price })))
       };
@@ -449,15 +449,15 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
-// Kashier Webhook / Callback Handler
+// Kashier Webhook / Callback Handler (تلقائي فوري في الخلفية)
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
-    const query = req.body || req.query;
-    console.log("Kashier Callback Received:", JSON.stringify(query));
+    const data = { ...(req.body || {}), ...(req.query || {}) };
+    console.log("Kashier Webhook/Callback Received:", JSON.stringify(data));
 
-    const orderId = query.merchantOrderId || query.orderId || query.paymentId;
-    const paymentStatus = query.paymentStatus || query.status;
-    const cardLast4 = query.cardLast4 || query.maskedCard || query.brand || 'بطاقة إلكترونية';
+    const orderId = data.merchantOrderId || data.orderId || data.paymentId;
+    const paymentStatus = data.paymentStatus || data.status;
+    const cardLast4 = data.cardLast4 || data.maskedCard || data.brand || 'بطاقة إلكترونية';
 
     if (orderId) {
       const isPaid = String(paymentStatus).toLowerCase() === 'success' || String(paymentStatus).toLowerCase() === 'paid';
@@ -465,7 +465,7 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
       await db.collection('transactions').doc(String(orderId)).set({
         paymentId: String(orderId),
         status: isPaid ? 'paid' : 'failed',
-        gatewayResponse: query,
+        gatewayResponse: data,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
@@ -489,7 +489,7 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
           const existingOrder = await db.collection('orders').doc(String(finalOrderId)).get();
           if (!existingOrder.exists) {
             await fulfillOrderAndSendCodes(finalOrderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items, { cardLast4 });
-            console.log("Order fulfilled via Kashier Webhook for:", finalOrderId);
+            console.log("Order fulfilled instantly via Kashier Webhook for:", finalOrderId);
           }
         }
       }
@@ -501,12 +501,10 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
-// مسار تسجيل المعاملات من المتصفح
+// مسار تسجيل المعاملات الاحتياطي من المتصفح
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
-    console.log("Record Transaction Called from Browser:", paymentId, status);
-
     if (!paymentId) return res.status(400).json({ success: false });
 
     if (status === 'paid') {
@@ -538,7 +536,6 @@ app.post('/api/record-transaction', async (req, res) => {
               orderData.currency, 
               orderData.items
             );
-            console.log("تم تسليم الأكواد بنجاح من المتصفح للطلب:", finalOrderId);
           }
         }
       }
@@ -562,10 +559,10 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
   let codesHtml = '';
   codes.forEach(c => {
     codesHtml += `
-      <div style="background: #0d1722; border: 1px solid #65cc00; padding: 15px; border-radius: 10px; margin-bottom: 12px; text-align: center; box-shadow: 0 0 10px rgba(101,204,0,0.15);">
+      <div style="background: #0d1722; border: 1px solid #38bdf8; padding: 15px; border-radius: 10px; margin-bottom: 12px; text-align: center; box-shadow: 0 0 10px rgba(56,189,248,0.15);">
         <p style="margin: 0 0 6px 0; color: #94a3b8; font-size: 13px; font-weight: 600;">${c.productName}</p>
-        <div style="background: #05080e; padding: 10px; border-radius: 6px; border: 1px dashed #65cc00; display: inline-block;">
-          <span style="font-size: 20px; font-weight: bold; letter-spacing: 2px; color: #65cc00; font-family: monospace; direction: ltr; display: inline-block;">${c.code}</span>
+        <div style="background: #05080e; padding: 10px; border-radius: 6px; border: 1px dashed #38bdf8; display: inline-block;">
+          <span style="font-size: 20px; font-weight: bold; letter-spacing: 2px; color: #38bdf8; font-family: monospace; direction: ltr; display: inline-block;">${c.code}</span>
         </div>
       </div>`;
   });
@@ -579,23 +576,20 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
     to: email,
     subject: `فاتورة وأكواد طلبك #${orderId} - TECH GAMING 🎮`,
     html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; text-align: right; padding: 30px; background: #070b12; color: #fff; max-width: 600px; margin: auto; border: 2px solid #65cc00; border-radius: 16px; box-shadow: 0 0 25px rgba(101,204,0,0.25);">
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; text-align: right; padding: 30px; background: #070b12; color: #fff; max-width: 600px; margin: auto; border: 2px solid #38bdf8; border-radius: 16px; box-shadow: 0 0 25px rgba(56,189,248,0.25);">
         
-        <!-- Neon Header / Logo Area -->
         <div style="text-align: center; margin-bottom: 25px;">
-          <h1 style="color: #65cc00; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(101,204,0,0.6); font-family: monospace;">TECH GAMING</h1>
-          <p style="color: #38bdf8; font-size: 13px; margin-top: 6px; text-shadow: 0 0 8px rgba(56,189,248,0.4);">منصتك الأولى للشحن الفوري والأكواد الرقمية</p>
+          <h1 style="color: #38bdf8; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(56,189,248,0.6); font-family: monospace;">TECH GAMING</h1>
+          <p style="color: #60a5fa; font-size: 13px; margin-top: 6px; text-shadow: 0 0 8px rgba(96,165,250,0.4);">منصتك الأولى للشحن الفوري والأكواد الرقمية</p>
         </div>
 
-        <hr style="border: none; border-top: 1px solid rgba(101,204,0,0.3); margin: 20px 0;">
+        <hr style="border: none; border-top: 1px solid rgba(56,189,248,0.3); margin: 20px 0;">
 
-        <!-- Greeting -->
         <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;">أهلاً بك يا بطل،</h3>
         <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
           تم تأكيد عملية الدفع بنجاح وتسجيل طلبك بالمتجر. إليك تفاصيل المعاملة والأكواد الخاصة بك:
         </p>
 
-        <!-- Order Summary Box -->
         <div style="background: #0b1320; border: 1px solid rgba(56,189,248,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
@@ -612,25 +606,21 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08);">الإجمالي المدفوع:</td>
-              <td style="padding: 6px 0; text-align: left; color: #65cc00; font-weight: bold; font-size: 15px; border-top: 1px solid rgba(255,255,255,0.08);">${amountPaid} EGP</td>
+              <td style="padding: 6px 0; text-align: left; color: #38bdf8; font-weight: bold; font-size: 15px; border-top: 1px solid rgba(255,255,255,0.08);">${amountPaid} EGP</td>
             </tr>
           </table>
         </div>
 
-        <!-- Codes Section Title -->
         <h4 style="color: #38bdf8; font-size: 15px; margin-bottom: 12px; border-right: 3px solid #38bdf8; padding-right: 8px;">الأكواد الرقمية الفورية:</h4>
 
-        <!-- Codes Container -->
         ${codesHtml}
 
-        <!-- Support Note -->
-        <div style="background: rgba(101,204,0,0.05); border: 1px dashed rgba(101,204,0,0.3); padding: 12px 15px; border-radius: 8px; margin-top: 20px; text-align: center;">
-          <p style="margin: 0; font-size: 12px; color: #a3e635; line-height: 1.5;">
+        <div style="background: rgba(56,189,248,0.05); border: 1px dashed rgba(56,189,248,0.3); padding: 12px 15px; border-radius: 8px; margin-top: 20px; text-align: center;">
+          <p style="margin: 0; font-size: 12px; color: #38bdf8; line-height: 1.5;">
             ⚡ إذا واجهتك أي مشكلة في تفعيل الكود، تواصل معنا فوراً عبر الدعم الفني بالمتجر.
           </p>
         </div>
 
-        <!-- Footer -->
         <div style="text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
           <p style="color: #64748b; font-size: 12px; margin: 0;">شكراً لثقتك في <strong>TECH GAMING</strong> 🚀</p>
         </div>
