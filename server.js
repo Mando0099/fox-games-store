@@ -340,7 +340,7 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
       return res.status(400).json({ success: false, message: getMyFatoorahError(executeResponse.data) });
     }
 
-    // 2. معالجة بوابة Kashier (كاشير)
+    // 2. معالجة بوابة Kashier (كاشير) - تم تصحيح الرابط هنا
     if (gatewayKey === 'kashier' || gateway.provider === 'kashier') {
       const merchantId = gateway.merchantId;
       const secretKey = gateway.secretKey;
@@ -353,10 +353,10 @@ app.post('/api/:gatewayKey/create-payment', async (req, res) => {
       const currency = 'EGP';
       const mode = gateway.isLive ? 'live' : 'test';
 
-      const pathString = `/pay?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&path=`;
+      const pathString = `/?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}`;
       const hash = crypto.createHmac('sha256', secretKey).update(pathString).digest('hex');
 
-      const kashierUrl = `https://${mode === 'live' ? '' : 'test-'}iframe.kashier.io/pay?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&hash=${hash}&mode=${mode}&redirect=true&allowedMethods=card,wallet`;
+      const kashierUrl = `https://${mode === 'live' ? '' : 'test-'}iframe.kashier.io/?merchantId=${merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&hash=${hash}&mode=${mode}&redirect=true`;
 
       return res.json({ success: true, paymentUrl: kashierUrl });
     }
