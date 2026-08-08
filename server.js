@@ -264,7 +264,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
 
     // 1. معالجة بوابة كاشير (Kashier) على وضع الـ Live حصرياً لتجاوز أي مشاكل Forbidden
 // معالجة بوابة كاشير بطريقة الـ Sessions المطابقة للموقع الشغال تماماً
- if (provider.includes('kashier')) {
+if (provider.includes('kashier')) {
       if (!gateway.merchantId || !gateway.secretKey) {
         return res.status(400).json({ success: false, message: 'Kashier Merchant ID or Secret Key is missing.' });
       }
@@ -273,39 +273,17 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       const currency = 'EGP';
       const mode = 'live';
 
-      try {
-        // نقطة الاتصال الرسمية الصحيحة لإنشاء جلسة كاشير من السيرفر
-        const response = await axios.post('https://api.kashier.io/v1/sessions', {
-          amount: amount,
-          currency: currency,
-          merchantOrderId: orderId,
-          mode: mode,
-          allowedMethods: ['card', 'wallet']
-        }, {
-          headers: {
-            Authorization: gateway.secretKey,
-            'Content-Type': 'application/json'
-          },
-          timeout: 15000
-        });
-
-        // استخراج الـ sessionId المشفر من استجابة كاشير
-        const sessionId = response.data?.body?.sessionId || response.data?.sessionId;
-
-        if (sessionId) {
-          const secureSessionUrl = `https://payments.kashier.io/session/${sessionId}?mode=${mode}`;
-          return res.json({ success: true, paymentUrl: secureSessionUrl });
-        } else {
-          throw new Error('Invalid session response from Kashier.');
-        }
-
-      } catch (sessionErr) {
-        console.error('Kashier Session API Error:', sessionErr.response?.data || sessionErr.message);
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Kashier Session Error: ' + (sessionErr.response?.data?.message || sessionErr.message) 
-        });
-      }
+      // إرسال البيانات المطلوبة للـ Frontend لتوليد نافذة الدفع أو الجلسة الرسمية بدون Forbidden
+      return res.json({
+        success: true,
+        gatewayType: 'kashier',
+        merchantId: gateway.merchantId,
+        orderId: orderId,
+        amount: amount,
+        currency: currency,
+        mode: mode,
+        hash: crypto.createHmac('sha256', gateway.secretKey).update(`/?merchantId=${gateway.merchantId}&orderId=${orderId}&amount=${amount}&currency=${currency}&mode=${mode}`).digest('hex')
+      });
     }
 
     // 2. معالجة ماي فاتورة (MyFatoorah) مع دعم الفيزا والماستر كارد مباشرة
