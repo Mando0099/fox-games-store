@@ -304,11 +304,11 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 });
 
 // ==========================================
-// 💳 FAWATERAK HANDLER (OAUTH & FULL DATA)
+// 💳 FAWATERAK HANDLER (OAUTH WITH BASIC AUTH)
 // ==========================================
 async function handleFawaterakPayment(gateway, order, res) {
-  const clientId = (gateway.clientId || '').trim();
-  const clientSecret = (gateway.secretKey || '').trim();
+  const clientId = String(gateway.clientId || '').trim();
+  const clientSecret = String(gateway.secretKey || '').trim();
   const providerKey = gateway.merchantId || 'FAWATERAK.29879';
 
   if (!clientId || !clientSecret) {
@@ -316,32 +316,34 @@ async function handleFawaterakPayment(gateway, order, res) {
   }
 
   try {
-    // 1. طلب رمز الوصول (OAuth) مع دعم Form-Urlencoded و JSON
-    const tokenParams = new URLSearchParams();
-    tokenParams.append('client_id', clientId);
-    tokenParams.append('client_secret', clientSecret);
-    tokenParams.append('grant_type', 'client_credentials');
+    // 1. طلب رمز الوصول (OAuth Token) مع دعم Basic Auth و Form-urlencoded
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    let accessToken = null;
 
-    let tokenRes;
     try {
-      tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', tokenParams.toString(), {
+      const tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', 'grant_type=client_credentials', {
+        headers: {
+          'Authorization': `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout: 30000
+      });
+      accessToken = tokenRes.data?.access_token || tokenRes.data?.data?.access_token;
+    } catch (authErr1) {
+      const tokenParams = new URLSearchParams();
+      tokenParams.append('client_id', clientId);
+      tokenParams.append('client_secret', clientSecret);
+      tokenParams.append('grant_type', 'client_credentials');
+
+      const tokenRes2 = await axios.post('https://app.fawaterk.com/oauth/token', tokenParams.toString(), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         timeout: 30000
       });
-    } catch (authErr) {
-      tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', {
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'client_credentials'
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
-      });
+      accessToken = tokenRes2.data?.access_token || tokenRes2.data?.data?.access_token;
     }
 
-    const accessToken = tokenRes.data?.access_token || tokenRes.data?.data?.access_token;
     if (!accessToken) {
-      return res.status(400).json({ success: false, message: 'فشل المصادقة مع بوابة فواتيرك (OAuth Token Error).' });
+      return res.status(400).json({ success: false, message: 'فشل استخراج رمز الوصول من فواتيرك (OAuth Failed).' });
     }
 
     const orderId = 'ORD_' + Date.now();
@@ -398,7 +400,7 @@ async function handleFawaterakPayment(gateway, order, res) {
         },
         timeout: 30000
       });
-    } catch (apiErr) {
+    } catch (invoiceErr) {
       response = await axios.post('https://app.fawaterk.com/api/v2/invoice/initiate-payment', fawaterakBody, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -412,9 +414,10 @@ async function handleFawaterakPayment(gateway, order, res) {
     if (paymentUrl) {
       return res.json({ success: true, paymentUrl });
     }
-    return res.status(400).json({ success: false, message: response.data?.message || 'فشل إنشاء رابط الدفع من فواتيرك.' });
+    return res.status(400).json({ success: false, message: response.data?.message || 'تعذر إنشاء رابط الدفع.' });
+
   } catch (err) {
-    console.error('Fawaterak OAuth/Payment Error:', err.response?.data || err.message);
+    console.error('Fawaterak Full Error:', err.response?.data || err.message);
     const errorMsg = err.response?.data?.message || err.response?.data?.error_description || err.message;
     return res.status(400).json({ success: false, message: errorMsg });
   }
