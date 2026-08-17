@@ -493,7 +493,7 @@
       </div>
     </section>
 
-    <!-- صفحة بوابات الدفع الاحترافية الجديدة (تم تحديثها بالكامل) -->
+    <!-- صفحة بوابات الدفع الاحترافية الجديدة -->
     <section id="payments-page" class="page">
       <div class="page-head">
         <h2>إدارة بوابات وطرق الدفع الذكية</h2>
@@ -634,16 +634,24 @@
       if (selected === 'fawaterak') {
         html = `
           <div class="form-group">
-            <label for="gw_clientId">Client ID (معرف العميل) *</label>
+            <label for="gw_clientId">Client ID (معرف OAuth) *</label>
             <input id="gw_clientId" type="text" placeholder="مثال: a286b810-2d18-4413-9ea8-c029fab5d091" required />
           </div>
           <div class="form-group">
             <label for="gw_clientSecret">Client Secret (المفتاح السري لـ OAuth) *</label>
-            <input id="gw_clientSecret" type="password" placeholder="أدخل مفتاح الـ Secret الظاهر في فواتيرك" required />
+            <input id="gw_clientSecret" type="password" placeholder="أدخل مفتاح الـ Secret من شاشة OAuth" required />
           </div>
           <div class="form-group">
-            <label for="gw_liveUrl">رابط الـ Token أو الـ API</label>
-            <input id="gw_liveUrl" type="text" value="https://app.fawaterak.com/oauth/token" readonly />
+            <label for="gw_apiKey">HASH API Key (مفتاح الـ Hash) *</label>
+            <input id="gw_apiKey" type="text" placeholder="أدخل الـ HASH API Key من فواتيرك" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_merchantId">Provider Key (رقم مزود الخدمة) *</label>
+            <input id="gw_merchantId" type="text" placeholder="مثال: FAWATERAK.29879" required />
+          </div>
+          <div class="form-group" style="grid-column: 1/-1;">
+            <label for="gw_webhookUrl">رابط الـ Webhook الخاص بمتجرك</label>
+            <input id="gw_webhookUrl" type="text" value="https://tech-gaming.store/api/fawaterak/webhook" readonly />
           </div>
         `;
       } else if (selected === 'kashier') {
@@ -760,6 +768,6 @@
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=205"></script>
+  <script src="/js/admin.js?v=206"></script>
 </body>
 </html>
