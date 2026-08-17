@@ -90,7 +90,13 @@
       0% { transform: scale(1); text-shadow: 0 0 15px var(--neon-cyan); }
       100% { transform: scale(1.08); text-shadow: 0 0 25px var(--neon-cyan), 0 0 50px var(--neon-cyan); }
     }
-    /* ================= END LOGO ANIMATIONS ================= */
+
+    .gateway-field-box {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      width: 100%;
+    }
   </style>
 
   <!-- حزمة SDK الخاصة بـ Firebase Compat -->
@@ -487,47 +493,59 @@
       </div>
     </section>
 
-    <!-- صفحة بوابات الدفع الاحترافية الجديدة -->
+    <!-- صفحة بوابات الدفع الاحترافية الجديدة (تم تحديثها بالكامل) -->
     <section id="payments-page" class="page">
       <div class="page-head">
         <h2>إدارة بوابات وطرق الدفع الذكية</h2>
-        <p>اختر بوابة الدفع، أدخل متطلباتها الحقيقية، وتحكم في تفعيل بوابة واحدة رئيسية للمتجر بضغطة زر</p>
+        <p>اختر بوابة الدفع وقم بإدخال المفاتيح الصحيحة الخاصة بها ليتم تفعيلها وتشفيرها فوراً في المتجر</p>
       </div>
 
       <!-- لوحة إضافة / اختيار بوابة جديدة -->
       <div class="panel form-panel" style="margin-bottom: 25px;">
         <div class="panel-head">
-          <h3><i class="fa-solid fa-circle-plus"></i> إضافة أو ربط بوابة دفع جديدة</h3>
+          <h3><i class="fa-solid fa-circle-plus"></i> إعداد وربط بوابة دفع جديدة</h3>
         </div>
-        <div class="form-grid" style="grid-template-columns: 1fr 2fr auto; align-items: flex-end; gap: 15px;">
-          <div class="form-group">
-            <label for="gatewaySelect">اختر بوابة الدفع *</label>
-            <select id="gatewaySelect" onchange="renderGatewayFields()">
-              <option value="">-- اختر البوابة --</option>
-              <option value="myfatoorah">MyFatoorah</option>
-              <option value="kashier">Kashier</option>
-              <option value="fawry">Fawry</option>
-              <option value="fawaterk">Fawaterk</option>
-              <option value="stripe">Stripe</option>
-              <option value="paypal">PayPal</option>
-              <option value="paymob">Paymob</option>
-              <option value="instapay">InstaPay</option>
-            </select>
-          </div>
+        
+        <form id="gateway-form" onsubmit="event.preventDefault(); saveAndActivateGateway();">
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+              <div class="form-group" style="flex: 1; min-width: 250px;">
+                <label for="gatewaySelect">اختر بوابة الدفع *</label>
+                <select id="gatewaySelect" onchange="renderGatewayFields()" required>
+                  <option value="">-- اختر البوابة لتوليد الحقول المطلوبة --</option>
+                  <option value="fawaterak">فواتيرك (Fawaterak - OAuth 2.0)</option>
+                  <option value="kashier">كاشير (Kashier)</option>
+                  <option value="myfatoorah">ماي فاتورة (MyFatoorah)</option>
+                  <option value="paymob">باي موب (Paymob)</option>
+                  <option value="fawry">فوري (Fawry Pay)</option>
+                  <option value="paypal">باي بال (PayPal)</option>
+                  <option value="stripe">سترايب (Stripe)</option>
+                  <option value="instapay">إنستاباي / محافظ إلكترونية (يدوي)</option>
+                </select>
+              </div>
 
-          <div id="dynamicGatewayInputs" style="display: contents;">
-            <div class="form-group">
-              <label>متطلبات البوابة</label>
-              <input type="text" disabled placeholder="الرجاء اختيار بوابة الدفع أولاً..." />
+              <div class="form-checkbox-group" style="margin-bottom: 10px;">
+                <input id="gatewayIsActive" type="checkbox" checked />
+                <label for="gatewayIsActive">تفعيل هذه البوابة كبوابة رئيسية للمتجر فور الحفظ</label>
+              </div>
+            </div>
+
+            <!-- الحقول الديناميكية الدقيقة لكل بوابة -->
+            <div id="dynamicGatewayInputs" class="gateway-field-box">
+              <div class="form-group" style="grid-column: 1/-1;">
+                <label>متطلبات الربط</label>
+                <input type="text" disabled placeholder="يرجى اختيار بوابة الدفع من القائمة بالأعلى لإظهار الحقول الخاصة بها..." />
+              </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 10px;">
+              <button type="submit" class="btn-submit" style="height: 48px;">
+                <i class="fa-solid fa-plug-circle-plus"></i> حفظ وتفعيل بوابة الدفع
+              </button>
             </div>
           </div>
-
-          <div class="form-group">
-            <button type="button" class="btn-submit" onclick="saveAndActivateGateway()" style="height: 48px; white-space: nowrap;">
-              <i class="fa-solid fa-plug-circle-plus"></i> حفظ وربط البوابة
-            </button>
-          </div>
-        </div>
+        </form>
       </div>
 
       <!-- استعراض البوابات المضافة والمفعلة حالياً -->
@@ -601,12 +619,126 @@
     </section>
   </main>
 
-  <!-- المكتبات الخارجية (تم تصحيح روابط الـ CDN لتعمل فوراً بدون أخطاء) -->
+  <!-- المكتبات الخارجية -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- السكربتات التفاعلية الداخلية -->
+  <!-- سكربت توليد حقول بوابات الدفع التلقائي -->
   <script>
+    function renderGatewayFields() {
+      const selected = document.getElementById('gatewaySelect').value;
+      const container = document.getElementById('dynamicGatewayInputs');
+
+      let html = '';
+
+      if (selected === 'fawaterak') {
+        html = `
+          <div class="form-group">
+            <label for="gw_clientId">Client ID (معرف العميل) *</label>
+            <input id="gw_clientId" type="text" placeholder="مثال: a286b810-2d18-4413-9ea8-c029fab5d091" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_clientSecret">Client Secret (المفتاح السري لـ OAuth) *</label>
+            <input id="gw_clientSecret" type="password" placeholder="أدخل مفتاح الـ Secret الظاهر في فواتيرك" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_liveUrl">رابط الـ Token أو الـ API</label>
+            <input id="gw_liveUrl" type="text" value="https://app.fawaterak.com/oauth/token" readonly />
+          </div>
+        `;
+      } else if (selected === 'kashier') {
+        html = `
+          <div class="form-group">
+            <label for="gw_merchantId">Merchant ID (معرف التاجر في كاشير) *</label>
+            <input id="gw_merchantId" type="text" placeholder="مثال: MID-XXXX-XXXX" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_apiKey">Payment API Key (مفتاح الـ API) *</label>
+            <input id="gw_apiKey" type="password" placeholder="أدخل الـ API Key الخاص بك في كاشير" required />
+          </div>
+        `;
+      } else if (selected === 'myfatoorah') {
+        html = `
+          <div class="form-group">
+            <label for="gw_token">API Token (رمز التوثيق) *</label>
+            <input id="gw_token" type="password" placeholder="أدخل الـ Live Token من ماي فاتورة" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_liveUrl">API URL (رابط المنصة)</label>
+            <input id="gw_liveUrl" type="text" value="https://api-eg.myfatoorah.com" />
+          </div>
+        `;
+      } else if (selected === 'paymob') {
+        html = `
+          <div class="form-group">
+            <label for="gw_apiKey">API Key (مفتاح باي موب) *</label>
+            <input id="gw_apiKey" type="password" placeholder="Paymob API Key" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_iframeId">Integration ID (رقم طريقة الدفع) *</label>
+            <input id="gw_iframeId" type="text" placeholder="مثال: 123456" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_secretKey">HMAC Secret (لتأمين الـ Webhook) *</label>
+            <input id="gw_secretKey" type="password" placeholder="Paymob HMAC Secret" />
+          </div>
+        `;
+      } else if (selected === 'fawry') {
+        html = `
+          <div class="form-group">
+            <label for="gw_merchantId">Merchant Code (كود التاجر) *</label>
+            <input id="gw_merchantId" type="text" placeholder="Fawry Merchant Code" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_secretKey">Security Key / Hash *</label>
+            <input id="gw_secretKey" type="password" placeholder="Fawry Security Secret" required />
+          </div>
+        `;
+      } else if (selected === 'stripe') {
+        html = `
+          <div class="form-group">
+            <label for="gw_apiKey">Publishable Key *</label>
+            <input id="gw_apiKey" type="text" placeholder="pk_live_..." required />
+          </div>
+          <div class="form-group">
+            <label for="gw_secretKey">Secret Key *</label>
+            <input id="gw_secretKey" type="password" placeholder="sk_live_..." required />
+          </div>
+        `;
+      } else if (selected === 'paypal') {
+        html = `
+          <div class="form-group">
+            <label for="gw_clientId">Client ID *</label>
+            <input id="gw_clientId" type="text" placeholder="PayPal Client ID" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_secretKey">Secret Key *</label>
+            <input id="gw_secretKey" type="password" placeholder="PayPal Secret Key" required />
+          </div>
+        `;
+      } else if (selected === 'instapay') {
+        html = `
+          <div class="form-group">
+            <label for="gw_merchantId">رقم الهاتف / حساب إنستاباي *</label>
+            <input id="gw_merchantId" type="text" placeholder="مثال: 010xxxxxxxx أو username@instapay" required />
+          </div>
+          <div class="form-group">
+            <label for="gw_token">اسم المستلم كما يظهر في التحويل *</label>
+            <input id="gw_token" type="text" placeholder="مثال: محمد أشرف" required />
+          </div>
+        `;
+      } else {
+        html = `
+          <div class="form-group" style="grid-column: 1/-1;">
+            <label>متطلبات الربط</label>
+            <input type="text" disabled placeholder="يرجى اختيار بوابة الدفع من القائمة بالأعلى لإظهار الحقول الخاصة بها..." />
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
     function toggleSidebar() {
       const sidebar = document.getElementById('appSidebar');
       const overlay = document.getElementById('sidebarOverlay');
@@ -628,6 +760,6 @@
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=204"></script>
+  <script src="/js/admin.js?v=205"></script>
 </body>
 </html>
