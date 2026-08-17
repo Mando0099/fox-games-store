@@ -90,7 +90,7 @@ body {
   padding: 0 40px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 26px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
   position: sticky;
@@ -185,10 +185,11 @@ body {
 
 .navActions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
 
+/* Currency Select Header Box */
 #storeCurrencySelector {
   background: #0d1722;
   color: var(--accent);
@@ -233,7 +234,7 @@ body {
   background: rgba(255, 255, 255, 0.02);
   color: white;
   border-radius: 8px;
-  padding: 0 20px;
+  padding: 0 22px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s;
@@ -249,13 +250,12 @@ body {
   border: 0 !important;
   height: 42px;
   border-radius: 8px;
-  padding: 0 18px;
+  padding: 0 20px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
 }
 
 .cart-badge {
@@ -706,61 +706,7 @@ body {
   color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
 }
 
-/* ================= GUARANTEE & BENEFITS ================= */
-.guarantee-box {
-  background: linear-gradient(135deg, rgba(13, 23, 34, 0.95) 0%, rgba(9, 15, 23, 0.95) 100%);
-  border: 1px solid rgba(0, 243, 255, 0.25);
-  border-radius: 16px;
-  padding: 30px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.guarantee-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  transition: 0.3s ease;
-}
-
-.guarantee-item:hover {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 243, 255, 0.15);
-}
-
-.guarantee-icon {
-  font-size: 24px;
-  color: var(--accent);
-  min-width: 45px;
-  height: 45px;
-  background: rgba(0, 243, 255, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.guarantee-content h4 {
-  color: #fff;
-  font-size: 15px;
-  margin-bottom: 4px;
-  font-weight: 700;
-}
-
-.guarantee-content p {
-  color: #94a3b8;
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 0;
-}
-
+/* ================= BENEFITS SECTION ================= */
 .benefits {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1058,97 +1004,69 @@ html[dir="rtl"] .topSearch { margin-left: 0; margin-right: auto; }
 html[dir="rtl"] .cartDrawer { right: auto; left: -440px; border-left: none; border-right: 1px solid var(--line); }
 html[dir="rtl"] .cartDrawer.open { left: 0; right: auto; }
 
-/* ================= RESPONSIVE (MOBILE & TABLET CLEANUP) ================= */
-@media(max-width: 1280px) {
-  .content { padding: 0 20px; }
-  .topbar { padding: 0 20px; gap: 14px; }
-  .mainNav { margin-left: 15px; gap: 6px; }
-  html[dir="rtl"] .mainNav { margin-right: 15px; }
+/* ================= RESPONSIVE ================= */
+@media(max-width:1280px) {
+  .content { padding: 0 24px; }
+  .topbar { padding: 0 24px; gap: 16px; }
+  .mainNav { margin-left: 20px; gap: 8px; }
+  html[dir="rtl"] .mainNav { margin-right: 20px; }
   .productGrid { grid-template-columns: repeat(4, 1fr) !important; gap: 16px; }
   .trendGrid { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media(max-width: 991px) {
-  body { padding-bottom: 75px !important; }
-  .content { padding: 0 14px; }
-  
-  /* الهيدر: تقسيم نظيف بدون تداخل */
-  .topbar { 
-    height: auto !important; 
-    padding: 10px 14px !important; 
-    display: grid !important; 
-    grid-template-columns: 1fr auto !important;
-    row-gap: 10px;
-    column-gap: 8px;
-  }
-  
-  .brand { grid-column: 1; font-size: 18px; }
-  .navActions { grid-column: 2; display: flex; gap: 6px; align-items: center; }
+@media(max-width:1024px) {
   .mainNav { display: none !important; }
-  
-  /* شريط البحث يمتد بعرض الشاشة كسطر ثانٍ */
-  .topSearch { 
-    grid-column: 1 / -1; 
-    width: 100% !important; 
-    margin: 0 !important; 
-    height: 38px;
-  }
-
-  .langBtn, .navActions button.loginBtn, .cartBtn, #storeCurrencySelector { 
-    padding: 0 8px !important; 
-    font-size: 11px !important; 
-    height: 34px !important; 
-  }
-  
-  /* السلايدر المتحرك */
-  .hero-slide { 
-    min-height: 250px !important; 
-    padding: 24px 16px !important; 
-    text-align: center;
-  }
-  .hero-title { font-size: 22px !important; line-height: 1.3; }
-  .hero-subtitle { font-size: 12px !important; margin-bottom: 15px; }
-  .hero-cta-buttons { flex-direction: column; width: 100%; }
-  .browse-cat-btn { width: 100%; justify-content: center; padding: 10px; }
-
-  /* شبكة الأقسام والمنتجات على الموبايل */
-  .trendGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
-  .trendCard { aspect-ratio: 16 / 10 !important; border-radius: 10px; }
-  
-  .productGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .productCard { border-radius: 10px; }
-  .productCover { aspect-ratio: 1 / 1; }
-  .productInfo { padding: 8px !important; }
-  .productInfo h3 { font-size: 12px !important; min-height: 32px !important; }
-  .productInfo p { font-size: 10px !important; }
-  .priceRow { margin: 6px 0 !important; }
-  .price { font-size: 13px !important; }
-  .add { padding: 6px 8px !important; font-size: 11px !important; }
-
-  /* الفلاتر */
-  .sectionHead { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
-  .filters { width: 100%; flex-direction: column; gap: 8px; }
-  .filters input, .filters select { width: 100%; }
-
-  /* مركز الضمان وطرق الدفع */
-  .guarantee-box { grid-template-columns: 1fr !important; padding: 16px; gap: 12px; }
-  .guarantee-item { padding: 10px; }
-  .benefits { grid-template-columns: 1fr !important; gap: 16px !important; padding: 20px 0; }
-  
-  .checkoutShowcase, .supportBox { flex-direction: column; text-align: center; padding: 20px 14px; gap: 14px; }
-  .paymentMethods { flex-direction: column; width: 100%; gap: 8px; margin-top: 10px; }
-  .method-card { width: 100%; height: 46px; min-width: unset; }
-
-  /* السلة */
-  .cartDrawer { 
-    width: 100% !important; 
-    max-width: 100vw !important; 
-    height: 100vh !important; 
-    padding: 16px;
-  }
+  .topSearch { width: 280px; }
+  .productGrid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
-@media(max-width: 360px) {
+@media(max-width:768px) {
+  body { padding-bottom: 70px !important; }
+  .content { padding: 0 14px; }
+  .topbar { height: auto; flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
+  .brand { font-size: 20px; }
+  .topSearch { order: 3; width: 100% !important; margin: 4px 0 0 0 !important; }
+  .navActions { margin-left: auto; gap: 8px; width: auto; }
+  html[dir="rtl"] .navActions { margin-left: 0; margin-right: auto; }
+  .langBtn, .navActions button.loginBtn, .cartBtn, #storeCurrencySelector { padding: 0 10px !important; font-size: 12px !important; height: 38px !important; }
+  
+  .hero-slide { min-height: 280px; padding: 30px 20px; text-align: center; }
+  .hero-title { font-size: 24px !important; }
+  .hero-subtitle { font-size: 13px; margin-bottom: 15px; }
+  .hero-cta-buttons { flex-direction: column; width: 100%; }
+  .browse-cat-btn { width: 100%; justify-content: center; }
+
+  .productGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .productCard { border-radius: 12px; }
+  .productCover { aspect-ratio: 1 / 1; }
+  .productInfo { padding: 10px !important; }
+  .productInfo h3 { font-size: 13px !important; min-height: 36px !important; }
+  .productInfo p { font-size: 11px !important; }
+  .priceRow { margin: 8px 0 6px !important; }
+  .price { font-size: 14px !important; }
+  .rating { font-size: 11px !important; }
+  .add { padding: 8px !important; font-size: 12px !important; }
+  
+  #trending { display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
+  .trendGrid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; }
+  .trendCard { display: block !important; width: 100% !important; aspect-ratio: 3 / 2 !important; visibility: visible !important; opacity: 1 !important; }
+  
+  .sectionHead { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .filters { width: 100%; flex-direction: column; gap: 8px; }
+  .filters input, .filters select { width: 100%; }
+  
+  .cartDrawer { width: 100% !important; max-width: 100vw !important; height: calc(100vh - 60px) !important; }
+  
+  .benefits { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .checkoutShowcase, .supportBox { flex-direction: column; text-align: center; padding: 20px 16px; }
+  .paymentMethods { display: flex; width: 100%; flex-direction: column; gap: 12px; }
+  .method-card { width: 100%; height: 50px; }
+  
+  .supportActions { width: 100%; flex-direction: column; }
+  .supportActions .whatsapp-support-btn { width: 100%; justify-content: center; }
+}
+
+@media(max-width:360px) {
   .productGrid { grid-template-columns: 1fr !important; }
   .trendGrid { grid-template-columns: 1fr !important; }
 }
