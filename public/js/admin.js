@@ -16,22 +16,35 @@ const swalConfig = {
   cancelButtonColor: '#475569'
 };
 
-// 📱 دالة تشغيل وإغلاق القائمة الجانبية بنظام الكلاسات النظيف
+// 📱 دالة تشغيل وإغلاق القائمة الجانبية
 function toggleSidebar() {
-  const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
+  const sidebar = $('appSidebar') || document.querySelector('.sidebar') || document.querySelector('aside');
+  const overlay = $('sidebarOverlay') || document.querySelector('.sidebar-overlay');
   
   if (sidebar) sidebar.classList.toggle('active');
   if (overlay) overlay.classList.toggle('active');
 }
 
-// 🔄 التنقل بين التابات وإغلاق القائمة فوراً
+// 🔒 دالة صريحة لغلق القائمة الجانبية فوراً على الموبايل
+function closeSidebarMobile() {
+  const sidebar = $('appSidebar') || document.querySelector('.sidebar') || document.querySelector('aside');
+  const overlay = $('sidebarOverlay') || document.querySelector('.sidebar-overlay');
+  
+  if (sidebar) {
+    sidebar.classList.remove('active', 'open', 'show');
+  }
+  if (overlay) {
+    overlay.classList.remove('active', 'show');
+  }
+}
+
+// 🔄 التنقل بين التابات مع غلق القائمة فوراً وبشكل حاسم
 function showPage(pageName, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = $(`${pageName}-page`);
   if (targetPage) targetPage.classList.add('active');
 
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .sidebar a, .sidebar button').forEach(b => b.classList.remove('active'));
   if (btn) {
     btn.classList.add('active');
   } else {
@@ -39,12 +52,8 @@ function showPage(pageName, btn) {
     if (targetBtn) targetBtn.classList.add('active');
   }
 
-  const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  
-  if (sidebar) sidebar.classList.remove('active');
-  if (overlay) overlay.classList.remove('active');
-
+  // إغلاق السايد بار فورياً عند اختيار التاب
+  closeSidebarMobile();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -54,8 +63,38 @@ function val(id) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const menuBtn = $('menuBtn');
-  if (menuBtn) menuBtn.onclick = toggleSidebar;
+  const menuBtn = $('menuBtn') || document.querySelector('.menu-toggle') || document.querySelector('#sidebarToggle');
+  if (menuBtn) {
+    menuBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    };
+  }
+
+  // إغلاق السايد بار عند الضغط على أي عنصر داخل القائمة الجانبية
+  const sidebarNavItems = document.querySelectorAll('.sidebar a, .sidebar .nav-btn, .sidebar button, aside a, aside button');
+  sidebarNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+      closeSidebarMobile();
+    });
+  });
+
+  // إغلاق السايد بار تلقائياً عند الضغط في أي مكان خارجي بالشاشة
+  document.addEventListener('click', (e) => {
+    const sidebar = $('appSidebar') || document.querySelector('.sidebar') || document.querySelector('aside');
+    const toggleBtn = $('menuBtn') || document.querySelector('.menu-toggle') || document.querySelector('#sidebarToggle');
+
+    if (sidebar && sidebar.classList.contains('active')) {
+      if (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+        closeSidebarMobile();
+      }
+    }
+  });
+
+  const overlay = $('sidebarOverlay') || document.querySelector('.sidebar-overlay');
+  if (overlay) {
+    overlay.addEventListener('click', closeSidebarMobile);
+  }
 });
 
 // 🔐 التحقق الأمني الصارم وصلاحيات الأدمن
@@ -578,7 +617,7 @@ function initEventListeners() {
   const imagePreview = $('imagePreview');
   const removeImgBtn = $('remove-img');
   const clearFormBtn = $('clear-form');
-  const menuBtn = $('menuBtn');
+  const menuBtn = $('menuBtn') || document.querySelector('.menu-toggle') || document.querySelector('#sidebarToggle');
 
   const gatewaySelect = $('gatewaySelect');
   if (gatewaySelect) {
@@ -586,7 +625,10 @@ function initEventListeners() {
   }
 
   if (menuBtn) {
-    menuBtn.onclick = toggleSidebar;
+    menuBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    };
   }
 
   if (dropzone && fileInput) {
