@@ -11,7 +11,6 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* ================= START NEW TECH GAMING STYLES ================= */
     :root {
       --neon-cyan: #00f3ff;
       --cyan-dim: rgba(0, 243, 255, 0.2);
@@ -219,9 +218,58 @@
       width: 50px; height: 35px; text-align: center; background: #090f17;
       color: #fff; border: 1px solid var(--cyan-dim); border-radius: 8px;
     }
-    /* ================= END NEW TECH GAMING STYLES ================= */
 
-    /* ================= START USER PROFILE STYLE ================= */
+    /* Guarantee Showcase Section */
+    .guarantee-box {
+      background: linear-gradient(135deg, rgba(13, 23, 34, 0.95) 0%, rgba(9, 15, 23, 0.95) 100%);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+      border-radius: 16px;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .guarantee-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      transition: 0.3s ease;
+    }
+    .guarantee-item:hover {
+      border-color: var(--neon-cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 243, 255, 0.15);
+    }
+    .guarantee-icon {
+      font-size: 28px;
+      color: var(--neon-cyan);
+      min-width: 45px;
+      height: 45px;
+      background: rgba(0, 243, 255, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .guarantee-content h4 {
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .guarantee-content p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* User Profile */
     .user-profile-wrapper { position: relative; display: inline-block; }
     .user-profile-btn { background: #0d1722; border: 1px solid rgba(0, 243, 255, 0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
     .user-profile-btn:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
@@ -244,9 +292,8 @@
     html[dir="rtl"] .user-profile-dropdown { right: auto; left: 0; text-align: right; }
     html[dir="rtl"] .profile-header { flex-direction: row-reverse; }
     .foxHidden { display: none !important; }
-    /* ================= END USER PROFILE STYLE ================= */
 
-    /* ================= START MODERN CART STYLE ================= */
+    /* Cart Drawer */
     .cartDrawer { width: 420px; background: #090f17; border-left: 1px solid rgba(0, 243, 255, 0.15); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
     html[dir="rtl"] .cartDrawer { border-left: none; border-right: 1px solid rgba(0, 243, 255, 0.15); }
     .cartItem { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: 0.3s; }
@@ -263,11 +310,8 @@
     .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus { border-color: var(--neon-cyan) !important; outline: none; }
     .currency-select-box { display: flex; flex-direction: column; gap: 6px; }
     .currency-select-box label { font-size: 12px; color: #94a3b8; font-weight: 600; }
-    .payment-logos-container { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; }
-    .pay-mini-logo { height: 14px; display: block; }
-    /* ================= END MODERN CART STYLE ================= */
 
-    /* ================= START MOBILE RESPONSIVE OVERRIDES ================= */
+    /* Mobile */
     .mobile-bottom-nav { display: none; }
     @media (max-width: 991px) {
       body { padding-bottom: 65px !important; }
@@ -518,11 +562,30 @@
       </div>
     </section>
 
-    <!-- قسم بوابة الدفع النشطة -->
-    <section class="section" id="activePaymentGatewaySection" style="display: none;">
-      <div class="panel" style="background: #0d1722; border: 1px solid rgba(0,243,255,0.3); padding: 20px; border-radius: 12px; text-align: center;">
-        <h3 style="color: var(--neon-cyan); margin-bottom: 10px;"><i class="fas fa-wallet"></i> طريقة الدفع المعتمدة حالياً بالمتجر</h3>
-        <p id="activeGatewayInfoDesc" style="color: #cbd5e1; font-size: 14px;"></p>
+    <!-- القسم البديل الاحترافي: مركز الضمان والشحن الفوري -->
+    <section class="section" id="guaranteeSection">
+      <div class="guarantee-box">
+        <div class="guarantee-item">
+          <div class="guarantee-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+          <div class="guarantee-content">
+            <h4>تسليم فوري وتلقائي</h4>
+            <p>وصول الأكواد وبيانات الشحن إلى بريدك الإلكتروني وشاشتك فور إتمام الدفع.</p>
+          </div>
+        </div>
+        <div class="guarantee-item">
+          <div class="guarantee-icon"><i class="fa-solid fa-lock"></i></div>
+          <div class="guarantee-content">
+            <h4>دفع مشفر وآمن 100%</h4>
+            <p>معاملات مالية مؤمنة بأعلى معايير التشفير المصرفي العالمية (256-bit SSL).</p>
+          </div>
+        </div>
+        <div class="guarantee-item">
+          <div class="guarantee-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="guarantee-content">
+            <h4>أكواد وحسابات رسمية</h4>
+            <p>جميع المنتجات الرقمية معتمدة ومضمونة بالكامل ضد الحظر أو التوقف.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -713,40 +776,11 @@
       startSlider();
     }
 
-    /* دالة جلب بوابة الدفع النشطة من فايربيز وعرضها ديناميكياً للعميل */
-    async function fetchActivePaymentGatewayForStore() {
-      try {
-        if (typeof firebase === 'undefined' || !firebase.firestore) return;
-        const db = firebase.firestore();
-        const snap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
-        
-        const section = document.getElementById('activePaymentGatewaySection');
-        const descEl = document.getElementById('activeGatewayInfoDesc');
-
-        if (!snap.empty && section && descEl) {
-          const gatewayData = snap.docs[0].data();
-          section.style.display = 'block';
-          
-          if (gatewayData.key === 'vodafone_cash') {
-            descEl.innerHTML = `الدفع متاح عبر محفظة فودافون كاش الرسمية.<br>رقم التحويل: <b>${gatewayData.credentials?.walletNumber || ''}</b><br><small>${gatewayData.credentials?.instructions || ''}</small>`;
-          } else if (gatewayData.key === 'instapay') {
-            descEl.innerHTML = `الدفع متاح عبر حساب InstaPay.<br>عنوان الدفع (IPA): <b>${gatewayData.credentials?.ipaAddress || ''}</b> (باسم: ${gatewayData.credentials?.accountName || ''})`;
-          } else {
-            descEl.innerHTML = `بوابة الدفع الإلكترونية النشطة حالياً: <b>${gatewayData.name}</b> (آمنة ومشفرة بالكامل)`;
-          }
-        }
-      } catch (e) {
-        console.error("Error fetching active gateway:", e);
-      }
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       if (slides.length > 0) {
         showSlide(currentSlideIndex);
         startSlider();
       }
-
-      fetchActivePaymentGatewayForStore();
 
       const mainLoginBtn = document.getElementById('mainLoginBtn');
       const userProfileWrapper = document.getElementById('userProfileWrapper');
