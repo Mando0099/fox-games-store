@@ -304,18 +304,20 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 });
 
 // ==========================================
-// 💳 FAWATERAK HANDLER
+// 💳 FAWATERAK HANDLER (OAUTH & FULL DATA)
 // ==========================================
 async function handleFawaterakPayment(gateway, order, res) {
-  const clientId = gateway.clientId || gateway.token;
+  const clientId = gateway.clientId;
   const clientSecret = gateway.secretKey;
-  
+  const providerKey = gateway.merchantId || 'FAWATERAK.29879';
+
   if (!clientId || !clientSecret) {
     return res.status(400).json({ success: false, message: 'Fawaterak Client ID or Client Secret is missing.' });
   }
 
   try {
-    const tokenRes = await axios.post('https://app.fawaterak.com/oauth/token', {
+    // 1. طلب رمز الوصول (OAuth Access Token)
+    const tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', {
       client_id: clientId,
       client_secret: clientSecret,
       grant_type: 'client_credentials'
@@ -331,20 +333,25 @@ async function handleFawaterakPayment(gateway, order, res) {
 
     const orderId = 'ORD_' + Date.now();
     const amount = money(order.total);
-    const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
-    const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
+    const fullName = (order.customer?.name || 'Gamer Client').trim();
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || 'Gamer';
+    const lastName = nameParts.slice(1).join(' ') || 'Customer';
+    const customerEmail = order.customer?.email || 'customer@tech-gaming.store';
     const customerPhone = cleanPhone(order.customer?.phone || '01000000000');
     const items = Array.isArray(order.items) ? order.items : [];
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
+    // 2. تجهيز كائن الفاتورة المتكامل لفواتيرك
     const fawaterakBody = {
       cartTotal: amount,
       currency: 'EGP',
       customer: {
-        first_name: customerName,
-        last_name: 'Customer',
+        first_name: firstName,
+        last_name: lastName,
         email: customerEmail,
-        phone: customerPhone
+        phone: customerPhone,
+        address: 'Egypt'
       },
       redirectionUrls: {
         successUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId}&productName=${encodeURIComponent(firstProductName)}`,
@@ -352,12 +359,14 @@ async function handleFawaterakPayment(gateway, order, res) {
         pendingUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=pending&paymentId=${orderId}`
       },
       cartItems: items.map(i => ({
-        name: i.name,
-        price: i.price,
+        name: i.name || 'منتج رقمي',
+        price: money(i.price),
         quantity: i.quantity || 1
-      }))
+      })),
+      payLoad: { orderId: orderId, providerKey: providerKey }
     };
 
+    // حفظ الطلب كمعلق في الفايربيز
     await db.collection('pending_orders').doc(orderId).set({
       orderId,
       customerEmail,
@@ -367,19 +376,31 @@ async function handleFawaterakPayment(gateway, order, res) {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    const response = await axios.post('https://app.fawaterak.com/api/v2/invoice/initiate-payment', fawaterakBody, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
+    // 3. إنشاء الفاتورة ورابط الدفع
+    let response;
+    try {
+      response = await axios.post('https://app.fawaterk.com/api/v2/createInvoiceLink', fawaterakBody, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+    } catch (apiErr) {
+      response = await axios.post('https://app.fawaterk.com/api/v2/invoice/initiate-payment', fawaterakBody, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+    }
 
-    const paymentUrl = response.data?.data?.url;
-    if (response.data?.status && paymentUrl) {
+    const paymentUrl = response.data?.data?.url || response.data?.data?.payment_url;
+    if (paymentUrl) {
       return res.json({ success: true, paymentUrl });
     }
-    return res.status(400).json({ success: false, message: 'فشل إنشاء رابط الدفع من فواتيرك.' });
+    return res.status(400).json({ success: false, message: response.data?.message || 'فشل إنشاء رابط الدفع من فواتيرك.' });
   } catch (err) {
     console.error('Fawaterak OAuth/Payment Error:', err.response?.data || err.message);
     return res.status(400).json({ success: false, message: err.response?.data?.message || err.message });
@@ -408,7 +429,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewa
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
     // 1. FAWATERAK
-    if (provider.includes('fawaterak')) {
+    if (provider.includes('fawaterak') || provider.includes('fawaterk')) {
       return await handleFawaterakPayment(gateway, order, res);
     }
 
@@ -576,10 +597,10 @@ app.post('/api/fawaterak/webhook', async (req, res) => {
     const data = req.body;
     console.log("Fawaterak Webhook Received:", JSON.stringify(data));
 
-    const orderId = data.merchantInvoiceId || data.invoiceId;
+    const orderId = data.merchantInvoiceId || data.invoiceId || data.payLoad?.orderId;
     const invoiceStatus = String(data.invoice_status || data.status).toLowerCase();
 
-    if (orderId && (invoiceStatus === 'paid' || invoiceStatus === 'complete')) {
+    if (orderId && (invoiceStatus === 'paid' || invoiceStatus === 'complete' || invoiceStatus === 'success')) {
       let pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
       if (pendingDoc.exists) {
         const orderData = pendingDoc.data();
