@@ -304,7 +304,7 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 });
 
 // ==========================================
-// 💳 FAWATERAK HANDLER (SMART HYBRID INTEGRATION)
+// 💳 FAWATERAK HANDLER (SMART HYBRID & DYNAMIC CURRENCY)
 // ==========================================
 async function handleFawaterakPayment(gateway, order, res) {
   const clientId = String(gateway.clientId || '').trim();
@@ -314,7 +314,7 @@ async function handleFawaterakPayment(gateway, order, res) {
 
   let tokenToUse = null;
 
-  // 1. محاولة طلب OAuth Token إذا كانت البيانات موجودة
+  // 1. محاولة طلب OAuth Token
   if (clientId && clientSecret) {
     try {
       const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -331,7 +331,7 @@ async function handleFawaterakPayment(gateway, order, res) {
     }
   }
 
-  // 2. استخدام HASH API Key كـ Fallback في حالة عدم نجاح OAuth
+  // 2. استخدام HASH API Key كـ Fallback
   if (!tokenToUse) {
     tokenToUse = hashApiKey || clientSecret || clientId;
   }
@@ -343,6 +343,7 @@ async function handleFawaterakPayment(gateway, order, res) {
   try {
     const orderId = 'ORD_' + Date.now();
     const amount = money(order.total);
+    const currency = (order.currency || 'EGP').toUpperCase();
     const fullName = (order.customer?.name || 'Gamer Client').trim();
     const nameParts = fullName.split(' ');
     const firstName = nameParts[0] || 'Gamer';
@@ -352,10 +353,10 @@ async function handleFawaterakPayment(gateway, order, res) {
     const items = Array.isArray(order.items) ? order.items : [];
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
-    // تجهيز كائن الفاتورة
+    // تجهيز كائن الفاتورة بالعملة المختارة
     const fawaterakBody = {
       cartTotal: amount,
-      currency: 'EGP',
+      currency: currency,
       customer: {
         first_name: firstName,
         last_name: lastName,
@@ -381,7 +382,7 @@ async function handleFawaterakPayment(gateway, order, res) {
       orderId,
       customerEmail,
       amount,
-      currency: 'EGP',
+      currency,
       items,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
@@ -433,6 +434,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewa
 
     const order = req.body || {};
     const amount = money(order.total);
+    const currency = (order.currency || 'EGP').toUpperCase();
     const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
     const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
     const customerPhone = cleanPhone(order.customer?.phone || '01000000000');
@@ -456,7 +458,6 @@ app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewa
       }
 
       const orderId = 'ORD_' + Date.now();
-      const currency = 'EGP';
       const mode = 'live';
       const amountForKashier = Number(amount).toFixed(2);
       const merchantRedirect = `${PUBLIC_BASE_URL}/payment-result.html?productName=${encodeURIComponent(firstProductName)}`;
@@ -502,7 +503,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewa
       const orderId = 'ORD_' + Date.now();
       const invoiceBody = {
         InvoiceValue: amount,
-        DisplayCurrencyIso: 'EGP',
+        DisplayCurrencyIso: currency,
         CustomerName: customerName,
         CustomerEmail: customerEmail,
         CustomerMobile: customerPhone,
@@ -515,7 +516,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewa
         orderId,
         customerEmail,
         amount,
-        currency: 'EGP',
+        currency,
         items,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
@@ -595,7 +596,7 @@ async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency
   }, { merge: true });
 
   if (purchasedCodes.length > 0) {
-    await sendCodesEmail(customerEmail, orderId, purchasedCodes, { amount, ...paymentDetails });
+    await sendCodesEmail(customerEmail, orderId, purchasedCodes, { amount, currency, ...paymentDetails });
   }
 }
 
@@ -619,7 +620,7 @@ app.post('/api/fawaterak/webhook', async (req, res) => {
         const existingOrder = await db.collection('orders').doc(String(orderId)).get();
         
         if (!existingOrder.exists && orderData.items) {
-          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency || 'EGP', orderData.items);
           console.log("Order fulfilled via Fawaterak Webhook for:", orderId);
         }
       }
@@ -651,7 +652,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
     const orderId = paymentData.InvoiceId || invoice.Id;
     const customerEmail = paymentData.CustomerEmail || 'customer@tech-gaming.store';
 
-    await fulfillOrderAndSendCodes(orderId, customerEmail, paymentData.InvoiceValue, paymentData.CurrencyIso, cartItems);
+    await fulfillOrderAndSendCodes(orderId, customerEmail, paymentData.InvoiceValue, paymentData.CurrencyIso || 'EGP', cartItems);
 
     return res.status(200).send('SUCCESS');
   } catch (error) { 
@@ -699,7 +700,7 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
         if (orderData && orderData.items) {
           const existingOrder = await db.collection('orders').doc(String(finalOrderId)).get();
           if (!existingOrder.exists) {
-            await fulfillOrderAndSendCodes(finalOrderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items, { cardLast4 });
+            await fulfillOrderAndSendCodes(finalOrderId, orderData.customerEmail, orderData.amount, orderData.currency || 'EGP', orderData.items, { cardLast4 });
             console.log("Order fulfilled instantly via Kashier Webhook for:", finalOrderId);
           }
         }
@@ -746,7 +747,7 @@ app.post('/api/record-transaction', async (req, res) => {
               finalOrderId, 
               orderData.customerEmail, 
               orderData.amount, 
-              orderData.currency, 
+              orderData.currency || 'EGP', 
               orderData.items
             );
           }
@@ -785,6 +786,7 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
 
   const purchaseDate = new Date().toLocaleString('ar-EG', { dateStyle: 'full', timeStyle: 'short' });
   const amountPaid = paymentDetails.amount || 'حسب الفاتورة';
+  const currencyPaid = paymentDetails.currency || 'EGP';
   const cardLast4 = paymentDetails.cardLast4 || 'بطاقة إلكترونية';
 
   const mailOptions = {
@@ -822,7 +824,7 @@ async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08);">الإجمالي المدفوع:</td>
-              <td style="padding: 6px 0; text-align: left; color: #38bdf8; font-weight: bold; font-size: 15px; border-top: 1px solid rgba(255,255,255,0.08);">${amountPaid} EGP</td>
+              <td style="padding: 6px 0; text-align: left; color: #38bdf8; font-weight: bold; font-size: 15px; border-top: 1px solid rgba(255,255,255,0.08);">${amountPaid} ${currencyPaid}</td>
             </tr>
           </table>
         </div>
