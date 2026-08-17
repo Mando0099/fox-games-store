@@ -613,6 +613,7 @@ async function checkout() {
   const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
   const email = ($('customerEmail')?.value || '').trim();
+  const currency = ($('currencySelect')?.value || 'EGP').toUpperCase();
 
   if (!name || !phone || !email) {
     setTimeout(() => {
@@ -677,7 +678,7 @@ async function checkout() {
       Swal.fire({
         title: currentLang === 'ar' ? 'تعليمات إتمام الدفع' : 'Payment Instructions',
         html: `
-          <p style="margin-bottom:10px;">الإجمالي المطلوب: <b style="color:var(--neon-cyan);">${total} EGP</b></p>
+          <p style="margin-bottom:10px;">الإجمالي المطلوب: <b style="color:var(--neon-cyan);">${total} ${currency}</b></p>
           <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:13px;">${detailsText}</p>
           <p style="margin-top:10px; font-size:12px; color:#94a3b8;">بعد إتمام العملية، اضغط تأكيد لتسجيل طلبك وتسليمه الفوري.</p>
         `,
@@ -696,6 +697,7 @@ async function checkout() {
             phone,
             email,
             total,
+            currency,
             items: cart,
             gateway: 'InstaPay Manual',
             status: 'Pending Verification',
@@ -713,7 +715,7 @@ async function checkout() {
       });
 
     } else {
-      // الاتصال الديناميكي بمسار الدفع الموحد في السيرفر
+      // الاتصال الديناميكي بمسار الدفع الموحد في السيرفر مع تمرير العملة
       const apiRes = await fetch(`/api/create-payment?v=${Date.now()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -724,6 +726,7 @@ async function checkout() {
             email: email 
           },
           total: Number(total),
+          currency: currency,
           items: cart.map(item => ({
             id: String(item.id || item.docId || '1'),
             name: String(item.name || 'Digital Product').substring(0, 100),
