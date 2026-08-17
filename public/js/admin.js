@@ -18,50 +18,44 @@ const swalConfig = {
 
 // 📱 دالة تشغيل وإغلاق القائمة الجانبية بنظام الكلاسات النظيف
 function toggleSidebar() {
-    const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-    }
-    if (overlay) {
-        overlay.classList.toggle('active');
-    }
+  const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  
+  if (sidebar) sidebar.classList.toggle('active');
+  if (overlay) overlay.classList.toggle('active');
 }
 
 // 🔄 التنقل بين التابات وإغلاق القائمة فوراً
 function showPage(pageName, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const targetPage = $(`${pageName}-page`);
-    if (targetPage) targetPage.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const targetPage = $(`${pageName}-page`);
+  if (targetPage) targetPage.classList.add('active');
 
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if (btn) {
-        btn.classList.add('active');
-    } else {
-        const targetBtn = document.querySelector(`[onclick*="'${pageName}'"]`);
-        if (targetBtn) targetBtn.classList.add('active');
-    }
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    const targetBtn = document.querySelector(`[onclick*="'${pageName}'"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
 
-    const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    
-    if (sidebar) sidebar.classList.remove('active');
-    if (overlay) overlay.classList.remove('active');
+  const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  
+  if (sidebar) sidebar.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // دالة جلب قيم المدخلات
 function val(id) {
-    return ($(id)?.value || '').trim();
+  return ($(id)?.value || '').trim();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const menuBtn = $('menuBtn');
-    if (menuBtn) {
-        menuBtn.onclick = toggleSidebar;
-    }
+  const menuBtn = $('menuBtn');
+  if (menuBtn) menuBtn.onclick = toggleSidebar;
 });
 
 // 🔐 التحقق الأمني الصارم وصلاحيات الأدمن
@@ -135,102 +129,101 @@ async function loadAll() {
 // ==========================================
 
 async function loadAdminsManagement() {
-    const container = $('adminsListTable');
-    if (!container) return;
+  const container = $('adminsListTable');
+  if (!container) return;
 
-    try {
-        const snap = await db.collection('admins').get();
-        if (snap.empty) {
-            container.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">لا توجد إيميلات مضافة حالياً</td></tr>';
-            return;
-        }
-
-        let html = '';
-        snap.forEach(doc => {
-            const d = doc.data();
-            const isActive = d.active !== false;
-            const isSuper = d.role === 'superadmin' || d.role === 'super_admin';
-            
-            const canControl = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
-
-            html += `
-                <tr>
-                    <td><strong>${d.email}</strong></td>
-                    <td>
-                        <span class="status-badge" style="background:${isSuper ? 'rgba(157,78,221,0.15)' : 'rgba(56,189,248,0.15)'}; color:${isSuper ? '#9d4edd' : '#38bdf8'};">
-                            ${isSuper ? 'مشرف رئيسي (Super Admin)' : 'أدمن عام'}
-                        </span>
-                    </td>
-                    <td>
-                        <span style="color: ${isActive ? '#22c55e' : '#ef4444'}; font-weight:600;">
-                            ${isActive ? '● مفعل (نشط)' : '○ محجوب (موقوف)'}
-                        </span>
-                    </td>
-                    <td>
-                        ${canControl ? `
-                            <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}', ${!isActive})">
-                                ${isActive ? '<i class="fa-solid fa-ban"></i> حجب الدخول' : '<i class="fa-solid fa-check"></i> تفعيل'}
-                            </button>
-                        ` : '<span style="color:#64748b; font-size:12px;">صلاحيات مقيدة</span>'}
-                    </td>
-                </tr>
-            `;
-        });
-        container.innerHTML = html;
-    } catch (err) {
-        console.error("Error loading admins:", err);
+  try {
+    const snap = await db.collection('admins').get();
+    if (snap.empty) {
+      container.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">لا توجد إيميلات مضافة حالياً</td></tr>';
+      return;
     }
+
+    let html = '';
+    snap.forEach(doc => {
+      const d = doc.data();
+      const isActive = d.active !== false;
+      const isSuper = d.role === 'superadmin' || d.role === 'super_admin';
+      const canControl = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+
+      html += `
+        <tr>
+          <td><strong>${d.email}</strong></td>
+          <td>
+            <span class="status-badge" style="background:${isSuper ? 'rgba(157,78,221,0.15)' : 'rgba(56,189,248,0.15)'}; color:${isSuper ? '#9d4edd' : '#38bdf8'};">
+              ${isSuper ? 'مشرف رئيسي (Super Admin)' : 'أدمن عام'}
+            </span>
+          </td>
+          <td>
+            <span style="color: ${isActive ? '#22c55e' : '#ef4444'}; font-weight:600;">
+              ${isActive ? '● مفعل (نشط)' : '○ محجوب (موقوف)'}
+            </span>
+          </td>
+          <td>
+            ${canControl ? `
+              <button class="delete-btn" style="padding: 6px 12px; font-size: 12px; background:${isActive ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'}; color:${isActive ? '#ef4444' : '#22c55e'}; border:none; border-radius:6px; cursor:pointer;" onclick="toggleAdminStatus('${doc.id}', ${!isActive})">
+                ${isActive ? '<i class="fa-solid fa-ban"></i> حجب الدخول' : '<i class="fa-solid fa-check"></i> تفعيل'}
+              </button>
+            ` : '<span style="color:#64748b; font-size:12px;">صلاحيات مقيدة</span>'}
+          </td>
+        </tr>
+      `;
+    });
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Error loading admins:", err);
+  }
 }
 
 async function addNewAdmin() {
-    const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
-    if (!isSuper) {
-        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية إضافة أدمنه جدد!', ...swalConfig });
-        return;
+  const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+  if (!isSuper) {
+    Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية إضافة أدمنه جدد!', ...swalConfig });
+    return;
+  }
+
+  const email = (val('newAdminEmail') || '').toLowerCase().trim();
+  const role = $('newAdminRole')?.value || 'admin';
+
+  if (!email) return;
+
+  try {
+    const check = await db.collection('admins').where('email', '==', email).get();
+    if (!check.empty) {
+      Swal.fire({ icon: 'warning', title: 'موجود مسبقاً', text: 'هذا البريد الإلكتروني مسجل كأدمن بالفعل!', ...swalConfig });
+      return;
     }
 
-    const email = (val('newAdminEmail') || '').toLowerCase().trim();
-    const role = $('newAdminRole')?.value || 'admin';
+    await db.collection('admins').add({
+      email: email,
+      role: role,
+      active: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-    if (!email) return;
+    $('newAdminEmail').value = '';
+    await loadAdminsManagement();
 
-    try {
-        const check = await db.collection('admins').where('email', '==', email).get();
-        if (!check.empty) {
-            Swal.fire({ icon: 'warning', title: 'موجود مسبقاً', text: 'هذا البريد الإلكتروني مسجل كأدمن بالفعل!', ...swalConfig });
-            return;
-        }
-
-        await db.collection('admins').add({
-            email: email,
-            role: role,
-            active: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        $('newAdminEmail').value = '';
-        await loadAdminsManagement();
-
-        Swal.fire({ icon: 'success', title: 'تمت الإضافة بنجاح', text: 'تم منح صلاحيات الأدمن لهذا البريد.', timer: 2000, showConfirmButton: false, ...swalConfig });
-    } catch (err) {
-        Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر إضافة الأدمن الجديد.', ...swalConfig });
-    }
+    Swal.fire({ icon: 'success', title: 'تمت الإضافة بنجاح', text: 'تم منح صلاحيات الأدمن لهذا البريد.', timer: 2000, showConfirmButton: false, ...swalConfig });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر إضافة الأدمن الجديد.', ...swalConfig });
+  }
 }
 
 async function toggleAdminStatus(docId, newStatus) {
-    const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
-    if (!isSuper) {
-        Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية حجب أو تفعيل الأدمنه!', ...swalConfig });
-        return;
-    }
+  const isSuper = currentAdminData && (currentAdminData.role === 'superadmin' || currentAdminData.role === 'super_admin');
+  if (!isSuper) {
+    Swal.fire({ icon: 'error', title: 'غير مسموح', text: 'عذراً، لا تملك صلاحية حجب أو تفعيل الأدمنه!', ...swalConfig });
+    return;
+  }
 
-    try {
-        await db.collection('admins').doc(docId).update({ active: newStatus });
-        await loadAdminsManagement();
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: newStatus ? 'تم تفعيل الأدمن' : 'تم حجب الأدمن بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
-    } catch (err) {
-        console.error("Error updating status:", err);
-    }
+  try {
+    await db.collection('admins').doc(docId).update({ active: newStatus });
+    await loadAdminsManagement();
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: newStatus ? 'تم تفعيل الأدمن' : 'تم حجب الأدمن بنجاح', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+  } catch (err) {
+    console.error("Error updating status:", err);
+  }
 }
 
 // ==========================================
@@ -238,165 +231,160 @@ async function toggleAdminStatus(docId, newStatus) {
 // ==========================================
 
 const gatewayConfigs = {
-    myfatoorah: [
-        { id: 'apiKey', label: 'API Key / Token *', type: 'password', placeholder: 'مفتاح الـ API الأساسي' },
-        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'المفتاح السري (Secret Key)' },
-        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
-    ],
-    kashier: [
-        { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'مفتاح الـ API' },
-        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'المفتاح السري (Secret Key)' },
-        { id: 'merchantId', label: 'Merchant ID / Account *', type: 'text', placeholder: 'معرف التاجر' }
-    ],
-    fawry: [
-        { id: 'merchantId', label: 'Merchant ID *', type: 'text', placeholder: 'معرف التاجر' },
-        { id: 'securityKey', label: 'Security Key *', type: 'password', placeholder: 'مفتاح الأمان' },
-        { id: 'callbackUrl', label: 'Callback URL *', type: 'text', placeholder: 'https://yourstore.com/callback' },
-        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
-    ],
-    fawaterk: [
-        { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'مفتاح الـ API' },
-        { id: 'apiSecret', label: 'API Secret *', type: 'password', placeholder: 'السري / التوكن' },
-        { id: 'merchantAccount', label: 'Merchant Account *', type: 'text', placeholder: 'حساب التاجر' },
-        { id: 'callbackUrl', label: 'Callback / Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/callback' }
-    ],
-    stripe: [
-        { id: 'publishableKey', label: 'Publishable Key *', type: 'text', placeholder: 'pk_live_...' },
-        { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'sk_live_...' },
-        { id: 'webhookSecret', label: 'Webhook Secret *', type: 'password', placeholder: 'مفتاح الـ Webhook' },
-        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
-    ],
-    paypal: [
-        { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'معرف العميل' },
-        { id: 'clientSecret', label: 'Client Secret *', type: 'password', placeholder: 'المفتاح السري' },
-        { id: 'webhookId', label: 'Webhook ID *', type: 'text', placeholder: 'معرف أو سري الـ Webhook' },
-        { id: 'returnUrl', label: 'Return URLs *', type: 'text', placeholder: 'https://yourstore.com/return' }
-    ],
-    paymob: [
-        { id: 'apiSecretKey', label: 'API Secret Key *', type: 'password', placeholder: 'المفتاح السري للـ API' },
-        { id: 'publicKey', label: 'Public Key *', type: 'text', placeholder: 'المفتاح العام' },
-        { id: 'integrationId', label: 'Integration ID *', type: 'text', placeholder: 'معرف التكامل' },
-        { id: 'iframeId', label: 'Iframe ID (اختياري)', type: 'text', placeholder: 'معرف الإطار' },
-        { id: 'webhookUrl', label: 'Webhook URL *', type: 'text', placeholder: 'https://yourstore.com/webhook' }
-    ],
-    instapay: [
-        { id: 'ipaAddress', label: 'عنوان الدفع (IPA) *', type: 'text', placeholder: 'username@instapay' },
-        { id: 'accountName', label: 'اسم صاحب الحساب *', type: 'text', placeholder: 'الاسم ثلاثي' }
-    ]
+  fawaterak: [
+    { id: 'clientId', label: 'Client ID (معرف العميل) *', type: 'text', placeholder: 'مثال: a286b810-2d18-4413-9ea8-c029fab5d091' },
+    { id: 'clientSecret', label: 'Client Secret (المفتاح السري لـ OAuth) *', type: 'password', placeholder: 'أدخل الـ Secret من فواتيرك' },
+    { id: 'liveUrl', label: 'رابط OAuth Token URL', type: 'text', placeholder: 'https://app.fawaterak.com/oauth/token', defaultValue: 'https://app.fawaterak.com/oauth/token' }
+  ],
+  kashier: [
+    { id: 'merchantId', label: 'Merchant ID (معرف التاجر) *', type: 'text', placeholder: 'مثال: MID-XXXX-XXXX' },
+    { id: 'apiKey', label: 'Payment API Key (مفتاح الـ API) *', type: 'password', placeholder: 'أدخل الـ API Key من كاشير' }
+  ],
+  myfatoorah: [
+    { id: 'token', label: 'API Token (رمز التوثيق) *', type: 'password', placeholder: 'أدخل الـ Live Token من ماي فاتورة' },
+    { id: 'liveUrl', label: 'API URL (رابط المنصة)', type: 'text', placeholder: 'https://api-eg.myfatoorah.com', defaultValue: 'https://api-eg.myfatoorah.com' }
+  ],
+  paymob: [
+    { id: 'apiKey', label: 'API Key *', type: 'password', placeholder: 'Paymob API Key' },
+    { id: 'iframeId', label: 'Integration ID *', type: 'text', placeholder: 'مثال: 123456' },
+    { id: 'secretKey', label: 'HMAC Secret *', type: 'password', placeholder: 'Paymob HMAC Secret' }
+  ],
+  fawry: [
+    { id: 'merchantId', label: 'Merchant Code (كود التاجر) *', type: 'text', placeholder: 'Fawry Merchant Code' },
+    { id: 'secretKey', label: 'Security Key / Hash *', type: 'password', placeholder: 'Fawry Security Secret' }
+  ],
+  stripe: [
+    { id: 'apiKey', label: 'Publishable Key *', type: 'text', placeholder: 'pk_live_...' },
+    { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'sk_live_...' }
+  ],
+  paypal: [
+    { id: 'clientId', label: 'Client ID *', type: 'text', placeholder: 'PayPal Client ID' },
+    { id: 'secretKey', label: 'Secret Key *', type: 'password', placeholder: 'PayPal Secret Key' }
+  ],
+  instapay: [
+    { id: 'merchantId', label: 'رقم الهاتف / عنوان الدفع (IPA) *', type: 'text', placeholder: '010xxxxxxxx أو username@instapay' },
+    { id: 'token', label: 'اسم المستلم الثلاثي *', type: 'text', placeholder: 'محمد أشرف ...' }
+  ]
 };
 
 function renderGatewayFields() {
-    const selectedGateway = $('gatewaySelect')?.value;
-    const container = $('dynamicGatewayInputs');
-    if (!container) return;
+  const selectedGateway = $('gatewaySelect')?.value;
+  const container = $('dynamicGatewayInputs');
+  if (!container) return;
 
-    if (!selectedGateway || !gatewayConfigs[selectedGateway]) {
-        container.innerHTML = '<div class="form-group"><label>متطلبات البوابة</label><input type="text" disabled placeholder="الرجاء اختيار بوابة الدفع أولاً..." /></div>';
-        return;
-    }
+  if (!selectedGateway || !gatewayConfigs[selectedGateway]) {
+    container.innerHTML = '<div class="form-group" style="grid-column: 1/-1;"><label>متطلبات البوابة</label><input type="text" disabled placeholder="يرجى اختيار بوابة الدفع من القائمة بالأعلى لإظهار الحقول الخاصة بها..." /></div>';
+    return;
+  }
 
-    let fieldsHtml = '';
-    gatewayConfigs[selectedGateway].forEach(field => {
-        fieldsHtml += `<div class="form-group"><label>${field.label}</label><input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" /></div>`;
-    });
-    container.innerHTML = fieldsHtml;
+  let fieldsHtml = '';
+  gatewayConfigs[selectedGateway].forEach(field => {
+    fieldsHtml += `
+      <div class="form-group">
+        <label for="gw_${field.id}">${field.label}</label>
+        <input type="${field.type}" id="gw_${field.id}" placeholder="${field.placeholder}" value="${field.defaultValue || ''}" />
+      </div>
+    `;
+  });
+  container.innerHTML = fieldsHtml;
 }
 
 async function saveAndActivateGateway() {
-    const gatewayKey = $('gatewaySelect')?.value;
-    if (!gatewayKey) return Swal.fire({ icon: 'warning', title: 'خطأ', text: 'اختر بوابة أولاً', ...swalConfig });
+  const gatewayKey = $('gatewaySelect')?.value;
+  if (!gatewayKey) return Swal.fire({ icon: 'warning', title: 'خطأ', text: 'اختر بوابة أولاً', ...swalConfig });
 
-    let credentials = {};
-    for (let field of gatewayConfigs[gatewayKey]) {
-        const valInput = $(`gw_${field.id}`)?.value;
-        if (field.label.includes('*') && !valInput) {
-            return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label.replace('*', '')} مطلوب أساسي!`, ...swalConfig });
-        }
-        credentials[field.id] = valInput || '';
+  const fields = gatewayConfigs[gatewayKey];
+  const payload = {
+    id: gatewayKey,
+    provider: gatewayKey,
+    name: $('gatewaySelect').options[$('gatewaySelect').selectedIndex]?.text || gatewayKey,
+    isActive: $('gatewayIsActive') ? $('gatewayIsActive').checked : true
+  };
+
+  for (let field of fields) {
+    const valInput = $(`gw_${field.id}`)?.value?.trim();
+    if (field.label.includes('*') && !valInput) {
+      return Swal.fire({ icon: 'warning', title: 'نقص بيانات', text: `حقل ${field.label.replace('*', '')} مطلوب أساسي!`, ...swalConfig });
     }
+    payload[field.id] = valInput || '';
+  }
 
-    try {
-        const gatewaySelectElem = $('gatewaySelect');
-        const gatewayName = gatewaySelectElem.options[gatewaySelectElem.selectedIndex]?.text || gatewayKey;
+  try {
+    Swal.fire({ title: 'جاري تشفير وحفظ بيانات البوابة بالسيرفر...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), ...swalConfig });
 
-        await db.collection('payment_gateways').doc(gatewayKey).set({
-            key: gatewayKey,
-            name: gatewayName,
-            credentials,
-            isActive: false,
-            isLive: false,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        
-        gatewaySelectElem.value = '';
-        renderGatewayFields();
-        await loadConfiguredGateways();
+    const res = await fetch('/api/admin/payment-gateways', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
 
-        Swal.fire({ icon: 'success', title: 'تم الربط بنجاح', text: 'تم حفظ مفاتيح الـ API وإعدادات البوابة بدقة.', ...swalConfig });
-    } catch (err) { 
-        console.error(err);
-        Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل حفظ الإعدادات.', ...swalConfig }); 
-    }
+    if (!data.success) throw new Error(data.message || 'فشل حفظ البوابة');
+
+    $('gatewaySelect').value = '';
+    renderGatewayFields();
+    await loadConfiguredGateways();
+
+    Swal.fire({ icon: 'success', title: 'تم الربط والتشفير بنجاح', text: 'تم حفظ مفاتيح البوابة في السيرفر وتفعيلها.', timer: 2000, showConfirmButton: false, ...swalConfig });
+  } catch (err) {
+    console.error(err);
+    Swal.fire({ icon: 'error', title: 'خطأ', text: err.message || 'فشل حفظ الإعدادات.', ...swalConfig });
+  }
 }
 
 async function loadConfiguredGateways() {
-    const container = $('configuredGatewaysList');
-    if (!container) return;
-    try {
-        const snap = await db.collection('payment_gateways').get();
-        if (snap.empty) return container.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1/-1; padding: 20px;">لا توجد بوابات دفع مضافة حالياً.</p>';
-        
-        let html = '';
-        snap.forEach(doc => {
-            const g = doc.data();
-            const isActive = g.isActive === true;
-            const isLive = g.isLive === true;
+  const container = $('configuredGatewaysList');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/admin/payment-gateways');
+    const data = await res.json();
 
-            html += `
-                <div class="panel" style="background: #0d1722; border: 1px solid ${isActive ? '#38bdf8' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i> ${g.name || doc.id}</h4>
-                        <button class="delete-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="deleteGateway('${doc.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
-                    </div>
-                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#38bdf8' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
-                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الوضع الحالي: <strong style="color: ${isLive ? '#38bdf8' : '#f59e0b'}">${isLive ? '🚀 حقيقي (Live)' : '🧪 تجريبي (Test)'}</strong></p>
-                     
-                    <div style="display: flex; gap: 10px; flex-direction: column;">
-                        <button class="btn-submit" style="width: 100%; padding: 10px; font-size: 13px; background: ${isLive ? '#f59e0b' : '#38bdf8'} !important; color: ${isLive ? '#fff' : '#050b14'}; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;" onclick="toggleGatewayLiveMode('${doc.id}', ${!isLive})">
-                            ${isLive ? '<i class="fa-solid fa-flask"></i> التبديل إلى وضع التجربة (Test)' : '<i class="fa-solid fa-rocket"></i> تفعيل الوضع الحقيقي (Live)'}
-                        </button>
-                        <button class="btn-submit" style="width: 100%; padding: 10px; font-size: 13px; background: ${isActive ? '#38bdf8' : '#1e293b'} !important; color: ${isActive ? '#050b14' : '#fff'}; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;" onclick="setExclusiveActiveGateway('${doc.id}')">
-                            ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
-                        </button>
-                    </div>
-                </div>`;
-        });
-        container.innerHTML = html;
-    } catch (err) { console.error("Error loading gateways:", err); }
-}
-
-async function toggleGatewayLiveMode(id, newLiveStatus) {
-    try {
-        await db.collection('payment_gateways').doc(id).update({ isLive: newLiveStatus });
-        await loadConfiguredGateways();
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: newLiveStatus ? 'تم التبديل إلى الوضع الحقيقي (Live)' : 'تم التبديل إلى وضع التجربة (Test)', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
-    } catch (err) {
-        console.error("Error updating live mode:", err);
+    if (!data.success || !data.gateways || data.gateways.length === 0) {
+      container.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1/-1; padding: 20px;">لا توجد بوابات دفع مضافة حالياً.</p>';
+      return;
     }
+
+    let html = '';
+    data.gateways.forEach(g => {
+      const isActive = g.isActive === true;
+
+      html += `
+        <div class="panel" style="background: #0d1722; border: 1px solid ${isActive ? '#38bdf8' : 'rgba(255,255,255,0.05)'}; margin-bottom: 0; position: relative; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="color: #fff; font-size: 18px; margin: 0;"><i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i> ${g.name || g.id}</h4>
+            <button class="delete-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="deleteGateway('${g.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+          </div>
+          <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">الحالة: <strong style="color: ${isActive ? '#38bdf8' : '#ef4444'}">${isActive ? '● مفعلة لتلقي المدفوعات' : '○ متوقفة'}</strong></p>
+          <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الأمان: <strong style="color: #22c55e">🔒 المفاتيح مشفرة بالـ Backend</strong></p>
+          
+          <div style="display: flex; gap: 10px; flex-direction: column;">
+            <button class="btn-submit" style="width: 100%; padding: 10px; font-size: 13px; background: ${isActive ? '#38bdf8' : '#1e293b'} !important; color: ${isActive ? '#050b14' : '#fff'}; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;" onclick="setExclusiveActiveGateway('${g.id}')">
+              ${isActive ? '<i class="fa-solid fa-check-circle"></i> مفعلة حالياً كبوابة رئيسية' : '<i class="fa-solid fa-power-off"></i> تفعيل هذه البوابة'}
+            </button>
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Error loading gateways:", err);
+  }
 }
 
 async function setExclusiveActiveGateway(activeId) {
-    try {
-        const snap = await db.collection('payment_gateways').get();
-        const batch = db.batch();
-        snap.forEach(doc => {
-            const ref = db.collection('payment_gateways').doc(doc.id);
-            batch.update(ref, { isActive: doc.id === activeId });
-        });
-        await batch.commit();
-        await loadConfiguredGateways();
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم تفعيل هذه البوابة وإيقاف الباقي تلقائياً', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
-    } catch (err) { console.error("Error setting active gateway:", err); }
+  try {
+    const res = await fetch('/api/admin/payment-gateways/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: activeId })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+
+    await loadConfiguredGateways();
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم تفعيل البوابة بنجاح وإيقاف الباقي', showConfirmButton: false, timer: 1500, background: '#101a26', color: '#fff' });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'خطأ', text: err.message || 'تعذر تفعيل البوابة.', ...swalConfig });
+  }
 }
 
 async function deleteGateway(id) {
@@ -582,81 +570,81 @@ function resetCouponForm() {
 // ==========================================
 
 function initEventListeners() {
-    const dropzone = $('dropzone');
-    const fileInput = $('product-image');
-    const previewContainer = $('img-preview-container');
-    const imagePreview = $('imagePreview');
-    const removeImgBtn = $('remove-img');
-    const clearFormBtn = $('clear-form');
-    const menuBtn = $('menuBtn');
+  const dropzone = $('dropzone');
+  const fileInput = $('product-image');
+  const previewContainer = $('img-preview-container');
+  const imagePreview = $('imagePreview');
+  const removeImgBtn = $('remove-img');
+  const clearFormBtn = $('clear-form');
+  const menuBtn = $('menuBtn');
 
-    const gatewaySelect = $('gatewaySelect');
-    if (gatewaySelect) {
-        gatewaySelect.addEventListener('change', renderGatewayFields);
-    }
+  const gatewaySelect = $('gatewaySelect');
+  if (gatewaySelect) {
+    gatewaySelect.addEventListener('change', renderGatewayFields);
+  }
 
-    if (menuBtn) {
-        menuBtn.onclick = toggleSidebar;
-    }
+  if (menuBtn) {
+    menuBtn.onclick = toggleSidebar;
+  }
 
-    if (dropzone && fileInput) {
-        dropzone.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', function() {
-            handleProductFileSelect(this.files[0]);
-        });
+  if (dropzone && fileInput) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', function() {
+      handleProductFileSelect(this.files[0]);
+    });
 
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
-        });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
+    });
 
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleProductFileSelect(e.dataTransfer.files[0]);
-            }
-        });
-    }
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleProductFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+  }
 
-    if (removeImgBtn) {
-        removeImgBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (fileInput) fileInput.value = '';
-            if (previewContainer) previewContainer.classList.remove('active');
-            if (imagePreview) imagePreview.src = '';
-        });
-    }
+  if (removeImgBtn) {
+    removeImgBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (fileInput) fileInput.value = '';
+      if (previewContainer) previewContainer.classList.remove('active');
+      if (imagePreview) imagePreview.src = '';
+    });
+  }
 
-    if (clearFormBtn) {
-        clearFormBtn.addEventListener('click', clearProductForm);
-    }
+  if (clearFormBtn) {
+    clearFormBtn.addEventListener('click', clearProductForm);
+  }
 
-    if ($('search-codes-input')) {
-        $('search-codes-input').addEventListener('input', filterCodesTablePro);
-    }
-    if ($('filter-status-select')) {
-        $('filter-status-select').addEventListener('change', filterCodesTablePro);
-    }
+  if ($('search-codes-input')) {
+    $('search-codes-input').addEventListener('input', filterCodesTablePro);
+  }
+  if ($('filter-status-select')) {
+    $('filter-status-select').addEventListener('change', filterCodesTablePro);
+  }
 }
 
 function handleProductFileSelect(file) {
-    const previewContainer = $('img-preview-container');
-    const imagePreview = $('imagePreview');
-    
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (imagePreview) imagePreview.src = e.target.result;
-            if (previewContainer) previewContainer.classList.add('active');
-        }
-        reader.readAsDataURL(file);
+  const previewContainer = $('img-preview-container');
+  const imagePreview = $('imagePreview');
+  
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      if (imagePreview) imagePreview.src = e.target.result;
+      if (previewContainer) previewContainer.classList.add('active');
     }
+    reader.readAsDataURL(file);
+  }
 }
 
 function clearProductForm() {
@@ -690,9 +678,7 @@ async function uploadImage(file) {
       { method: 'POST', body: formData }
     );
 
-    if (!res.ok) {
-      throw new Error('فشل رفع الصورة إلى سيرفر الصور');
-    }
+    if (!res.ok) throw new Error('فشل رفع الصورة إلى سيرفر الصور');
 
     const data = await res.json();
     return data.secure_url;
@@ -1164,7 +1150,7 @@ async function loadOrders() {
         const orderPrice = Number(o.total || o.price || o.amount || 0);
         const customer = o.customerName || o.email || o.username || '-';
         const status = o.status || o.paymentStatus || o.payment_status || '-';
-        const code = o.assignedCode || o.code || '-';
+        const code = o.assignedCode || o.code || (o.codes && o.codes[0]?.code) || '-';
 
         return `
           <tr>
@@ -1286,38 +1272,38 @@ async function loadStats() {
     const chartValues = Object.values(chartDataMap).reverse();
     updateRevenueChart(chartLabels, chartValues);
   } catch (error) {
-      console.error("خطأ في جلب العدادات: ", error);
+    console.error("خطأ في جلب العدادات: ", error);
   }
 }
 
 function updateRevenueChart(labels, dataValues) {
-    const ctx = document.getElementById('revenueChart');
-    if (!ctx) return;
+  const ctx = document.getElementById('revenueChart');
+  if (!ctx) return;
 
-    const finalLabels = labels.length ? labels : ['أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'];
-    const finalData = dataValues.length ? dataValues : [0, 0, 0, 0, 0];
+  const finalLabels = labels.length ? labels : ['أبريل', '4 مايو', '11 مايو', '18 مايو', 'اليوم'];
+  const finalData = dataValues.length ? dataValues : [0, 0, 0, 0, 0];
 
-    if (revenueChartInstance) {
-        revenueChartInstance.data.labels = finalLabels;
-        revenueChartInstance.data.datasets[0].data = finalData;
-        revenueChartInstance.update();
-    } else {
-        revenueChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: finalLabels,
-                datasets: [{
-                    data: finalData,
-                    borderColor: '#38bdf8',
-                    backgroundColor: 'rgba(56,189,248,0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-          });
-    }
+  if (revenueChartInstance) {
+    revenueChartInstance.data.labels = finalLabels;
+    revenueChartInstance.data.datasets[0].data = finalData;
+    revenueChartInstance.update();
+  } else {
+    revenueChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: finalLabels,
+        datasets: [{
+          data: finalData,
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56,189,248,0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
 }
 
 function logout() {
@@ -1332,7 +1318,7 @@ function logout() {
   }).then((result) => {
     if (result.isConfirmed) {
       firebase.auth().signOut().then(() => {
-          window.location.replace('/login.html');
+        window.location.replace('/login.html');
       });
     }
   });
