@@ -329,6 +329,15 @@
     </div>
 
     <div class="navActions">
+      <!-- اختيار عملة ودولة المتجر في الهيدر -->
+      <select id="storeCurrencySelector" onchange="setStoreCurrency(this.value)" style="background: #0d1722; color: var(--neon-cyan); border: 1px solid rgba(0, 243, 255, 0.4); border-radius: 8px; padding: 6px 10px; font-weight: bold; cursor: pointer;">
+        <option value="EGP">🇪🇬 مصر (EGP)</option>
+        <option value="USD">🇺🇸 دولي (USD)</option>
+        <option value="SAR">🇸🇦 السعودية (SAR)</option>
+        <option value="AED">🇦🇪 الإمارات (AED)</option>
+        <option value="KWD">🇰🇼 الكويت (KWD)</option>
+      </select>
+
       <button onclick="toggleLanguage()" class="langBtn" id="langToggleBtn">العربية</button>
       
       <button onclick="openAuth()" title="Account" class="loginBtn" id="mainLoginBtn" data-i18n="btn_login">Login</button>
@@ -366,7 +375,7 @@
 
   <main id="home" class="content">
       
-    <!-- البانر المتحرك الاحترافي الجديد مع صور الخلفيات لكل شريحة -->
+    <!-- البانر المتحرك -->
     <section class="hero-banner-section">
       <div class="hero-slider-container" id="heroSlider">
         
@@ -411,7 +420,7 @@
 
       </div>
 
-      <!-- أسهم التنقل ونقاط التقليب -->
+      <!-- أدوات التحكم في السلايدر -->
       <div class="slider-controls">
         <button class="slider-arrow prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
         <div class="slider-dots" id="sliderDots">
@@ -548,10 +557,10 @@
     </div>
     
     <div class="checkoutForm">
-      <!-- اختيار عملة الدفع -->
+      <!-- اختيار عملة الدفع داخل السلة -->
       <div class="currency-select-box">
         <label for="currencySelect"><i class="fas fa-coins" style="color: var(--neon-cyan);"></i> عملة الدفع / Currency:</label>
-        <select id="currencySelect">
+        <select id="currencySelect" onchange="setStoreCurrency(this.value)">
           <option value="EGP" selected>🇪🇬 الجنيه المصري (EGP)</option>
           <option value="USD">🇺🇸 الدولار الأمريكي (USD)</option>
           <option value="SAR">🇸🇦 الريال السعودي (SAR)</option>
@@ -576,7 +585,7 @@
     </div>
   </aside>
 
-  <!-- النافذة المنبثقة لتفاصيل المنتج مع قسم التعليقات -->
+  <!-- النافذة المنبثقة للمنتج -->
   <div id="productModal" class="modal-overlay">
     <div class="modal-content">
       <button class="close-modal" onclick="closeProductModal()">×</button>
