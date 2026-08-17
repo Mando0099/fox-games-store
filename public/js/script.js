@@ -1,4 +1,4 @@
-// ================= TECH GAMING LIVE DATABASE LINK =================
+// ================= TECH GAMING LIVE DATABASE & MULTI-CURRENCY =================
 const $ = id => document.getElementById(id);
 
 if (typeof cart === 'undefined') {
@@ -7,6 +7,45 @@ if (typeof cart === 'undefined') {
 if (typeof coupon === 'undefined') {
   var coupon = 0; 
   localStorage.setItem('techgaming_coupon', '0');
+}
+
+// 💱 إعدادات العملات والدول وأسعار الصرف (Base: EGP)
+const currencyRates = {
+  EGP: { symbol: 'EGP', rate: 1, flag: '🇪🇬', name: 'مصر (EGP)' },
+  USD: { symbol: 'USD', rate: 0.021, flag: '🇺🇸', name: 'أمريكا / دولي (USD)' },
+  SAR: { symbol: 'SAR', rate: 0.078, flag: '🇸🇦', name: 'السعودية (SAR)' },
+  AED: { symbol: 'AED', rate: 0.076, flag: '🇦🇪', name: 'الإمارات (AED)' },
+  KWD: { symbol: 'KWD', rate: 0.0064, flag: '🇰🇼', name: 'الكويت (KWD)' }
+};
+
+let currentCurrency = localStorage.getItem('techgaming_currency') || 'EGP';
+let currentLang = localStorage.getItem('techgaming_lang') || 'en';
+
+function formatPrice(egpPrice) {
+  const c = currencyRates[currentCurrency] || currencyRates.EGP;
+  const converted = (Number(egpPrice || 0) * c.rate);
+  return `${converted.toFixed(2)} ${c.symbol}`;
+}
+
+function getConvertedAmount(egpPrice) {
+  const c = currencyRates[currentCurrency] || currencyRates.EGP;
+  return Number((Number(egpPrice || 0) * c.rate).toFixed(2));
+}
+
+function setStoreCurrency(cur) {
+  if (currencyRates[cur]) {
+    currentCurrency = cur;
+    localStorage.setItem('techgaming_currency', cur);
+    
+    // مزامنة كافة القوائم المنسدلة للعملات في الصفحة والسلة
+    const curSelectTop = $('storeCurrencySelector');
+    if (curSelectTop) curSelectTop.value = cur;
+    const curSelectCart = $('currencySelect');
+    if (curSelectCart) curSelectCart.value = cur;
+    
+    renderProducts();
+    updateCart();
+  }
 }
 
 const translations = {
@@ -52,12 +91,15 @@ const translations = {
   }
 };
 
-let currentLang = localStorage.getItem('techgaming_lang') || 'en';
-
 window.addEventListener('load', () => {
   applyLanguage(currentLang);
   if (typeof checkAuthState === 'function') checkAuthState();
   
+  const curSelectTop = $('storeCurrencySelector');
+  if (curSelectTop) curSelectTop.value = currentCurrency;
+  const curSelectCart = $('currencySelect');
+  if (curSelectCart) curSelectCart.value = currentCurrency;
+
   waitForDataAndRender();
   reveal();
 });
@@ -150,30 +192,14 @@ function renderCategories() {
 
 function filterByCategory(categoryName) {
   const categoryFilterSelect = $('categoryFilter');
-  if (categoryFilterSelect) {
-    categoryFilterSelect.value = categoryName;
-  }
-  
+  if (categoryFilterSelect) categoryFilterSelect.value = categoryName;
   scrollToId('products');
-  
-  const productGrid = $('productGrid');
-  if (productGrid) {
-    productGrid.style.opacity = '0';
-    productGrid.style.transform = 'translateY(15px)';
-    setTimeout(() => {
-      renderProducts();
-      productGrid.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      productGrid.style.opacity = '1';
-      productGrid.style.transform = 'translateY(0)';
-    }, 150);
-  }
+  renderProducts();
 }
 
 function resetCategoryFilter() {
   const categoryFilterSelect = $('categoryFilter');
-  if (categoryFilterSelect) {
-    categoryFilterSelect.value = 'All';
-  }
+  if (categoryFilterSelect) categoryFilterSelect.value = 'All';
   renderProducts();
   scrollToId('products');
 }
@@ -210,15 +236,10 @@ function renderProducts() {
     const originalIndex = products.indexOf(p);
     const imgUrl = p.img || p.image || '';
     const stockCount = Number(p.stock || 0);
-    
     const isOutOfStock = stockCount <= 0;
     const btnText = isOutOfStock 
       ? (currentLang === 'ar' ? 'نفذت الكمية' : 'Out of Stock') 
       : (currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details');
-    
-    const btnClass = isOutOfStock ? 'add out-of-stock-btn' : 'add';
-    const btnAction = isOutOfStock ? 'disabled' : `onclick="openProductModal(${originalIndex})"`;
-    const stockStyle = isOutOfStock ? 'color: #ef4444;' : 'color: var(--accent);';
     
     return `<article class="productCard reveal">
       <div class="productCover">
@@ -228,10 +249,10 @@ function renderProducts() {
         <h3>${p.name}</h3>
         <p>${p.desc || ''}</p>
         <div class="priceRow">
-          <div class="price">${p.price}.00 EGP</div>
-          <span class="rating" style="${stockStyle}">📦 ${stockCount}</span>
+          <div class="price">${formatPrice(p.price)}</div>
+          <span class="rating" style="${isOutOfStock ? 'color: #ef4444;' : 'color: var(--accent);'}">📦 ${stockCount}</span>
         </div>
-        <button class="${btnClass}" ${btnAction}>${btnText}</button>
+        <button class="${isOutOfStock ? 'add out-of-stock-btn' : 'add'}" ${isOutOfStock ? 'disabled' : `onclick="openProductModal(${originalIndex})"`}>${btnText}</button>
       </div>
     </article>`;
   }).join('');
@@ -245,19 +266,15 @@ function openProductModal(index) {
   const p = products[index];
   if(!p) return;
   currentSelectedProduct = p;
-  
   currentProductStock = (p.stock !== undefined) ? Number(p.stock) : 0; 
 
   $('modalProductName').innerText = p.name;
-  $('modalProductPrice').innerText = p.price + ' EGP';
+  $('modalProductPrice').innerText = formatPrice(p.price);
   $('modalProductImg').src = p.img || p.image || '';
   $('modalProductCategory').innerText = p.category;
   $('modalProductDesc').innerText = p.desc || (currentLang === 'ar' ? 'لا يوجد وصف متاح.' : 'No description available.');
   $('modalProductStock').innerText = currentProductStock;
   $('modalQty').value = 1;
-
-  renderProductReviews(p);
-  checkIfUserCanReview(p);
 
   $('productModal').classList.add('active');
 }
@@ -266,101 +283,14 @@ function closeProductModal() {
   $('productModal').classList.remove('active');
 }
 
-function renderProductReviews(product) {
-  const reviewsList = $('reviewsList');
-  if(!reviewsList) return;
-  const reviews = product.reviews || [];
-
-  if (reviews.length === 0) {
-    reviewsList.innerHTML = `<p style="color:#94a3b8; font-size:12px; text-align:center;">لا توجد تقييمات سابقة. متاح التعليق فقط للمشترين الموثوقين بعد إتمام الشراء!</p>`;
-    return;
-  }
-
-  reviewsList.innerHTML = reviews.map(rev => `
-    <div class="review-item">
-      <div class="review-user">
-        <i class="fas fa-user-circle"></i> ${rev.userName} 
-        <span class="verified-badge"><i class="fas fa-check-circle"></i> مشتري موثوق</span>
-      </div>
-      <div class="review-body">${rev.text}</div>
-    </div>
-  `).join('');
-}
-
-function checkIfUserCanReview(product) {
-  const addReviewBox = $('addReviewBox');
-  if(!addReviewBox) return;
-  const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-  const verifiedBuyers = product.verifiedBuyers || [];
-
-  if (currentUser && verifiedBuyers.includes(currentUser.uid)) {
-    addReviewBox.style.display = 'flex';
-  } else {
-    addReviewBox.style.display = 'none';
-  }
-}
-
-async function submitReview() {
-  const text = $('reviewText')?.value.trim();
-  if (!text) return;
-
-  const currentUser = firebase.auth().currentUser;
-  if (!currentUser || !currentSelectedProduct) return;
-
-  const newReview = {
-    userId: currentUser.uid,
-    userName: currentUser.displayName || 'Gamer',
-    text: text,
-    date: new Date().toISOString()
-  };
-
-  try {
-    const db = firebase.firestore();
-    const productRef = db.collection('products').doc(String(currentSelectedProduct.id || currentSelectedProduct.docId));
-    
-    await productRef.update({
-      reviews: firebase.firestore.FieldValue.arrayUnion(newReview)
-    });
-
-    if(!currentSelectedProduct.reviews) currentSelectedProduct.reviews = [];
-    currentSelectedProduct.reviews.push(newReview);
-    
-    $('reviewText').value = '';
-    renderProductReviews(currentSelectedProduct);
-    
-    Swal.fire({
-      icon: 'success',
-      title: 'شكراً لك!',
-      text: 'تمت إضافة تقييمك بنجاح كمشتري موثوق.',
-      background: '#090f17', color: '#fff', timer: 2000, showConfirmButton: false,
-      customClass: { container: 'high-z-index-alert' }
-    });
-
-  } catch (error) {
-    console.error("خطأ في رفع التقييم:", error);
-  }
-}
-
 function increaseQty() {
   let input = $('modalQty');
-  if (parseInt(input.value) < currentProductStock) {
-    input.value = parseInt(input.value) + 1;
-  } else {
-    Swal.fire({
-      icon: 'warning',
-      title: currentLang === 'ar' ? 'تنبيه' : 'Attention',
-      text: currentLang === 'ar' ? 'الكمية المطلوبة تتخطى المخزون المتاح في السيرفر!' : 'Requested quantity exceeds available stock!',
-      background: '#090f17', color: '#fff',
-      customClass: { container: 'high-z-index-alert' }
-    });
-  }
+  if (parseInt(input.value) < currentProductStock) input.value = parseInt(input.value) + 1;
 }
 
 function decreaseQty() {
   let input = $('modalQty');
-  if (parseInt(input.value) > 1) {
-    input.value = parseInt(input.value) - 1;
-  }
+  if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
 }
 
 function addToCartFromModal() {
@@ -378,17 +308,6 @@ function addToCartFromModal() {
   save();
   updateCart();
   closeProductModal();
-  
-  Swal.fire({
-    icon: 'success',
-    title: currentLang === 'ar' ? 'تمت الإضافة' : 'Added',
-    text: currentLang === 'ar' ? 'تم إضافة المنتج للسلة بنجاح' : 'Product added to cart successfully',
-    timer: 1500,
-    showConfirmButton: false,
-    background: '#090f17', color: '#fff',
-    customClass: { container: 'high-z-index-alert' }
-  });
-  
   $('cartDrawer')?.classList.add('open');
 }
 
@@ -412,7 +331,7 @@ function updateCart() {
               <div class="cartItem-details">
                 <span class="cartItem-name">${item.name}</span>
                 <span class="cartItem-cat">${item.category || ''}</span>
-                <span class="cartItem-price">${item.price} EGP</span>
+                <span class="cartItem-price">${formatPrice(item.price)}</span>
               </div>
               <button class="cartItem-remove-btn" onclick="removeItem(${item.cartId})" title="Remove">
                 <i class="fas fa-trash-alt"></i>
@@ -422,12 +341,13 @@ function updateCart() {
       : `<p style="color:#94a3b8; text-align:center; padding:30px; font-size:13px;">${currentLang === 'ar' ? 'سلة المشتريات فارغة حالياً.' : 'Your cart is empty.'}</p>`;
   }
 
-  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const discountValue = Math.round(subtotal * coupon / 100);
+  const subtotalEGP = cart.reduce((s, i) => s + Number(i.price || 0), 0);
+  const discountEGP = Math.round(subtotalEGP * coupon / 100);
+  const totalEGP = subtotalEGP - discountEGP;
   
-  if ($('subtotal')) $('subtotal').textContent = `${subtotal} EGP`;
-  if ($('discount')) $('discount').textContent = `${discountValue} EGP`;
-  if ($('total')) $('total').textContent = `${subtotal - discountValue} EGP`;
+  if ($('subtotal')) $('subtotal').textContent = formatPrice(subtotalEGP);
+  if ($('discount')) $('discount').textContent = formatPrice(discountEGP);
+  if ($('total')) $('total').textContent = formatPrice(totalEGP);
 }
 
 function toggleLanguage() {
@@ -457,99 +377,39 @@ function applyLanguage(lang) {
 
   document.querySelectorAll('[data-i18n-holder]').forEach(el => {
     const key = el.getAttribute('data-i18n-holder');
-    if (translations[lang][key]) {
-      el.placeholder = translations[lang][key];
-    }
+    if (translations[lang][key]) el.placeholder = translations[lang][key];
   });
 
-  if ($('langToggleBtn')) {
-    $('langToggleBtn').textContent = translations[lang]['lang_btn'];
-  }
+  if ($('langToggleBtn')) $('langToggleBtn').textContent = translations[lang]['lang_btn'];
 }
 
 async function applyCoupon() {
   const code = ($('couponInput')?.value || '').trim().toUpperCase();
-  if (!code) {
-    Swal.fire({
-      icon: 'warning',
-      text: currentLang === 'ar' ? 'يرجى إدخال كود الخصم أولاً!' : 'Please enter a coupon code first!',
-      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-      customClass: { container: 'high-z-index-alert' }
-    });
-    return;
-  }
-
-  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  if (!code || typeof firebase === 'undefined' || !firebase.firestore) return;
 
   try {
     const couponDoc = await firebase.firestore().collection('coupons').doc(code).get();
     if (couponDoc.exists) {
-      const couponData = couponDoc.data();
-      coupon = parseFloat(couponData.value || 0); 
+      coupon = parseFloat(couponDoc.data().value || 0); 
       save();
       updateCart();
-      Swal.fire({
-        icon: 'success',
-        title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!',
-        text: currentLang === 'ar' ? `تم تفعيل خصم بقيمة ${coupon}% بنجاح 🎉` : `Successfully applied ${coupon}% discount 🎉`,
-        timer: 2000, showConfirmButton: false,
-        background: '#090f17', color: '#fff',
-        customClass: { container: 'high-z-index-alert' }
-      });
+      Swal.fire({ icon: 'success', title: currentLang === 'ar' ? 'تم تطبيق الخصم!' : 'Coupon Applied!', timer: 2000, showConfirmButton: false, background: '#090f17', color: '#fff' });
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon',
-        text: currentLang === 'ar' ? 'قسيمة الخصم غير موجودة أو منتهية.' : 'This coupon does not exist or expired.',
-        confirmButtonText: currentLang === 'ar' ? 'محاولة أخرى' : 'Try Again',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
-        customClass: { container: 'high-z-index-alert' }
-      });
+      Swal.fire({ icon: 'error', title: currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid Coupon', background: '#090f17', color: '#fff' });
     }
-  } catch (error) {
-    console.error("Error fetching coupon:", error);
-  }
+  } catch (error) { console.error(error); }
 }
 
 async function updateProductStockAfterPurchase(purchasedItems) {
   if (typeof firebase === 'undefined' || !firebase.firestore) return;
   const db = firebase.firestore();
   const batch = db.batch();
-
-  try {
-    purchasedItems.forEach(item => {
-      if (item.id) {
-        const productRef = db.collection('products').doc(String(item.id));
-        batch.update(productRef, {
-          stock: firebase.firestore.FieldValue.increment(-1)
-        });
-      }
-    });
-    await batch.commit();
-  } catch (error) {
-    console.error("خطأ في تحديث المخزون:", error);
-  }
-}
-
-async function registerVerifiedBuyer(purchasedItems, userId) {
-  if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
-  const db = firebase.firestore();
-  const batch = db.batch();
-
-  try {
-    purchasedItems.forEach(item => {
-      if (item.id) {
-        const productRef = db.collection('products').doc(String(item.id));
-        batch.update(productRef, {
-          verifiedBuyers: firebase.firestore.FieldValue.arrayUnion(userId)
-        });
-      }
-    });
-    await batch.commit();
-  } catch (error) {
-    console.error("خطأ في توثيق المشتري:", error);
-  }
+  purchasedItems.forEach(item => {
+    if (item.id) {
+      batch.update(db.collection('products').doc(String(item.id)), { stock: firebase.firestore.FieldValue.increment(-1) });
+    }
+  });
+  await batch.commit();
 }
 
 function clearCartAfterPurchase() {
@@ -560,197 +420,91 @@ function clearCartAfterPurchase() {
 
 function processSecureCheckout() {
   const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-  const drawer = document.getElementById('cartDrawer');
-  if (drawer) {
-    drawer.classList.remove('open');
-    drawer.style.display = 'none';
-  }
+  const drawer = $('cartDrawer');
+  if (drawer) { drawer.classList.remove('open'); drawer.style.display = 'none'; }
   
   if (!currentUser) {
     setTimeout(() => {
       Swal.fire({
         icon: 'warning',
         title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
-        text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
+        text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
         confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-        allowOutsideClick: false,
-        customClass: { container: 'high-z-index-alert' }
+        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
       }).then((result) => {
         if (drawer) drawer.style.display = 'block';
-        if (result.isConfirmed) {
-          if(typeof openAuth === 'function') openAuth();
-        }
+        if (result.isConfirmed && typeof openAuth === 'function') openAuth();
       });
     }, 150);
     return;
   }
-
-  if(typeof checkout === 'function') {
-    checkout();
-  }
+  checkout();
 }
 
 async function checkout() {
-  const drawer = document.getElementById('cartDrawer');
-  if (drawer) {
-    drawer.classList.remove('open');
-    drawer.style.display = 'none';
-  }
+  const drawer = $('cartDrawer');
+  if (drawer) { drawer.classList.remove('open'); drawer.style.display = 'none'; }
 
-  if (!cart.length) {
-    if (drawer) drawer.style.display = 'block';
-    Swal.fire({
-      icon: 'warning',
-      text: currentLang === 'ar' ? 'سلة المشتريات فارغة.' : 'Your cart is empty.',
-      confirmButtonText: currentLang === 'ar' ? 'حسناً' : 'OK',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-      customClass: { container: 'high-z-index-alert' }
-    });
-    return;
-  }
+  if (!cart.length) return;
 
   const name = ($('customerName')?.value || '').trim();
   const phone = ($('customerPhone')?.value || '').trim();
   const email = ($('customerEmail')?.value || '').trim();
-  const currency = ($('currencySelect')?.value || 'EGP').toUpperCase();
 
   if (!name || !phone || !email) {
     setTimeout(() => {
       Swal.fire({
         icon: 'warning',
         title: currentLang === 'ar' ? 'بيانات غير مكتملة' : 'Incomplete Information',
-        text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول (الاسم، الهاتف، والبريد) لإتمام عملية الشراء.' : 'Please fill in all fields.',
-        confirmButtonText: currentLang === 'ar' ? 'إدخال البيانات' : 'Enter Info',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-        customClass: { container: 'high-z-index-alert' }
-      }).then(() => {
-        if (drawer) {
-          drawer.style.display = 'block';
-          drawer.classList.add('open');
-        }
-      });
+        text: currentLang === 'ar' ? 'برجاء ملء جميع الحقول المطلوبة.' : 'Please fill in all fields.',
+        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff'
+      }).then(() => { if (drawer) { drawer.style.display = 'block'; drawer.classList.add('open'); } });
     }, 150);
     return;
   }
 
-  const subtotal = cart.reduce((s, i) => s + Number(i.price || 0), 0);
-  const discountValue = Math.round(subtotal * coupon / 100);
-  const total = subtotal - discountValue;
-
-  if (total <= 0) {
-    if (drawer) drawer.style.display = 'block';
-    return;
-  }
+  const subtotalEGP = cart.reduce((s, i) => s + Number(i.price || 0), 0);
+  const discountEGP = Math.round(subtotalEGP * coupon / 100);
+  const totalEGP = subtotalEGP - discountEGP;
+  const finalConvertedTotal = getConvertedAmount(totalEGP);
 
   Swal.fire({
-    title: currentLang === 'ar' ? 'جاري توجيهك لبوابة الدفع الآمنة...' : 'Connecting to Secure Gateway...',
+    title: currentLang === 'ar' ? 'جاري تحويلك لبوابة الدفع الآمنة...' : 'Connecting to Secure Gateway...',
     allowOutsideClick: false,
     background: '#090f17', color: '#fff',
-    customClass: { container: 'high-z-index-alert' },
-    didOpen: () => { Swal.showLoading(); }
+    didOpen: () => Swal.showLoading()
   });
 
   try {
-    if (typeof firebase === 'undefined' || !firebase.firestore) throw new Error('Firebase not initialized');
-    const db = firebase.firestore();
-    
-    // فحص إذا كانت هناك بوابة يدوية مفعلة كـ InstaPay
-    const gatewaySnap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
-    let isManualInstapay = false;
-    let instapayDetails = {};
+    const apiRes = await fetch(`/api/create-payment?v=${Date.now()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer: { 
+          name: name.substring(0, 50), 
+          phone: phone.replace(/\D/g, '').slice(-11) || '01000000000', 
+          email: email 
+        },
+        total: finalConvertedTotal,
+        currency: currentCurrency,
+        items: cart.map(item => ({
+          id: String(item.id || item.docId || '1'),
+          name: String(item.name || 'Digital Product').substring(0, 100),
+          category: String(item.category || ''),
+          price: getConvertedAmount(item.price),
+          quantity: 1
+        }))
+      })
+    });
 
-    if (!gatewaySnap.empty) {
-      const activeGateway = gatewaySnap.docs[0].data();
-      const gKey = (activeGateway.provider || activeGateway.key || activeGateway.name || '').toLowerCase();
-      if (gKey.includes('instapay')) {
-        isManualInstapay = true;
-        instapayDetails = activeGateway.credentials || activeGateway;
-      }
+    const data = await apiRes.json();
+    if (!apiRes.ok || !data.paymentUrl) {
+      throw new Error(data.message || 'فشل إنشاء رابط الدفع.');
     }
 
-    if (isManualInstapay) {
-      Swal.close();
-      if (drawer) drawer.style.display = 'block';
-
-      const detailsText = `عنوان الدفع / الهاتف: <b>${instapayDetails.merchantId || instapayDetails.ipaAddress || 'غير محدد'}</b><br>اسم المستلم: ${instapayDetails.token || instapayDetails.accountName || ''}`;
-
-      Swal.fire({
-        title: currentLang === 'ar' ? 'تعليمات إتمام الدفع' : 'Payment Instructions',
-        html: `
-          <p style="margin-bottom:10px;">الإجمالي المطلوب: <b style="color:var(--neon-cyan);">${total} ${currency}</b></p>
-          <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:13px;">${detailsText}</p>
-          <p style="margin-top:10px; font-size:12px; color:#94a3b8;">بعد إتمام العملية، اضغط تأكيد لتسجيل طلبك وتسليمه الفوري.</p>
-        `,
-        icon: 'info',
-        confirmButtonText: currentLang === 'ar' ? 'تأكيد وإتمام الطلب' : 'Confirm Order',
-        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-        customClass: { container: 'high-z-index-alert' }
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          const currentUser = firebase.auth().currentUser;
-          await updateProductStockAfterPurchase(cart);
-          if (currentUser) await registerVerifiedBuyer(cart, currentUser.uid);
-          
-          await db.collection('orders').add({
-            customerName: name,
-            phone,
-            email,
-            total,
-            currency,
-            items: cart,
-            gateway: 'InstaPay Manual',
-            status: 'Pending Verification',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-
-          clearCartAfterPurchase();
-          Swal.fire({
-            icon: 'success',
-            title: currentLang === 'ar' ? 'تم تسجيل طلبك بنجاح' : 'Order Placed',
-            text: currentLang === 'ar' ? 'سيتم مراجعة الطلب وتسليمك المنتج فوراً.' : 'Your order has been placed successfully.',
-            background: '#090f17', color: '#fff'
-          });
-        }
-      });
-
-    } else {
-      // الاتصال الديناميكي بمسار الدفع الموحد في السيرفر مع تمرير العملة
-      const apiRes = await fetch(`/api/create-payment?v=${Date.now()}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer: { 
-            name: name.substring(0, 50), 
-            phone: phone.replace(/\D/g, '').slice(-11) || '01000000000', 
-            email: email 
-          },
-          total: Number(total),
-          currency: currency,
-          items: cart.map(item => ({
-            id: String(item.id || item.docId || '1'),
-            name: String(item.name || 'Digital Product').substring(0, 100),
-            category: String(item.category || ''),
-            price: Number(item.price || 0),
-            quantity: 1
-          }))
-        })
-      });
-
-      const data = await apiRes.json();
-      if (!apiRes.ok || !data.paymentUrl) {
-        throw new Error(data.message || 'Payment link was not created.');
-      }
-
-      const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-      await updateProductStockAfterPurchase(cart);
-      if (currentUser) {
-        await registerVerifiedBuyer(cart, currentUser.uid);
-      }
-      
-      clearCartAfterPurchase();
-      window.location.href = data.paymentUrl;
-    }
+    await updateProductStockAfterPurchase(cart);
+    clearCartAfterPurchase();
+    window.location.href = data.paymentUrl;
 
   } catch (e) {
     console.error('Checkout error:', e);
@@ -759,9 +513,7 @@ async function checkout() {
       icon: 'error',
       title: currentLang === 'ar' ? 'خطأ في معالجة الدفع' : 'Payment Error',
       text: e.message,
-      confirmButtonText: currentLang === 'ar' ? 'إغلاق' : 'Close',
-      background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444',
-      customClass: { container: 'high-z-index-alert' }
+      background: '#090f17', color: '#fff', confirmButtonColor: '#ef4444'
     });
   }
 }
@@ -774,9 +526,7 @@ function save() {
 function toggleCart() { 
   const drawer = $('cartDrawer');
   if (drawer) {
-    if (drawer.style.display === 'none') {
-      drawer.style.display = 'block';
-    }
+    if (drawer.style.display === 'none') drawer.style.display = 'block';
     drawer.classList.toggle('open');
   }
 }
@@ -784,6 +534,4 @@ function toggleCart() {
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 function focusSearch() { scrollToId('products'); setTimeout(() => $('searchInput')?.focus(), 500); }
 function openAuth() { window.location.href = 'login.html'; }
-function closeAuth() { window.location.href = 'index.html'; }
-function toggleChat() { $('chat')?.classList.toggle('open'); }
 function reveal() { document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')); }
