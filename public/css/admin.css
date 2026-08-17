@@ -35,12 +35,17 @@
   font-family: 'Cairo', 'Segoe UI', sans-serif;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
   display: flex;
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* تخصيص شريط التمرير */
@@ -297,19 +302,24 @@ body {
 
 /* طبقة الـ Overlay الخلفية للموبايل */
 .sidebar-overlay {
-  display: none;
+  display: block;
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  z-index: 998;
+  z-index: 99998;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .sidebar-overlay.active {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* ==========================================================================
@@ -708,33 +718,33 @@ th {
 }
 
 /* ==========================================================================
-   إصلاح تجاوب الموبايل والقائمة الجانبية (محاذاة تامة لأقصى اليمين في واجهات RTL)
+   إصلاح تجاوب الموبايل والقائمة الجانبية (RTL Fixed Slide)
    ========================================================================== */
 @media (max-width: 1000px) {
   body {
     flex-direction: column !important;
+    position: relative;
+    width: 100%;
   }
 
-  /* إجبار السايدبار على التموضع الصحيح في أقصى يمين الشاشة مع الإخفاء والانزلاق الصحيح */
   .sidebar {
     position: fixed !important;
     top: 0 !important;
+    bottom: 0 !important;
     left: auto !important;
-    right: 0 !important;
+    right: -320px !important;
     width: 280px !important;
     height: 100vh !important;
+    height: 100dvh !important;
     z-index: 999999 !important;
     background-color: var(--bg-card) !important;
     box-shadow: -15px 0 40px rgba(0, 0, 0, 0.9) !important;
-    transform: translateX(0) !important; /* الوضع الافتراضي عند الفتح أو التموضع */
-    right: -320px !important;            /* إخفاء القائمة بالكامل لليمين خارج الشاشة */
     transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 20px 15px !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  /* عند تفعيل الكلاس active تظهر فوراً من اليمين بـ right: 0 */
   .sidebar.active {
     right: 0 !important;
   }
