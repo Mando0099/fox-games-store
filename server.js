@@ -307,8 +307,8 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 // 💳 FAWATERAK HANDLER (OAUTH & FULL DATA)
 // ==========================================
 async function handleFawaterakPayment(gateway, order, res) {
-  const clientId = gateway.clientId;
-  const clientSecret = gateway.secretKey;
+  const clientId = (gateway.clientId || '').trim();
+  const clientSecret = (gateway.secretKey || '').trim();
   const providerKey = gateway.merchantId || 'FAWATERAK.29879';
 
   if (!clientId || !clientSecret) {
@@ -316,15 +316,28 @@ async function handleFawaterakPayment(gateway, order, res) {
   }
 
   try {
-    // 1. طلب رمز الوصول (OAuth Access Token)
-    const tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', {
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'client_credentials'
-    }, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 30000
-    });
+    // 1. طلب رمز الوصول (OAuth) مع دعم Form-Urlencoded و JSON
+    const tokenParams = new URLSearchParams();
+    tokenParams.append('client_id', clientId);
+    tokenParams.append('client_secret', clientSecret);
+    tokenParams.append('grant_type', 'client_credentials');
+
+    let tokenRes;
+    try {
+      tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', tokenParams.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 30000
+      });
+    } catch (authErr) {
+      tokenRes = await axios.post('https://app.fawaterk.com/oauth/token', {
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials'
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 30000
+      });
+    }
 
     const accessToken = tokenRes.data?.access_token || tokenRes.data?.data?.access_token;
     if (!accessToken) {
@@ -342,7 +355,7 @@ async function handleFawaterakPayment(gateway, order, res) {
     const items = Array.isArray(order.items) ? order.items : [];
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
-    // 2. تجهيز كائن الفاتورة المتكامل لفواتيرك
+    // 2. تجهيز كائن الفاتورة
     const fawaterakBody = {
       cartTotal: amount,
       currency: 'EGP',
@@ -366,7 +379,6 @@ async function handleFawaterakPayment(gateway, order, res) {
       payLoad: { orderId: orderId, providerKey: providerKey }
     };
 
-    // حفظ الطلب كمعلق في الفايربيز
     await db.collection('pending_orders').doc(orderId).set({
       orderId,
       customerEmail,
@@ -376,7 +388,7 @@ async function handleFawaterakPayment(gateway, order, res) {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    // 3. إنشاء الفاتورة ورابط الدفع
+    // 3. إنشاء رابط الدفع
     let response;
     try {
       response = await axios.post('https://app.fawaterk.com/api/v2/createInvoiceLink', fawaterakBody, {
@@ -403,7 +415,8 @@ async function handleFawaterakPayment(gateway, order, res) {
     return res.status(400).json({ success: false, message: response.data?.message || 'فشل إنشاء رابط الدفع من فواتيرك.' });
   } catch (err) {
     console.error('Fawaterak OAuth/Payment Error:', err.response?.data || err.message);
-    return res.status(400).json({ success: false, message: err.response?.data?.message || err.message });
+    const errorMsg = err.response?.data?.message || err.response?.data?.error_description || err.message;
+    return res.status(400).json({ success: false, message: errorMsg });
   }
 }
 
