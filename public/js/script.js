@@ -95,29 +95,29 @@ function waitForDataAndRender(attempt = 0) {
 window.addEventListener('scroll', reveal);
 
 function setSessionTimer() {
-    localStorage.setItem('techgaming_login_time', new Date().getTime());
+  localStorage.setItem('techgaming_login_time', new Date().getTime());
 }
 
 function checkSession() {
-    const loginTime = localStorage.getItem('techgaming_login_time');
-    if (loginTime) {
-        const currentTime = new Date().getTime();
-        const oneHour = 60 * 60 * 1000;
-        if (currentTime - loginTime > oneHour) {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                firebase.auth().signOut().then(() => {
-                    localStorage.removeItem('techgaming_login_time');
-                    Swal.fire({
-                        icon: 'info',
-                        title: currentLang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
-                        text: currentLang === 'ar' ? 'مرت ساعة على تسجيل دخولك، يرجى تسجيل الدخول مرة أخرى.' : 'Your session has expired. Please log in again.',
-                        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-                        customClass: { container: 'high-z-index-alert' }
-                    }).then(() => window.location.reload());
-                });
-            }
-        }
+  const loginTime = localStorage.getItem('techgaming_login_time');
+  if (loginTime) {
+    const currentTime = new Date().getTime();
+    const oneHour = 60 * 60 * 1000;
+    if (currentTime - loginTime > oneHour) {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().signOut().then(() => {
+          localStorage.removeItem('techgaming_login_time');
+          Swal.fire({
+            icon: 'info',
+            title: currentLang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
+            text: currentLang === 'ar' ? 'مرت ساعة على تسجيل دخولك، يرجى تسجيل الدخول مرة أخرى.' : 'Your session has expired. Please log in again.',
+            background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+            customClass: { container: 'high-z-index-alert' }
+          }).then(() => window.location.reload());
+        });
+      }
     }
+  }
 }
 setInterval(checkSession, 60000);
 
@@ -149,33 +149,33 @@ function renderCategories() {
 }
 
 function filterByCategory(categoryName) {
-    const categoryFilterSelect = $('categoryFilter');
-    if (categoryFilterSelect) {
-        categoryFilterSelect.value = categoryName;
-    }
-    
-    scrollToId('products');
-    
-    const productGrid = $('productGrid');
-    if (productGrid) {
-        productGrid.style.opacity = '0';
-        productGrid.style.transform = 'translateY(15px)';
-        setTimeout(() => {
-            renderProducts();
-            productGrid.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-            productGrid.style.opacity = '1';
-            productGrid.style.transform = 'translateY(0)';
-        }, 150);
-    }
+  const categoryFilterSelect = $('categoryFilter');
+  if (categoryFilterSelect) {
+    categoryFilterSelect.value = categoryName;
+  }
+  
+  scrollToId('products');
+  
+  const productGrid = $('productGrid');
+  if (productGrid) {
+    productGrid.style.opacity = '0';
+    productGrid.style.transform = 'translateY(15px)';
+    setTimeout(() => {
+      renderProducts();
+      productGrid.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      productGrid.style.opacity = '1';
+      productGrid.style.transform = 'translateY(0)';
+    }, 150);
+  }
 }
 
 function resetCategoryFilter() {
-    const categoryFilterSelect = $('categoryFilter');
-    if (categoryFilterSelect) {
-        categoryFilterSelect.value = 'All';
-    }
-    renderProducts();
-    scrollToId('products');
+  const categoryFilterSelect = $('categoryFilter');
+  if (categoryFilterSelect) {
+    categoryFilterSelect.value = 'All';
+  }
+  renderProducts();
+  scrollToId('products');
 }
 
 function renderFilters() {
@@ -242,154 +242,154 @@ let currentSelectedProduct = null;
 let currentProductStock = 0;
 
 function openProductModal(index) {
-    const p = products[index];
-    if(!p) return;
-    currentSelectedProduct = p;
-    
-    currentProductStock = (p.stock !== undefined) ? Number(p.stock) : 0; 
+  const p = products[index];
+  if(!p) return;
+  currentSelectedProduct = p;
+  
+  currentProductStock = (p.stock !== undefined) ? Number(p.stock) : 0; 
 
-    $('modalProductName').innerText = p.name;
-    $('modalProductPrice').innerText = p.price + ' EGP';
-    $('modalProductImg').src = p.img || p.image || '';
-    $('modalProductCategory').innerText = p.category;
-    $('modalProductDesc').innerText = p.desc || (currentLang === 'ar' ? 'لا يوجد وصف متاح.' : 'No description available.');
-    $('modalProductStock').innerText = currentProductStock;
-    $('modalQty').value = 1;
+  $('modalProductName').innerText = p.name;
+  $('modalProductPrice').innerText = p.price + ' EGP';
+  $('modalProductImg').src = p.img || p.image || '';
+  $('modalProductCategory').innerText = p.category;
+  $('modalProductDesc').innerText = p.desc || (currentLang === 'ar' ? 'لا يوجد وصف متاح.' : 'No description available.');
+  $('modalProductStock').innerText = currentProductStock;
+  $('modalQty').value = 1;
 
-    renderProductReviews(p);
-    checkIfUserCanReview(p);
+  renderProductReviews(p);
+  checkIfUserCanReview(p);
 
-    $('productModal').classList.add('active');
+  $('productModal').classList.add('active');
 }
 
 function closeProductModal() {
-    $('productModal').classList.remove('active');
+  $('productModal').classList.remove('active');
 }
 
 function renderProductReviews(product) {
-    const reviewsList = $('reviewsList');
-    if(!reviewsList) return;
-    const reviews = product.reviews || [];
+  const reviewsList = $('reviewsList');
+  if(!reviewsList) return;
+  const reviews = product.reviews || [];
 
-    if (reviews.length === 0) {
-        reviewsList.innerHTML = `<p style="color:#94a3b8; font-size:12px; text-align:center;">لا توجد تقييمات سابقة. متاح التعليق فقط للمشترين الموثوقين بعد إتمام الشراء!</p>`;
-        return;
-    }
+  if (reviews.length === 0) {
+    reviewsList.innerHTML = `<p style="color:#94a3b8; font-size:12px; text-align:center;">لا توجد تقييمات سابقة. متاح التعليق فقط للمشترين الموثوقين بعد إتمام الشراء!</p>`;
+    return;
+  }
 
-    reviewsList.innerHTML = reviews.map(rev => `
-        <div class="review-item">
-            <div class="review-user">
-                <i class="fas fa-user-circle"></i> ${rev.userName} 
-                <span class="verified-badge"><i class="fas fa-check-circle"></i> مشتري موثوق</span>
-            </div>
-            <div class="review-body">${rev.text}</div>
-        </div>
-    `).join('');
+  reviewsList.innerHTML = reviews.map(rev => `
+    <div class="review-item">
+      <div class="review-user">
+        <i class="fas fa-user-circle"></i> ${rev.userName} 
+        <span class="verified-badge"><i class="fas fa-check-circle"></i> مشتري موثوق</span>
+      </div>
+      <div class="review-body">${rev.text}</div>
+    </div>
+  `).join('');
 }
 
 function checkIfUserCanReview(product) {
-    const addReviewBox = $('addReviewBox');
-    if(!addReviewBox) return;
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    const verifiedBuyers = product.verifiedBuyers || [];
+  const addReviewBox = $('addReviewBox');
+  if(!addReviewBox) return;
+  const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+  const verifiedBuyers = product.verifiedBuyers || [];
 
-    if (currentUser && verifiedBuyers.includes(currentUser.uid)) {
-        addReviewBox.style.display = 'flex';
-    } else {
-        addReviewBox.style.display = 'none';
-    }
+  if (currentUser && verifiedBuyers.includes(currentUser.uid)) {
+    addReviewBox.style.display = 'flex';
+  } else {
+    addReviewBox.style.display = 'none';
+  }
 }
 
 async function submitReview() {
-    const text = $('reviewText')?.value.trim();
-    if (!text) return;
+  const text = $('reviewText')?.value.trim();
+  if (!text) return;
 
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser || !currentSelectedProduct) return;
+  const currentUser = firebase.auth().currentUser;
+  if (!currentUser || !currentSelectedProduct) return;
 
-    const newReview = {
-        userId: currentUser.uid,
-        userName: currentUser.displayName || 'Gamer',
-        text: text,
-        date: new Date().toISOString()
-    };
+  const newReview = {
+    userId: currentUser.uid,
+    userName: currentUser.displayName || 'Gamer',
+    text: text,
+    date: new Date().toISOString()
+  };
 
-    try {
-        const db = firebase.firestore();
-        const productRef = db.collection('products').doc(String(currentSelectedProduct.id || currentSelectedProduct.docId));
-        
-        await productRef.update({
-            reviews: firebase.firestore.FieldValue.arrayUnion(newReview)
-        });
+  try {
+    const db = firebase.firestore();
+    const productRef = db.collection('products').doc(String(currentSelectedProduct.id || currentSelectedProduct.docId));
+    
+    await productRef.update({
+      reviews: firebase.firestore.FieldValue.arrayUnion(newReview)
+    });
 
-        if(!currentSelectedProduct.reviews) currentSelectedProduct.reviews = [];
-        currentSelectedProduct.reviews.push(newReview);
-        
-        $('reviewText').value = '';
-        renderProductReviews(currentSelectedProduct);
-        
-        Swal.fire({
-            icon: 'success',
-            title: 'شكراً لك!',
-            text: 'تمت إضافة تقييمك بنجاح كمشتري موثوق.',
-            background: '#090f17', color: '#fff', timer: 2000, showConfirmButton: false,
-            customClass: { container: 'high-z-index-alert' }
-        });
+    if(!currentSelectedProduct.reviews) currentSelectedProduct.reviews = [];
+    currentSelectedProduct.reviews.push(newReview);
+    
+    $('reviewText').value = '';
+    renderProductReviews(currentSelectedProduct);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'شكراً لك!',
+      text: 'تمت إضافة تقييمك بنجاح كمشتري موثوق.',
+      background: '#090f17', color: '#fff', timer: 2000, showConfirmButton: false,
+      customClass: { container: 'high-z-index-alert' }
+    });
 
-    } catch (error) {
-        console.error("خطأ في رفع التقييم:", error);
-    }
+  } catch (error) {
+    console.error("خطأ في رفع التقييم:", error);
+  }
 }
 
 function increaseQty() {
-    let input = $('modalQty');
-    if (parseInt(input.value) < currentProductStock) {
-        input.value = parseInt(input.value) + 1;
-    } else {
-        Swal.fire({
-            icon: 'warning',
-            title: currentLang === 'ar' ? 'تنبيه' : 'Attention',
-            text: currentLang === 'ar' ? 'الكمية المطلوبة تتخطى المخزون المتاح في السيرفر!' : 'Requested quantity exceeds available stock!',
-            background: '#090f17', color: '#fff',
-            customClass: { container: 'high-z-index-alert' }
-        });
-    }
+  let input = $('modalQty');
+  if (parseInt(input.value) < currentProductStock) {
+    input.value = parseInt(input.value) + 1;
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      title: currentLang === 'ar' ? 'تنبيه' : 'Attention',
+      text: currentLang === 'ar' ? 'الكمية المطلوبة تتخطى المخزون المتاح في السيرفر!' : 'Requested quantity exceeds available stock!',
+      background: '#090f17', color: '#fff',
+      customClass: { container: 'high-z-index-alert' }
+    });
+  }
 }
 
 function decreaseQty() {
-    let input = $('modalQty');
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-    }
+  let input = $('modalQty');
+  if (parseInt(input.value) > 1) {
+    input.value = parseInt(input.value) - 1;
+  }
 }
 
 function addToCartFromModal() {
-    if(!currentSelectedProduct) return;
-    let qty = parseInt($('modalQty').value);
-    
-    for(let i = 0; i < qty; i++) {
-        cart.push({ 
-            ...currentSelectedProduct, 
-            cartId: Date.now() + Math.random(),
-            id: currentSelectedProduct.id || currentSelectedProduct.docId || Date.now()
-        });
-    }
-    
-    save();
-    updateCart();
-    closeProductModal();
-    
-    Swal.fire({
-        icon: 'success',
-        title: currentLang === 'ar' ? 'تمت الإضافة' : 'Added',
-        text: currentLang === 'ar' ? 'تم إضافة المنتج للسلة بنجاح' : 'Product added to cart successfully',
-        timer: 1500,
-        showConfirmButton: false,
-        background: '#090f17', color: '#fff',
-        customClass: { container: 'high-z-index-alert' }
+  if(!currentSelectedProduct) return;
+  let qty = parseInt($('modalQty').value);
+  
+  for(let i = 0; i < qty; i++) {
+    cart.push({ 
+      ...currentSelectedProduct, 
+      cartId: Date.now() + Math.random(),
+      id: currentSelectedProduct.id || currentSelectedProduct.docId || Date.now()
     });
-    
-    $('cartDrawer')?.classList.add('open');
+  }
+  
+  save();
+  updateCart();
+  closeProductModal();
+  
+  Swal.fire({
+    icon: 'success',
+    title: currentLang === 'ar' ? 'تمت الإضافة' : 'Added',
+    text: currentLang === 'ar' ? 'تم إضافة المنتج للسلة بنجاح' : 'Product added to cart successfully',
+    timer: 1500,
+    showConfirmButton: false,
+    background: '#090f17', color: '#fff',
+    customClass: { container: 'high-z-index-alert' }
+  });
+  
+  $('cartDrawer')?.classList.add('open');
 }
 
 function removeItem(cartId) {
@@ -513,89 +513,89 @@ async function applyCoupon() {
 }
 
 async function updateProductStockAfterPurchase(purchasedItems) {
-    if (typeof firebase === 'undefined' || !firebase.firestore) return;
-    const db = firebase.firestore();
-    const batch = db.batch();
+  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  const db = firebase.firestore();
+  const batch = db.batch();
 
-    try {
-        purchasedItems.forEach(item => {
-            if (item.id) {
-                const productRef = db.collection('products').doc(String(item.id));
-                batch.update(productRef, {
-                    stock: firebase.firestore.FieldValue.increment(-1)
-                });
-            }
+  try {
+    purchasedItems.forEach(item => {
+      if (item.id) {
+        const productRef = db.collection('products').doc(String(item.id));
+        batch.update(productRef, {
+          stock: firebase.firestore.FieldValue.increment(-1)
         });
-        await batch.commit();
-    } catch (error) {
-        console.error("خطأ في تحديث المخزون:", error);
-    }
+      }
+    });
+    await batch.commit();
+  } catch (error) {
+    console.error("خطأ في تحديث المخزون:", error);
+  }
 }
 
 async function registerVerifiedBuyer(purchasedItems, userId) {
-    if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
-    const db = firebase.firestore();
-    const batch = db.batch();
+  if (typeof firebase === 'undefined' || !firebase.firestore || !userId) return;
+  const db = firebase.firestore();
+  const batch = db.batch();
 
-    try {
-        purchasedItems.forEach(item => {
-            if (item.id) {
-                const productRef = db.collection('products').doc(String(item.id));
-                batch.update(productRef, {
-                    verifiedBuyers: firebase.firestore.FieldValue.arrayUnion(userId)
-                });
-            }
+  try {
+    purchasedItems.forEach(item => {
+      if (item.id) {
+        const productRef = db.collection('products').doc(String(item.id));
+        batch.update(productRef, {
+          verifiedBuyers: firebase.firestore.FieldValue.arrayUnion(userId)
         });
-        await batch.commit();
-    } catch (error) {
-        console.error("خطأ في توثيق المشتري:", error);
-    }
+      }
+    });
+    await batch.commit();
+  } catch (error) {
+    console.error("خطأ في توثيق المشتري:", error);
+  }
 }
 
 function clearCartAfterPurchase() {
-    cart = [];
-    save();
-    updateCart();
+  cart = [];
+  save();
+  updateCart();
 }
 
 function processSecureCheckout() {
-    const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-    const drawer = document.getElementById('cartDrawer');
-    if (drawer) {
-        drawer.classList.remove('open');
-        drawer.style.display = 'none';
-    }
-    
-    if (!currentUser) {
-        setTimeout(() => {
-            Swal.fire({
-                icon: 'warning',
-                title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
-                text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
-                confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
-                background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
-                allowOutsideClick: false,
-                customClass: { container: 'high-z-index-alert' }
-            }).then((result) => {
-                if (drawer) drawer.style.display = 'block';
-                if (result.isConfirmed) {
-                    if(typeof openAuth === 'function') openAuth();
-                }
-            });
-        }, 150);
-        return;
-    }
+  const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+  const drawer = document.getElementById('cartDrawer');
+  if (drawer) {
+    drawer.classList.remove('open');
+    drawer.style.display = 'none';
+  }
+  
+  if (!currentUser) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'warning',
+        title: currentLang === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required',
+        text: currentLang === 'ar' ? 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.' : 'You must log in to complete your purchase.',
+        confirmButtonText: currentLang === 'ar' ? 'تسجيل الدخول الآن' : 'Log In Now',
+        background: '#090f17', color: '#fff', confirmButtonColor: '#00f3ff',
+        allowOutsideClick: false,
+        customClass: { container: 'high-z-index-alert' }
+      }).then((result) => {
+        if (drawer) drawer.style.display = 'block';
+        if (result.isConfirmed) {
+          if(typeof openAuth === 'function') openAuth();
+        }
+      });
+    }, 150);
+    return;
+  }
 
-    if(typeof checkout === 'function') {
-        checkout();
-    }
+  if(typeof checkout === 'function') {
+    checkout();
+  }
 }
 
 async function checkout() {
   const drawer = document.getElementById('cartDrawer');
   if (drawer) {
-      drawer.classList.remove('open');
-      drawer.style.display = 'none';
+    drawer.classList.remove('open');
+    drawer.style.display = 'none';
   }
 
   if (!cart.length) {
@@ -625,8 +625,8 @@ async function checkout() {
         customClass: { container: 'high-z-index-alert' }
       }).then(() => {
         if (drawer) {
-            drawer.style.display = 'block';
-            drawer.classList.add('open');
+          drawer.style.display = 'block';
+          drawer.classList.add('open');
         }
       });
     }, 150);
@@ -638,12 +638,12 @@ async function checkout() {
   const total = subtotal - discountValue;
 
   if (total <= 0) {
-      if (drawer) drawer.style.display = 'block';
-      return;
+    if (drawer) drawer.style.display = 'block';
+    return;
   }
 
   Swal.fire({
-    title: currentLang === 'ar' ? 'جاري التحقق من بوابة الدفع...' : 'Checking Active Gateway...',
+    title: currentLang === 'ar' ? 'جاري توجيهك لبوابة الدفع الآمنة...' : 'Connecting to Secure Gateway...',
     allowOutsideClick: false,
     background: '#090f17', color: '#fff',
     customClass: { container: 'high-z-index-alert' },
@@ -654,21 +654,25 @@ async function checkout() {
     if (typeof firebase === 'undefined' || !firebase.firestore) throw new Error('Firebase not initialized');
     const db = firebase.firestore();
     
+    // فحص إذا كانت هناك بوابة يدوية مفعلة كـ InstaPay
     const gatewaySnap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
-    
-    if (gatewaySnap.empty) {
-      throw new Error(currentLang === 'ar' ? 'لا توجد بوابة دفع مفعلة حالياً من الإدارة.' : 'No active payment gateway configured.');
+    let isManualInstapay = false;
+    let instapayDetails = {};
+
+    if (!gatewaySnap.empty) {
+      const activeGateway = gatewaySnap.docs[0].data();
+      const gKey = (activeGateway.provider || activeGateway.key || activeGateway.name || '').toLowerCase();
+      if (gKey.includes('instapay')) {
+        isManualInstapay = true;
+        instapayDetails = activeGateway.credentials || activeGateway;
+      }
     }
 
-    const activeGateway = gatewaySnap.docs[0].data();
-    const gatewayKey = (activeGateway.key || activeGateway.provider || activeGateway.name || 'myfatoorah').toLowerCase();
-    const creds = activeGateway.credentials || {};
-
-    if (gatewayKey === 'instapay') {
+    if (isManualInstapay) {
       Swal.close();
       if (drawer) drawer.style.display = 'block';
 
-      const detailsText = `عنوان الدفع (IPA): <b>${creds.ipaAddress || 'غير محدد'}</b><br>اسم الحساب: ${creds.accountName || ''}`;
+      const detailsText = `عنوان الدفع / الهاتف: <b>${instapayDetails.merchantId || instapayDetails.ipaAddress || 'غير محدد'}</b><br>اسم المستلم: ${instapayDetails.token || instapayDetails.accountName || ''}`;
 
       Swal.fire({
         title: currentLang === 'ar' ? 'تعليمات إتمام الدفع' : 'Payment Instructions',
@@ -693,7 +697,7 @@ async function checkout() {
             email,
             total,
             items: cart,
-            gateway: activeGateway.name,
+            gateway: 'InstaPay Manual',
             status: 'Pending Verification',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
@@ -709,13 +713,11 @@ async function checkout() {
       });
 
     } else {
-      // إرسال الطلب بالصيغة الصحيحة المنظفة لتجنب خطأ Invalid data تماماً مع منع الكاش عبر إضافة الوقت
-      const apiRes = await fetch(`/api/myfatoorah/create-payment?v=${Date.now()}`, {
+      // الاتصال الديناميكي بمسار الدفع الموحد في السيرفر
+      const apiRes = await fetch(`/api/create-payment?v=${Date.now()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          gatewayKey: gatewayKey,
-          credentials: creds,
           customer: { 
             name: name.substring(0, 50), 
             phone: phone.replace(/\D/g, '').slice(-11) || '01000000000', 
@@ -726,7 +728,8 @@ async function checkout() {
             id: String(item.id || item.docId || '1'),
             name: String(item.name || 'Digital Product').substring(0, 100),
             category: String(item.category || ''),
-            price: Number(item.price || 0)
+            price: Number(item.price || 0),
+            quantity: 1
           }))
         })
       });
@@ -739,7 +742,7 @@ async function checkout() {
       const currentUser = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
       await updateProductStockAfterPurchase(cart);
       if (currentUser) {
-          await registerVerifiedBuyer(cart, currentUser.uid);
+        await registerVerifiedBuyer(cart, currentUser.uid);
       }
       
       clearCartAfterPurchase();
@@ -766,13 +769,13 @@ function save() {
 }
 
 function toggleCart() { 
-    const drawer = $('cartDrawer');
-    if (drawer) {
-        if (drawer.style.display === 'none') {
-            drawer.style.display = 'block';
-        }
-        drawer.classList.toggle('open');
+  const drawer = $('cartDrawer');
+  if (drawer) {
+    if (drawer.style.display === 'none') {
+      drawer.style.display = 'block';
     }
+    drawer.classList.toggle('open');
+  }
 }
 
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
