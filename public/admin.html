@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>TECH GAMING - لوحة التحكم الإدارية</title>
 
   <!-- الخطوط والأيقونات -->
@@ -756,6 +756,7 @@
       }
     }
 
+    // إغلاق القائمة الجانبية تلقائياً في شاشات الموبايل عند الضغط على أي زر تصفح
     document.addEventListener("DOMContentLoaded", function() {
       document.querySelectorAll('.sidebar nav .nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -768,6 +769,6 @@
   </script>
 
   <!-- الملف البرمجي الأساسي للوحة التحكم -->
-  <script src="/js/admin.js?v=206"></script>
+  <script src="/js/admin.js?v=207"></script>
 </body>
 </html>
