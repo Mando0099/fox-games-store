@@ -22,7 +22,9 @@ const PORT = process.env.PORT || 9000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  extensions: ['html', 'htm']
+}));
 
 // ==========================================
 // 🔐 ENCRYPTION & DECRYPTION HELPERS
@@ -62,6 +64,9 @@ const ENV_MYFATOORAH_API_URL = (process.env.MYFATOORAH_API_URL || 'https://api-e
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'Tech Gaming <onboarding@resend.dev>';
 
+// ==========================================
+// ⚙️ DYNAMIC PAYMENT GATEWAY RETRIEVER
+// ==========================================
 async function getActivePaymentGateway() {
   try {
     const snapshot = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
@@ -72,7 +77,8 @@ async function getActivePaymentGateway() {
       const provider = (data.provider || data.key || doc.id || 'myfatoorah').toLowerCase();
       
       const rawTokenOrKey = data.token || data.apiKey || creds.apiKey || creds.token || creds.secretKey || creds.apiSecretKey;
-      const rawSecret = data.secretKey || creds.secretKey || creds.apiSecret || '';
+      const rawSecret = data.secretKey || creds.secretKey || creds.apiSecret || creds.clientSecret || data.clientSecret || '';
+      const rawClientId = data.clientId || creds.clientId || '';
       const rawMerchantId = data.merchantId || creds.merchantId || '';
       
       return {
@@ -81,9 +87,10 @@ async function getActivePaymentGateway() {
         isLive: true,
         token: decrypt(rawTokenOrKey),
         apiKey: decrypt(rawTokenOrKey),
-        secretKey: decrypt(rawSecret),
+        clientId: decrypt(rawClientId) || rawClientId,
+        secretKey: decrypt(rawSecret) || rawSecret,
         merchantId: decrypt(rawMerchantId) || rawMerchantId,
-        apiUrl: 'https://api-eg.myfatoorah.com'
+        apiUrl: data.liveUrl || 'https://api-eg.myfatoorah.com'
       };
     }
   } catch (err) { console.error('Gateway fetch error:', err.message); }
@@ -93,6 +100,7 @@ async function getActivePaymentGateway() {
     provider: 'myfatoorah',
     isLive: true,
     token: ENV_MYFATOORAH_TOKEN,
+    clientId: '',
     secretKey: '',
     apiUrl: ENV_MYFATOORAH_API_URL,
     merchantId: ''
@@ -140,7 +148,7 @@ app.get('/api/admin/payment-gateways', async (req, res) => {
         sandboxUrl: data.sandboxUrl || '',
         liveUrl: data.liveUrl || '',
         merchantId: data.merchantId || '',
-        tokenSet: !!(data.token || data.apiKey || data.credentials),
+        tokenSet: !!(data.token || data.apiKey || data.clientId || data.credentials),
         updatedAt: data.updatedAt
       });
     });
@@ -155,7 +163,7 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
   try {
     const { 
       id, name, provider, apiUrl, sandboxUrl, liveUrl, 
-      token, secretKey, apiKey, merchantId, iframeId, webhookSecret, 
+      token, secretKey, apiKey, clientId, clientSecret, merchantId, iframeId, webhookSecret, 
       isActive 
     } = req.body;
     
@@ -175,12 +183,14 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     const existingData = existingDoc.exists ? existingDoc.data() : {};
 
     const inputToken = token || apiKey;
+    const inputClientId = clientId;
+    const inputSecretKey = secretKey || clientSecret;
 
     const gatewayPayload = {
-      name: name || existingData.name || 'MyFatoorah',
+      name: name || existingData.name || 'Payment Gateway',
       provider: provider || existingData.provider || 'myfatoorah',
-      sandboxUrl: sandboxUrl || existingData.sandboxUrl || 'https://apitest.myfatoorah.com',
-      liveUrl: liveUrl || existingData.liveUrl || 'https://api-eg.myfatoorah.com',
+      sandboxUrl: sandboxUrl || existingData.sandboxUrl || '',
+      liveUrl: liveUrl || existingData.liveUrl || '',
       merchantId: merchantId ?? existingData.merchantId ?? '',
       iframeId: iframeId ?? existingData.iframeId ?? '',
       isActive: isActive !== undefined ? Boolean(isActive) : (existingData.isActive || false),
@@ -189,7 +199,8 @@ app.post('/api/admin/payment-gateways', async (req, res) => {
     };
 
     if (inputToken) gatewayPayload.token = encrypt(inputToken);
-    if (secretKey) gatewayPayload.secretKey = encrypt(secretKey);
+    if (inputClientId) gatewayPayload.clientId = encrypt(inputClientId);
+    if (inputSecretKey) gatewayPayload.secretKey = encrypt(inputSecretKey);
     if (webhookSecret) gatewayPayload.webhookSecret = encrypt(webhookSecret);
 
     await docRef.set(gatewayPayload, { merge: true });
@@ -293,10 +304,93 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 });
 
 // ==========================================
-// 💳 PAYMENT ROUTES
+// 💳 FAWATERAK HANDLER
+// ==========================================
+async function handleFawaterakPayment(gateway, order, res) {
+  const clientId = gateway.clientId || gateway.token;
+  const clientSecret = gateway.secretKey;
+  
+  if (!clientId || !clientSecret) {
+    return res.status(400).json({ success: false, message: 'Fawaterak Client ID or Client Secret is missing.' });
+  }
+
+  try {
+    const tokenRes = await axios.post('https://app.fawaterak.com/oauth/token', {
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'client_credentials'
+    }, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 30000
+    });
+
+    const accessToken = tokenRes.data?.access_token || tokenRes.data?.data?.access_token;
+    if (!accessToken) {
+      return res.status(400).json({ success: false, message: 'فشل المصادقة مع بوابة فواتيرك (OAuth Token Error).' });
+    }
+
+    const orderId = 'ORD_' + Date.now();
+    const amount = money(order.total);
+    const customerName = (order.customer?.name || 'Gamer').substring(0, 50);
+    const customerEmail = (order.customer?.email || 'customer@tech-gaming.store');
+    const customerPhone = cleanPhone(order.customer?.phone || '01000000000');
+    const items = Array.isArray(order.items) ? order.items : [];
+    const firstProductName = items.length > 0 ? (items[0].name || '') : '';
+
+    const fawaterakBody = {
+      cartTotal: amount,
+      currency: 'EGP',
+      customer: {
+        first_name: customerName,
+        last_name: 'Customer',
+        email: customerEmail,
+        phone: customerPhone
+      },
+      redirectionUrls: {
+        successUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=success&paymentId=${orderId}&productName=${encodeURIComponent(firstProductName)}`,
+        failUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=failed&paymentId=${orderId}`,
+        pendingUrl: `${PUBLIC_BASE_URL}/payment-result.html?status=pending&paymentId=${orderId}`
+      },
+      cartItems: items.map(i => ({
+        name: i.name,
+        price: i.price,
+        quantity: i.quantity || 1
+      }))
+    };
+
+    await db.collection('pending_orders').doc(orderId).set({
+      orderId,
+      customerEmail,
+      amount,
+      currency: 'EGP',
+      items,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    const response = await axios.post('https://app.fawaterak.com/api/v2/invoice/initiate-payment', fawaterakBody, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    });
+
+    const paymentUrl = response.data?.data?.url;
+    if (response.data?.status && paymentUrl) {
+      return res.json({ success: true, paymentUrl });
+    }
+    return res.status(400).json({ success: false, message: 'فشل إنشاء رابط الدفع من فواتيرك.' });
+  } catch (err) {
+    console.error('Fawaterak OAuth/Payment Error:', err.response?.data || err.message);
+    return res.status(400).json({ success: false, message: err.response?.data?.message || err.message });
+  }
+}
+
+// ==========================================
+// 💳 MAIN DYNAMIC PAYMENT ROUTE
 // ==========================================
 
-app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
+app.post(['/api/myfatoorah/create-payment', '/api/create-payment', '/api/:gatewayKey/create-payment'], async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
     
@@ -313,6 +407,12 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
     const provider = (gateway.provider || '').toLowerCase();
     const firstProductName = items.length > 0 ? (items[0].name || '') : '';
 
+    // 1. FAWATERAK
+    if (provider.includes('fawaterak')) {
+      return await handleFawaterakPayment(gateway, order, res);
+    }
+
+    // 2. KASHIER
     if (provider.includes('kashier')) {
       const paymentApiKey = gateway.token || gateway.apiKey;
       if (!gateway.merchantId || !paymentApiKey) {
@@ -359,6 +459,7 @@ app.post(['/api/myfatoorah/create-payment', '/api/:gatewayKey/create-payment'], 
       return res.json({ success: true, paymentUrl });
     }
 
+    // 3. MYFATOORAH
     if (provider.includes('myfatoorah') || !provider) {
       const tokenToUse = gateway.token || gateway.apiKey || ENV_MYFATOORAH_TOKEN;
       if (!tokenToUse) {
@@ -469,6 +570,35 @@ async function fulfillOrderAndSendCodes(orderId, customerEmail, amount, currency
 // 🌐 WEBHOOKS & TRANSACTIONS
 // ==========================================
 
+// Fawaterak Webhook
+app.post('/api/fawaterak/webhook', async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("Fawaterak Webhook Received:", JSON.stringify(data));
+
+    const orderId = data.merchantInvoiceId || data.invoiceId;
+    const invoiceStatus = String(data.invoice_status || data.status).toLowerCase();
+
+    if (orderId && (invoiceStatus === 'paid' || invoiceStatus === 'complete')) {
+      let pendingDoc = await db.collection('pending_orders').doc(String(orderId)).get();
+      if (pendingDoc.exists) {
+        const orderData = pendingDoc.data();
+        const existingOrder = await db.collection('orders').doc(String(orderId)).get();
+        
+        if (!existingOrder.exists && orderData.items) {
+          await fulfillOrderAndSendCodes(orderId, orderData.customerEmail, orderData.amount, orderData.currency, orderData.items);
+          console.log("Order fulfilled via Fawaterak Webhook for:", orderId);
+        }
+      }
+    }
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Fawaterak Webhook Error:', err.message);
+    return res.status(500).json({ success: false });
+  }
+});
+
+// MyFatoorah Webhook
 app.post('/api/myfatoorah/webhook', async (req, res) => {
   try {
     const gateway = await getActivePaymentGateway();
@@ -497,6 +627,7 @@ app.post('/api/myfatoorah/webhook', async (req, res) => {
   }
 });
 
+// Kashier Webhook & Callback
 app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => {
   try {
     const data = { ...(req.body || {}), ...(req.query || {}) };
@@ -548,6 +679,7 @@ app.post(['/api/kashier/webhook', '/api/kashier/callback'], async (req, res) => 
   }
 });
 
+// Record Transaction (Frontend Fallback)
 app.post('/api/record-transaction', async (req, res) => {
   try {
     const { paymentId, status, gatewayResponse } = req.body;
@@ -603,6 +735,9 @@ app.post('/api/record-transaction', async (req, res) => {
   }
 });
 
+// ==========================================
+// ✉️ EMAIL SERVICE (RESEND)
+// ==========================================
 async function sendCodesEmail(email, orderId, codes, paymentDetails = {}) {
   let codesHtml = '';
   codes.forEach(c => {
