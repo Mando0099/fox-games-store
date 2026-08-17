@@ -258,9 +258,11 @@
     .cartItem-price { font-size: 14px; font-weight: 800; color: var(--neon-cyan); }
     .cartItem-remove-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .cartItem-remove-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
-    .coupon .checkoutForm { display: flex; flex-direction: column; gap: 12px; }
-    .coupon input, .checkoutForm input { background: #0d1722 !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; width: 100%; box-sizing: border-box; }
-    .coupon input:focus, .checkoutForm input:focus { border-color: var(--neon-cyan) !important; outline: none; }
+    .coupon, .checkoutForm { display: flex; flex-direction: column; gap: 12px; }
+    .coupon input, .checkoutForm input, .checkoutForm select { background: #0d1722 !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #fff !important; border-radius: 8px !important; padding: 10px 12px !important; width: 100%; box-sizing: border-box; }
+    .coupon input:focus, .checkoutForm input:focus, .checkoutForm select:focus { border-color: var(--neon-cyan) !important; outline: none; }
+    .currency-select-box { display: flex; flex-direction: column; gap: 6px; }
+    .currency-select-box label { font-size: 12px; color: #94a3b8; font-weight: 600; }
     .payment-logos-container { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; }
     .pay-mini-logo { height: 14px; display: block; }
     /* ================= END MODERN CART STYLE ================= */
@@ -368,7 +370,7 @@
     <section class="hero-banner-section">
       <div class="hero-slider-container" id="heroSlider">
         
-        <!-- الشريحة الأولى: خلفية ألعاب ومنصات رقمية -->
+        <!-- الشريحة الأولى -->
         <div class="hero-slide active" style="background-image: url('https://wallpapersworld.org/wp-content/uploads/2023/02/%D8%AE%D9%84%D9%81%D9%8A%D8%A7%D8%AA-%D8%A8%D8%A8%D8%AC%D9%8A-%D9%81%D8%AE%D9%85%D9%87-3-scaled.jpg');">
           <div class="hero-content">
             <h1 class="hero-title" data-i18n="hero_title">امن انواع الهاكات </h1>
@@ -381,7 +383,7 @@
           </div>
         </div>
 
-        <!-- الشريحة الثانية: خلفية تعبر عن الحسابات والعروض -->
+        <!-- الشريحة الثانية -->
         <div class="hero-slide" style="background-image: url('https://www.levelinfinite.com/wp-content/uploads/2024/02/pubg-mobile-home-banner-pc.jpg');">
           <div class="hero-content" style="max-width: 100%;">
             <span style="color: var(--neon-cyan); font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-fire"></i> منتجات شائعة ورائجة</span>
@@ -393,7 +395,7 @@
           </div>
         </div>
 
-        <!-- الشريحة الثالثة: خلفية تعبر عن الأمان والدفع الإلكتروني -->
+        <!-- الشريحة الثالثة -->
         <div class="hero-slide" style="background-image: url('https://ucstroitel.ru/upload/iblock/945/945028f059294f45986c22e13602778d.png');">
           <div class="hero-content" style="max-width: 100%;">
             <span style="color: #22c55e; font-weight: 800; font-size: 14px; letter-spacing: 2px;"><i class="fas fa-shield-alt"></i> حماية تامة وعمليات مشفرة</span>
@@ -432,7 +434,7 @@
       <div class="trendGrid" id="categoryGrid"></div>
     </section>
 
-    <!-- المنتجات مخفية افتراضياً -->
+    <!-- المنتجات -->
     <section class="section" id="products">
       <div class="sectionHead reveal">
         <div>
@@ -451,7 +453,7 @@
       <div class="productGrid" id="productGrid"></div>
     </section>
 
-    <!-- القسم الأول: المميزات بتنسيق منظم -->
+    <!-- المميزات -->
     <section class="benefits">
       <div class="benefit-item">
         <i class="fas fa-bolt benefit-icon" style="color:var(--neon-cyan);"></i>
@@ -483,7 +485,7 @@
       </div>
     </section>
 
-    <!-- القسم الثاني: طرق الدفع الاحترافية -->
+    <!-- طرق الدفع -->
     <section class="section" id="checkout">
       <div class="checkoutShowcase reveal">
         <div>
@@ -507,7 +509,7 @@
       </div>
     </section>
 
-    <!-- قسم لعرض بوابة الدفع النشطة حالياً ديناميكياً للعملاء -->
+    <!-- قسم بوابة الدفع النشطة -->
     <section class="section" id="activePaymentGatewaySection" style="display: none;">
       <div class="panel" style="background: #0d1722; border: 1px solid rgba(0,243,255,0.3); padding: 20px; border-radius: 12px; text-align: center;">
         <h3 style="color: var(--neon-cyan); margin-bottom: 10px;"><i class="fas fa-wallet"></i> طريقة الدفع المعتمدة حالياً بالمتجر</h3>
@@ -546,6 +548,18 @@
     </div>
     
     <div class="checkoutForm">
+      <!-- اختيار عملة الدفع -->
+      <div class="currency-select-box">
+        <label for="currencySelect"><i class="fas fa-coins" style="color: var(--neon-cyan);"></i> عملة الدفع / Currency:</label>
+        <select id="currencySelect">
+          <option value="EGP" selected>🇪🇬 الجنيه المصري (EGP)</option>
+          <option value="USD">🇺🇸 الدولار الأمريكي (USD)</option>
+          <option value="SAR">🇸🇦 الريال السعودي (SAR)</option>
+          <option value="AED">🇦🇪 الدرهم الإماراتي (AED)</option>
+          <option value="KWD">🇰🇼 الدينار الكويتي (KWD)</option>
+        </select>
+      </div>
+
       <input id="customerName" placeholder="Full Name" data-i18n-holder="holder_name" required>
       <input id="customerPhone" placeholder="Phone Number" data-i18n-holder="holder_phone" required>
       <input type="email" id="customerEmail" placeholder="Email Address" data-i18n-holder="holder_email" required>
@@ -591,20 +605,16 @@
             <i class="fas fa-cart-plus"></i> أضف إلى السلة
           </button>
 
-          <!-- القسم الجديد: تعليقات المشترين -->
+          <!-- قسم التعليقات -->
           <div class="product-reviews-section">
             <h3>آراء المشترين <i class="fas fa-star" style="color:#ffd54a;"></i></h3>
-            <div id="reviewsList" class="reviews-list">
-                <!-- سيتم عرض التعليقات هنا برمجياً -->
-            </div>
+            <div id="reviewsList" class="reviews-list"></div>
             
-            <!-- صندوق كتابة التعليق -->
             <div id="addReviewBox" class="add-review-box foxHidden">
-                <textarea id="reviewText" placeholder="اكتب تقييمك للمنتج هنا... (متاح للمشترين فقط)"></textarea>
-                <button onclick="submitReview()" class="btn-submit-review">إرسال التقييم</button>
+              <textarea id="reviewText" placeholder="اكتب تقييمك للمنتج هنا... (متاح للمشترين فقط)"></textarea>
+              <button onclick="submitReview()" class="btn-submit-review">إرسال التقييم</button>
             </div>
           </div>
-          <!-- نهاية قسم التعليقات -->
 
         </div>
       </div>
@@ -709,9 +719,9 @@
           section.style.display = 'block';
           
           if (gatewayData.key === 'vodafone_cash') {
-            descEl.innerHTML = `الدفع متاح عبر محفظة فودافون كاش الرسمية.<br>رقم التحويل: <b>${gatewayData.credentials.walletNumber || ''}</b><br><small>${gatewayData.credentials.instructions || ''}</small>`;
+            descEl.innerHTML = `الدفع متاح عبر محفظة فودافون كاش الرسمية.<br>رقم التحويل: <b>${gatewayData.credentials?.walletNumber || ''}</b><br><small>${gatewayData.credentials?.instructions || ''}</small>`;
           } else if (gatewayData.key === 'instapay') {
-            descEl.innerHTML = `الدفع متاح عبر حساب InstaPay.<br>عنوان الدفع (IPA): <b>${gatewayData.credentials.ipaAddress || ''}</b> (باسم: ${gatewayData.credentials.accountName || ''})`;
+            descEl.innerHTML = `الدفع متاح عبر حساب InstaPay.<br>عنوان الدفع (IPA): <b>${gatewayData.credentials?.ipaAddress || ''}</b> (باسم: ${gatewayData.credentials?.accountName || ''})`;
           } else {
             descEl.innerHTML = `بوابة الدفع الإلكترونية النشطة حالياً: <b>${gatewayData.name}</b> (آمنة ومشفرة بالكامل)`;
           }
@@ -727,7 +737,6 @@
         startSlider();
       }
 
-      // استدعاء جلب بوابة الدفع النشطة عند تحميل الصفحة
       fetchActivePaymentGatewayForStore();
 
       const mainLoginBtn = document.getElementById('mainLoginBtn');
@@ -823,64 +832,6 @@
         });
       }
     });
-
-    function filterByCategory(catName) {
-        const categoryFilter = document.getElementById('categoryFilter');
-        const productsSection = document.getElementById('products');
-        
-        if (categoryFilter) {
-            categoryFilter.value = catName;
-            productsSection.classList.add('show-products');
-            if (typeof renderProducts === 'function') {
-                renderProducts();
-            }
-            setTimeout(() => {
-                productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-    }
-
-    async function processSecureCheckout() {
-        const currentUser = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-        if (!currentUser) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'تسجيل الدخول مطلوب',
-                text: 'يجب عليك تسجيل الدخول أو إنشاء حساب لإتمام عملية الشراء.',
-                confirmButtonText: 'تسجيل الدخول الآن',
-                background: '#090f17',
-                color: '#fff',
-                confirmButtonColor: '#00f3ff'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    if(typeof openAuth === 'function') openAuth();
-                }
-            });
-            return;
-        }
-
-        // تحقق إضافي من بوابة الدفع المفعلة قبل إتمام الطلب
-        try {
-          const db = firebase.firestore();
-          const snap = await db.collection('payment_gateways').where('isActive', '==', true).limit(1).get();
-          if (snap.empty) {
-            Swal.fire({
-              icon: 'error',
-              title: 'تنبيه إداري',
-              text: 'عذراً، لا توجد بوابة دفع مفعلة حالياً من قبل الإدارة لإتمام الطلب.',
-              background: '#090f17',
-              color: '#fff'
-            });
-            return;
-          }
-        } catch (e) {
-          console.error(e);
-        }
-
-        if(typeof checkout === 'function') {
-            checkout();
-        }
-    }
   </script>
 </body>
 </html>
