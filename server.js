@@ -304,7 +304,7 @@ app.delete('/api/admin/coupons/:id', async (req, res) => {
 });
 
 // ==========================================
-// 💳 FAWATERAK HANDLER (DIRECT HASH + OAUTH HYBRID)
+// 💳 FAWATERAK HANDLER (ROBUST DUAL AUTH & CURRENCY)
 // ==========================================
 async function handleFawaterakPayment(gateway, order, res) {
   const hashApiKey = String(gateway.apiKey || gateway.token || gateway.secretKey || '').trim();
@@ -314,7 +314,7 @@ async function handleFawaterakPayment(gateway, order, res) {
 
   let tokenToUse = hashApiKey;
 
-  // محاولة جلب OAuth Token إذا توفر الـ Client ID و Secret
+  // محاولة طلب توكن OAuth إذا توفرت بيانات العميل
   if (!tokenToUse && clientId && clientSecret) {
     try {
       const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -327,7 +327,7 @@ async function handleFawaterakPayment(gateway, order, res) {
       });
       tokenToUse = tokenRes.data?.access_token || tokenRes.data?.data?.access_token;
     } catch (e) {
-      console.warn("OAuth token retrieval skipped, checking Direct HASH Key...");
+      console.warn("OAuth token retrieval skipped, using direct key...");
     }
   }
 
