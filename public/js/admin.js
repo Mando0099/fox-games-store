@@ -232,9 +232,11 @@ async function toggleAdminStatus(docId, newStatus) {
 
 const gatewayConfigs = {
   fawaterak: [
-    { id: 'clientId', label: 'Client ID (معرف العميل) *', type: 'text', placeholder: 'مثال: a286b810-2d18-4413-9ea8-c029fab5d091' },
+    { id: 'clientId', label: 'Client ID (معرف OAuth) *', type: 'text', placeholder: 'مثال: a286b810-2d18-4413-9ea8-c029fab5d091' },
     { id: 'clientSecret', label: 'Client Secret (المفتاح السري لـ OAuth) *', type: 'password', placeholder: 'أدخل الـ Secret من فواتيرك' },
-    { id: 'liveUrl', label: 'رابط OAuth Token URL', type: 'text', placeholder: 'https://app.fawaterak.com/oauth/token', defaultValue: 'https://app.fawaterak.com/oauth/token' }
+    { id: 'apiKey', label: 'HASH API Key *', type: 'text', placeholder: 'أدخل HASH API key' },
+    { id: 'merchantId', label: 'Provider Key (رقم التاجر) *', type: 'text', placeholder: 'مثال: FAWATERAK.29879' },
+    { id: 'webhookUrl', label: 'Webhook URL', type: 'text', placeholder: 'https://tech-gaming.store/api/fawaterak/webhook', defaultValue: 'https://tech-gaming.store/api/fawaterak/webhook' }
   ],
   kashier: [
     { id: 'merchantId', label: 'Merchant ID (معرف التاجر) *', type: 'text', placeholder: 'مثال: MID-XXXX-XXXX' },
