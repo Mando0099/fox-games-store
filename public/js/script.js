@@ -19,7 +19,7 @@ const currencyRates = {
 };
 
 let currentCurrency = localStorage.getItem('techgaming_currency') || 'EGP';
-let currentLang = localStorage.getItem('techgaming_lang') || 'en';
+let currentLang = localStorage.getItem('techgaming_lang') || 'ar';
 
 function formatPrice(egpPrice) {
   const c = currencyRates[currentCurrency] || currencyRates.EGP;
